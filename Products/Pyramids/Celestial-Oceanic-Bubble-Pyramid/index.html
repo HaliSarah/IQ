@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<!--
+  Title:       I.Q. Productionz — Celestial Oceanic Bubble Pyramid
+  Author:      Hali Sarah Parsons  Date: 2026
+  Description: Product detail page mask.
+               IQProductionz.com/products/pyramids/celestial-oceanic-bubble-pyramid
+               loads https://iqproductionz.wixsite.com/iqpr/pyramids?lightbox=dataItem-lgdtz7tp1 — lightbox opens automatically.
+-->
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Celestial Oceanic Bubble Pyramid | I.Q. Productionz</title>
+  <meta name="description" content="Celestial Oceanic Bubble Pyramid — I.Q. Productionz. Handmade metaphysical products. Houston, Texas.">
+  <meta property="og:title" content="Celestial Oceanic Bubble Pyramid | I.Q. Productionz">
+  <meta property="og:url" content="https://IQProductionz.com/products/pyramids/celestial-oceanic-bubble-pyramid">
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel+Decorative&display=swap" rel="stylesheet">
+  <style>
+    * { margin:0; padding:0; box-sizing:border-box; }
+    html, body { width:100%; height:100%; overflow:hidden; background:#2a2720; }
+    #wix-frame { position:fixed; top:0; left:0; width:100%; height:100%; border:none; }
+    #loader {
+      position:fixed; inset:0;
+      background:#2a2720 url('https://static.wixstatic.com/media/b63ec4_d6fad9165f744284a4b90915a9fbbbc5~mv2.jpg/v1/fill/w_288,h_271,al_c,q_80,usm_0.66_1.00_0.01,enc_avif,quality_auto/b63ec4_d6fad9165f744284a4b90915a9fbbbc5~mv2.jpg') center/cover;
+      display:flex; flex-direction:column; align-items:center; justify-content:center;
+      z-index:10; transition:opacity .8s ease;
+    }
+    #loader::before { content:''; position:absolute; inset:0; background:rgba(20,16,10,.78); }
+    #loader.hidden { opacity:0; pointer-events:none; }
+    #loader img { position:relative; height:68px; filter:drop-shadow(0 0 16px rgba(201,138,46,.7)); margin-bottom:1.1rem; animation:pulse 2s ease-in-out infinite; }
+    #loader p { position:relative; font-family:'Cinzel Decorative','Palatino Linotype',serif; font-size:.6rem; letter-spacing:.3em; text-transform:uppercase; color:rgba(201,138,46,.8); }
+    .spinner { position:relative; width:22px; height:22px; border:2px solid rgba(201,138,46,.2); border-top-color:rgba(201,138,46,.85); border-radius:50%; animation:spin 1s linear infinite; margin-top:1rem; }
+    @keyframes pulse { 0%,100% { filter:drop-shadow(0 0 10px rgba(201,138,46,.4)); } 50% { filter:drop-shadow(0 0 24px rgba(201,138,46,.9)); } }
+    @keyframes spin { to { transform:rotate(360deg); } }
+  </style>
+</head>
+<body>
+  <div id="loader">
+    <img src="https://static.wixstatic.com/media/b63ec4_2117e26bc8e646c8ad8b0050222de71b~mv2.png/v1/fill/w_295,h_92,al_c,q_85,usm_0.66_1.00_0.01,enc_avif,quality_auto/IQ-noglow_edited_edited.png" alt="I.Q. Productionz">
+    <p>Loading</p>
+    <div class="spinner"></div>
+  </div>
+  <iframe id="wix-frame" src="https://iqproductionz.wixsite.com/iqpr/pyramids?lightbox=dataItem-lgdtz7tp1"
+    title="Celestial Oceanic Bubble Pyramid | I.Q. Productionz"
+    allow="autoplay; fullscreen; payment" loading="eager"></iframe>
+  <script>
+    const frame  = document.getElementById('wix-frame');
+    const loader = document.getElementById('loader');
+    frame.addEventListener('load', () => setTimeout(() => loader.classList.add('hidden'), 300));
+    setTimeout(() => loader.classList.add('hidden'), 6000);
+  </script>
+</body>
+</html>

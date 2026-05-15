@@ -1,0 +1,1316 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>Mary Kay Skin Assessment</title>
+
+<script>
+(function(){
+  var params=new URLSearchParams(window.location.search);
+  var sid=params.get('sid');
+  if(!sid){sid='mk_'+Math.random().toString(36).substr(2,9)+Date.now().toString(36);try{history.replaceState(null,'',window.location.pathname+'?sid='+sid);}catch(e){}}
+  window._sessionId=sid;
+  /* #NOTES: Update this URL to your actual live website link if you want the save feature to link back properly */
+  window._resumeUrl='https://iqproductionz.com/MaryKay/Assess/?sid='+sid;
+})();
+</script>
+
+<script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
+
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400&family=Jost:wght@300;400;500;600&display=swap" rel="stylesheet">
+
+<style>
+/* #NOTES: ================================================================= */
+/* #NOTES: MASTER COLOR VARIABLES */
+/* #NOTES: Edit these hex codes (#e8507a, etc.) to change colors across the whole site instantly. */
+/* #NOTES: ================================================================= */
+html,body{background:var(--pink-pale);} /* #NOTES: The absolute background color of the webpage (dark pink/black) */
+:root{
+  --pink:#e8507a;       /* #NOTES: Main brand pink used for buttons and highlights */
+  --pink-dark:#c93a62;  /* #NOTES: Darker pink used for button hover states */
+  --pink-light:#fce4ec; /* #NOTES: Very light pink used for selected item backgrounds */
+  --pink-pale:#fff5f8;  /* #NOTES: The pale pink used for the background of the form pages */
+  --gold:#c9a96e;       /* #NOTES: The gold color used for accents and subheaders */
+  --dark:#2a1a20;       /* #NOTES: Almost black used for main headings */
+  --text:#3d2530;       /* #NOTES: Dark brown/pink used for general paragraph text */
+  --gray:#8a7a80;       /* #NOTES: Grayish-pink used for placeholder text and small notes */
+  --link:#e8507a;       /* #NOTES: Color for clickable text links */
+}
+
+/* #NOTES: BASIC RESET */
+/* #NOTES: This strips default browser margins so the design looks identical on all devices. */
+*{box-sizing:border-box;margin:0;padding:0;}
+
+/* #NOTES: MAIN BODY STYLING */
+/* #NOTES: Sets the default font to Jost, and default text color. */
+body{font-family:'Jost',sans-serif;background:var(--pink-pale);color:var(--text);min-height:100vh;}
+
+/* #NOTES: SCREEN CONTAINERS */
+/* #NOTES: .screen is hidden by default. Only the screen with .active is shown. */
+/* #NOTES: padding controls the spacing at the top and bottom of the screen. */
+.screen{display:none;min-height:100vh;flex-direction:column;align-items:center;justify-content:flex-start;padding:40px 20px 60px;}
+.screen.active{display:flex;}
+
+/* #NOTES: CORNER ACCENTS (GOLD LINES) */
+/* #NOTES: These are the thin gold corner decorations seen on dark screens like the Thank You page. */
+.hcorner{position:absolute;width:clamp(28px,4vw,50px);height:clamp(28px,4vw,50px);opacity:0.4;pointer-events:none;z-index:2;}
+.htl{top:16px;left:16px;border-top:1px solid var(--gold);border-left:1px solid var(--gold);}
+.htr{top:16px;right:16px;border-top:1px solid var(--gold);border-right:1px solid var(--gold);}
+.hbl{bottom:16px;left:16px;border-bottom:1px solid var(--gold);border-left:1px solid var(--gold);}
+.hbr{bottom:16px;right:16px;border-bottom:1px solid var(--gold);border-right:1px solid var(--gold);}
+
+/* #NOTES: PROGRESS BAR STYLING */
+/* #NOTES: Change max-width to make the bar wider or narrower. */
+.progress-bar-wrap{max-width:700px;width:100%;margin-bottom:8px;}
+.progress-label{font-size:11px;letter-spacing:2px;color:var(--gray);text-transform:uppercase;margin-bottom:6px;}
+.progress-bar{height:3px;background:var(--pink-light);border-radius:2px;}
+/* #NOTES: This is the actual colored bar that fills up. Uses a gradient from pink to gold. */
+.progress-fill{height:100%;background:linear-gradient(90deg,var(--pink),var(--gold));border-radius:2px;transition:width 0.5s ease;}
+
+/* #NOTES: PAGE HEADER & LOGO */
+/* #NOTES: Controls the "Mary Kay" text at the very top of the white screens. */
+.page-header{text-align:center;padding:30px 20px 10px;max-width:700px;width:100%;}
+.page-logo{font-family:'Cormorant Garamond',serif;font-size:22px;color:var(--pink);letter-spacing:2px;font-style:italic;}
+
+/* #NOTES: QUESTION CARD (THE WHITE BOX) */
+/* #NOTES: This is the main white container holding the questions. */
+/* #NOTES: max-width:700px restricts how wide it gets on desktop. Change this if you want a skinnier card. */
+/* #NOTES: border-radius:16px controls how rounded the corners are. */
+.question-card{background:white;border-radius:16px;padding:clamp(28px,5vw,50px);max-width:700px;width:100%;box-shadow:0 4px 40px rgba(42,26,32,0.08);margin-top:20px;}
+
+/* #NOTES: QUESTION TEXT STYLING */
+/* #NOTES: .q-step is the small gold text above the question (e.g. "Question 1"). */
+.q-step{font-size:10px;letter-spacing:3px;color:var(--gold);text-transform:uppercase;margin-bottom:10px;}
+/* #NOTES: .q-title is the main large text of the question itself. */
+.q-title{font-family:'Cormorant Garamond',serif;font-size:clamp(1.4rem,3.5vw,1.9rem);font-weight:400;color:var(--dark);margin-bottom:8px;line-height:1.3;}
+/* #NOTES: .q-hint is the small gray italic text under the question (e.g. "Select all that apply"). */
+.q-hint{font-size:12px;font-style:italic;color:var(--gray);margin-bottom:24px;}
+/* #NOTES: .q-nav controls the layout of the Next/Back buttons at the bottom of the card. */
+.q-nav{display:flex;gap:12px;flex-wrap:wrap;}
+
+/* #NOTES: FADE IN ANIMATION */
+/* #NOTES: Makes the white cards slide up and fade in smoothly when switching screens. */
+.fade-in{animation:fadeIn 0.4s ease;}
+@keyframes fadeIn{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+
+/* #NOTES: SELECTION CHIPS (OVAL BUTTONS) */
+/* #NOTES: These are the pill-shaped buttons used for multiple selection. */
+.options-grid{display:flex;flex-wrap:wrap;gap:10px;margin-bottom:28px;}
+.option-chip{padding:10px 18px;border:1.5px solid #e8d5db;border-radius:100px;font-size:13px;cursor:pointer;transition:all 0.2s ease;background:white;color:var(--text);font-family:'Jost',sans-serif;font-weight:400;user-select:none;}
+.option-chip:hover{border-color:var(--pink);color:var(--pink);}
+.option-chip.selected{background:var(--pink);color:white;border-color:var(--pink);}
+
+/* #NOTES: RADIO BUTTONS (LONG RECTANGLES) */
+/* #NOTES: These are the long buttons used for single selection (Yes/No, Oily/Dry). */
+.options-radio{display:flex;flex-direction:column;gap:10px;margin-bottom:28px;}
+.radio-option{display:flex;align-items:center;gap:12px;padding:14px 18px;border:1.5px solid #e8d5db;border-radius:12px;cursor:pointer;transition:all 0.2s ease;background:white;font-size:14px;}
+.radio-option:hover{border-color:var(--pink);background:var(--pink-pale);}
+.radio-option.selected{border-color:var(--pink);background:var(--pink-light);}
+/* #NOTES: .radio-dot is the visual circle on the left of the text. */
+.radio-dot{width:18px;height:18px;border:2px solid #e8d5db;border-radius:50%;flex-shrink:0;transition:all 0.2s;display:flex;align-items:center;justify-content:center;}
+.radio-option.selected .radio-dot{border-color:var(--pink);background:var(--pink);}
+.radio-option.selected .radio-dot::after{content:'';width:7px;height:7px;background:white;border-radius:50%;display:block;}
+
+/* #NOTES: TEXT INPUTS */
+/* #NOTES: General styling for text boxes and dropdowns. */
+.text-input{width:100%;padding:12px 16px;border:1.5px solid #e8d5db;border-radius:10px;font-family:'Jost',sans-serif;font-size:14px;color:var(--text);outline:none;transition:border 0.2s;margin-top:8px;display:none;}
+.text-input.visible{display:block;}
+
+/* #NOTES: MAIN BUTTONS */
+/* #NOTES: .btn-primary is the solid pink button. */
+.btn-primary{background:linear-gradient(135deg,var(--pink),var(--pink-dark));color:white;border:none;padding:14px 32px;font-family:'Jost',sans-serif;font-weight:600;font-size:12px;letter-spacing:3px;text-transform:uppercase;cursor:pointer;transition:all 0.3s ease;border-radius:50px;display:inline-block;text-decoration:none;line-height:1;}
+.btn-primary:hover{background:linear-gradient(135deg,var(--pink-dark),#a82e50);transform:translateY(-2px);box-shadow:0 8px 25px rgba(232,80,122,0.4);}
+/* #NOTES: .btn-secondary is the transparent button with a pink outline. */
+.btn-secondary{background:transparent;color:var(--pink);border:1.5px solid var(--pink);padding:13px 32px;font-family:'Jost',sans-serif;font-weight:500;font-size:12px;letter-spacing:3px;text-transform:uppercase;cursor:pointer;transition:all 0.3s ease;border-radius:50px;display:inline-block;text-decoration:none;line-height:1;}
+.btn-secondary:hover{background:var(--pink-light);}
+
+/* #NOTES: RESULTS SCREEN STYLING */
+/* #NOTES: Controls the look of the generated product list. */
+.results-header{text-align:center;margin-bottom:30px;}
+.results-title{font-family:'Cormorant Garamond',serif;font-size:clamp(1.6rem,4vw,2.2rem);color:var(--dark);margin-bottom:8px;}
+.product-list{list-style:none;margin:20px 0;}
+.product-list li{padding:12px 0;border-bottom:1px solid #f0e8eb;font-size:14px;line-height:1.6;}
+.product-list li:last-child{border-bottom:none;}
+.product-list a{color:var(--link);text-decoration:none;font-weight:500;}
+
+/* #NOTES: RESULT SCREEN ACTIONS & NOTES */
+.results-actions{display:flex;flex-wrap:wrap;gap:10px;margin-top:16px;justify-content:center;}
+.results-actions button,.results-actions a{flex:1;min-width:140px;text-align:center;cursor:pointer;}
+.consultant-note{background:var(--pink-light);border-left:3px solid var(--pink);padding:14px 18px;border-radius:10px;margin:20px 0;font-size:12px;line-height:1.8;color:var(--text);text-align:center;}
+.guarantee-note{font-family:'Cormorant Garamond',serif;font-size:1.1rem;color:var(--dark);text-align:center;margin:24px 0 12px;font-style:italic;}
+.info-box{background:#fff8f0;border-left:3px solid var(--gold);padding:14px 18px;border-radius:10px;margin:14px 0;font-size:13px;line-height:1.8;color:var(--text);}
+.no-results-box{text-align:center;padding:20px;}
+
+/* #NOTES: PROFILE FORM STYLING */
+/* #NOTES: Controls the layout of the large beauty profile form fields. */
+.consent-title{font-family:'Cormorant Garamond',serif;font-size:1.6rem;color:var(--dark);margin-bottom:20px;text-align:center;}
+.section-title{font-family:'Cormorant Garamond',serif;font-size:1.4rem;color:var(--dark);margin:20px 0 12px;padding-bottom:6px;border-bottom:1px solid #f0e8eb;}
+.form-row{display:flex;gap:14px;flex-wrap:wrap;margin-bottom:14px;}
+.form-field{flex:1;min-width:160px;margin-bottom:14px;}
+.form-field.full{flex:0 0 100%;}
+.form-label{font-size:11px;letter-spacing:2px;color:var(--gray);text-transform:uppercase;display:block;margin-bottom:6px;}
+.form-input{width:100%;padding:12px 14px;border:1.5px solid #e8d5db;border-radius:10px;font-family:'Jost',sans-serif;font-size:14px;outline:none;transition:border 0.2s;background:white;color:var(--text);}
+.form-input:focus{border-color:var(--pink);}
+/* #NOTES: Custom dropdown arrow styling */
+select.form-input{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%23e8507a' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 14px center;padding-right:36px;}
+
+/* #NOTES: CONSENT & CHECKBOX STYLING */
+.consent-text{font-size:13px;line-height:1.9;color:var(--text);max-height:260px;overflow-y:auto;padding:16px;background:var(--pink-pale);border-radius:10px;margin-bottom:20px;}
+.consent-options{display:flex;flex-direction:column;gap:10px;margin-bottom:20px;}
+.consent-check{display:flex;gap:12px;align-items:flex-start;font-size:13px;line-height:1.6;cursor:pointer;}
+.consent-check input{margin-top:3px;accent-color:var(--pink);}
+
+/* #NOTES: SIGNATURE PAD STYLING */
+/* #NOTES: Change the height here if you want the drawing box to be taller or shorter. */
+.signature-area{border:1.5px solid #e8d5db;border-radius:12px;margin:16px 0;background:white;overflow:hidden;}
+.sig-label{font-size:11px;letter-spacing:2px;color:var(--gray);padding:10px 14px 6px;text-transform:uppercase;display:block;}
+.sig-instructions{font-size:11px;color:var(--pink);padding:0 14px 6px;font-style:italic;display:block;}
+#sig-canvas{width:100%;height:140px;cursor:crosshair;display:block;touch-action:none;background:white;}
+.sig-clear{font-size:11px;color:var(--pink);cursor:pointer;padding:8px 14px 12px;display:inline-block;}
+
+/* #NOTES: POP-UP MODALS (Save Results / Errors) */
+/* #NOTES: The overlay is the dark transparent background behind the popup. */
+.modal-overlay{display:none;position:fixed;inset:0;background:rgba(42,26,32,0.6);z-index:999;align-items:center;justify-content:center;padding:20px;}
+.modal-overlay.active{display:flex;}
+.modal-box{background:white;border-radius:16px;padding:36px;max-width:440px;width:100%;box-shadow:0 20px 60px rgba(0,0,0,0.2);}
+.modal-title{font-family:'Cormorant Garamond',serif;font-size:1.5rem;color:var(--dark);margin-bottom:8px;}
+.modal-sub{font-size:13px;color:var(--gray);margin-bottom:20px;line-height:1.6;}
+
+/* #NOTES: SLIDE-UP MODAL (Personal Message to Sarah) */
+/* #NOTES: Slides up from the bottom instead of appearing in the center. */
+.slideup-overlay{display:none;position:fixed;inset:0;background:rgba(13,6,8,0.8);z-index:1200;align-items:flex-end;justify-content:center;}
+.slideup-overlay.active{display:flex;}
+.slideup-sheet{background:white;border-radius:24px 24px 0 0;padding:32px 28px 48px;width:100%;max-width:640px;box-shadow:0 -8px 40px rgba(0,0,0,0.3);animation:slideUp 0.35s cubic-bezier(0.32,0.72,0,1) forwards;}
+@keyframes slideUp{from{transform:translateY(100%)}to{transform:translateY(0)}}
+.slideup-handle{width:40px;height:4px;background:#e8d5db;border-radius:2px;margin:0 auto 24px;}
+.slideup-title{font-family:'Cormorant Garamond',serif;font-size:1.6rem;color:var(--dark);margin-bottom:6px;}
+.slideup-sub{font-size:13px;color:var(--gray);margin-bottom:24px;line-height:1.6;}
+
+/* #NOTES: MISC. */
+#addr-section{display:block;}
+
+/* #NOTES: THANK YOU PAGES STYLING */
+/* #NOTES: Sets the background to dark mode specifically for these completion screens. */
+#screen-thankyou,#screen-personal-ty{background:radial-gradient(ellipse at 20% 50%,#3d0a1e 0%,#1a0d13 50%,#0d0608 100%);justify-content:center;position:relative;overflow:hidden;min-height:100vh;}
+#ty-sparkles,#pty-sparkles{position:fixed;inset:0;pointer-events:none;overflow:hidden;z-index:0;}
+
+/* #NOTES: MOBILE RESPONSIVENESS */
+/* #NOTES: These rules only apply on screens smaller than 480px (cell phones). */
+@media(max-width:480px){
+  .question-card{padding:24px 18px;}
+  .options-grid{gap:8px;}
+  .option-chip{padding:9px 14px;font-size:12px;}
+  .results-actions{flex-direction:column;}
+  .form-row{flex-direction:column;gap:0;}
+  .slideup-sheet{padding:28px 20px 44px;}
+}
+</style>
+</head>
+<body>
+
+<div id="screen-q1" class="screen active" style="background:var(--pink-pale);">
+  <div class="page-header"></div>
+  
+  <div class="progress-bar-wrap">
+    <div class="progress-label">Step 1 of 3</div>
+    <div class="progress-bar"><div class="progress-fill" style="width:25%"></div></div>
+  </div>
+  
+  <div class="question-card fade-in">
+    <div class="q-step">Question 1</div>
+    <div class="q-title">How would you describe your skin type?</div>
+    <div class="q-hint">Select the best option</div>
+    <div class="options-radio" id="q1-options">
+      <div class="radio-option" data-val="Oily" onclick="selectRadio('q1-options',this)"><div class="radio-dot"></div><span>Oily / Combination</span></div>
+      <div class="radio-option" data-val="Dry" onclick="selectRadio('q1-options',this)"><div class="radio-dot"></div><span>Normal / Dry</span></div>
+    </div>
+    
+    <div class="q-nav">
+      <button class="btn-primary" onclick="nextQ1()">Next &#8594;</button>
+    </div>
+  </div>
+</div>
+
+<div id="screen-q2" class="screen" style="background:var(--pink-pale);">
+  <div class="page-header"></div>
+  
+  <div class="progress-bar-wrap">
+    <div class="progress-label">Step 2 of 3</div>
+    <div class="progress-bar"><div class="progress-fill" style="width:50%"></div></div>
+  </div>
+  
+  <div class="question-card fade-in">
+    <div class="q-step">Question 2</div>
+    <div class="q-title">How would you define your skin?</div>
+    <div class="q-hint">Select the best option</div>
+    <div class="options-radio" id="q2-options">
+      <div class="radio-option" data-val="Acne" onclick="selectRadio('q2-options',this)"><div class="radio-dot"></div><span>Acne</span></div>
+      <div class="radio-option" data-val="Expression Lines" onclick="selectRadio('q2-options',this)"><div class="radio-dot"></div><span>Expression Lines</span></div>
+      <div class="radio-option" data-val="Wrinkles" onclick="selectRadio('q2-options',this)"><div class="radio-dot"></div><span>Wrinkles</span></div>
+      <div class="radio-option" data-val="Sagging" onclick="selectRadio('q2-options',this)"><div class="radio-dot"></div><span>Sagging</span></div>
+    </div>
+    
+    <div style="margin-top:4px;margin-bottom:16px;">
+      <a href="https://iqproductionz.com/MaryKay/FullAssess/" style="font-size:11px;color:var(--gray);text-decoration:none;display:block;margin-bottom:5px;">Want more definition options? <span style="color:var(--pink);font-weight:600;">Take the advanced assessment &#8594;</span></a>
+      <a href="https://iqproductionz.com/MaryKay/BracketAssess/" style="font-size:11px;color:var(--gray);text-decoration:none;display:block;">Want income &amp; age-based results? <span style="color:var(--pink);font-weight:600;">Take the bracketed assessment &#8594;</span></a>
+    </div>
+    
+    <div class="q-nav">
+      <button class="btn-secondary" onclick="goTo('screen-q1')">&#8592; Back</button>
+      <button class="btn-primary" onclick="nextQ2()">Next &#8594;</button>
+    </div>
+  </div>
+</div>
+
+<div id="screen-q3" class="screen" style="background:var(--pink-pale);">
+  <div class="page-header"></div>
+  
+  <div class="progress-bar-wrap">
+    <div class="progress-label">Step 3 of 3</div>
+    <div class="progress-bar"><div class="progress-fill" style="width:75%"></div></div>
+  </div>
+  
+  <div class="question-card fade-in">
+    <div class="q-step">Question 3</div>
+    <div class="q-title"><em>Did you know foundation is skincare?</em></div>
+    
+    <div class="options-radio" id="q3-options">
+      <div class="radio-option" data-val="Yes" onclick="selectRadio('q3-options',this)"><div class="radio-dot"></div><span>Yes</span></div>
+      <div class="radio-option" data-val="No" onclick="selectRadio('q3-options',this)"><div class="radio-dot"></div><span>No</span></div>
+    </div>
+    
+    <div class="q-nav">
+      <button class="btn-secondary" onclick="goTo('screen-q2')">&#8592; Back</button>
+      <button class="btn-primary" onclick="nextQ3()">Next &#8594;</button>
+    </div>
+  </div>
+</div>
+
+<div id="screen-results" class="screen" style="background:var(--pink-pale);">
+  <div class="page-header">
+    <div class="page-logo">Assessment Results</div>
+  </div>
+  
+  <div class="question-card fade-in" style="max-width:720px">
+    <div class="results-header">
+      <div style="font-family:'Cormorant Garamond',serif;font-size:clamp(1.3rem,3.5vw,1.8rem);color:var(--gold);font-weight:400;letter-spacing:1px;margin-bottom:8px;">Congratulations!</div>
+      <div style="font-family:'Cormorant Garamond',serif;font-size:clamp(1.6rem,4vw,2.2rem);color:var(--dark);font-weight:400;margin-bottom:8px;">You Qualify for the Following:</div>
+    </div>
+    
+    <div id="foundation-msg"></div>
+    
+    <ul class="product-list" id="results-list"></ul>
+    
+    <div id="eye-cream-note" style="display:none;" class="info-box"><span id="eye-cream-text"></span></div>
+    
+    <div style="margin-top:20px;background:var(--pink-pale);border-left:3px solid var(--gold);padding:16px 18px;border-radius:10px;font-size:13px;line-height:1.9;color:var(--text);">
+      We are making this qualification quick for you. Please note that for individual concerns, we can offer mixing and matching products to customize your routine. We recommend <a href="javascript:void(0)" onclick="openPersonalEmailModal()" style="color:var(--pink);font-weight:600;text-decoration:underline;">sending your direct skincare issue to Sarah</a> so she can assess which swaps would work best for your situation.
+    </div>
+    
+    <div id="no-results-section" class="no-results-box" style="display:none">
+      <p>Please <a href="javascript:void(0)" onclick="openPersonalEmailModal()" style="color:var(--pink);font-weight:600;">send Sarah a personal message</a> and she'll assess your needs directly.</p>
+    </div>
+    
+    <div id="results-action-section">
+      <div class="guarantee-note">With a 100% Satisfaction Guarantee, you have everything to gain!</div>
+      
+      <div class="results-actions" style="justify-content:center;">
+        <button class="btn-secondary" onclick="openEmailModal()">Save Results</button>
+        <button class="btn-primary" onclick="goTo('screen-profile')">Request a Free Sample →</button>
+      </div>
+      
+      <div class="consultant-note"><strong>*If you currently have a Mary Kay Independent Beauty Consultant, please exit and contact them directly.*</strong><br>Feel comfortable sharing your results with them, but do not order from the links above.</div>
+      
+      <div style="display:flex;justify-content:space-between;align-items:flex-end;margin-top:20px;flex-wrap:wrap;gap:12px;">
+        <button onclick="backFromResults()" style="background:none;border:none;font-size:11px;color:#b09090;cursor:pointer;padding:4px 8px;letter-spacing:1px;">← Back</button>
+        <button onclick="window.location.href='https://iqproductionz.com/MaryKay/Assess/'" style="background:none;border:none;font-size:11px;color:#b09090;cursor:pointer;padding:4px 8px;letter-spacing:1px;">Retake the Assessment</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div id="screen-exit" class="screen" style="background:var(--pink-pale);">
+  <div class="page-header"><div class="page-logo">Mary Kay</div></div>
+  <div class="question-card fade-in" style="text-align:center;max-width:540px;">
+    <div style="font-size:40px;margin-bottom:16px;">🌸</div>
+    <div style="font-family:'Cormorant Garamond',serif;font-size:1.8rem;color:var(--dark);margin-bottom:12px;">Thank You for Your Time!</div>
+    <p style="font-size:14px;color:var(--gray);line-height:1.9;margin-bottom:28px;">Feel free to browse Mary Kay products whenever you're ready.</p>
+    <a href="https://www.marykay.com/sistahay/en/home" target="_blank" class="btn-primary">Browse Mary Kay →</a>
+    <div style="margin-top:20px;"><button onclick="window.location.href='https://iqproductionz.com/MaryKay/Assess/'" style="background:none;border:none;font-size:11px;color:#b09090;cursor:pointer;letter-spacing:1px;">Retake the Assessment</button></div>
+  </div>
+</div>
+
+
+<div id="screen-profile" class="screen" style="background:var(--pink-pale);">
+  <div class="page-header"><div class="page-logo">Beauty Profile</div></div>
+  <div class="question-card fade-in" style="max-width:720px">
+    
+    <div class="consent-title">Request Your Free Sample(s):</div>
+    <p style="font-size:13px;color:var(--gray);margin-bottom:20px;text-align:center;">Fields marked <span style="color:var(--pink)">*</span> are required.</p>
+
+    <div class="section-title">Personal Information</div>
+    <div class="form-row">
+      <div class="form-field">
+        <label class="form-label">First Name <span style="color:var(--pink)">*</span></label>
+        <input type="text" class="form-input" id="prof-first" placeholder="First name" autocomplete="given-name"
+          oninput="this.value=this.value.replace(/[^a-zA-Z\s\-\']/g,'')">
+      </div>
+      <div class="form-field">
+        <label class="form-label">Last Name <span style="color:var(--pink)">*</span></label>
+        <input type="text" class="form-input" id="prof-last" placeholder="Last name" autocomplete="family-name"
+          oninput="this.value=this.value.replace(/[^a-zA-Z\s\-\']/g,'')">
+      </div>
+    </div>
+    <div class="form-row">
+      <div class="form-field">
+        <label class="form-label">Birthday (Month &amp; Day only)</label>
+        <input type="text" class="form-input" id="prof-bday" placeholder="e.g. March 15"
+          oninput="this.value=this.value.replace(/[^a-zA-Z0-9\s]/g,'')">
+      </div>
+      <div class="form-field">
+        <label class="form-label">Occupation</label>
+        <input type="text" class="form-input" id="prof-occ" placeholder="Your occupation">
+      </div>
+    </div>
+    <div class="form-row">
+      <div class="form-field">
+        <label class="form-label">Wedding Anniversary (Month &amp; Day only)</label>
+        <input type="text" class="form-input" id="prof-anniv" placeholder="e.g. June 20"
+          oninput="this.value=this.value.replace(/[^a-zA-Z0-9\s]/g,'')">
+      </div>
+    </div>
+
+    <div class="section-title">Address <span style="color:var(--pink)">*</span></div>
+
+    <div class="form-row">
+      <div class="form-field" style="max-width:160px;">
+        <label class="form-label">State <span style="color:var(--pink)">*</span></label>
+        <select class="form-input" id="prof-state" autocomplete="address-level1" onchange="onStateChange()">
+          <option value="">-- Select State --</option>
+          <option>AL</option><option>AK</option><option>AZ</option><option>AR</option><option>CA</option>
+          <option>CO</option><option>CT</option><option>DE</option><option>FL</option><option>GA</option>
+          <option>HI</option><option>ID</option><option>IL</option><option>IN</option><option>IA</option>
+          <option>KS</option><option>KY</option><option>LA</option><option>ME</option><option>MD</option>
+          <option>MA</option><option>MI</option><option>MN</option><option>MS</option><option>MO</option>
+          <option>MT</option><option>NE</option><option>NV</option><option>NH</option><option>NJ</option>
+          <option>NM</option><option>NY</option><option>NC</option><option>ND</option><option>OH</option>
+          <option>OK</option><option>OR</option><option>PA</option><option>RI</option><option>SC</option>
+          <option>SD</option><option>TN</option><option>TX</option><option>UT</option><option>VT</option>
+          <option>VA</option><option>WA</option><option>WV</option><option>WI</option><option>WY</option>
+          <option>DC</option>
+        </select>
+      </div>
+      <div class="form-field">
+        <label class="form-label">City <span style="color:var(--pink)">*</span></label>
+        <select class="form-input" id="prof-city" autocomplete="address-level2" onchange="onCityChange()" disabled>
+          <option value="">-- Select State First --</option>
+        </select>
+        <div id="city-loading" style="font-size:11px;color:var(--gray);margin-top:4px;display:none;">Loading cities…</div>
+      </div>
+      <div class="form-field" style="max-width:130px;">
+        <label class="form-label">ZIP Code <span style="color:var(--pink)">*</span></label>
+        <input type="text" class="form-input" id="prof-zip" placeholder="Auto-filled" maxlength="5"
+          oninput="this.value=this.value.replace(/[^0-9]/g,'').substring(0,5)" inputmode="numeric" readonly style="background:#f9f4f6;">
+      </div>
+    </div>
+
+    <div id="addr-section">
+      <div class="form-field full">
+        <label class="form-label">Street Address <span style="color:var(--pink)">*</span></label>
+        <input type="text" class="form-input" id="prof-addr" placeholder="e.g. 123 Main Street" autocomplete="street-address">
+      </div>
+      <div class="form-field full">
+        <label class="form-label">Apt, Suite, Unit, etc. <span style="color:var(--gray);font-weight:400;">(optional)</span></label>
+        <input type="text" class="form-input" id="prof-addr2" placeholder="Apt 4B, Suite 200, etc." autocomplete="address-line2">
+      </div>
+    </div>
+
+    <div class="section-title">Contact Information</div>
+    <div class="form-row">
+      <div class="form-field">
+        <label class="form-label">Email Address <span style="color:var(--pink)">*</span></label>
+        <input type="email" class="form-input" id="prof-email" placeholder="your@email.com" autocomplete="email">
+      </div>
+      <div class="form-field">
+        <label class="form-label">Phone Number</label>
+        <input type="tel" class="form-input" id="prof-phone" placeholder="(000) 000-0000" maxlength="14"
+          autocomplete="tel" oninput="formatPhone(this)">
+      </div>
+    </div>
+
+    <div class="section-title">Social Media</div>
+    <div class="form-row">
+      <div class="form-field">
+        <label class="form-label">Facebook</label>
+        <input type="text" class="form-input" id="prof-fb" placeholder="Facebook name or URL">
+      </div>
+      <div class="form-field">
+        <label class="form-label">Instagram</label>
+        <input type="text" class="form-input" id="prof-ig" placeholder="@handle">
+      </div>
+    </div>
+    <div class="form-row">
+      <div class="form-field">
+        <label class="form-label">Other Platform (TikTok, X, Snapchat…)</label>
+        <input type="text" class="form-input" id="prof-social-platform" placeholder="Platform name">
+      </div>
+      <div class="form-field">
+        <label class="form-label">Other — Handle / Username</label>
+        <input type="text" class="form-input" id="prof-social-handle" placeholder="Your handle">
+      </div>
+    </div>
+
+    <div class="section-title">Best Way &amp; Time to Be Reached</div>
+    <div class="form-row">
+      <div class="form-field">
+        <label class="form-label">Best Way to Contact Me</label>
+        <select class="form-input" id="prof-contact-method" onchange="updateContactOptions()">
+          <option value="">Select...</option>
+          <option value="Call">Call</option>
+          <option value="Text">Text</option>
+          <option value="Email">Email</option>
+          <option value="Call or Text">Call or Text</option>
+          <option value="Any">Any Method</option>
+          <option value="Other">Other</option>
+        </select>
+      </div>
+      <div class="form-field" id="contact-method-other-wrap" style="display:none;">
+        <label class="form-label">Please specify</label>
+        <input type="text" class="form-input" id="prof-contact-method-other" placeholder="e.g. WhatsApp, Facebook Messenger…">
+      </div>
+    </div>
+    <div class="form-row">
+      <div class="form-field">
+        <label class="form-label">Weekday or Weekend</label>
+        <select class="form-input" id="prof-contact-day">
+          <option value="">Select...</option>
+          <option value="Weekday">Weekday</option>
+          <option value="Weekend">Weekend</option>
+          <option value="Either">Either</option>
+          <option value="Other">Other</option>
+        </select>
+      </div>
+      <div class="form-field" id="contact-day-other-wrap" style="display:none;">
+        <label class="form-label">Please specify</label>
+        <input type="text" class="form-input" id="prof-contact-day-other" placeholder="e.g. Fridays only, Sundays…">
+      </div>
+    </div>
+    <div class="form-row">
+      <div class="form-field">
+        <label class="form-label">Best Time of Day</label>
+        <select class="form-input" id="prof-contact-time">
+          <option value="">Select...</option>
+          <option value="Rising">Rising</option>
+          <option value="Afternoon">Afternoon</option>
+          <option value="Evening">Evening</option>
+          <option value="Other">Other</option>
+        </select>
+      </div>
+      <div class="form-field" id="contact-time-other-wrap" style="display:none;">
+        <label class="form-label">Please specify</label>
+        <input type="text" class="form-input" id="prof-contact-time-other" placeholder="e.g. After 6pm, Noon…">
+      </div>
+    </div>
+    <div class="form-row">
+      <div class="form-field full">
+        <label class="form-label">Specific Time (optional)</label>
+        <input type="text" class="form-input" id="prof-contact-specific" placeholder="e.g. 3:00 PM, Saturdays at noon…">
+      </div>
+    </div>
+
+
+    <div class="section-title" style="margin-top:28px;">Your Free Sample Selections <span style="font-size:12px;color:var(--gray);font-weight:400;font-family:'Jost',sans-serif;">— click to expand</span></div>
+    <div style="background:var(--pink-pale);border:1px solid #f0d8e0;border-radius:12px;padding:16px 18px;margin-bottom:20px;">
+      <button type="button" onclick="toggleSampleDropdown()" style="background:none;border:none;cursor:pointer;display:flex;align-items:center;gap:8px;font-family:'Jost',sans-serif;font-size:13px;color:var(--pink);font-weight:600;width:100%;text-align:left;padding:0;">
+        <span id="sample-arrow" style="font-size:16px;transition:transform 0.2s;">&#9658;</span>
+        <span>Select from your qualified products</span>
+      </button>
+      
+      <div id="sample-dropdown-body" style="display:none;margin-top:14px;">
+        <p style="font-size:12px;color:var(--gray);margin-bottom:12px;font-style:italic;">Click each product you'd like as a free sample.</p>
+        <div id="sample-product-list" style="display:flex;flex-direction:column;gap:8px;"></div>
+        <p style="font-size:12px;color:var(--gold);margin-top:14px;line-height:1.7;">&#10022; We will send your free sample(s) to the address you provide on this form.</p>
+        <p style="font-size:11px;color:var(--gray);margin-top:6px;font-style:italic;">* Sample availability is subject to Hali Sarah's current inventory. She will confirm with you directly.</p>
+      </div>
+    </div>
+
+    <div class="section-title">Wish List Referrals</div>
+    <p style="font-size:12px;color:var(--gray);margin-bottom:14px;font-style:italic;">Who can you share your product wish list with?</p>
+    <div class="form-row">
+      <div class="form-field">
+        <label class="form-label">Referral 1 — Name</label>
+        <input type="text" class="form-input" id="ref1-name" placeholder="Full name"
+          oninput="this.value=this.value.replace(/[^a-zA-Z\s\-\']/g,'')">
+      </div>
+      <div class="form-field">
+        <label class="form-label">Relationship</label>
+        <input type="text" class="form-input" id="ref1-rel" placeholder="e.g. Friend, Sister">
+      </div>
+    </div>
+    <div class="form-field full">
+      <label class="form-label">Contact Info</label>
+      <input type="text" class="form-input" id="ref1-contact" placeholder="Phone or email">
+    </div>
+    
+    <div class="form-row">
+      <div class="form-field">
+        <label class="form-label">Referral 2 — Name</label>
+        <input type="text" class="form-input" id="ref2-name" placeholder="Full name"
+          oninput="this.value=this.value.replace(/[^a-zA-Z\s\-\']/g,'')">
+      </div>
+      <div class="form-field">
+        <label class="form-label">Relationship</label>
+        <input type="text" class="form-input" id="ref2-rel" placeholder="e.g. Friend, Sister">
+      </div>
+    </div>
+    <div class="form-field full">
+      <label class="form-label">Contact Info</label>
+      <input type="text" class="form-input" id="ref2-contact" placeholder="Phone or email">
+    </div>
+
+    <div class="section-title" style="margin-top:28px;">I Am Interested In Learning More About</div>
+    <div class="consent-options" style="margin-top:8px;">
+      <label class="consent-check"><input type="checkbox" id="int-color"> Color application techniques</label>
+      <label class="consent-check"><input type="checkbox" id="int-mens"> Men's products</label>
+      <label class="consent-check"><input type="checkbox" id="int-hostess"> Earning hostess rewards</label>
+      <label class="consent-check"><input type="checkbox" id="int-gifts"> Gift-giving services</label>
+      <label class="consent-check"><input type="checkbox" id="int-money"> Earning extra money</label>
+    </div>
+
+    <div class="section-title" style="margin-top:28px;">Anything Else You Want to Share?</div>
+    <textarea id="prof-notes" class="form-input" rows="4" placeholder="Feel free to share anything else about your skin, lifestyle, or questions you have for Hali Sarah..." style="width:100%;resize:vertical;min-height:100px;margin-top:4px;"></textarea>
+
+    <div class="section-title" style="margin-top:28px;">Customer Consent</div>
+    <div class="consent-text" style="max-height:260px; font-size:12px; line-height:1.8;">
+      <strong>Dear Valued Customer:</strong><br><br>
+      One of the many benefits of shopping with me, your Mary Kay Independent Beauty Consultant, is that you can receive personalized service just the way you want it, when you want it and where you want it. It is important to me to take the time to get to know you, your style and your preferences so I can meet your beauty needs. Mary Kay Inc. offers me tools and services, including online tools, that allow me to provide you 24-hour access to information about products and services, tips and trends, and other information that may be of interest to you. I can share with you brochures, postcards and other direct mail and email, online and mobile materials regarding Mary Kay products, services, special promotions or general beauty news and trends. At my request, these materials may be sent to you directly by Mary Kay Inc. (and its affiliates) on my behalf. Because your privacy is important to me and to Mary Kay Inc., I want to make sure you are aware that you have a choice with regard to what information you choose to share with me and what information I may share about you to Mary Kay Inc. If you wish to receive the services, information and materials described above, then please indicate your consent to allow me to share your full name, address, email address and other profile and contact information with Mary Kay Inc. <strong>Mary Kay Inc. (and its affiliates) will only use the information you provide for the purpose of providing you with the information you have requested from me, and will not sell or otherwise disclose your information to any third party.</strong> For complete information on Mary Kay's Privacy Policies, please visit marykay.com. You have the ability to contact me or Mary Kay Inc. at any time to let us know any changes or updates you would like to make regarding your information, including the ability to let us know if you would no longer like to receive certain materials or communications. You may withdraw from any Mary Kay related email or mailing at any time by contacting the Mary Kay Inc. Privacy Team at <strong>1-800-453-1140</strong> or sending an email to <strong><a href="mailto:privacy@mkcorp.com" style="color:#e8507a;text-decoration:none;font-weight:500;">privacy@mkcorp.com</a></strong>.<br><br>
+      I can't wait to provide you with the very best in customer service to meet all your beauty needs!<br><br>
+      <em>Please indicate your preferences below and sign in the space provided:</em>
+    </div>
+    
+    <p style="font-size:12px;color:var(--gray);margin-bottom:10px;font-style:italic;">Select which you consent to &mdash; all are optional.</p>
+    
+    <div style="margin-bottom:12px;">
+      <label class="consent-check" style="font-weight:600;color:var(--pink);">
+        <input type="checkbox" id="consent-all" onchange="toggleAllConsent(this)"> Select All
+      </label>
+    </div>
+    <div class="consent-options" style="margin-top:14px;">
+      <label class="consent-check"><input type="checkbox" id="consent-contact"> Yes, I would like to receive <strong>email updates</strong> regarding Mary Kay® products and services.</label>
+      <label class="consent-check"><input type="checkbox" id="consent-data"> Yes, I would like to receive <strong>SMS/Text messages</strong> regarding Mary Kay® products and services.</label>
+      <label class="consent-check"><input type="checkbox" id="consent-personalized"> Yes, I consent to being contacted with <strong>personalized recommendations</strong>.</label>
+      <label class="consent-check"><input type="checkbox" id="consent-profile"> Yes, I consent to my assessment data being used to create a <strong>customer profile</strong>.</label>
+    </div>
+    
+    <p style="font-size:11px; color:var(--gray); margin-top:10px; font-style:italic;">By signing, you consent to the forwarding of your name and contact information to Mary Kay Inc. (and its affiliates) by me, your Independent Beauty Consultant, for the purposes set out above. <a href="javascript:void(0)" onclick="openConsentTerms()" style="color:var(--pink);font-weight:600;">View full consent terms →</a></p>
+
+    <div class="signature-area" style="margin-top:16px;">
+      <span class="sig-label">Customer Signature <span style="color:var(--pink)">*</span></span>
+      <span class="sig-instructions">Draw your signature below using your mouse or finger</span>
+      <canvas id="sig-canvas"></canvas>
+      <span class="sig-clear" onclick="clearSignature()">✕ Clear &amp; Redraw</span>
+    </div>
+
+    <div style="margin-top:28px; display:flex; gap:12px; flex-wrap:wrap;">
+      <button id="profile-submit-btn" class="btn-primary" onclick="submitProfile()">Submit</button>
+    </div>
+  </div>
+</div>
+
+
+<div id="sig-confirm-modal" class="modal-overlay" style="z-index:1100;">
+  <div class="modal-box" style="text-align:center; max-width:340px; width:90%;">
+    <div class="modal-title" style="margin-bottom:10px;">No Signature Detected</div>
+    <p class="modal-sub">Would you like to continue without signing, or go back and add your signature?</p>
+    <div style="display:flex;flex-direction:column;gap:10px;margin-top:20px;">
+      <button class="btn-secondary" id="sig-continue-btn" onclick="sigModalContinue()" style="width:100%;font-size:11px;text-align:center;">Continue Without Signing</button>
+      <button class="btn-primary" id="sig-back-btn" onclick="sigModalBack()" style="width:100%;font-size:11px;text-align:center;">← Go Back &amp; Sign</button>
+    </div>
+  </div>
+</div>
+
+<div id="email-modal" class="modal-overlay">
+  <div class="modal-box">
+    <div class="modal-title" id="modal-title">Save Your Results</div>
+    <div class="modal-sub" id="modal-sub">Enter your details below.</div>
+    <div style="margin-bottom:14px;">
+      <label class="form-label">Name</label>
+      <input type="text" class="form-input" id="modal-name" placeholder="Your name">
+    </div>
+    <div style="margin-bottom:20px;">
+      <label class="form-label">Email Address</label>
+      <input type="email" class="form-input" id="modal-email" placeholder="your@email.com">
+    </div>
+    <div style="display:flex;gap:10px;flex-wrap:wrap;">
+      <button id="modal-send-btn" class="btn-primary" onclick="sendModalEmail()" style="flex:1">Send</button>
+      <button class="btn-secondary" onclick="closeEmailModal()" style="flex:1">Cancel</button>
+    </div>
+  </div>
+</div>
+
+<div id="personal-email-overlay" class="slideup-overlay">
+  <div class="slideup-sheet">
+    <div class="slideup-handle"></div>
+    <div class="slideup-title">Send Sarah a Personal Message</div>
+    <div class="slideup-sub">Tell Sarah about your specific skin concern and she'll put together a custom recommendation just for you.</div>
+    <div class="form-field" style="margin-bottom:14px;"><label class="form-label">Your First Name <span style="color:var(--pink)">*</span></label><input type="text" class="form-input" id="personal-name" placeholder="First name"></div>
+    <div class="form-field" style="margin-bottom:14px;"><label class="form-label">Your Email <span style="color:var(--pink)">*</span></label><input type="email" class="form-input" id="personal-email" placeholder="your@email.com"></div>
+    <div class="form-field" style="margin-bottom:20px;"><label class="form-label">Your Message <span style="color:var(--pink)">*</span></label><textarea class="form-input" id="personal-message" rows="4" placeholder="Tell Sarah about your specific skin concerns, goals, or questions..." style="resize:vertical;height:100px;display:block;"></textarea></div>
+    <div style="display:flex;gap:12px;flex-wrap:wrap;">
+      <button class="btn-secondary" onclick="closePersonalEmailModal()" style="flex:1;">Cancel</button>
+      <button class="btn-primary" id="personal-send-btn" onclick="sendPersonalEmail()" style="flex:2;">Send to Sarah →</button>
+    </div>
+  </div>
+</div>
+
+
+<div id="screen-thankyou" class="screen" style="background:radial-gradient(ellipse at 20% 50%,#3d0a1e 0%,#1a0d13 50%,#0d0608 100%);justify-content:center;position:relative;overflow:hidden;min-height:100vh;">
+  <div id="ty-sparkles" style="position:fixed;inset:0;pointer-events:none;overflow:hidden;z-index:0;"></div>
+  <div class="hcorner htl"></div><div class="hcorner htr"></div><div class="hcorner hbl"></div><div class="hcorner hbr"></div>
+  <div class="question-card fade-in" style="max-width:580px;text-align:center;padding:clamp(36px,6vw,60px);background:rgba(255,255,255,0.04);border:1px solid rgba(201,169,110,0.2);border-radius:20px;box-shadow:0 4px 40px rgba(0,0,0,0.4);position:relative;z-index:2;margin:auto;">
+    <div style="font-family:'Cormorant Garamond',serif;font-size:13px;letter-spacing:5px;color:var(--gold);text-transform:uppercase;margin-bottom:28px;opacity:0.8;">Mary Kay &nbsp;·&nbsp; Skin Assessment</div>
+    <div style="font-size:52px;margin-bottom:16px;">✨</div>
+    <div style="font-family:'Cormorant Garamond',serif;font-size:clamp(1.8rem,5vw,2.6rem);color:white;font-weight:300;line-height:1.2;margin-bottom:12px;">You're All Set,<br><span id="ty-name" style="font-style:italic;color:var(--gold);">Beautiful!</span></div>
+    <div style="width:50px;height:1px;background:linear-gradient(90deg,transparent,var(--gold),transparent);margin:18px auto 24px;"></div>
+    <p style="font-size:14px;color:rgba(255,255,255,0.6);line-height:1.9;margin-bottom:20px;">Your skin assessment is complete and your beauty profile has been submitted. <em>Hali Sarah</em> will review your results and <em>may</em> reach out personally.</p>
+    <div style="background:rgba(201,169,110,0.08);border-left:3px solid var(--gold);border-radius:10px;padding:18px 22px;margin:0 0 24px;text-align:left;"><p style="font-size:13px;color:rgba(255,255,255,0.75);line-height:1.8;margin:0;"><strong style="color:var(--gold);">What happens next?</strong><br>Your personalized <strong>qualification results</strong> have been sent to your email. Hali Sarah Parsons will follow up with you if no further action is taken on your behalf within 48 hours.</p></div>
+    <div style="margin-bottom:24px;text-align:center;"><button onclick="openEmailInbox()" class="btn-primary" style="box-shadow:0 8px 24px rgba(232,80,122,0.4);border:none;cursor:pointer;">Check My Email 📬</button></div>
+    <p style="font-size:11px;color:rgba(255,255,255,0.35);line-height:1.8;margin-bottom:16px;">If you have any questions, please <a href="https://www.marykay.com/sistahay/en/ibcprofile" target="_blank" style="color:#e8507a;text-decoration:none;font-weight:500;">contact Hali Sarah</a> officially.</p>
+    <div style="margin-top:8px;"><p style="font-family:'Cormorant Garamond',serif;font-size:15px;color:var(--gold);font-style:italic;margin:0;">Skin-cerely yours, Hali Sarah Parsons</p><p style="font-size:10px;letter-spacing:2px;color:rgba(255,255,255,0.3);margin:4px 0 16px;text-transform:uppercase;">Independent Beauty Consultant</p></div>
+    <p style="font-size:10px;color:rgba(255,255,255,0.15);line-height:1.8;margin-bottom:20px;">This assessment was built by Hali Sarah Parsons, your new Mary Kay Independent Beauty Consultant!</p>
+    <div style="text-align:center;padding-top:16px;border-top:1px solid rgba(201,169,110,0.15);"><a href="https://iqproductionz.com/MaryKay/Assess/" style="font-size:11px;color:rgba(255,255,255,0.3);padding:4px 8px;letter-spacing:1px;text-decoration:none;">Retake the Assessment</a></div>
+  </div>
+</div>
+
+<div id="screen-personal-ty" class="screen" style="background:radial-gradient(ellipse at 20% 50%,#3d0a1e 0%,#1a0d13 50%,#0d0608 100%);justify-content:center;position:relative;overflow:hidden;min-height:100vh;">
+  <div id="pty-sparkles" style="position:fixed;inset:0;pointer-events:none;overflow:hidden;z-index:0;"></div>
+  <div class="hcorner htl"></div><div class="hcorner htr"></div><div class="hcorner hbl"></div><div class="hcorner hbr"></div>
+  <div class="question-card fade-in" style="max-width:580px;text-align:center;padding:clamp(36px,6vw,60px);background:rgba(255,255,255,0.04);border:1px solid rgba(201,169,110,0.2);border-radius:20px;box-shadow:0 4px 40px rgba(0,0,0,0.4);position:relative;z-index:2;margin:auto;">
+    <div style="font-family:'Cormorant Garamond',serif;font-size:13px;letter-spacing:5px;color:var(--gold);text-transform:uppercase;margin-bottom:28px;opacity:0.8;">Mary Kay &nbsp;·&nbsp; Skin Assessment</div>
+    <div style="font-size:52px;margin-bottom:16px;">✨</div>
+    <div style="font-family:'Cormorant Garamond',serif;font-size:clamp(1.8rem,5vw,2.6rem);color:white;font-weight:300;line-height:1.2;margin-bottom:12px;">You're All Set,<br><span id="pty-name" style="font-style:italic;color:var(--gold);">Beautiful!</span></div>
+    <div style="width:50px;height:1px;background:linear-gradient(90deg,transparent,var(--gold),transparent);margin:18px auto 24px;"></div>
+    <p style="font-size:14px;color:rgba(255,255,255,0.6);line-height:1.9;margin-bottom:20px;">Your skin assessment is complete and your personalized qualification results (so far) have been sent to your email if you want to explore them further.</p>
+    <div style="background:rgba(201,169,110,0.08);border-left:3px solid var(--gold);border-radius:10px;padding:18px 22px;margin:0 0 24px;text-align:left;"><p style="font-size:13px;color:rgba(255,255,255,0.75);line-height:1.8;margin:0;"><strong style="color:var(--gold);">What happens next?</strong><br>Hali Sarah will review your results and personal message. With this information, she will reply to your email with her unique, case-specific recommendations within the next seven days.</p></div>
+    <div style="margin-bottom:24px;text-align:center;"><button onclick="openEmailInboxPersonal()" class="btn-primary" style="box-shadow:0 8px 24px rgba(232,80,122,0.4);border:none;cursor:pointer;">Check My Email 📬</button></div>
+    <div style="margin-top:8px;"><p style="font-family:'Cormorant Garamond',serif;font-size:15px;color:var(--gold);font-style:italic;margin:0;">Skin-cerely yours, Hali Sarah Parsons</p><p style="font-size:10px;letter-spacing:2px;color:rgba(255,255,255,0.3);margin:4px 0 16px;text-transform:uppercase;">Independent Beauty Consultant</p></div>
+    <p style="font-size:10px;color:rgba(255,255,255,0.15);line-height:1.8;margin-bottom:20px;">This assessment was built by Hali Sarah Parsons, your new Mary Kay Independent Beauty Consultant!</p>
+    <div style="text-align:center;padding-top:16px;border-top:1px solid rgba(201,169,110,0.15);"><a href="https://iqproductionz.com/MaryKay/Assess/" style="font-size:11px;color:rgba(255,255,255,0.3);padding:4px 8px;letter-spacing:1px;text-decoration:none;">Retake the Assessment</a></div>
+  </div>
+</div>
+
+
+<script>
+// #NOTES: =================================================================
+// #NOTES: JAVASCRIPT - EMAIL JS KEYS & CONFIGURATION
+// #NOTES: This block initializes the EmailJS tool that actually sends the data.
+// #NOTES: =================================================================
+const EJS_PUBLIC_KEY='zmLo4nV99WWp2KjiR';
+const EJS_SERVICE_ID='MaryKay';
+const EJS_TEMPLATE_ID='template_z5qi34i';
+const CONSULTANT_EMAIL='sistahaymarykay@gmail.com';
+
+window.addEventListener('load',function(){if(window.emailjs)emailjs.init({publicKey:EJS_PUBLIC_KEY});});
+
+// #NOTES: This state object holds memory of what the user selected in the quiz
+const state={q1:[],q1SkinType:'',q2:'',q3:'',q3b:[],products:[]};
+
+// #NOTES: =================================================================
+// #NOTES: NAVIGATION HELPER FUNCTION
+// #NOTES: This function hides all screens and only reveals the target 'id'.
+// #NOTES: =================================================================
+function goTo(id){
+  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
+  const el=document.getElementById(id);
+  if(el){el.classList.add('active');window.scrollTo(0,0);}
+  
+  // If moving to the profile, wake up the signature pad logic
+  if(id==='screen-profile')setTimeout(initCanvas,300);
+  
+  // If moving to a thank you screen, fire off the sparkle animations
+  if(id==='screen-thankyou'||id==='screen-personal-ty')setTimeout(()=>initSparkles(id),50);
+}
+
+// #NOTES: CLICK HANDLERS FOR CHIPS & RADIOS
+// #NOTES: These functions allow chips and radio buttons to visually toggle.
+document.querySelectorAll('.option-chip').forEach(function(chip){chip.addEventListener('click',function(){this.classList.toggle('selected');});});
+function getSelected(cid){return[...document.querySelectorAll('#'+cid+' .option-chip.selected')].map(c=>c.dataset.val);}
+function selectRadio(cid,el){document.querySelectorAll('#'+cid+' .radio-option').forEach(o=>o.classList.remove('selected'));el.classList.add('selected');}
+function getRadio(cid){const s=document.querySelector('#'+cid+' .radio-option.selected');return s?s.dataset.val:'';}
+
+// #NOTES: =================================================================
+// #NOTES: QUESTION PROGRESSION LOGIC
+// #NOTES: These functions are tied to the 'Next' buttons on each question.
+// #NOTES: =================================================================
+
+// Step 1: Skin Type (Oily vs Dry)
+function nextQ1(){
+  var st = getRadio('q1-options');
+  if(!st){ alert('Please select your skin type.'); return; }
+  state.q1SkinType = st;
+  goTo('screen-q2'); // advances to the definition
+}
+
+// Step 2: Definition (Acne, Wrinkles, Sagging, etc.)
+function nextQ2(){
+  // Using getRadio because Q2 in this file is a radio button list (single choice)
+  var sel = getRadio('q2-options'); 
+  if(!sel){ alert('Please select one option.'); return; }
+  state.q1 = [sel];
+  goTo('screen-q3'); // advances to foundation
+}
+
+// Step 3: Foundation Yes/No
+function nextQ3(){
+  state.q3Foundation = getRadio('q3-options');
+  if(!state.q3Foundation){ alert('Please select an option.'); return; }
+  buildSimpleResults(); // calculates the products and advances to results
+}
+
+// #NOTES: =================================================================
+// #NOTES: PRODUCT QUALIFICATION LOGIC
+// #NOTES: This is the brain of the assessment. It reads the answers and picks products.
+// #NOTES: =================================================================
+function buildSimpleResults(){
+  var products=[];
+  const isOily = state.q1SkinType==='Oily';
+  const eyeNote=document.getElementById('eye-cream-note');
+  const eyeText=document.getElementById('eye-cream-text');
+  const foundMsg=document.getElementById('foundation-msg');
+  
+  // Clear old notes out just in case
+  eyeNote.style.display='none';
+  foundMsg.innerHTML='';
+
+  // #NOTES: FOUNDATION LOGIC
+  if(state.q3Foundation==='Yes'){
+    foundMsg.innerHTML='<div class="info-box">❖ <a href="https://www.marykay.com/sistahay/en/foundation-finder.html" target="_blank" style="color:var(--pink);font-weight:500;">Find Your Foundation Match →</a></div>';
+  } else {
+    foundMsg.innerHTML='<div class="info-box">Did you know? Foundation creates a breathable barrier that keeps pollutants off your skin. <a href="https://www.marykay.com/sistahay/en/foundation-finder.html" target="_blank" style="color:var(--pink);font-weight:500;">Try the Foundation Finder →</a></div>';
+  }
+
+  // #NOTES: PRODUCT SELECTION BASED ON QUESTION 2
+  if(state.q1==='Acne'||state.q1[0]==='Acne'){
+    products.push({name:"Clear Proof® Acne System Set",url:"https://www.marykay.com/sistahay/en/skincare/collection/clear-proof/clear-proof-acne-system-10058977/10058977US10058977.html"});
+  
+  } else if(state.q1==='Expression Lines'||state.q1[0]==='Expression Lines'){
+    if(isOily)products.push({name:"Mary Kay® Mattifying Regimen",url:"https://www.marykay.com/sistahay/en/skincare/collection/mary-kay-skin-care/mary-kay-mattifying-regimen-990322396/990322396US10230673.html"});
+    else products.push({name:"Mary Kay® Hydrating Regimen",url:"https://www.marykay.com/sistahay/en/skincare/collection/mary-kay-skin-care/mary-kay-hydrating-regimen-990322397/990322397US10230672.html"});
+    
+    eyeNote.style.display='block';
+    eyeText.innerHTML='Concerned about lines around your eyes? Add the <a href="https://www.marykay.com/sistahay/en/skincare/collection/timewise/timewise-eye-cream-990307131/990307131US10217408.html" target="_blank" style="color:var(--pink);font-weight:500;">TimeWise® Eye Cream</a> to your regimen!';
+    products.push({name:'TimeWise® Eye Cream',url:'https://www.marykay.com/sistahay/en/skincare/collection/timewise/timewise-eye-cream-990307131/990307131US10217408.html',sampleOnly:true});
+  
+  } else if(state.q1==='Wrinkles'||state.q1[0]==='Wrinkles'){
+    // Base Miracle Set logic (remains in the main results view!)
+    if(isOily)products.push({name:"TimeWise® Miracle Set Combination/Oily",url:"https://www.marykay.com/sistahay/en/skincare/collection/timewise/timewise-miracle-set-combination-oily-990312971/990312971US10217415.html"});
+    else products.push({name:"TimeWise® Miracle Set Normal/Dry",url:"https://www.marykay.com/sistahay/en/skincare/collection/timewise/timewise-miracle-set-normal-dry-990312970/990312970US10217417.html"});
+    
+    eyeNote.style.display='block';
+    eyeText.innerHTML='Want eye care included? The <a href="https://www.marykay.com/sistahay/en/skincare/collection/timewise/ultimate-timewise-miracle-set-combination-to-oily-990314980/990314980US10223244.html" target="_blank" style="color:var(--pink);font-weight:500;">Ultimate TimeWise® Miracle Set</a> includes an eye cream — available as a sample below!';
+    
+    // Ultimate sets appended as "sampleOnly:true" so they won't render in the list, but WILL appear in the sample dropdown
+    if(isOily) products.push({name:'Ultimate TimeWise® Miracle Set Combination/Oily',url:'https://www.marykay.com/sistahay/en/skincare/collection/timewise/ultimate-timewise-miracle-set-combination-to-oily-990314980/990314980US10223244.html',sampleOnly:true});
+    else products.push({name:'Ultimate TimeWise® Miracle Set Normal/Dry',url:'https://www.marykay.com/sistahay/en/skincare/collection/timewise/ultimate-timewise-miracle-set-normal-to-dry-990314981/990314981US10223243.html',sampleOnly:true});
+  
+  } else if(state.q1==='Sagging'||state.q1[0]==='Sagging'){
+    products.push({name:"TimeWise Repair® Volu-Firm® Set",url:"https://www.marykay.com/sistahay/en/skincare/collection/timewise-repair/timewise-repair-volufirm-set-990324679/990324679US10211954.html"});
+  }
+
+  // #NOTES: Save generated products to state so the sample dropdown can read them
+  state.products=products;
+  const list=document.getElementById('results-list');
+  list.innerHTML='';
+  
+  const noRes=document.getElementById('no-results-section');
+  const actSec=document.getElementById('results-action-section');
+  
+  if(!products.length){
+      // Shows fallback screen if array is empty
+      noRes.style.display='block';actSec.style.display='none';
+  } else {
+      noRes.style.display='none';actSec.style.display='block';
+      // #NOTES: Only render products that are NOT marked as 'sampleOnly'
+      products.filter(function(p){return !p.sampleOnly;}).forEach(p=>{
+          const li=document.createElement('li');
+          li.innerHTML='<a href="'+p.url+'" target="_blank">❖ '+p.name+'</a>'+(p.note?'<br><span style="font-size:12px;color:var(--gray);font-style:italic;">'+p.note+'</span>':'');
+          list.appendChild(li);
+      });
+  }
+  
+  goTo('screen-results'); // Reveal the results screen
+}
+
+// #NOTES: =================================================================
+// #NOTES: MODAL CONTROLS (POP UPS)
+// #NOTES: =================================================================
+function openPersonalEmailModal(){document.getElementById('personal-email-overlay').classList.add('active');}
+function closePersonalEmailModal(){document.getElementById('personal-email-overlay').classList.remove('active');}
+
+
+// #NOTES: HTML WRAPPER FOR SENT EMAILS
+// #NOTES: Every single email sent wraps its text inside this beautiful HTML box so it looks professional.
+function emailWrap(inner){
+  return '<!DOCTYPE html><html><head><meta charset="UTF-8">'
+    +'<style>'
+    +'body{margin:0;padding:24px 16px;background:#fdf6f8;font-family:Jost,Arial,sans-serif;}'
+    +'.wrap{max-width:600px;margin:0 auto;background:#fff;border-radius:16px;overflow:hidden;box-shadow:0 4px 24px rgba(232,80,122,.10);}'
+    +'.hdr{background:linear-gradient(135deg,#e8507a,#c93a62);padding:32px 40px;text-align:center;}'
+    +'.hdr h1{margin:0;font-family:Cormorant Garamond,Georgia,serif;font-size:28px;font-weight:300;color:#fff;letter-spacing:3px;text-transform:uppercase;}'
+    +'.hdr p{margin:6px 0 0;font-size:12px;color:rgba(255,255,255,.85);letter-spacing:2px;text-transform:uppercase;}'
+    +'.body{padding:32px 40px;}'
+    +'.section{margin-bottom:28px;}'
+    +'.sec-title{background:linear-gradient(90deg,#e8507a,#c9a96e);color:#fff;font-size:10px;font-weight:600;letter-spacing:2px;text-transform:uppercase;padding:7px 14px;border-radius:4px;margin-bottom:14px;}'
+    +'.row{display:flex;gap:16px;margin-bottom:10px;flex-wrap:wrap;}'
+    +'.field{flex:1;min-width:140px;}'
+    +'.field-lbl{font-size:9px;color:#c9a96e;letter-spacing:1.5px;text-transform:uppercase;margin-bottom:2px;}'
+    +'.field-val{font-size:13px;color:#2a1a20;border-bottom:1px solid #f0e8eb;padding-bottom:4px;}'
+    +'.product-item{padding:10px 0;border-bottom:1px solid #f9f0f4;}'
+    +'.product-item a{color:#e8507a;font-weight:600;font-size:13px;text-decoration:none;}'
+    +'.ftr{background:#fce4ec;padding:18px 40px;text-align:center;font-size:11px;color:#a06070;}'
+    +'.ftr a{color:#e8507a;text-decoration:none;}'
+    +'</style></head><body>'
+    +'<div style="padding:24px 16px;background:#fdf6f8;">'
+    +'<div class="wrap">'+inner
+    +'<div class="ftr">Mary Kay Independent Beauty Consultant<br>'
+    +'<a href="mailto:sistahaymarykay@gmail.com">sistahaymarykay@gmail.com</a></div>'
+    +'</div></div></body></html>';
+}
+
+// #NOTES: =================================================================
+// #NOTES: SEND PERSONAL EMAIL TO CONSULTANT (NO EMOJIS)
+// #NOTES: Fires when user uses the "Send Sarah a Personal Message" form.
+// #NOTES: =================================================================
+async function sendPersonalEmail(){
+  const name=document.getElementById('personal-name').value.trim();
+  const email=document.getElementById('personal-email').value.trim();
+  const message=document.getElementById('personal-message').value.trim();
+  
+  if(!name||!email||!message){alert('Please fill in all fields.');return;}
+  const btn=document.getElementById('personal-send-btn');btn.textContent='Sending…';btn.disabled=true;
+  
+  const prodList=state.products.length?state.products.map(p=>'<div style="padding:8px 0;border-bottom:1px solid #f0e8eb;"><a href="'+p.url+'" target="_blank" style="color:#e8507a;text-decoration:none;font-weight:500;">❖ '+p.name+'</a></div>').join(''):'<p style="color:#b09090;font-style:italic;">No products on file yet.</p>';
+  
+  // Clean email sent to YOU (no emojis)
+  const consultantHtml=emailWrap('<div class="hdr"><h1>Mary Kay</h1><p>PERSONAL ASSESSMENT NEEDED</p></div><div class="body"><div class="section"><div class="sec-title">Client Info</div><div class="row"><div class="field"><div class="field-lbl">Name</div><div class="field-val">'+name+'</div></div><div class="field"><div class="field-lbl">Email</div><div class="field-val">'+email+'</div></div></div><div class="row"><div class="field"><div class="field-lbl">Skin Concern</div><div class="field-val">'+(state.q1||'—')+'</div></div><div class="field"><div class="field-lbl">Skin Type</div><div class="field-val">'+(state.q2||'—')+'</div></div></div></div><div class="section"><div class="sec-title">Their Message</div><p style="font-size:14px;color:#3d2530;line-height:1.9;background:#fff5f8;padding:16px;border-radius:10px;border-left:3px solid #e8507a;">'+message+'</p></div><div class="section"><div class="sec-title">Original Results (For Reference)</div>'+prodList+'</div></div>');
+  
+  // Friendly email sent to THEM (emojis allowed here)
+  const customerHtml=emailWrap('<div class="hdr"><h1>Mary Kay</h1><p>Results for Your Records</p></div><div class="body"><p style="font-family:\'Cormorant Garamond\',Georgia,serif;font-size:26px;color:#2a1a20;font-weight:300;margin:0 0 6px;">Dear '+name+',</p><div style="width:40px;height:1px;background:linear-gradient(90deg,#e8507a,#c9a96e);margin:0 0 22px;"></div><p style="font-size:14px;color:#3d2530;line-height:1.9;margin:0 0 16px;">Thank you for taking the time to send me a personal message about your specific skincare goals and/or issues. Although your original product qualification(s) may not be a perfect fit, the link is still included for our records.</p><p style="font-size:14px;color:#3d2530;line-height:1.9;margin:0 0 28px;">I’m looking forward to working with you to achieve your best skin yet!</p><div class="section"><div class="sec-title">Your Original Results</div>'+prodList+'</div><div style="border-top:1px solid #f0e8eb;margin-top:32px;padding-top:24px;"><p style="font-family:\'Cormorant Garamond\',Georgia,serif;font-size:20px;color:#6b3fa0;font-weight:400;margin:0 0 2px;font-style:italic;">Skin-cerely yours,</p><p style="font-family:\'Cormorant Garamond\',Georgia,serif;font-size:17px;color:#2a1a20;margin:0 0 10px;">Hali Sarah Parsons</p><p style="font-size:11px;color:#b09090;margin:0 0 2px;letter-spacing:1px;text-transform:uppercase;">Mary Kay Independent Beauty Consultant</p><p style="font-size:11px;color:#b09090;"><a href="mailto:sistahaymarykay@gmail.com" style="color:#e8507a;text-decoration:none;font-weight:500;">sistahaymarykay@gmail.com</a></p></div></div>');
+  
+  try{
+    if(window.emailjs){
+        await emailjs.send(EJS_SERVICE_ID,EJS_TEMPLATE_ID,{to_email:CONSULTANT_EMAIL,subject:'PERSONAL ASSESSMENT NEEDED',message:consultantHtml,reply_to:email,name:name});
+        await emailjs.send(EJS_SERVICE_ID,EJS_TEMPLATE_ID,{to_email:email,subject:'Results for Your Records ✨',message:customerHtml,reply_to:CONSULTANT_EMAIL,name:'Hali Sarah Parsons'});
+    }
+    closePersonalEmailModal();
+    document.getElementById('pty-name').textContent=name+'!';
+    // Store for PersonalJS script routing
+    try{sessionStorage.setItem('mk_client_name',name);sessionStorage.setItem('mk_client_email',email);}catch(e){}
+    goTo('screen-personal-ty');
+  }catch(e){console.warn(e);btn.textContent='Send to Sarah →';btn.disabled=false;alert('There was an issue sending. Please try again.');}
+}
+
+// #NOTES: =================================================================
+// #NOTES: HELPER TO OPEN NATIVE INBOX APP ON MOBILE
+// #NOTES: Detects Gmail, Yahoo, Apple Mail, etc., and forces device to open it.
+// #NOTES: =================================================================
+function openEmailInbox(){const emailInput=document.getElementById('prof-email');const email=emailInput?emailInput.value.trim().toLowerCase():'';_openInbox(email);}
+function openEmailInboxPersonal(){const email=(document.getElementById('personal-email')||{value:''}).value.trim().toLowerCase();_openInbox(email);}
+function _openInbox(email){const domain=email.split('@')[1]||'';const isMobile=/iPhone|iPad|iPod|Android/i.test(navigator.userAgent);const mS={'gmail.com':'googlegmail://','googlemail.com':'googlegmail://','yahoo.com':'ymail://','ymail.com':'ymail://','outlook.com':'ms-outlook://','hotmail.com':'ms-outlook://','live.com':'ms-outlook://','msn.com':'ms-outlook://','icloud.com':'message://','me.com':'message://','mac.com':'message://'};const wU={'gmail.com':'https://mail.google.com','googlemail.com':'https://mail.google.com','yahoo.com':'https://mail.yahoo.com','ymail.com':'https://mail.yahoo.com','outlook.com':'https://outlook.live.com/mail','hotmail.com':'https://outlook.live.com/mail','live.com':'https://outlook.live.com/mail','msn.com':'https://outlook.live.com/mail','icloud.com':'https://www.icloud.com/mail','me.com':'https://www.icloud.com/mail','mac.com':'https://www.icloud.com/mail','aol.com':'https://mail.aol.com','protonmail.com':'https://mail.proton.me','proton.me':'https://mail.proton.me','att.net':'https://mail.yahoo.com','sbcglobal.net':'https://mail.yahoo.com','comcast.net':'https://login.comcast.net/login','verizon.net':'https://webmail.verizon.net'};if(isMobile&&mS[domain]){window.location.href=mS[domain];setTimeout(function(){if(!document.hidden)window.open(wU[domain]||('https://mail.'+domain),'_blank');},1500);}else{window.open(wU[domain]||('https://mail.'+domain),'_blank');}}
+
+// #NOTES: =================================================================
+// #NOTES: THANK YOU SCREEN SPARKLE ANIMATION
+// #NOTES: Generates random floating gold/pink/white dots behind text.
+// #NOTES: =================================================================
+function initSparkles(screenId){const elId=screenId==='screen-thankyou'?'ty-sparkles':'pty-sparkles';const el=document.getElementById(elId);if(!el||el._done)return;el._done=true;for(var i=0;i<60;i++){var s=document.createElement('div');s.className='hp';s.style.left=(Math.random()*100)+'%';var sz=(Math.random()*3+2)+'px';s.style.width=sz;s.style.height=sz;var col=i%3===0?'#e8507a':i%3===1?'#c9a96e':'#fff';s.style.color=col;s.style.background=col;s.style.boxShadow='0 0 6px '+col;s.style.animationDuration=(Math.random()*10+6)+'s';s.style.animationDelay=(Math.random()*4)+'s';el.appendChild(s);}}
+
+function formatPhone(input){let v=input.value.replace(/\D/g,'');if(v.length>=10)v=v.substring(0,10);if(v.length>6)v='('+v.slice(0,3)+') '+v.slice(3,6)+'-'+v.slice(6);else if(v.length>3)v='('+v.slice(0,3)+') '+v.slice(3);else if(v.length)v='('+v;input.value=v;}
+function updateContactOptions(){document.getElementById('contact-method-other-wrap').style.display=document.getElementById('prof-contact-method').value==='Other'?'block':'none';}
+
+// #NOTES: =================================================================
+// #NOTES: SIGNATURE PAD SYSTEM
+// #NOTES: Native Canvas logic to handle finger touch or mouse drawing.
+// #NOTES: =================================================================
+let sigCanvas,sigCtx,sigDrawing=false,sigHasData=false;
+function initCanvas(){sigCanvas=document.getElementById('sig-canvas');if(!sigCanvas)return;sigCtx=sigCanvas.getContext('2d');const rect=sigCanvas.getBoundingClientRect();sigCanvas.width=rect.width*window.devicePixelRatio;sigCanvas.height=rect.height*window.devicePixelRatio;sigCtx.scale(window.devicePixelRatio,window.devicePixelRatio);sigCtx.strokeStyle='#2a1a20';sigCtx.lineWidth=2;sigCtx.lineCap='round';sigCtx.lineJoin='round';sigCanvas.addEventListener('mousedown',e=>{sigDrawing=true;sigCtx.beginPath();sigCtx.moveTo(e.offsetX,e.offsetY);});sigCanvas.addEventListener('mousemove',e=>{if(!sigDrawing)return;sigCtx.lineTo(e.offsetX,e.offsetY);sigCtx.stroke();sigHasData=true;});sigCanvas.addEventListener('mouseup',()=>sigDrawing=false);sigCanvas.addEventListener('mouseleave',()=>sigDrawing=false);sigCanvas.addEventListener('touchstart',e=>{e.preventDefault();sigDrawing=true;const t=e.touches[0];const r=sigCanvas.getBoundingClientRect();sigCtx.beginPath();sigCtx.moveTo(t.clientX-r.left,t.clientY-r.top);},{passive:false});sigCanvas.addEventListener('touchmove',e=>{e.preventDefault();if(!sigDrawing)return;const t=e.touches[0];const r=sigCanvas.getBoundingClientRect();sigCtx.lineTo(t.clientX-r.left,t.clientY-r.top);sigCtx.stroke();sigHasData=true;},{passive:false});sigCanvas.addEventListener('touchend',()=>sigDrawing=false);}
+function clearSignature(){if(sigCtx&&sigCanvas){sigCtx.clearRect(0,0,sigCanvas.width,sigCanvas.height);sigHasData=false;}}
+
+// #NOTES: Fires if user accepts continuing without a signature.
+function sigModalContinue(){document.getElementById('sig-confirm-modal').classList.remove('active');doSubmitProfile();}
+// #NOTES: Fires if user changes their mind and wants to go back and sign.
+function sigModalBack(){document.getElementById('sig-confirm-modal').classList.remove('active');}
+
+
+// #NOTES: =================================================================
+// #NOTES: FINAL PROFILE / SAMPLE FORM SUBMISSION
+// #NOTES: Handles grabbing all form variables, preparing email data, and sending.
+// #NOTES: =================================================================
+function submitProfile(){
+  var first = document.getElementById('prof-first').value.trim();
+  var last  = document.getElementById('prof-last').value.trim();
+  var email = document.getElementById('prof-email').value.trim();
+  
+  // Validation Gates
+  if(!first||!last){ alert('Please enter your first and last name.'); return; }
+  if(!email||!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)){ alert('Please enter a valid email address.'); return; }
+  
+  // Forces signature popup if skipped
+  if(!sigHasData){
+    document.getElementById('sig-confirm-modal').classList.add('active');
+    return;
+  }
+  
+  doSubmitProfile();
+}
+
+async function doSubmitProfile(){
+  var btn = document.getElementById('profile-submit-btn');
+  btn.textContent = 'Submitting\u2026'; btn.disabled = true;
+  
+  try {
+
+  // Retrieve inputs
+  var first  = document.getElementById('prof-first').value.trim();
+  var last   = document.getElementById('prof-last').value.trim();
+  var name   = first + ' ' + last;
+  var email  = document.getElementById('prof-email').value.trim();
+  var phone  = (document.getElementById('prof-phone')||{value:''}).value.trim();
+  var occ    = (document.getElementById('prof-occ')||{value:''}).value.trim();
+  var bday   = (document.getElementById('prof-bday')||{value:''}).value.trim();
+  var addr   = (document.getElementById('prof-addr')||{value:''}).value.trim();
+  var addr2  = (document.getElementById('prof-addr2')||{value:''}).value.trim();
+  var city   = (document.getElementById('prof-city')||{value:''}).value.trim();
+  var state_s = (document.getElementById('prof-state')||{value:''}).value;
+  var zip    = (document.getElementById('prof-zip')||{value:''}).value.trim();
+  var notes  = (document.getElementById('prof-notes')||{value:''}).value.trim();
+  var wantsOpp = document.getElementById('int-money') && document.getElementById('int-money').checked;
+
+  // Consent selections
+  var consentContact     = document.getElementById('consent-contact') && document.getElementById('consent-contact').checked;
+  var consentData        = document.getElementById('consent-data') && document.getElementById('consent-data').checked;
+  var consentPersonalized= document.getElementById('consent-personalized') && document.getElementById('consent-personalized').checked;
+  var consentProfile     = document.getElementById('consent-profile') && document.getElementById('consent-profile').checked;
+
+  // Sample selections (pulled from dynamically generated checkboxes)
+  var sampleSelections = getSampleSelections();
+  var sampleProdNames = sampleSelections ? sampleSelections.items.map(function(p){return p.name;}).join(', ') : '';
+  var sampleProdLinks = sampleSelections ? sampleSelections.items.map(function(p){return p.url;}).join(', ') : '';
+
+  // Build generated product HTML for the email list (excluding sample-only objects)
+  var tier1 = state.products ? state.products.filter(function(p){return !p.future && !p.sampleOnly;}) : [];
+  var prodListHtml = tier1.length
+    ? tier1.map(function(p){ return '<div style="padding:8px 0;border-bottom:1px solid #f0e8eb;"><a href="'+p.url+'" target="_blank" style="color:#e8507a;text-decoration:none;font-weight:500;">\u2756 '+p.name+'</a></div>'; }).join('')
+    : '<p style="color:#b09090;font-style:italic;">No products on file.</p>';
+
+  // Samples HTML for email listing explicitly requested ones
+  var samplesHtml = sampleSelections && sampleSelections.items.length
+    ? sampleSelections.items.map(function(p){ return '<div style="padding:8px 0;border-bottom:1px solid #f0e8eb;"><a href="'+p.url+'" target="_blank" style="color:#e8507a;text-decoration:none;font-weight:500;">\u2756 '+p.name+'</a></div>'; }).join('')
+    : '<p style="color:#b09090;font-style:italic;">No samples requested.</p>';
+
+  var PERSONALJS = 'https://iqproductionz.com/BackEnd/MaryKay/BrandedEmail/';
+
+  // Capture signature as image data
+  var sigImg = '';
+  try {
+    if(sigCanvas && sigHasData) sigImg = sigCanvas.toDataURL('image/png');
+  } catch(e) { sigImg = ''; }
+
+  // Build consent summary for Consultant's record
+  var consentLines = [];
+  if(consentContact)     consentLines.push('Email updates re: MK products & services');
+  if(consentData)        consentLines.push('SMS/Text messages re: MK products & services');
+  if(consentPersonalized)consentLines.push('Personalized recommendations');
+  if(consentProfile)     consentLines.push('Assessment data used for customer profile');
+  
+  var consentHtml = consentLines.length
+    ? consentLines.map(function(l){ return '<div style="font-size:12px;color:#3d2530;padding:3px 0;">✓ '+l+'</div>'; }).join('')
+    : '<div style="font-size:12px;color:#b09090;font-style:italic;">No consent given</div>';
+    
+  var consentSection = '<div class="section"><div class="sec-title">Customer Consent</div>'+consentHtml
+    +'<div style="margin-top:8px;font-size:11px;color:#b09090;">'
+    +'<a href="https://marykay.com/en/legal/privacy-policy" style="color:#e8507a;text-decoration:none;">View Full Consent Terms</a>'
+    +'</div></div>';
+
+  var sigSection = sigImg
+    ? '<div class="section"><div class="sec-title">Customer Signature</div>'
+      +'<img src="'+sigImg+'" style="max-width:280px;border:1px solid #f0e8eb;border-radius:8px;padding:8px;background:white;display:block;" alt="Customer Signature">'
+      +'</div>'
+    : '<div class="section"><div class="sec-title">Customer Signature</div>'
+      +'<p style="font-size:12px;color:#b09090;font-style:italic;">No signature provided</p></div>';
+
+  // ── CONSULTANT EMAIL TEMPLATE (NO EMOJIS, CLEAN TEXT) ──
+  var consultantBody = emailWrap(
+    '<div class="hdr"><h1>Mary Kay</h1><p>NEW LEAD - SAMPLES REQUESTED</p></div>' +
+    '<div class="body">' +
+      '<div class="section"><div class="sec-title">Client Info</div>' +
+        '<div class="row"><div class="field"><div class="field-lbl">Name</div><div class="field-val">'+name+'</div></div>' +
+        '<div class="field"><div class="field-lbl">Email</div><div class="field-val">'+email+'</div></div></div>' +
+        '<div class="row"><div class="field"><div class="field-lbl">Phone</div><div class="field-val">'+(phone||'\u2014')+'</div></div>' +
+        '<div class="field"><div class="field-lbl">Occupation</div><div class="field-val">'+(occ||'\u2014')+'</div></div></div>' +
+        '<div class="row"><div class="field"><div class="field-lbl">Address</div><div class="field-val">'+addr+(addr2?' '+addr2:'')+', '+city+', '+state_s+' '+zip+'</div></div></div>' +
+        '<div class="row"><div class="field"><div class="field-lbl">Skin Type</div><div class="field-val">'+(state.q1SkinType||'\u2014')+'</div></div>' +
+        '<div class="field"><div class="field-lbl">Skin Concern</div><div class="field-val">'+((state.q1||[])[0]||'\u2014')+'</div></div></div>' +
+        '<div class="row"><div class="field"><div class="field-lbl">Foundation</div><div class="field-val">'+(state.q3Foundation==='Yes'?'Yes \u2013 uses/wants foundation':'No')+'</div></div>' +
+        '<div class="field"><div class="field-lbl">Birthday</div><div class="field-val">'+(bday||'\u2014')+'</div></div></div>' +
+        '<div class="row"><div class="field"><div class="field-lbl">Opp. Interest</div><div class="field-val">'+(wantsOpp?'Yes \u2713':'No')+'</div></div></div>' +
+      '</div>' +
+      '<div class="section"><div class="sec-title">Qualified Products</div>'+prodListHtml+'</div>' +
+      '<div class="section"><div class="sec-title">Samples Requested</div>'+samplesHtml+'</div>' +
+      (notes ? '<div class="section"><div class="sec-title">Additional Notes</div><p style="font-size:14px;color:#3d2530;line-height:1.9;">'+notes+'</p></div>' : '') +
+      consentSection +
+      sigSection +
+      '<div style="border-top:1px solid #f0e8eb;margin-top:24px;padding-top:20px;text-align:center;">' +
+        '<a href="'+PERSONALJS+'" style="color:#e8507a;text-decoration:none;font-size:12px;font-weight:500;">\u2756 Send a Personal Reply via PersonalJS</a>' +
+      '</div>' +
+    '</div>'
+  );
+
+  // Opp section attached to Customer email if they checked the Make Extra Money box
+  var oppSection = wantsOpp
+    ? '<div style="border-top:2px solid #e8507a;margin-top:32px;padding-top:28px;text-align:center;">' +
+        '<div style="font-family:Cormorant Garamond,Georgia,serif;font-size:24px;color:#2a1a20;font-weight:300;margin-bottom:6px;">Ready to Turn Your Passion Into Income?</div>' +
+        '<p style="font-size:13px;color:#8a7a80;line-height:1.8;margin-bottom:20px;">Watch the video below to learn what\u2019s possible with Mary Kay.</p>' +
+        '<a href="https://www.youtube.com/watch?v=lDkwtF-EdpE" target="_blank" style="display:block;max-width:480px;margin:0 auto 20px;border-radius:12px;overflow:hidden;text-decoration:none;">' +
+          '<img src="https://img.youtube.com/vi/lDkwtF-EdpE/hqdefault.jpg" alt="Mary Kay Opportunity" style="display:block;width:100%;border-radius:12px;">' +
+        '</a>' +
+        '<a href="https://iqproductionz.com/MaryKay/Opportunity/" style="display:inline-block;background:linear-gradient(135deg,#e8507a,#c93a62);color:#fff;border-radius:50px;padding:14px 36px;font-size:13px;font-family:Jost,Arial,sans-serif;font-weight:600;letter-spacing:2px;text-transform:uppercase;text-decoration:none;">Become A Consultant \u2192</a>' +
+      '</div>'
+    : '';
+
+  // ── CUSTOMER EMAIL TEMPLATE (Emojis allowed) ──
+  var customerBody = emailWrap(
+    '<div class="hdr"><h1>Mary Kay</h1><p>Your Skincare Qualification Results</p></div>' +
+    '<div class="body">' +
+      '<p style="font-family:Cormorant Garamond,Georgia,serif;font-size:26px;color:#2a1a20;font-weight:300;margin:0 0 6px;">Dear '+first+',</p>' +
+      '<div style="width:40px;height:1px;background:linear-gradient(90deg,#e8507a,#c9a96e);margin:0 0 22px;"></div>' +
+      '<p style="font-size:14px;color:#3d2530;line-height:1.9;margin:0 0 16px;">I am so excited for you! You have just begun the first step to your new self. Initial appearances are marked by our faces and when we are confident behind them, it can really boost our vitality. I will be packaging up the free samples you have requested within the next few days.</p>' +
+      '<p style="font-size:14px;color:#3d2530;line-height:1.9;margin:0 0 16px;">In the meantime, I have included your personalized assessment results compiled into product links for your records. The best part about these selections are that they evolve as your skin does \u2014 with my help! Every step of the way, I can be as involved as you are comfortable with.</p>' +
+      '<p style="font-size:14px;color:#3d2530;line-height:1.9;margin:0 0 28px;">You now have evolving product choices with your personal Mary Kay Beauty Consultant! <strong>Congratulations</strong> \u2014 I look forward to working with you to get your skin glowing and radiant!</p>' +
+      '<div class="section"><div class="sec-title">\u2756 Your Qualification Results</div>'+prodListHtml+'</div>' +
+      '<div style="margin-top:24px;padding:14px 18px;background:#fff8f0;border-left:3px solid #c9a96e;border-radius:8px;font-size:12px;color:#3d2530;line-height:1.8;"><em>Note: It is best to start with a basic routine and reassess your results with me to best serve you.</em></div>' +
+      oppSection +
+      '<div style="border-top:1px solid #f0e8eb;margin-top:32px;padding-top:24px;">' +
+        '<p style="font-family:Cormorant Garamond,Georgia,serif;font-size:20px;color:#6b3fa0;font-weight:400;margin:0 0 2px;font-style:italic;">Skin-cerely yours,</p>' +
+        '<p style="font-family:Cormorant Garamond,Georgia,serif;font-size:17px;color:#2a1a20;margin:0 0 10px;">Hali Sarah Parsons</p>' +
+        '<p style="font-size:11px;color:#b09090;margin:0 0 2px;letter-spacing:1px;text-transform:uppercase;">Mary Kay Independent Beauty Consultant</p>' +
+        '<p style="font-size:11px;color:#b09090;"><a href="mailto:sistahaymarykay@gmail.com" style="color:#e8507a;text-decoration:none;font-weight:500;">sistahaymarykay@gmail.com</a></p>' +
+      '</div>' +
+    '</div>'
+  );
+
+  } catch(err) {
+    console.error('doSubmitProfile error:', err);
+    btn.textContent = 'Submit'; btn.disabled = false;
+    alert('There was an error processing your data: ' + err.message);
+    return;
+  }
+
+  // #NOTES: This immediately moves the user to the Thank You screen so they aren't stuck waiting for the email APIs.
+  var tyEl = document.getElementById('ty-name');
+  if(tyEl) tyEl.textContent = first + '!';
+  goTo('screen-thankyou');
+  btn.textContent = 'Submit'; btn.disabled = false;
+
+  // #NOTES: Actually fires the EmailJS API connection. Done in the background.
+  if(window.emailjs){
+    emailjs.send(EJS_SERVICE_ID, EJS_TEMPLATE_ID, {
+      to_email: CONSULTANT_EMAIL,
+      subject: 'NEW LEAD - SAMPLES REQUESTED - ' + name,
+      message: consultantBody,
+      reply_to: email,
+      name: 'Hali Sarah Parsons'
+    }).then(function(){
+      return emailjs.send(EJS_SERVICE_ID, EJS_TEMPLATE_ID, {
+        to_email: email,
+        subject: 'Sample Request Sent ✈️',
+        message: customerBody,
+        reply_to: CONSULTANT_EMAIL,
+        name: 'Hali Sarah Parsons'
+      });
+    }).catch(function(e){ console.warn('Email send error:', e); });
+  }
+}
+
+// #NOTES: =================================================================
+// #NOTES: "SAVE RESULTS" MODAL EMAIL LOGIC
+// #NOTES: This handles the popup logic if a user simply hits "Save Results" instead of filling out the full profile.
+// #NOTES: =================================================================
+async function sendProgressEmail(){
+  var email = document.getElementById('modal-email').value.trim();
+  var name  = document.getElementById('modal-name').value.trim();
+  if(!email || !name){ alert('Please enter your name and email.'); return; }
+  var btn = document.getElementById('modal-send-btn');
+  btn.textContent = 'Sending…'; btn.disabled = true;
+
+  var prodHtml = state.products && state.products.length
+    ? state.products.filter(function(p){return !p.future && !p.sampleOnly;}).map(function(p){
+        return '<div style="padding:8px 0;border-bottom:1px solid #f0e8eb;">'
+          +'<a href="'+p.url+'" target="_blank" style="color:#e8507a;text-decoration:none;font-weight:500;">❖ '+p.name+'</a>'
+          +(p.note ? '<br><span style="font-size:11px;color:#b09090;font-style:italic;">'+p.note+'</span>' : '')
+          +'</div>';
+      }).join('')
+    : '<p style="color:#b09090;font-style:italic;">No products yet.</p>';
+
+  var html = emailWrap(
+    '<div class="hdr"><h1>Mary Kay</h1><p>Your Qualification Results</p></div>'
+    +'<div class="body">'
+    +'<p style="font-family:Cormorant Garamond,Georgia,serif;font-size:26px;color:#2a1a20;font-weight:300;margin:0 0 22px;">Dear '+name+',</p>'
+    +'<p style="font-size:14px;color:#3d2530;line-height:1.9;margin:0 0 16px;">Here are your qualification results so far. When you complete your assessment, your name gets entered into a drawing for a free product conducted every 1st of the month!</p>'
+    +'<div class="section"><div class="sec-title">Your Results So Far</div>'+prodHtml+'</div>'
+    +'<div style="margin-top:24px;padding:14px 18px;background:#fff8f0;border-left:3px solid #c9a96e;border-radius:8px;font-size:12px;color:#3d2530;line-height:1.8;"><em>Note: It is best to start with a basic routine and reassess your results with me to best serve you.</em></div>'
+    +'<div style="border-top:1px solid #f0e8eb;margin-top:32px;padding-top:24px;">'
+    +'<p style="font-family:Cormorant Garamond,Georgia,serif;font-size:20px;color:#6b3fa0;font-weight:400;margin:0 0 2px;font-style:italic;">Skin-cerely yours,</p>'
+    +'<p style="font-family:Cormorant Garamond,Georgia,serif;font-size:17px;color:#2a1a20;margin:0 0 10px;">Hali Sarah Parsons</p>'
+    +'<p style="font-size:11px;color:#b09090;"><a href="mailto:sistahaymarykay@gmail.com" style="color:#e8507a;text-decoration:none;font-weight:500;">sistahaymarykay@gmail.com</a></p>'
+    +'</div></div>'
+  );
+
+  var consultantSaveHtml = emailWrap(
+    '<div class="hdr"><h1>Mary Kay</h1><p>Saved Results from Product Match</p></div>'
+    +'<div class="body">'
+    +'<div class="section"><div class="sec-title">Customer Info</div>'
+    +'<div class="row"><div class="field"><div class="field-lbl">Name</div><div class="field-val">'+name+'</div></div>'
+    +'<div class="field"><div class="field-lbl">Email</div><div class="field-val">'+email+'</div></div></div></div>'
+    +'<div class="section"><div class="sec-title">Assessment Answers</div>'
+    +'<div class="row"><div class="field"><div class="field-lbl">Skin Type</div><div class="field-val">'+(state.q1SkinType||'—')+'</div></div>'
+    +'<div class="field"><div class="field-lbl">Skin Concern</div><div class="field-val">'+((state.q1||[])[0]||'—')+'</div></div></div></div>'
+    +'<div class="section"><div class="sec-title">Results So Far</div>'+prodHtml+'</div>'
+    +'<div style="border-top:1px solid #f0e8eb;margin-top:24px;padding-top:20px;text-align:center;">'
+    +'<a href="https://iqproductionz.com/BackEnd/MaryKay/BrandedEmail/" style="color:#e8507a;text-decoration:none;font-size:12px;font-weight:500;">❖ Send a Personal Reply via PersonalJS</a>'
+    +'</div></div>'
+  );
+
+  if(window.emailjs){
+    emailjs.send(EJS_SERVICE_ID, EJS_TEMPLATE_ID, {
+      to_email: email,
+      subject: 'Your Saved Results 🌺',
+      message: html,
+      reply_to: CONSULTANT_EMAIL,
+      name: 'Hali Sarah Parsons'
+    }).then(function(){
+      return emailjs.send(EJS_SERVICE_ID, EJS_TEMPLATE_ID, {
+        to_email: CONSULTANT_EMAIL,
+        subject: 'Saved Results from Product Match - ' + name,
+        message: consultantSaveHtml,
+        reply_to: email,
+        name: 'Hali Sarah Parsons'
+      });
+    }).then(function(){
+      document.getElementById('email-modal').classList.remove('active');
+      alert('✓ Results Saved! Check your email.');
+    }).catch(function(e){
+      console.warn(e);
+      btn.textContent = 'Send';
+      btn.disabled = false;
+      alert('Error sending. Please try again.');
+    });
+  } else {
+    document.getElementById('email-modal').classList.remove('active');
+    alert('✓ Results noted! (Email service not loaded)');
+  }
+}
+
+function openEmailModal(){ document.getElementById('email-modal').classList.add('active'); }
+function closeEmailModal(){ document.getElementById('email-modal').classList.remove('active'); }
+function sendModalEmail(){ sendProgressEmail(); }
+function openConsentTerms(){ alert("For complete consent information, please visit marykay.com/en/legal/privacy-policy"); }
+function backFromResults(){ goTo('screen-q3'); }
+
+// #NOTES: Selects all consent checkboxes if user hits "Select All"
+function toggleAllConsent(master){
+  var ids=['consent-contact','consent-data','consent-personalized','consent-profile'];
+  ids.forEach(function(id){
+    var el=document.getElementById(id);
+    if(el){ el.checked=master.checked; el.dispatchEvent(new Event('change')); }
+  });
+}
+
+// #NOTES: =================================================================
+// #NOTES: DYNAMIC SAMPLE DROPDOWN LOGIC
+// #NOTES: Populates the dropdown based on what the user qualified for in State.
+// #NOTES: =================================================================
+function toggleSampleDropdown(){
+  var body=document.getElementById('sample-dropdown-body');
+  var arrow=document.getElementById('sample-arrow');
+  if(!body||!arrow)return;
+  var open=body.style.display!=='none';
+  body.style.display=open?'none':'block';
+  arrow.style.transform=open?'':'rotate(90deg)';
+  if(!open)buildSampleProductList();
+}
+
+function buildSampleProductList(){
+  var container=document.getElementById('sample-product-list');
+  if(!container)return;
+  container.innerHTML='';
+  
+  // Excludes future-only products, but includes everything else (even sampleOnly items)
+  var prods=(typeof state!=='undefined'&&state.products)?state.products.filter(function(p){return !p.future;}):[];
+  
+  if(!prods.length){container.innerHTML='<p style="font-size:13px;color:var(--gray);font-style:italic;">Complete your assessment first to see your products here.</p>';return;}
+  
+  prods.forEach(function(p,idx){
+    var chip=document.createElement('div');
+    chip.style.cssText='display:flex;align-items:center;gap:10px;padding:10px 14px;border:1.5px solid #e8d5db;border-radius:10px;cursor:pointer;background:white;transition:all 0.2s;';
+    chip.innerHTML='<input type="checkbox" id="sample-chk-'+idx+'" data-name="'+p.name+'" data-url="'+p.url+'" style="accent-color:#e8507a;width:16px;height:16px;cursor:pointer;"><label for="sample-chk-'+idx+'" style="font-size:13px;color:#3d2530;cursor:pointer;line-height:1.4;">'+p.name+'</label>';
+    // Logic for checking/unchecking a sample option
+    chip.querySelector('input').addEventListener('change',function(){
+      chip.style.background=this.checked?'#fce4ec':'white';
+      chip.style.borderColor=this.checked?'#e8507a':'#e8d5db';
+    });
+    container.appendChild(chip);
+  });
+}
+
+function getSampleSelections(){
+  var checked=document.querySelectorAll('#sample-product-list input[type=checkbox]:checked');
+  if(!checked.length)return null;
+  var items=[];
+  checked.forEach(function(ch){items.push({name:ch.dataset.name,url:ch.dataset.url});});
+  return {items:items};
+}
+
+
+// #NOTES: =================================================================
+// #NOTES: CITY / ZIP AUTO-POPULATE DATABASE
+// #NOTES: Massive object listing U.S. states and top cities/zips so users don't have to manually type them.
+// #NOTES: =================================================================
+const STATE_CITIES = {"AL": ["Anniston:36201", "Auburn:36830", "Birmingham:35203", "Decatur:35601", "Dothan:36301", "Florence:35630", "Gadsden:35901", "Hoover:35216", "Huntsville:35801", "Mobile:36602", "Montgomery:36104", "Tuscaloosa:35401"], "AK": ["Anchorage:99501", "Badger:99705", "College:99701", "Fairbanks:99701", "Juneau:99801", "Ketchikan:99901", "Sitka:99835", "Wasilla:99654"], "AZ": ["Avondale:85323", "Buckeye:85326", "Casa Grande:85122", "Chandler:85224", "Flagstaff:86001", "Gilbert:85234", "Glendale:85301", "Goodyear:85338", "Maricopa:85138", "Mesa:85201", "Peoria:85345", "Phoenix:85001", "Scottsdale:85251", "Surprise:85374", "Tempe:85281", "Tucson:85701", "Yuma:85364"], "AR": ["Conway:72032", "Fayetteville:72701", "Fort Smith:72901", "Jonesboro:72401", "Little Rock:72201", "North Little Rock:72114", "Pine Bluff:71601", "Springdale:72764"], "CA": ["Anaheim:92801", "Bakersfield:93301", "Chula Vista:91910", "Compton:90220", "Concord:94519", "Corona:92879", "Elk Grove:95624", "Escondido:92025", "Fontana:92335", "Fremont:94536", "Fresno:93701", "Fullerton:92831", "Garden Grove:92840", "Glendale:91201", "Hayward:94541", "Huntington Beach:92646", "Inglewood:90301", "Irvine:92614", "Lancaster:93534", "Long Beach:90801", "Los Angeles:90001", "Modesto:95351", "Moreno Valley:92553", "Oakland:94601", "Oceanside:92054", "Ontario:91761", "Orange:92856", "Oxnard:93030", "Palmdale:93550", "Pasadena:91101", "Pomona:91766", "Rancho Cucamonga:91730", "Riverside:92501", "Sacramento:94203", "Salinas:93901", "San Bernardino:92401", "San Diego:92101", "San Francisco:94102", "San Jose:95101", "Santa Ana:92701", "Santa Clarita:91350", "Santa Rosa:95401", "Simi Valley:93065", "Stockton:95201", "Sunnyvale:94085", "Torrance:90501", "Vallejo:94589", "Victorville:92392", "Visalia:93277"], "CO": ["Arvada:80001", "Aurora:80010", "Boulder:80301", "Broomfield:80021", "Castle Rock:80104", "Colorado Springs:80901", "Denver:80201", "Fort Collins:80521", "Greeley:80631", "Lakewood:80226", "Longmont:80501", "Loveland:80537", "Pueblo:81001", "Westminster:80030"], "CT": ["Bridgeport:06601", "Bristol:06010", "Danbury:06810", "Hartford:06101", "Meriden:06450", "Middletown:06457", "New Britain:06050", "New Haven:06501", "Norwalk:06850", "Stamford:06901", "Waterbury:06701"], "DE": ["Dover:19901", "Middletown:19709", "Newark:19711", "Wilmington:19801"], "FL": ["Boca Raton:33427", "Boynton Beach:33435", "Bradenton:34201", "Cape Coral:33901", "Clearwater:33755", "Coral Springs:33065", "Davie:33314", "Daytona Beach:32114", "Fort Lauderdale:33301", "Fort Myers:33901", "Gainesville:32601", "Hialeah:33010", "Hollywood:33019", "Jacksonville:32099", "Lakeland:33801", "Miramar:33023", "Miami:33101", "Naples:34101", "Orlando:32801", "Palm Bay:32905", "Pembroke Pines:33024", "Pensacola:32501", "Port St. Lucie:34952", "Pompano Beach:33060", "St. Petersburg:33701", "Tallahassee:32301", "Tampa:33601", "West Palm Beach:33401"], "GA": ["Albany:31701", "Athens:30601", "Atlanta:30301", "Augusta:30901", "Columbus:31901", "Macon:31201", "Marietta:30060", "Roswell:30075", "Savannah:31401", "South Fulton:30349", "Warner Robins:31088"], "HI": ["Hilo:96720", "Honolulu:96801", "Kailua:96734", "Kaneohe:96744", "Pearl City:96782", "Waipahu:96797"], "ID": ["Boise:83701", "Caldwell:83605", "Coeur d'Alene:83814", "Idaho Falls:83401", "Meridian:83642", "Nampa:83651", "Pocatello:83201", "Twin Falls:83301"], "IL": ["Aurora:60505", "Chicago:60601", "Elgin:60120", "Joliet:60431", "Naperville:60540", "Peoria:61601", "Rockford:61101", "Springfield:62701", "Waukegan:60085"], "IN": ["Anderson:46011", "Bloomington:47401", "Carmel:46032", "Evansville:47701", "Fort Wayne:46801", "Gary:46401", "Indianapolis:46201", "Muncie:47302", "South Bend:46601", "Terre Haute:47801"], "IA": ["Ames:50010", "Cedar Rapids:52401", "Council Bluffs:51501", "Davenport:52801", "Des Moines:50301", "Dubuque:52001", "Iowa City:52240", "Sioux City:51101", "Waterloo:50701"], "KS": ["Kansas City:66101", "Lawrence:66044", "Olathe:66061", "Overland Park:66204", "Salina:67401", "Topeka:66601", "Wichita:67201"], "KY": ["Bowling Green:42101", "Covington:41011", "Frankfort:40601", "Lexington:40502", "Louisville:40201", "Owensboro:42301", "Paducah:42001"], "LA": ["Baton Rouge:70801", "Kenner:70062", "Lafayette:70501", "Lake Charles:70601", "Metairie:70001", "Monroe:71201", "New Orleans:70112", "Shreveport:71101"], "ME": ["Auburn:04210", "Augusta:04330", "Bangor:04401", "Lewiston:04240", "Portland:04101"], "MD": ["Annapolis:21401", "Baltimore:21201", "Bowie:20715", "Frederick:21701", "Gaithersburg:20877", "Rockville:20850", "Salisbury:21801"], "MA": ["Boston:02101", "Brockton:02301", "Cambridge:02138", "Fall River:02720", "Lowell:01851", "New Bedford:02740", "Newton:02458", "Quincy:02169", "Springfield:01101", "Worcester:01601"], "MI": ["Ann Arbor:48104", "Dearborn:48120", "Detroit:48201", "Flint:48501", "Grand Rapids:49501", "Kalamazoo:49001", "Lansing:48901", "Livonia:48150", "Sterling Heights:48310", "Warren:48088"], "MN": ["Bloomington:55420", "Brooklyn Park:55443", "Duluth:55801", "Minneapolis:55401", "Plymouth:55441", "Rochester:55901", "St. Paul:55101"], "MS": ["Biloxi:39530", "Gulfport:39501", "Hattiesburg:39401", "Jackson:39201", "Meridian:39301", "Southaven:38671", "Tupelo:38801"], "MO": ["Columbia:65201", "Independence:64050", "Jefferson City:65101", "Kansas City:64101", "Springfield:65801", "St. Joseph:64501", "St. Louis:63101"], "MT": ["Billings:59101", "Bozeman:59715", "Butte:59701", "Great Falls:59401", "Missoula:59801"], "NE": ["Bellevue:68005", "Grand Island:68801", "Lincoln:68501", "Omaha:68101"], "NV": ["Carson City:89701", "Henderson:89002", "Las Vegas:89101", "North Las Vegas:89030", "Reno:89501", "Sparks:89431"], "NH": ["Concord:03301", "Dover:03820", "Manchester:03101", "Nashua:03060"], "NJ": ["Camden:08101", "Edison:08817", "Elizabeth:07201", "Jersey City:07302", "Newark:07101", "Paterson:07501", "Trenton:08601", "Woodbridge:07095"], "NM": ["Albuquerque:87101", "Las Cruces:88001", "Rio Rancho:87124", "Santa Fe:87501"], "NY": ["Albany:12201", "Brooklyn:11201", "Buffalo:14201", "Manhattan:10001", "Queens:11101", "Rochester:14601", "Staten Island:10301", "Syracuse:13201", "White Plains:10601", "Yonkers:10701"], "NC": ["Asheville:28801", "Cary:27511", "Charlotte:28201", "Durham:27701", "Fayetteville:28301", "Greensboro:27401", "High Point:27260", "Raleigh:27601", "Wilmington:28401", "Winston-Salem:27101"], "ND": ["Bismarck:58501", "Fargo:58102", "Grand Forks:58201", "Minot:58701"], "OH": ["Akron:44301", "Cincinnati:45201", "Cleveland:44101", "Columbus:43201", "Dayton:45401", "Toledo:43601", "Youngstown:44501"], "OK": ["Broken Arrow:74011", "Edmond:73003", "Lawton:73501", "Moore:73160", "Norman:73069", "Oklahoma City:73101", "Tulsa:74101"], "OR": ["Bend:97701", "Eugene:97401", "Gresham:97030", "Hillsboro:97123", "Medford:97501", "Portland:97201", "Salem:97301"], "PA": ["Allentown:18101", "Erie:16501", "Philadelphia:19101", "Pittsburgh:15201", "Reading:19601", "Scranton:18501"], "RI": ["Cranston:02910", "Pawtucket:02860", "Providence:02901", "Warwick:02886", "Woonsocket:02895"], "SC": ["Charleston:29401", "Columbia:29201", "Florence:29501", "Greenville:29601", "Rock Hill:29730", "Spartanburg:29301"], "SD": ["Aberdeen:57401", "Rapid City:57701", "Sioux Falls:57101"], "TN": ["Chattanooga:37401", "Clarksville:37040", "Jackson:38301", "Johnson City:37601", "Knoxville:37901", "Memphis:38101", "Murfreesboro:37129", "Nashville:37201"], "TX": ["Abilene:79601", "Allen:75002", "Amarillo:79101", "Arlington:76010", "Austin:78701", "Beaumont:77701", "Brownsville:78520", "Carrollton:75006", "Corpus Christi:78401", "Dallas:75201", "Denton:76201", "El Paso:79901", "Fort Worth:76101", "Frisco:75034", "Garland:75040", "Grand Prairie:75050", "Houston:77001", "Irving:75061", "Killeen:76541", "Laredo:78040", "League City:77573", "Lewisville:75029", "Lubbock:79401", "McAllen:78501", "McKinney:75069", "Mesquite:75149", "Midland:79701", "Odessa:79761", "Pasadena:77501", "Pearland:77581", "Plano:75023", "Round Rock:78664", "San Antonio:78201", "Sugar Land:77478", "Tyler:75701", "Waco:76701", "Wichita Falls:76301"], "UT": ["Layton:84041", "Ogden:84401", "Orem:84057", "Provo:84601", "Salt Lake City:84101", "Sandy:84070", "St. George:84770", "West Jordan:84084", "West Valley City:84120"], "VT": ["Burlington:05401", "Montpelier:05601", "Rutland:05701"], "VA": ["Alexandria:22301", "Arlington:22201", "Chesapeake:23320", "Hampton:23661", "Newport News:23601", "Norfolk:23501", "Portsmouth:23701", "Richmond:23219", "Roanoke:24001", "Virginia Beach:23450"], "WA": ["Bellevue:98004", "Bellingham:98225", "Everett:98201", "Kent:98031", "Kirkland:98033", "Renton:98055", "Seattle:98101", "Spokane:99201", "Tacoma:98401", "Vancouver:98660", "Yakima:98901"], "WV": ["Charleston:25301", "Huntington:25701", "Morgantown:26501", "Parkersburg:26101"], "WI": ["Appleton:54911", "Green Bay:54301", "Kenosha:53140", "Madison:53701", "Milwaukee:53201", "Racine:53401"], "WY": ["Casper:82601", "Cheyenne:82001", "Gillette:82716", "Laramie:82070"], "DC": ["Washington:20001"]};
+var cityZipMap = {};
+
+function onStateChange(){
+  const st = document.getElementById('prof-state').value;
+  const citySelect = document.getElementById('prof-city');
+  const zipInput   = document.getElementById('prof-zip');
+  const addrSec    = document.getElementById('addr-section');
+  cityZipMap = {}; // reset
+  zipInput.value = '';
+  
+  citySelect.innerHTML = '<option value="">-- Select City --</option>';
+  if(!st){ citySelect.disabled=true; citySelect.innerHTML='<option value="">-- Select State First --</option>'; return; }
+  
+  const entries = (STATE_CITIES[st]||[]);
+  entries.forEach(e => {
+    const [city, zip] = e.split(':');
+    cityZipMap[city] = zip;
+  });
+  
+  const sorted = Object.keys(cityZipMap).sort();
+  citySelect.innerHTML = '<option value="">-- Select City --</option>' +
+    sorted.map(c=>`<option value="${c}">${c}</option>`).join('');
+  citySelect.disabled = false;
+}
+
+function onCityChange(){
+  const city     = document.getElementById('prof-city').value;
+  const zipInput = document.getElementById('prof-zip');
+  
+  // Set zip code automatically based on city chosen
+  zipInput.value = city ? (cityZipMap[city]||'') : '';
+}
+
+</script>
+</body>
+</html>

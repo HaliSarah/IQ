@@ -1,0 +1,749 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Haligricity — The Practice of Wholeness</title>
+<meta name="description" content="Haligricity. From halig (whole, healed) and the living current of practice. A new synthesis of body, breath, sound, movement, eating, and connection — rooted in many traditions, named anew.">
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700&family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
+<script>emailjs.init("3vNjQbWmqzzOO6IK");</script>
+<style>
+  :root {
+    --bg:          #FFFDF0;
+    --bg-soft:     #FFFAEC;
+    --gold:        #C9A227;
+    --gold-mid:    #DAA520;
+    --gold-border: #B8860B;
+    --gold-light:  #FFF8DC;
+    --gold-pale:   #FFFAEC;
+    --purple:      #4A1060;
+    --purple-mid:  #6B2D8E;
+    --purple-light:#EDE0F5;
+    --purple-soft: #C9A8E0;
+    --ink:         #1A1A1A;
+    --gray:        #555;
+    --gray-light:  #888;
+    --line:        #EEE8D0;
+  }
+  * { box-sizing:border-box; margin:0; padding:0; }
+  body {
+    font-family: Georgia, 'Cormorant Garamond', serif;
+    background: var(--bg);
+    color: var(--ink);
+    min-height: 100vh;
+    padding-bottom: 60px;
+  }
+  a { color: var(--purple); }
+
+  /* TOP NAV */
+  .top-nav {
+    display:flex; justify-content:space-between; align-items:center;
+    padding:14px 22px;
+    background:#fff; border-bottom:1.5px solid var(--gold-border);
+    position:sticky; top:0; z-index:60;
+  }
+  .top-nav .crumbs {
+    font-family:'Cinzel',serif; font-size:11px; letter-spacing:2px;
+    color:var(--gold-border); text-transform:uppercase;
+  }
+  .top-nav .crumbs strong { color:var(--purple); }
+  .nav-home {
+    padding:7px 16px; border:1.5px solid var(--gold-border); border-radius:6px;
+    background:transparent; color:var(--gold-border);
+    font-family:'Cinzel',serif; font-size:11px; letter-spacing:1.5px;
+    text-transform:uppercase; text-decoration:none; transition:all .2s;
+  }
+  .nav-home:hover { background:var(--purple); color:#fff; border-color:var(--purple); }
+
+  /* HERO */
+  .hero {
+    text-align:center;
+    padding: 64px 24px 40px;
+    border-bottom:1.5px solid var(--gold-border);
+    background: linear-gradient(180deg, #FFFAEC 0%, #FFFDF0 100%);
+    position:relative; overflow:hidden;
+  }
+  .hero::before {
+    content:''; position:absolute; inset:0;
+    background: radial-gradient(circle at 50% 0%, rgba(201,162,39,0.10) 0%, transparent 60%);
+    pointer-events:none;
+  }
+  .symbol-wrap {
+    width:88px; height:88px;
+    margin:0 auto 26px;
+    position:relative;
+    z-index:1;
+  }
+  .symbol-glow {
+    position:absolute; inset:-14px;
+    border-radius:50%;
+    background: radial-gradient(circle, rgba(201,162,39,0.28) 0%, transparent 70%);
+    animation: pulse 3.5s ease-in-out infinite;
+  }
+  /* WHY: logo rotated 45deg everywhere per spec */
+  .symbol-svg {
+    width:100%; height:100%;
+    position:relative;
+    transform: rotate(45deg);
+    filter: drop-shadow(0 0 10px rgba(201,162,39,0.4));
+  }
+  @keyframes pulse {
+    0%,100% { transform: scale(1); opacity: .55; }
+    50%     { transform: scale(1.15); opacity: 1; }
+  }
+  .hero .eyebrow {
+    font-family:'Cinzel',serif; font-size:10px; letter-spacing:.4em;
+    color:var(--gold-border); text-transform:uppercase; margin-bottom:14px;
+  }
+  .hero h1 {
+    font-family:'Cinzel',serif; font-weight:600;
+    font-size:clamp(1.9rem, 4.8vw, 2.8rem);
+    color:var(--purple); letter-spacing:0.06em;
+    margin-bottom:14px;
+  }
+  .hero .tagline {
+    font-style:italic; color:var(--gray);
+    font-size:1.05rem; max-width:520px; margin:0 auto 8px;
+    line-height:1.6;
+  }
+  .hero .pronounce {
+    font-size:.85rem; color:var(--gold-border); letter-spacing:.08em;
+    margin-top:14px; font-family:'Cinzel',serif; text-transform:uppercase;
+  }
+
+  /* SECTION FRAME */
+  .wrap { max-width: 880px; margin: 0 auto; padding: 0 22px; }
+  section { margin-top: 56px; }
+  .section-eyebrow {
+    font-family:'Cinzel',serif; font-size:10px; letter-spacing:.35em;
+    color:var(--gold-border); text-transform:uppercase; margin-bottom:8px;
+    text-align:center;
+  }
+  .section-title {
+    font-family:'Cinzel',serif; font-weight:600;
+    font-size:clamp(1.4rem, 3.5vw, 1.9rem);
+    color:var(--purple); text-align:center; margin-bottom:6px;
+    letter-spacing:.04em;
+  }
+  .section-sub {
+    text-align:center; color:var(--gray); font-style:italic;
+    font-size:.98rem; max-width:540px; margin:0 auto 28px; line-height:1.6;
+  }
+  .gold-divider {
+    width:60px; height:2px;
+    background:linear-gradient(90deg,transparent,var(--gold),transparent);
+    margin:14px auto 28px;
+  }
+
+  /* ETYMOLOGY CARDS */
+  .ety-card {
+    background:#fff; border:1.5px solid var(--gold-border);
+    border-radius:14px; padding:32px 28px; margin-bottom:18px;
+    box-shadow:0 2px 14px rgba(180,140,0,.07);
+    position:relative;
+  }
+  .ety-card::before {
+    content:''; position:absolute; top:0; left:24px; right:24px; height:2px;
+    background:linear-gradient(90deg,transparent,var(--gold),transparent);
+  }
+  .ety-card h3 {
+    font-family:'Cinzel',serif; color:var(--purple);
+    font-size:1.05rem; letter-spacing:.05em; font-weight:600;
+    margin-bottom:10px; text-transform:uppercase;
+  }
+  .ety-card h3 .greek { font-style:italic; color:var(--gold-border); font-weight:400; margin-left:8px; }
+  .ety-card p { font-size:1rem; line-height:1.75; color:var(--ink); margin-bottom:10px; }
+  .ety-card p:last-child { margin-bottom:0; }
+  .ety-card strong { color:var(--purple); }
+  .ety-card em { color:var(--gold-border); }
+  .root-chain {
+    display:flex; flex-wrap:wrap; align-items:center; justify-content:center;
+    gap:10px; margin:18px 0 10px; font-family:'Cinzel',serif; font-size:.85rem;
+    letter-spacing:.1em; text-transform:uppercase; color:var(--gold-border);
+  }
+  .root-chain span.word { background:var(--gold-pale); border:1px solid var(--gold-border);
+    padding:6px 14px; border-radius:20px; color:var(--purple); }
+  .root-chain span.arrow { color:var(--gold-mid); font-size:1.1rem; }
+
+  /* TWO-COL TERM CARDS */
+  .term-grid {
+    display:grid; grid-template-columns:repeat(auto-fit, minmax(320px, 1fr));
+    gap:18px;
+  }
+  .term-card {
+    background:var(--purple); color:#fff;
+    border-radius:16px; padding:30px 26px; position:relative; overflow:hidden;
+    border:2px solid var(--gold-border);
+  }
+  .term-card::before {
+    content:''; position:absolute; top:-30px; right:-30px;
+    width:120px; height:120px; border-radius:50%;
+    background: radial-gradient(circle, rgba(201,162,39,0.35) 0%, transparent 70%);
+  }
+  .term-card .badge {
+    font-family:'Cinzel',serif; font-size:.7rem; letter-spacing:.18em;
+    text-transform:uppercase; color:var(--purple-soft); margin-bottom:10px;
+  }
+  .term-card h3 {
+    font-family:'Cinzel',serif; font-size:1.8rem; font-weight:400;
+    margin-bottom:8px; letter-spacing:.04em;
+  }
+  .term-card .build {
+    font-style:italic; color:var(--purple-soft); font-size:.92rem;
+    margin-bottom:14px; padding-bottom:14px;
+    border-bottom:1px solid rgba(201,168,224,.3);
+  }
+  .term-card p { font-size:.98rem; line-height:1.75; color:rgba(255,255,255,.92); }
+
+  /* PRACTICE CARDS */
+  .practice-grid {
+    display:grid; grid-template-columns:repeat(auto-fit, minmax(240px, 1fr));
+    gap:16px;
+  }
+  .practice-card {
+    background:#fff; border:1.5px solid var(--gold-border); border-radius:12px;
+    padding:24px 22px; text-decoration:none; color:var(--ink);
+    transition:all .25s ease; position:relative; overflow:hidden;
+    display:flex; flex-direction:column; gap:8px;
+  }
+  .practice-card::before {
+    content:''; position:absolute; top:0; left:0; right:0; height:3px;
+    background:linear-gradient(90deg, var(--gold), var(--purple-mid));
+    opacity:.6; transition:opacity .25s ease;
+  }
+  .practice-card:hover {
+    transform:translateY(-3px); border-color:var(--purple-mid);
+    box-shadow:0 6px 22px rgba(74,16,96,.18);
+  }
+  .practice-card:hover::before { opacity:1; }
+  .practice-mini-sym {
+    width:34px; height:34px; margin-bottom:6px;
+    transform: rotate(45deg);
+  }
+  .practice-card h4 {
+    font-family:'Cinzel',serif; color:var(--purple);
+    font-size:.95rem; letter-spacing:.06em; text-transform:uppercase;
+    font-weight:600;
+  }
+  .practice-card p { font-size:.88rem; color:var(--gray); line-height:1.6; }
+  .practice-card .go {
+    margin-top:auto; padding-top:10px;
+    font-family:'Cinzel',serif; font-size:.72rem; letter-spacing:.15em;
+    text-transform:uppercase; color:var(--gold-border);
+  }
+
+  /* VISHNU MUDRA */
+  .vishnu {
+    display:grid; grid-template-columns:1fr 1.4fr; gap:30px;
+    background:#fff; border:1.5px solid var(--gold-border); border-radius:14px;
+    padding:30px; align-items:center;
+    box-shadow:0 2px 14px rgba(180,140,0,.07);
+  }
+  @media(max-width:640px) { .vishnu { grid-template-columns:1fr; } }
+  .vishnu .img-frame {
+    background:var(--gold-pale); border:1px solid var(--gold-border);
+    border-radius:10px; padding:12px; text-align:center;
+  }
+  .vishnu .img-frame img {
+    max-width:100%; height:auto; border-radius:6px;
+    display:block; margin:0 auto;
+  }
+  .vishnu .img-frame .caption {
+    font-family:'Cinzel',serif; font-size:.7rem; letter-spacing:.15em;
+    text-transform:uppercase; color:var(--gold-border); margin-top:10px;
+  }
+  .vishnu h3 {
+    font-family:'Cinzel',serif; color:var(--purple);
+    font-size:1.15rem; letter-spacing:.05em; text-transform:uppercase;
+    margin-bottom:10px; font-weight:600;
+  }
+  .vishnu p { font-size:.98rem; line-height:1.7; color:var(--ink); margin-bottom:12px; }
+
+  /* DOWNLOAD BUTTON */
+  .dl-btn, .download-link {
+    display:inline-flex; align-items:center; gap:8px;
+    padding:10px 20px;
+    background:linear-gradient(135deg, var(--gold) 0%, var(--gold-mid) 100%);
+    border:none; border-radius:6px; color:#fff;
+    font-family:'Cinzel',serif; font-size:.78rem; letter-spacing:.13em;
+    text-transform:uppercase; cursor:pointer; text-decoration:none;
+    transition:all .2s; box-shadow:0 3px 10px rgba(184,134,11,.25);
+  }
+  .dl-btn:hover, .download-link:hover {
+    transform:translateY(-1px);
+    box-shadow:0 5px 16px rgba(184,134,11,.4);
+  }
+  .dl-btn.purple, .download-link.purple {
+    background:var(--purple);
+  }
+  .dl-btn.purple:hover, .download-link.purple:hover {
+    background:var(--purple-mid);
+  }
+  .dl-btn .arrow { font-size:.9rem; }
+
+  /* BOOKS GRID */
+  .books-grid {
+    display:grid; grid-template-columns:repeat(auto-fit, minmax(260px, 1fr));
+    gap:16px;
+  }
+  .book-card {
+    background:#fff; border:1.5px solid var(--gold-border); border-radius:12px;
+    padding:22px 20px; display:flex; flex-direction:column; gap:8px;
+    position:relative; overflow:hidden;
+  }
+  .book-card::before {
+    content:''; position:absolute; top:0; left:0; bottom:0; width:4px;
+    background: linear-gradient(180deg, var(--gold), var(--purple-mid));
+  }
+  .book-card .tag {
+    align-self:flex-start; font-family:'Cinzel',serif; font-size:.65rem;
+    letter-spacing:.12em; text-transform:uppercase;
+    padding:3px 9px; border-radius:20px; margin-bottom:4px;
+    background:var(--gold-pale); color:var(--gold-border); border:1px solid var(--gold-border);
+  }
+  .book-card .tag.draft { background:var(--purple-light); color:var(--purple); border-color:var(--purple-mid); }
+  .book-card h4 {
+    font-family:'Cinzel',serif; color:var(--purple); font-size:1.05rem;
+    letter-spacing:.04em; font-weight:600; line-height:1.3;
+  }
+  .book-card p { font-size:.9rem; color:var(--gray); line-height:1.65; }
+  .book-card .meta { font-size:.78rem; color:var(--gold-border); font-style:italic; margin-top:auto; padding-top:8px; }
+
+  /* REGION GRID (food guide + history) */
+  .region-grid {
+    display:grid; grid-template-columns:repeat(auto-fit, minmax(220px, 1fr));
+    gap:14px;
+  }
+  .region-card {
+    background:#fff; border:1.5px solid var(--gold-border); border-radius:10px;
+    padding:18px 18px 16px; transition:all .2s;
+    display:flex; flex-direction:column; gap:6px;
+  }
+  .region-card:hover {
+    border-color:var(--purple-mid);
+    box-shadow:0 4px 14px rgba(74,16,96,.12);
+  }
+  .region-card .area {
+    font-family:'Cinzel',serif; font-size:.7rem; letter-spacing:.12em;
+    text-transform:uppercase; color:var(--gold-border);
+  }
+  .region-card .place {
+    font-family:'Cinzel',serif; color:var(--purple);
+    font-size:1.05rem; letter-spacing:.03em; font-weight:600;
+  }
+  .region-card a.download-mini {
+    margin-top:8px; align-self:flex-start;
+    font-family:'Cinzel',serif; font-size:.72rem; letter-spacing:.12em;
+    text-transform:uppercase; color:var(--gold-border); text-decoration:none;
+    padding:6px 12px; border:1px solid var(--gold-border); border-radius:6px;
+    transition:all .2s;
+  }
+  .region-card a.download-mini:hover {
+    background:var(--purple); color:#fff; border-color:var(--purple);
+  }
+
+  .history-grid {
+    display:grid; grid-template-columns:repeat(auto-fit, minmax(240px, 1fr));
+    gap:14px;
+  }
+
+  /* REQUEST FORM */
+  .request-form {
+    background:#fff; border:1.5px solid var(--gold-border); border-radius:14px;
+    padding:28px 26px; margin-top:24px;
+  }
+  .request-form h3 {
+    font-family:'Cinzel',serif; color:var(--purple);
+    font-size:1.05rem; letter-spacing:.06em; text-transform:uppercase;
+    font-weight:600; margin-bottom:6px;
+  }
+  .request-form .form-sub { font-size:.92rem; color:var(--gray); margin-bottom:18px; font-style:italic; line-height:1.6; }
+  .request-form label {
+    display:block; font-family:'Cinzel',serif; font-size:.72rem;
+    letter-spacing:.15em; text-transform:uppercase; color:var(--gold-border);
+    margin-bottom:6px;
+  }
+  .request-form input, .request-form textarea {
+    width:100%; padding:11px 14px; border:1.5px solid var(--gold-border);
+    border-radius:8px; background:var(--gold-pale); font-family:Georgia,serif;
+    font-size:.95rem; color:var(--ink); margin-bottom:14px;
+    transition:border-color .2s, background .2s;
+    outline:none;
+  }
+  .request-form input:focus, .request-form textarea:focus {
+    border-color:var(--purple); background:#fff;
+  }
+  .request-form textarea { min-height:90px; resize:vertical; }
+  .request-form .row { display:grid; grid-template-columns:1fr 1fr; gap:14px; }
+  @media(max-width:520px) { .request-form .row { grid-template-columns:1fr; } }
+  .submit-btn {
+    background:var(--purple); color:#fff;
+    border:none; border-radius:8px; padding:13px 28px;
+    font-family:'Cinzel',serif; font-size:.82rem; letter-spacing:.12em;
+    text-transform:uppercase; cursor:pointer; transition:background .2s;
+  }
+  .submit-btn:hover { background:var(--purple-mid); }
+  .form-msg { margin-top:10px; font-size:.88rem; color:var(--purple); font-style:italic; display:none; }
+  .form-msg.show { display:block; }
+
+  /* FOOTER */
+  .ftr {
+    text-align:center; margin-top:64px; padding:28px 16px 0;
+    border-top:1.5px solid var(--gold-border);
+    font-family:'Cinzel',serif; font-size:.78rem; letter-spacing:.1em;
+    color:var(--gold-border);
+  }
+  .ftr .blessing { color:var(--purple); margin-bottom:6px; }
+  .ftr a { color:var(--gold-border); text-decoration:none; }
+  .ftr a:hover { color:var(--purple); }
+</style>
+</head>
+<body>
+
+<nav class="top-nav">
+  <div class="crumbs"><strong>Haligricity</strong></div>
+  <a class="nav-home" href="https://iqproductionz.com/">↩ Site Home</a>
+</nav>
+
+<!-- ─── HERO ─────────────────────────────── -->
+<header class="hero">
+  <div class="symbol-wrap">
+    <div class="symbol-glow"></div>
+    <svg class="symbol-svg" viewBox="0 0 80 80" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <circle cx="40" cy="40" r="36" stroke="#C9A227" stroke-width="1.4" opacity="0.8"/>
+      <rect x="13.5" y="13.5" width="53" height="53" stroke="#C9A227" stroke-width="1.4" opacity="0.55"/>
+      <circle cx="40" cy="40" r="3.5" fill="#4A1060"/>
+      <line x1="40" y1="4"  x2="40" y2="16" stroke="#C9A227" stroke-width="1" opacity="0.5"/>
+      <line x1="40" y1="64" x2="40" y2="76" stroke="#C9A227" stroke-width="1" opacity="0.5"/>
+      <line x1="4"  y1="40" x2="16" y2="40" stroke="#C9A227" stroke-width="1" opacity="0.5"/>
+      <line x1="64" y1="40" x2="76" y2="40" stroke="#C9A227" stroke-width="1" opacity="0.5"/>
+    </svg>
+  </div>
+  <div class="eyebrow">A New Synthesis — Old Roots</div>
+  <h1>Haligricity</h1>
+  <p class="tagline">The practice of wholeness. A living, breathing current of body, sound, mudra, mantra, food, and connection — woven from many traditions and named anew.</p>
+  <div class="pronounce">/ ˈhɑːl·ɪ·ˌɡrɪs·ɪ·ti /</div>
+</header>
+
+<div class="wrap">
+
+<!-- ─── ETYMOLOGY ─────────────────────────────── -->
+<section>
+  <div class="section-eyebrow">Etymology</div>
+  <h2 class="section-title">What the Name Holds</h2>
+  <div class="gold-divider"></div>
+
+  <div class="ety-card">
+    <h3>Helios <span class="greek">ἥλιος</span></h3>
+    <p><strong>Helios</strong> is the Greek word for <em>Sun</em> — the visible source of light, life, and warmth. In ancient cosmology, Helios drove the sun-chariot across the sky each day, and the name became shorthand for radiant, life-giving presence. The Heliopolitan philosophy (named for the Egyptian city of Heliopolis, "City of the Sun") wove the Sun into the daily cycle of breath, prayer, and renewal.</p>
+    <p>This is one of the threads in Haligricity — the recognition that <strong>light is not separate from us</strong>. We are warmed by it, fed by it, and we carry a version of it inside our own field.</p>
+  </div>
+
+  <div class="ety-card">
+    <h3>Holi · Halig · Holy</h3>
+    <p>The word <strong>holy</strong> comes from Old English <em>hālig</em>, from Proto-Germanic <em>*hailagaz</em> — itself from <em>*hailaz</em>, meaning <strong>whole, uninjured, of good omen</strong>. That same root gave us the words <em>whole</em> and <em>heal</em>.</p>
+    <div class="root-chain">
+      <span class="word">*kailo-</span>
+      <span class="arrow">→</span>
+      <span class="word">hailaz</span>
+      <span class="arrow">→</span>
+      <span class="word">hālig</span>
+      <span class="arrow">→</span>
+      <span class="word">holy</span>
+      <span class="arrow">·</span>
+      <span class="word">whole</span>
+      <span class="arrow">·</span>
+      <span class="word">heal</span>
+    </div>
+    <p>So at its core: <strong>holy = whole = healed.</strong> Not set apart in a distant, untouchable sense — but <em>intact</em>. Complete. Nothing missing. The Proto-Indo-European root <em>*kailo-</em> also flows into Old Norse <em>heilagr</em>, Old High German <em>heilag</em>, and Gothic <em>hails</em> — all meaning health, wholeness, being sound.</p>
+    <p>The idea of "sacred" or "consecrated to God" came later, as the Christian church narrowed the word. The original charge of the word was simply: <strong>that which is whole cannot be broken. That which is whole is already in right relationship with life.</strong></p>
+  </div>
+
+  <div class="ety-card">
+    <h3>Why This Matters for Haligricity</h3>
+    <p>The Haligric path — in its very name — carries <em>halig</em>, the old form of holy. <strong>Haligricity is not naming itself after religion.</strong> It is naming itself after wholeness, the original meaning.</p>
+    <p>The body–breath–sound–movement–eating–connection practices in the <em>Well-Being</em> book are not "spiritual" in the churchy sense — they are <strong>haligric in the oldest sense</strong>: practices that return a person to their whole, unbroken, healed state.</p>
+    <p>We've also moved away from the word <em>prayer</em> and other terms alike, since each religion has specific names for such things within their branding. Our aim is to create a new term for this new synthesis — even though many old historical concepts are woven in and respected by labeling their origins.</p>
+  </div>
+</section>
+
+<!-- ─── COINED TERMS ─────────────────────────────── -->
+<section>
+  <div class="section-eyebrow">Coined by Sarah</div>
+  <h2 class="section-title">Vericence &amp; Tetralty</h2>
+  <p class="section-sub">Two original terms — pillars of the Haligric vocabulary.</p>
+  <div class="gold-divider"></div>
+
+  <div class="term-grid">
+    <div class="term-card">
+      <div class="badge">Term One</div>
+      <h3>Vericence</h3>
+      <div class="build"><strong>Ver-</strong> (Truth · Voice) &nbsp;+&nbsp; <strong>-icence</strong> (from Luminescence / Presence)</div>
+      <p>The act of speaking your truth into light. It is not a prayer — it is a declaration. You aren't asking for light; you are acknowledging that the light <em>is</em> you.</p>
+    </div>
+
+    <div class="term-card">
+      <div class="badge">Term Two</div>
+      <h3>Tetralty</h3>
+      <div class="build">A fourfold uniting — the human as conductor of current</div>
+      <p>The integration of <strong>Feel · Say · Think · Do</strong> — the four aspects of a human being aligned so that you become a strong, clean conductor of the currency we carry.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ─── PRACTICES ─────────────────────────────── -->
+<section>
+  <div class="section-eyebrow">Practices</div>
+  <h2 class="section-title">Find Your Practice</h2>
+  <p class="section-sub">Interactive tools to help you locate the practice your body, breath, and energy are asking for — right now.</p>
+  <div class="gold-divider"></div>
+
+  <div class="practice-grid">
+    <a class="practice-card" href="./FindYourPractice/">
+      <svg class="practice-mini-sym" viewBox="0 0 80 80" fill="none">
+        <circle cx="40" cy="40" r="32" stroke="#C9A227" stroke-width="1.4" opacity="0.8"/>
+        <rect x="16" y="16" width="48" height="48" stroke="#C9A227" stroke-width="1.4" opacity="0.55"/>
+        <circle cx="40" cy="40" r="3" fill="#4A1060"/>
+      </svg>
+      <h4>The Practice Finder</h4>
+      <p>A living quiz — retake whenever your life changes — and receive a tailored Haligric practice for the moment.</p>
+      <span class="go">Begin Quiz →</span>
+    </a>
+
+    <a class="practice-card" href="./Mudras/Quiz/">
+      <svg class="practice-mini-sym" viewBox="0 0 80 80" fill="none">
+        <circle cx="40" cy="40" r="32" stroke="#C9A227" stroke-width="1.4" opacity="0.8"/>
+        <rect x="16" y="16" width="48" height="48" stroke="#C9A227" stroke-width="1.4" opacity="0.55"/>
+        <circle cx="40" cy="40" r="3" fill="#4A1060"/>
+      </svg>
+      <h4>Mudra Finder</h4>
+      <p>Nine questions. Receive the sacred hand gesture your body, mind, and energy are calling for.</p>
+      <span class="go">Find Your Mudra →</span>
+    </a>
+
+    <a class="practice-card" href="./Pranayama/Quiz/">
+      <svg class="practice-mini-sym" viewBox="0 0 80 80" fill="none">
+        <circle cx="40" cy="40" r="32" stroke="#C9A227" stroke-width="1.4" opacity="0.8"/>
+        <rect x="16" y="16" width="48" height="48" stroke="#C9A227" stroke-width="1.4" opacity="0.55"/>
+        <circle cx="40" cy="40" r="3" fill="#4A1060"/>
+      </svg>
+      <h4>Pranayama Finder</h4>
+      <p>Discover the breath practice that meets the state you are in — for grounding, clarity, energizing, or stilling.</p>
+      <span class="go">Find Your Breath →</span>
+    </a>
+  </div>
+</section>
+
+<!-- ─── VISHNU MUDRA + PRANAYAMA GUIDE ─────────────────────────────── -->
+<section>
+  <div class="section-eyebrow">Hand Gesture · Vishnu Mudra</div>
+  <h2 class="section-title">For Alternate-Nostril Breath</h2>
+  <div class="gold-divider"></div>
+
+  <div class="vishnu">
+    <div class="img-frame">
+      <img src="https://2.bp.blogspot.com/-XAFm9QCSpQI/W-8fcWAz9nI/AAAAAAAAOFI/UbHCijXlZ0wWicBEVPs3jPZcfMCCl8AlwCLcBGAs/s1600/vishnu%2Bmudra.jpg" alt="Vishnu Mudra — hand position for Nadi Shodhana pranayama"
+           onerror="this.parentNode.innerHTML='<div style=\'padding:40px 20px;color:#888;font-style:italic;font-size:.9rem;\'>Vishnu Mudra reference image unavailable. The mudra: right hand, index and middle fingers folded into the palm, thumb on the right nostril, ring and little fingers on the left nostril.</div>'">
+      <div class="caption">Vishnu Mudra · The Preserver's Gesture</div>
+    </div>
+    <div>
+      <h3>How to Form It</h3>
+      <p>Lift your right hand to your face. <strong>Fold the index and middle fingers down into the palm.</strong> Keep the thumb, ring finger, and little finger extended. You will use the thumb to gently close the right nostril, and the ring + little fingers to close the left nostril.</p>
+      <p>This is the traditional hand position for <em>Nadi Shodhana</em> (alternate-nostril breath) — a foundational Haligric pranayama for clearing the energetic channels and steadying the mind.</p>
+      <a class="dl-btn purple" href="./Pranayama/Pranayama_Complete_Guide.pdf" download>
+        <span class="arrow">⬇</span> Download Pranayama Guide
+      </a>
+    </div>
+  </div>
+</section>
+
+<!-- ─── BOOKS / WORD DOCS ─────────────────────────────── -->
+<section>
+  <div class="section-eyebrow">Books in Progress</div>
+  <h2 class="section-title">The Haligric Library</h2>
+  <p class="section-sub">These manuscripts are still being refined. Summaries here will become downloadable PDFs as each volume is finalized.</p>
+  <div class="gold-divider"></div>
+
+  <div class="books-grid">
+
+    <div class="book-card">
+      <span class="tag">Foundation Text</span>
+      <h4>Haligricity — A Philosophy</h4>
+      <p>The core text. Lays out the worldview, the etymology of the word <em>halig</em>, the framework of Vericence and Tetralty, and the relationship between wholeness, healing, and current.</p>
+      <div class="meta">Status: Final draft — refining</div>
+    </div>
+
+    <div class="book-card">
+      <span class="tag">Practice Manual</span>
+      <h4>Haligric — Well-Being</h4>
+      <p>The hands-on book: daily practices for body, breath, sound, movement, eating, and connection. Everything you need to live haligrically without committing to any one tradition's branding.</p>
+      <div class="meta">Status: Final draft — refining</div>
+    </div>
+
+    <div class="book-card">
+      <span class="tag">Ritual Guide</span>
+      <h4>Haligric — Rituals</h4>
+      <p>Ceremony, seasonal observances, life-passage rites, and personal rituals — drawn from many traditions and re-rooted in the language of wholeness.</p>
+      <div class="meta">Status: Final draft — refining</div>
+    </div>
+
+    <div class="book-card">
+      <span class="tag draft">Controversial</span>
+      <h4>Haligric — Controversial Manual</h4>
+      <p>The harder questions: cultural appropriation, religious gatekeeping, modern witchcraft, and the responsibility that comes with naming something new. For readers willing to sit with discomfort.</p>
+      <div class="meta">Status: Draft — placeholder</div>
+    </div>
+
+    <div class="book-card">
+      <span class="tag draft">Advanced</span>
+      <h4>Real Magic · Book 2 — Advanced Practice</h4>
+      <p>The next volume of the Real Magic series. Deeper energy work, longer practice arcs, and the integration of Vericence and Tetralty into ongoing daily life.</p>
+      <div class="meta">Status: Draft — placeholder</div>
+    </div>
+
+  </div>
+</section>
+
+<!-- ─── FOOD GUIDES ─────────────────────────────── -->
+<section>
+  <div class="section-eyebrow">Eating as Practice</div>
+  <h2 class="section-title">Regional Food Guides</h2>
+  <p class="section-sub">Each guide pulls together native foods, seasonal eating, and regional traditions — page-numbered from page 4 onward (the first three pages are cover &amp; intro). Free to download.</p>
+  <div class="gold-divider"></div>
+
+  <div class="region-grid">
+
+    <div class="region-card">
+      <span class="area">United States · North</span>
+      <span class="place">New England</span>
+      <a class="download-mini" href="./FoodGuide/USA/North/New-England.pdf" download>⬇ Download PDF</a>
+    </div>
+
+    <div class="region-card">
+      <span class="area">United States · PNW</span>
+      <span class="place">Pacific Northwest</span>
+      <a class="download-mini" href="./FoodGuide/USA/PNW/Pacific-Northwest.pdf" download>⬇ Download PDF</a>
+    </div>
+
+    <div class="region-card">
+      <span class="area">United States · West</span>
+      <span class="place">Pacific Coast</span>
+      <a class="download-mini" href="./FoodGuide/USA/West/Pacific-Coast.pdf" download>⬇ Download PDF</a>
+    </div>
+
+    <div class="region-card">
+      <span class="area">United States · Rockies</span>
+      <span class="place">The Rockies</span>
+      <a class="download-mini" href="./FoodGuide/USA/Rockies/Rockies.pdf" download>⬇ Download PDF</a>
+    </div>
+
+    <div class="region-card">
+      <span class="area">United States · South</span>
+      <span class="place">The South</span>
+      <a class="download-mini" href="./FoodGuide/USA/South/The-South.pdf" download>⬇ Download PDF</a>
+    </div>
+
+  </div>
+</section>
+
+<!-- ─── HISTORY COLLECTION ─────────────────────────────── -->
+<section>
+  <div class="section-eyebrow">Comparative History</div>
+  <h2 class="section-title">The History Collection</h2>
+  <p class="section-sub">Deep-dive PDFs into the world's spiritual, philosophical, and ritual traditions. Each one is downloadable. If your region or tradition isn't listed, request it below.</p>
+  <div class="gold-divider"></div>
+
+  <div class="history-grid">
+    <div class="region-card"><span class="area">Indigenous · Americas</span><span class="place">All My Relations — Native American Beliefs</span><a class="download-mini" href="./HistoryCollection/All_My_Relations_Native_American_Beliefs.pdf" download>⬇ Download PDF</a></div>
+    <div class="region-card"><span class="area">Indonesia</span><span class="place">Balinese Beliefs, Rituals &amp; Traditions</span><a class="download-mini" href="./HistoryCollection/Balinese_Beliefs_Rituals_and_Traditions.pdf" download>⬇ Download PDF</a></div>
+    <div class="region-card"><span class="area">India · Hindu</span><span class="place">Bhagavad-Gita for Awakening</span><a class="download-mini" href="./HistoryCollection/Bhagavad-Gita-For-Awakeninging-full-2-2021.pdf" download>⬇ Download PDF</a></div>
+    <div class="region-card"><span class="area">China</span><span class="place">Confucianism — A Complete Philosophy Guide</span><a class="download-mini" href="./HistoryCollection/Confucianism_Complete_Philosophy_Guide.pdf" download>⬇ Download PDF</a></div>
+    <div class="region-card"><span class="area">Synthesis</span><span class="place">Five Paths of the Living World</span><a class="download-mini" href="./HistoryCollection/Five_Paths_of_the_Living_World.pdf" download>⬇ Download PDF</a></div>
+    <div class="region-card"><span class="area">India</span><span class="place">Hinduism — Deep Dive into Rituals, Deities, Texts</span><a class="download-mini" href="./HistoryCollection/Hinduism_DeepDive_Rituals_Deities_Texts.pdf" download>⬇ Download PDF</a></div>
+    <div class="region-card"><span class="area">Middle East</span><span class="place">Islam &amp; Samaritanism — Complete Guide</span><a class="download-mini" href="./HistoryCollection/Islam_and_Samaritanism_Complete_Guide.pdf" download>⬇ Download PDF</a></div>
+    <div class="region-card"><span class="area">Northern Europe</span><span class="place">Norse Runes &amp; Pagan/Wiccan Gods</span><a class="download-mini" href="./HistoryCollection/Norse_Runes_and_Pagan_Wiccan_Gods.pdf" download>⬇ Download PDF</a></div>
+    <div class="region-card"><span class="area">Caribbean · Diaspora</span><span class="place">Rastafari — A Deep Dive</span><a class="download-mini" href="./HistoryCollection/Rastafari_A_Deep_Dive.pdf" download>⬇ Download PDF</a></div>
+    <div class="region-card"><span class="area">Modern Movement</span><span class="place">Scientology — A Complete Factual Guide</span><a class="download-mini" href="./HistoryCollection/Scientology_Complete_Factual_Guide.pdf" download>⬇ Download PDF</a></div>
+    <div class="region-card"><span class="area">Mesoamerica</span><span class="place">Serpent &amp; Star — Aztec &amp; Mayan Beliefs</span><a class="download-mini" href="./HistoryCollection/Serpent_and_Star_Aztec_Mayan_Beliefs.pdf" download>⬇ Download PDF</a></div>
+    <div class="region-card"><span class="area">Eastern Mediterranean</span><span class="place">The Byzantine Empire — Faith &amp; Ritual</span><a class="download-mini" href="./HistoryCollection/The_Byzantine_Empire_Faith_and_Ritual.pdf" download>⬇ Download PDF</a></div>
+    <div class="region-card"><span class="area">Celtic · British Isles</span><span class="place">The Druids — A Deep Dive</span><a class="download-mini" href="./HistoryCollection/The_Druids_A_Deep_Dive.pdf" download>⬇ Download PDF</a></div>
+    <div class="region-card"><span class="area">Ancient Egypt</span><span class="place">The Heliopolitan Philosophy — A Deep Dive</span><a class="download-mini" href="./HistoryCollection/The_Heliopolitan_Philosophy_A_Deep_Dive.pdf" download>⬇ Download PDF</a></div>
+    <div class="region-card"><span class="area">Synthesis</span><span class="place">The Indwelling Divine — Seven Paths</span><a class="download-mini" href="./HistoryCollection/The_Indwelling_Divine_Seven_Paths.pdf" download>⬇ Download PDF</a></div>
+    <div class="region-card"><span class="area">Ancient Egypt</span><span class="place">The Wisdom of Kemet — Egyptian Beliefs</span><a class="download-mini" href="./HistoryCollection/The_Wisdom_of_Kemet_Egyptian_Beliefs.pdf" download>⬇ Download PDF</a></div>
+    <div class="region-card"><span class="area">Mesoamerica</span><span class="place">Zapotec Beliefs, Rituals &amp; Traditions</span><a class="download-mini" href="./HistoryCollection/Zapotec_Beliefs_Rituals_and_Traditions.pdf" download>⬇ Download PDF</a></div>
+  </div>
+
+  <!-- REGION REQUEST FORM -->
+  <div class="request-form" id="reqForm">
+    <h3>Don't See Your Region or Tradition?</h3>
+    <div class="form-sub">Tell us which one you'd like us to research and add — we read every request and prioritize the most-asked.</div>
+    <div class="row">
+      <div>
+        <label>Your Name</label>
+        <input type="text" id="req-name" placeholder="First and last name">
+      </div>
+      <div>
+        <label>Email</label>
+        <input type="email" id="req-email" placeholder="you@example.com">
+      </div>
+    </div>
+    <label>Region / Tradition / Practice</label>
+    <input type="text" id="req-topic" placeholder="e.g. Yoruba, Shintō, Sufism, Andean cosmology…">
+    <label>Why It Matters to You <span style="font-style:italic;color:var(--gray);text-transform:none;letter-spacing:0;">(optional)</span></label>
+    <textarea id="req-why" placeholder="A sentence or two about what you'd want a guide to cover, or why it's important to you."></textarea>
+    <button class="submit-btn" onclick="submitRequest()">Submit Request</button>
+    <div class="form-msg" id="req-msg">Received — thank you. We'll be in touch.</div>
+  </div>
+</section>
+
+</div>
+
+<footer class="ftr">
+  <div class="blessing"><strong>Grand Rising.</strong> · <strong>Be More You.</strong> · <strong>Ashe.</strong></div>
+  Haligricity · Hali Sarah Parsons · <a href="https://iqproductionz.com/">IQProductionz.com</a>
+</footer>
+
+<script>
+function submitRequest() {
+  var name  = document.getElementById('req-name').value.trim();
+  var email = document.getElementById('req-email').value.trim();
+  var topic = document.getElementById('req-topic').value.trim();
+  var why   = document.getElementById('req-why').value.trim();
+  var msg   = document.getElementById('req-msg');
+
+  if (!name || !email || !topic) {
+    msg.textContent = 'Please fill in your name, email, and the region/tradition.';
+    msg.style.color = '#B8860B';
+    msg.classList.add('show');
+    return;
+  }
+
+  msg.textContent = 'Sending…';
+  msg.style.color = '#6B2D8E';
+  msg.classList.add('show');
+
+  emailjs.send('IQProductionz', 'template_iq_contact', {
+    subject: 'Haligricity — History Collection Request: ' + topic,
+    name: name,
+    message:
+      'Email: ' + email + '\n' +
+      'Region / Tradition: ' + topic + '\n\n' +
+      (why ? 'Why it matters:\n' + why : '(no additional context provided)')
+  }).then(function() {
+    msg.textContent = 'Received — thank you. We will reach back out as soon as the guide is ready.';
+    msg.style.color = '#4A1060';
+    document.getElementById('req-name').value = '';
+    document.getElementById('req-email').value = '';
+    document.getElementById('req-topic').value = '';
+    document.getElementById('req-why').value = '';
+  }).catch(function(err) {
+    console.error(err);
+    msg.textContent = 'Something went wrong sending. Please email us directly at hello@iqproductionz.com.';
+    msg.style.color = '#B8860B';
+  });
+}
+</script>
+
+</body>
+</html>

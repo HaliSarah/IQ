@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>BackEnd Portal — I.Q. Productionz</title>
+<meta name="description" content="I.Q. Productionz internal tools portal. Staff access only.">
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700&family=Raleway:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg:      #333333;
+    --surface: #454545;
+    --card:    #454545;
+    --border:  #2e2b24;
+    --gold:    #c98a2e;
+    --gold-lt: #e0a84a;
+    --gold-dim:#7a5218;
+    --white:   #f0ece3;
+    --muted:   #A9A9A9;
+    --success: #4a8c62;
+    --radius:  8px;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: 'Raleway', sans-serif;
+    background: var(--bg);
+    color: var(--white);
+    min-height: 100vh;
+    padding-bottom: 80px;
+  }
+
+  /* TOP NAV */
+  .top-nav {
+    display:flex; justify-content:space-between; align-items:center;
+    padding:16px 24px;
+    background:var(--surface);
+    border-bottom:1px solid var(--border);
+    position:sticky; top:0; z-index:50;
+  }
+  .top-nav .crumbs {
+    font-family:'Cinzel',serif; font-size:11px; letter-spacing:2px;
+    color:var(--muted); text-transform:uppercase;
+  }
+  .top-nav .crumbs strong { color:var(--gold); }
+  .nav-home {
+    padding:9px 18px; border:1px solid var(--gold-dim); border-radius:var(--radius);
+    background:transparent; color:var(--gold-lt);
+    font-family:'Cinzel',serif; font-size:11px; letter-spacing:1.5px;
+    text-transform:uppercase; text-decoration:none;
+    transition:all .2s;
+  }
+  .nav-home:hover { background:var(--gold); color:#333; border-color:var(--gold); }
+
+  /* HEADER */
+  .hdr {
+    background: linear-gradient(160deg,#454545 0%,#333333 60%);
+    border-bottom: 1px solid var(--border);
+    padding: 56px 32px 44px; text-align: center;
+    position: relative; overflow: hidden;
+  }
+  .hdr::before {
+    content:''; position:absolute; inset:0;
+    background: radial-gradient(ellipse at 50% 0%, rgba(201,138,46,0.13) 0%, transparent 70%);
+    pointer-events:none;
+  }
+  .logo-wrap { display:flex; align-items:center; justify-content:center; gap:14px; margin-bottom:22px; position:relative; }
+  .logo-wrap img { height:62px; width:auto; filter:drop-shadow(0 0 14px rgba(201,138,46,0.45)); }
+  .brand-name { font-family:'Cinzel',serif; font-size:22px; font-weight:700; color:var(--gold); letter-spacing:2px; line-height:1; }
+  .brand-sub  { font-size:10px; letter-spacing:4px; text-transform:uppercase; color:var(--muted); margin-top:4px; }
+  .gold-rule  { width:60px; height:2px; background:linear-gradient(90deg,transparent,var(--gold),transparent); margin:18px auto; }
+  .hdr h1 { font-family:'Cinzel',serif; font-size:clamp(22px,4vw,38px); font-weight:600; color:var(--white); letter-spacing:2px; text-transform:uppercase; margin-bottom:10px; }
+  .hdr .eyebrow { font-size:10px; letter-spacing:4px; text-transform:uppercase; color:var(--gold); margin-bottom:14px; }
+  .hdr p  { font-size:13px; color:var(--muted); max-width:520px; margin:0 auto; line-height:1.7; font-weight:300; }
+
+  /* BODY */
+  .body { max-width:960px; margin:0 auto; padding:48px 24px 0; }
+  .section-title { font-family:'Cinzel',serif; font-size:14px; font-weight:600; color:var(--gold); letter-spacing:2px; text-transform:uppercase; margin-bottom:18px; }
+  .section-sub   { font-size:12px; color:var(--muted); margin-bottom:24px; }
+
+  /* TOOL GRID */
+  .tool-grid {
+    display:grid; grid-template-columns:repeat(auto-fit,minmax(260px,1fr));
+    gap:18px; margin-bottom:48px;
+  }
+  .tool-card {
+    background:var(--card); border:1px solid var(--border); border-radius:var(--radius);
+    padding:26px 24px; position:relative; overflow:hidden;
+    text-decoration:none; color:var(--white);
+    transition:all .25s ease;
+    display:flex; flex-direction:column; gap:10px;
+  }
+  .tool-card::before {
+    content:''; position:absolute; top:0; left:0; right:0; height:2px;
+    background:linear-gradient(90deg,transparent,var(--gold),transparent);
+    opacity:.5; transition:opacity .25s ease;
+  }
+  .tool-card:hover {
+    border-color:var(--gold-dim);
+    transform:translateY(-3px);
+    box-shadow:0 8px 24px rgba(0,0,0,.35), 0 0 24px rgba(201,138,46,.12);
+  }
+  .tool-card:hover::before { opacity:1; }
+  .tool-icon {
+    width:44px; height:44px; border-radius:10px;
+    background:linear-gradient(135deg,var(--gold),#a87025);
+    display:flex; align-items:center; justify-content:center;
+    font-family:'Cinzel',serif; font-size:18px; font-weight:700; color:#333;
+    box-shadow:0 4px 14px rgba(201,138,46,.25);
+  }
+  .tool-name { font-family:'Cinzel',serif; font-size:15px; font-weight:600; color:var(--gold-lt); letter-spacing:1.5px; text-transform:uppercase; }
+  .tool-path { font-family:'Raleway',sans-serif; font-size:11px; color:var(--muted); letter-spacing:.5px; }
+  .tool-desc { font-size:13px; color:var(--white); line-height:1.65; font-weight:300; }
+  .tool-tag {
+    display:inline-block; font-size:10px; letter-spacing:1px; text-transform:uppercase;
+    padding:3px 9px; border-radius:20px; margin-top:6px;
+    background:rgba(201,138,46,.12); color:var(--gold-lt); border:1px solid var(--gold-dim);
+  }
+  .tool-tag.muted { background:rgba(169,169,169,.08); color:var(--muted); border-color:var(--border); }
+  .tool-card.placeholder { opacity:.55; cursor:default; pointer-events:none; }
+  .tool-card.placeholder:hover { transform:none; box-shadow:none; }
+
+  /* FOOTER */
+  .ftr {
+    text-align:center; margin-top:48px; padding:32px 16px;
+    border-top:1px solid var(--border);
+    font-size:11px; color:var(--muted); letter-spacing:1px;
+  }
+  .ftr a { color:var(--gold-lt); text-decoration:none; }
+</style>
+</head>
+<body>
+
+<nav class="top-nav">
+  <div class="crumbs"><strong>BackEnd</strong> / Portal</div>
+  <a class="nav-home" href="https://iqproductionz.com/">↩ Site Home</a>
+</nav>
+
+<header class="hdr">
+  <div class="logo-wrap">
+    <img src="https://static.wixstatic.com/media/b63ec4_2117e26bc8e646c8ad8b0050222de71b~mv2.png/v1/fill/w_295,h_92,al_c,q_85,usm_0.66_1.00_0.01,enc_avif,quality_auto/IQ-noglow_edited_edited.png" alt="I.Q. Productionz">
+  </div>
+  <div class="eyebrow">Staff Tools</div>
+  <h1>BackEnd Portal</h1>
+  <div class="gold-rule"></div>
+  <p>Internal tools for I.Q. Productionz. Pick a workspace to open it. Each tool has a BackEnd Home button at the top to return here.</p>
+</header>
+
+<main class="body">
+
+  <div class="section-title">General Tools</div>
+  <div class="tool-grid">
+
+    <a class="tool-card" href="./BrandedEmail/">
+      <div class="tool-icon">✉</div>
+      <div class="tool-name">Branded Email</div>
+      <div class="tool-path">/BackEnd/BrandedEmail/</div>
+      <div class="tool-desc">Compose and send a styled email from your I.Q. Productionz address with consistent branding.</div>
+      <div class="tool-tag">Email Tool</div>
+    </a>
+
+    <a class="tool-card" href="./PitchAssist/">
+      <div class="tool-icon">⚑</div>
+      <div class="tool-name">Pitch Assist</div>
+      <div class="tool-path">/BackEnd/PitchAssist/</div>
+      <div class="tool-desc">Launch-ready website pitch deck — share with prospects and walk them through service tiers.</div>
+      <div class="tool-tag">Sales</div>
+    </a>
+
+    <div class="tool-card placeholder">
+      <div class="tool-icon">⌂</div>
+      <div class="tool-name">Clients</div>
+      <div class="tool-path">/BackEnd/Clients/</div>
+      <div class="tool-desc">Client roster and per-client dashboards. Coming soon.</div>
+      <div class="tool-tag muted">In Progress</div>
+    </div>
+
+  </div>
+
+  <div class="section-title">Mary Kay Workspace</div>
+  <div class="section-sub">Tools tied to the Mary Kay assessment funnel and lead intake.</div>
+  <div class="tool-grid">
+
+    <a class="tool-card" href="./MaryKay/LeadProcessor/">
+      <div class="tool-icon">⚙</div>
+      <div class="tool-name">Lead Processor</div>
+      <div class="tool-path">/BackEnd/MaryKay/LeadProcessor/</div>
+      <div class="tool-desc">Process incoming assessment submissions — review answers, build samples list, and follow up.</div>
+      <div class="tool-tag">Mary Kay</div>
+    </a>
+
+    <a class="tool-card" href="./MaryKay/BrandedEmail/">
+      <div class="tool-icon">✉</div>
+      <div class="tool-name">MK Branded Email</div>
+      <div class="tool-path">/BackEnd/MaryKay/BrandedEmail/</div>
+      <div class="tool-desc">Pink-branded email composer for Mary Kay personal replies (PersonalJS replacement).</div>
+      <div class="tool-tag">Mary Kay</div>
+    </a>
+
+  </div>
+
+</main>
+
+<footer class="ftr">
+  I.Q. Productionz · Staff Portal · <a href="https://iqproductionz.com/">IQProductionz.com</a>
+</footer>
+
+</body>
+</html>

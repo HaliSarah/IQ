@@ -1,0 +1,750 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Website Project Intake — I.Q. Productionz</title>
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700&family=Raleway:wght@300;400;500;600&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
+<script>emailjs.init("3vNjQbWmqzzOO6IK");</script>
+<style>
+  :root {
+    --bg:      #333333;
+    --surface: #454545;
+    --card:    #454545;
+    --border:  #2e2b24;
+    --gold:    #c98a2e;
+    --gold-lt: #e0a84a;
+    --gold-dim:#7a5218;
+    --white:   #f0ece3;
+    --muted:   #A9A9A9;
+    --success: #4a8c62;
+    --radius:  8px;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Raleway', sans-serif; background: var(--bg); color: var(--white); min-height: 100vh; padding-bottom: 80px; }
+
+  /* HEADER */
+  .form-header {
+    background: linear-gradient(160deg,#454545 0%,#333333 60%);
+    border-bottom: 1px solid var(--border);
+    padding: 48px 32px 40px; text-align: center; position: relative; overflow: hidden;
+  }
+  .form-header::before {
+    content:''; position:absolute; inset:0;
+    background: radial-gradient(ellipse at 50% 0%, rgba(201,138,46,0.13) 0%, transparent 70%);
+    pointer-events:none;
+  }
+  .logo-wrap { display:flex; align-items:center; justify-content:center; gap:16px; margin-bottom:22px; }
+  .logo-wrap img { height:62px; width:auto; filter:drop-shadow(0 0 14px rgba(201,138,46,0.45)); }
+  .logo-text .brand-name { font-family:'Cinzel',serif; font-size:22px; font-weight:700; color:var(--gold); letter-spacing:2px; line-height:1; }
+  .logo-text .brand-sub  { font-size:10px; letter-spacing:4px; text-transform:uppercase; color:var(--muted); margin-top:4px; }
+  .gold-rule { width:60px; height:2px; background:linear-gradient(90deg,transparent,var(--gold),transparent); margin:18px auto; }
+  .form-header h1 { font-family:'Cinzel',serif; font-size:clamp(20px,4vw,34px); font-weight:600; color:var(--white); letter-spacing:1px; margin-bottom:10px; text-transform:uppercase; }
+  .form-header p  { font-size:13px; color:var(--muted); max-width:460px; margin:0 auto; line-height:1.7; font-weight:300; }
+
+  /* PROGRESS */
+  .progress-wrap { background:var(--surface); border-bottom:1px solid var(--border); padding:20px 32px 22px; }
+  .progress-steps { display:flex; align-items:center; max-width:680px; margin:0 auto; }
+  .step-dot { display:flex; flex-direction:column; align-items:center; gap:6px; flex:0 0 auto; }
+  .step-dot .dot {
+    width:30px; height:30px; border-radius:50%; border:2px solid var(--border);
+    display:flex; align-items:center; justify-content:center;
+    font-size:11px; font-weight:700; color:var(--muted); transition:all 0.3s; font-family:'Cinzel',serif;
+  }
+  .step-dot .dot-label { font-size:9px; letter-spacing:1.5px; text-transform:uppercase; color:var(--muted); white-space:nowrap; transition:color 0.3s; }
+  .step-dot.active .dot { background:var(--gold); border-color:var(--gold); color:#333333; box-shadow:0 0 12px rgba(201,138,46,0.5); }
+  .step-dot.active .dot-label { color:var(--gold-lt); }
+  .step-dot.done .dot { background:var(--success); border-color:var(--success); color:#fff; }
+  .step-dot.done .dot-label { color:var(--muted); }
+  .step-line { flex:1; height:1px; background:var(--border); margin-bottom:22px; transition:background 0.3s; }
+  .step-line.done { background:var(--success); }
+
+  /* BODY */
+  .form-body { max-width:680px; margin:0 auto; padding:40px 24px 0; }
+
+  /* CARD */
+  .section-card {
+    background:var(--card); border:1px solid var(--border); border-radius:var(--radius);
+    padding:32px; margin-bottom:20px; position:relative; overflow:hidden;
+  }
+  .section-card::before {
+    content:''; position:absolute; top:0; left:0; right:0; height:2px;
+    background:linear-gradient(90deg,transparent,var(--gold),transparent);
+  }
+  .section-card h2 { font-family:'Cinzel',serif; font-size:18px; font-weight:600; color:var(--gold); letter-spacing:1.5px; text-transform:uppercase; margin-bottom:6px; }
+  .section-card .section-sub { font-size:13px; color:var(--muted); margin-bottom:28px; line-height:1.6; font-weight:300; }
+
+  /* FIELDS */
+  .field { margin-bottom:22px; }
+  .field:last-child { margin-bottom:0; }
+  label { display:block; font-size:12px; font-weight:600; letter-spacing:1px; text-transform:uppercase; color:var(--white); margin-bottom:8px; }
+  label .req  { color:var(--gold); margin-left:2px; }
+  label .hint { font-weight:400; color:var(--muted); font-size:11px; margin-left:6px; text-transform:none; letter-spacing:0; }
+  input[type="text"],input[type="email"],input[type="tel"],input[type="url"],textarea,select {
+    width:100%; padding:12px 16px; border:1px solid var(--border); border-radius:var(--radius);
+    font-family:'Raleway',sans-serif; font-size:14px; color:var(--white); background:var(--surface);
+    transition:border-color 0.2s,box-shadow 0.2s; outline:none; appearance:none;
+  }
+  input::placeholder,textarea::placeholder { color:var(--muted); }
+  input:focus,textarea:focus,select:focus { border-color:var(--gold); box-shadow:0 0 0 3px rgba(201,138,46,0.15); }
+  textarea { resize:vertical; min-height:100px; line-height:1.6; }
+  select {
+    background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%237a7468' stroke-width='2'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");
+    background-repeat:no-repeat; background-position:right 14px center; padding-right:40px; background-color:var(--surface);
+  }
+  select option { background:var(--surface); }
+
+  /* YES/NO */
+  .yn-group { display:flex; gap:10px; }
+  .yn-btn {
+    flex:1; padding:11px; border:1px solid var(--border); border-radius:var(--radius);
+    background:var(--surface); font-family:'Raleway',sans-serif; font-size:13px; font-weight:600;
+    cursor:pointer; transition:all 0.2s; color:var(--muted); text-align:center; letter-spacing:.5px;
+  }
+  .yn-btn:hover { border-color:var(--gold-dim); color:var(--white); }
+  .yn-btn.selected-yes { background:var(--gold); border-color:var(--gold); color:#333333; }
+  .yn-btn.selected-no  { background:var(--surface); border-color:var(--muted); color:var(--white); }
+
+  /* REVEAL */
+  .reveal { display:none; margin-top:14px; }
+  .reveal.open { display:block; }
+
+  /* UPLOAD */
+  .upload-zone {
+    border:1px dashed var(--border); border-radius:var(--radius); padding:26px 20px;
+    text-align:center; cursor:pointer; transition:all 0.2s; background:var(--surface); position:relative;
+  }
+  .upload-zone:hover { border-color:var(--gold); background:#1e1b14; }
+  .upload-zone input[type="file"] { position:absolute; inset:0; opacity:0; cursor:pointer; width:100%; border:none; }
+  .upload-zone .up-icon { font-size:26px; margin-bottom:8px; }
+  .upload-zone .up-text { font-size:13px; color:var(--muted); }
+  .upload-zone .up-text strong { color:var(--gold); }
+  .upload-zone .file-list { margin-top:10px; font-size:12px; color:var(--success); text-align:left; }
+
+  /* ADDRESS */
+  .addr-row { display:grid; grid-template-columns:1fr 1fr; gap:14px; }
+
+  /* ITEMS */
+  .item-list { display:flex; flex-direction:column; gap:12px; }
+  .item-card { border:1px solid var(--border); border-radius:var(--radius); padding:16px; background:var(--surface); position:relative; }
+  .item-card .item-row { display:grid; grid-template-columns:2fr 1fr; gap:10px; margin-bottom:10px; }
+  .remove-item { position:absolute; top:10px; right:12px; background:none; border:none; font-size:18px; cursor:pointer; color:var(--muted); line-height:1; }
+  .remove-item:hover { color:var(--gold); }
+
+  /* SOCIAL */
+  .social-list { display:flex; flex-direction:column; gap:10px; }
+  .social-row { display:flex; gap:10px; align-items:center; }
+  .social-platform { flex:0 0 130px; padding:11px 12px; border:1px solid var(--border); border-radius:var(--radius); font-size:13px; font-weight:600; background:var(--bg); color:var(--muted); }
+  .social-row input { flex:1; }
+  .remove-social { background:none; border:none; font-size:16px; cursor:pointer; color:var(--muted); }
+  .remove-social:hover { color:var(--gold); }
+
+  /* ADD BTN */
+  .add-btn {
+    display:inline-flex; align-items:center; gap:8px; padding:10px 18px;
+    border:1px dashed var(--border); border-radius:var(--radius); background:none;
+    font-family:'Raleway',sans-serif; font-size:12px; font-weight:700; letter-spacing:.5px;
+    color:var(--muted); cursor:pointer; transition:all 0.2s; margin-top:10px;
+  }
+  .add-btn:hover { border-color:var(--gold); color:var(--gold); }
+
+  /* CHECKBOXES */
+  .check-grid { display:grid; grid-template-columns:1fr 1fr; gap:10px; }
+  .check-item {
+    display:flex; align-items:flex-start; gap:10px; padding:12px 14px;
+    border:1px solid var(--border); border-radius:var(--radius);
+    cursor:pointer; transition:all 0.2s; background:var(--surface); user-select:none;
+  }
+  .check-item:hover { border-color:var(--gold-dim); }
+  .check-item.checked { border-color:var(--gold); background:#1e1b14; }
+  .check-item input[type="checkbox"] { display:none; }
+  .check-box { width:17px; height:17px; min-width:17px; border:1.5px solid var(--border); border-radius:4px; margin-top:1px; display:flex; align-items:center; justify-content:center; transition:all 0.2s; }
+  .check-item.checked .check-box { background:var(--gold); border-color:var(--gold); }
+  .check-box::after { content:'✓'; color:#333333; font-size:10px; font-weight:900; display:none; }
+  .check-item.checked .check-box::after { display:block; }
+  .check-label { font-size:13px; font-weight:500; line-height:1.4; }
+  .check-label .check-sub { font-weight:300; color:var(--muted); font-size:11px; display:block; margin-top:2px; }
+
+  /* TYPE GRID */
+  .type-grid { display:grid; grid-template-columns:1fr 1fr; gap:10px; }
+  .type-card {
+    padding:14px 16px; border:1px solid var(--border); border-radius:var(--radius);
+    cursor:pointer; transition:all 0.2s; background:var(--surface); user-select:none;
+    text-align:center; font-size:13px; font-weight:500; color:var(--muted);
+  }
+  .type-card:hover { border-color:var(--gold-dim); color:var(--white); }
+  .type-card.selected { border-color:var(--gold); background:#1e1b14; color:var(--gold); font-weight:700; }
+  .type-card input { display:none; }
+
+  /* NAV */
+  .nav-bar { display:flex; justify-content:space-between; align-items:center; margin-top:32px; gap:14px; }
+  .btn-back {
+    padding:13px 24px; border:1px solid var(--border); border-radius:var(--radius); background:none;
+    font-family:'Raleway',sans-serif; font-size:13px; font-weight:700; letter-spacing:.5px;
+    color:var(--muted); cursor:pointer; transition:all 0.2s;
+  }
+  .btn-back:hover { border-color:var(--muted); color:var(--white); }
+  .btn-next, .btn-submit {
+    flex:1; padding:14px 24px;
+    background:linear-gradient(135deg,var(--gold) 0%,#a87025 100%);
+    color:#333333; border:none; border-radius:var(--radius);
+    font-family:'Cinzel',serif; font-size:13px; font-weight:700; letter-spacing:1px; text-transform:uppercase;
+    cursor:pointer; transition:all 0.2s; box-shadow:0 4px 16px rgba(201,138,46,0.25);
+  }
+  .btn-next:hover, .btn-submit:hover { background:linear-gradient(135deg,var(--gold-lt) 0%,var(--gold) 100%); box-shadow:0 4px 24px rgba(201,138,46,0.4); }
+  .btn-next:disabled, .btn-submit:disabled { opacity:.5; cursor:not-allowed; }
+
+  /* DIVIDER */
+  .divider { border:none; border-top:1px solid var(--border); margin:24px 0; }
+
+  /* PAGES */
+  .page { display:none; }
+  .page.active { display:block; }
+
+  /* SENDING OVERLAY */
+  .sending-overlay {
+    position:fixed; inset:0; background:rgba(13,12,10,0.93);
+    flex-direction:column; align-items:center; justify-content:center; z-index:999; display:none;
+  }
+  .sending-overlay.show { display:flex; }
+  .spinner { width:48px; height:48px; border:3px solid var(--border); border-top-color:var(--gold); border-radius:50%; animation:spin .8s linear infinite; margin-bottom:20px; }
+  @keyframes spin { to { transform:rotate(360deg); } }
+  .sending-overlay p { color:var(--gold); font-family:'Cinzel',serif; letter-spacing:2px; font-size:13px; }
+
+  /* THANK YOU */
+  .thankyou { text-align:center; padding:60px 24px; }
+  .ty-icon { width:72px; height:72px; background:var(--gold); border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:30px; margin:0 auto 24px; box-shadow:0 0 32px rgba(201,138,46,0.4); }
+  .thankyou h2 { font-family:'Cinzel',serif; font-size:26px; font-weight:700; color:var(--gold); letter-spacing:1px; text-transform:uppercase; margin-bottom:12px; }
+  .thankyou p { font-size:14px; color:var(--muted); line-height:1.8; max-width:420px; margin:0 auto; font-weight:300; }
+
+  /* FOOTER */
+  .form-footer { text-align:center; padding:28px 20px 0; margin-top:8px; }
+  .sig-logo { height:38px; width:auto; opacity:.45; filter:grayscale(1); transition:all 0.3s; }
+  .sig-logo:hover { opacity:1; filter:none; }
+  .sig-text { font-size:11px; color:var(--muted); margin-top:8px; letter-spacing:1px; }
+  .sig-text a { color:var(--gold); text-decoration:none; }
+  .sig-text a:hover { color: #e0a84a; }
+
+  @media(max-width:540px){
+    .form-header { padding:32px 18px 28px; }
+    .section-card { padding:22px 16px; }
+    .addr-row,.check-grid,.type-grid { grid-template-columns:1fr; }
+    .step-dot .dot-label { display:none; }
+    .logo-wrap img { height:46px; }
+  }
+</style>
+</head>
+<body>
+
+<div class="sending-overlay" id="sendingOverlay">
+  <div class="spinner"></div>
+  <p>Sending Your Brief…</p>
+</div>
+
+<!-- HEADER -->
+<div class="form-header">
+  <div class="logo-wrap">
+    <img src="IQ-noglow_edited_edited.avif" alt="I.Q. Productionz" onerror="this.style.display='none'">
+    <div class="logo-text">
+      <div class="brand-name">I.Q. Productionz</div>
+      <div class="brand-sub">Inner Quality Productionz</div>
+    </div>
+  </div>
+  <div class="gold-rule"></div>
+  <h1>Website Project Intake</h1>
+  <p>Fill this out so we can build something made exactly for you. Takes about 5–8 minutes. No tech knowledge needed.</p>
+</div>
+
+<!-- PROGRESS -->
+<div class="progress-wrap">
+  <div class="progress-steps">
+    <div class="step-dot active" id="dot-1"><div class="dot">1</div><div class="dot-label">Basics</div></div>
+    <div class="step-line" id="line-1"></div>
+    <div class="step-dot" id="dot-2"><div class="dot">2</div><div class="dot-label">Brand</div></div>
+    <div class="step-line" id="line-2"></div>
+    <div class="step-dot" id="dot-3"><div class="dot">3</div><div class="dot-label">Location</div></div>
+    <div class="step-line" id="line-3"></div>
+    <div class="step-dot" id="dot-4"><div class="dot">4</div><div class="dot-label">Offerings</div></div>
+    <div class="step-line" id="line-4"></div>
+    <div class="step-dot" id="dot-5"><div class="dot">5</div><div class="dot-label">Connect</div></div>
+    <div class="step-line" id="line-5"></div>
+    <div class="step-dot" id="dot-6"><div class="dot">6</div><div class="dot-label">Extras</div></div>
+  </div>
+</div>
+
+<div class="form-body">
+
+<!-- PAGE 1 -->
+<div class="page active" id="page-1">
+  <div class="section-card">
+    <h2>Business Basics</h2>
+    <p class="section-sub">Let's start with who you are and what you do.</p>
+    <div class="field"><label>Business Name <span class="req">*</span></label><input type="text" id="bizName" placeholder="e.g. Bella's Nail Bar" /></div>
+    <div class="field"><label>Owner / Contact Name <span class="req">*</span></label><input type="text" id="ownerName" placeholder="Your first and last name" /></div>
+    <div class="field"><label>Phone Number <span class="hint">(for project questions only)</span></label><input type="tel" id="ownerPhone" placeholder="(555) 000-0000" /></div>
+    <div class="field">
+      <label>What does your business do? <span class="req">*</span></label>
+      <div class="type-grid">
+        <label class="type-card" onclick="selectType(this,'products')"><input type="radio" name="bizType" value="products"> 🛍️ Sells Products</label>
+        <label class="type-card" onclick="selectType(this,'services')"><input type="radio" name="bizType" value="services"> 🛠️ Offers Services</label>
+        <label class="type-card" onclick="selectType(this,'both')"><input type="radio" name="bizType" value="both"> ✨ Both</label>
+        <label class="type-card" onclick="selectType(this,'other')"><input type="radio" name="bizType" value="other"> 📝 Other</label>
+      </div>
+      <div class="reveal" id="bizTypeOtherReveal" style="margin-top:12px"><input type="text" id="bizTypeOther" placeholder="Briefly describe what your business does…" /></div>
+    </div>
+    <div class="field"><label>Tagline or one-liner <span class="hint">(optional)</span></label><input type="text" id="tagline" placeholder="e.g. Fresh nails, happy lives." /></div>
+  </div>
+  <div class="nav-bar"><button class="btn-next" onclick="goTo(2)">Continue — Brand & Design →</button></div>
+</div>
+
+<!-- PAGE 2 -->
+<div class="page" id="page-2">
+  <div class="section-card">
+    <h2>Brand & Design</h2>
+    <p class="section-sub">Help us match your website to your existing look — or we'll create one for you.</p>
+    <div class="field">
+      <label>Do you have a logo?</label>
+      <div class="yn-group">
+        <button class="yn-btn" onclick="yn(this,'logoYes','logoReveal')">Yes, I have one</button>
+        <button class="yn-btn" onclick="yn(this,'logoNo',null)">No, create one for me</button>
+      </div>
+      <div class="reveal" id="logoReveal">
+        <div class="upload-zone"><input type="file" accept="image/*,.pdf,.svg,.ai,.eps" onchange="handleFiles(this,'logoFileList')" multiple><div class="up-icon">🖼️</div><div class="up-text"><strong>Click to upload</strong> your logo<br><span style="font-size:11px">PNG, SVG, PDF, AI — any format</span></div><div class="file-list" id="logoFileList"></div></div>
+      </div>
+    </div>
+    <hr class="divider">
+    <div class="field">
+      <label>Do you have brand colors?</label>
+      <div class="yn-group">
+        <button class="yn-btn" onclick="yn(this,'colorYes','colorReveal')">Yes, I know my colors</button>
+        <button class="yn-btn" onclick="yn(this,'colorNo',null)">No, choose for me</button>
+      </div>
+      <div class="reveal" id="colorReveal"><input type="text" id="colorInput" placeholder="e.g. Hot pink #FF69B4, Black, Gold — hex codes or names both work" /></div>
+    </div>
+    <hr class="divider">
+    <div class="field">
+      <label>Do you have a preferred font?</label>
+      <div class="yn-group">
+        <button class="yn-btn" onclick="yn(this,'fontYes','fontReveal')">Yes, I have one in mind</button>
+        <button class="yn-btn" onclick="yn(this,'fontNo',null)">No, choose for me</button>
+      </div>
+      <div class="reveal" id="fontReveal"><input type="text" id="fontInput" placeholder="e.g. Playfair Display, Futura, 'something modern and bold'" /></div>
+    </div>
+    <hr class="divider">
+    <div class="field">
+      <label>Do you have photos for the site?</label>
+      <div class="yn-group">
+        <button class="yn-btn" onclick="yn(this,'photoYes','photoReveal')">Yes, uploading mine</button>
+        <button class="yn-btn" onclick="yn(this,'photoNo',null)">No, use stock photos</button>
+      </div>
+      <div class="reveal" id="photoReveal">
+        <div class="upload-zone"><input type="file" accept="image/*,video/*" multiple onchange="handleFiles(this,'photoFileList')"><div class="up-icon">📸</div><div class="up-text"><strong>Upload photos or videos</strong><br><span style="font-size:11px">JPG, PNG, MP4 — as many as you'd like</span></div><div class="file-list" id="photoFileList"></div></div>
+      </div>
+    </div>
+    <hr class="divider">
+    <div class="field"><label>Overall vibe / aesthetic <span class="hint">(optional)</span></label><textarea id="vibeInput" placeholder="e.g. Luxury and elegant. Clean and minimal. Bold and colorful. Warm and approachable." style="min-height:80px"></textarea></div>
+    <div class="field"><label>Websites you love or want to feel like <span class="hint">(optional)</span></label><input type="text" id="inspoInput" placeholder="Paste a link or describe what you like" /></div>
+  </div>
+  <div class="nav-bar"><button class="btn-back" onclick="goTo(1)">← Back</button><button class="btn-next" onclick="goTo(3)">Continue — Location →</button></div>
+</div>
+
+<!-- PAGE 3 -->
+<div class="page" id="page-3">
+  <div class="section-card">
+    <h2>Business Location</h2>
+    <p class="section-sub">We'll add this to your contact page and Google Maps embed.</p>
+    <div class="field">
+      <label>Do you have a physical location?</label>
+      <div class="yn-group">
+        <button class="yn-btn" onclick="yn(this,'addrYes','addrReveal')">Yes, I have a location</button>
+        <button class="yn-btn" onclick="yn(this,'addrNo',null)">No, online only / mobile</button>
+      </div>
+      <div class="reveal" id="addrReveal">
+        <div class="field" style="margin-top:0"><label>Street Address</label><input type="text" id="street" placeholder="123 Main Street, Suite 4" /></div>
+        <div class="addr-row">
+          <div class="field" style="margin-bottom:0"><label>State</label>
+            <select id="stateSelect"><option value="">Select state…</option><option>Alabama</option><option>Alaska</option><option>Arizona</option><option>Arkansas</option><option>California</option><option>Colorado</option><option>Connecticut</option><option>Delaware</option><option>Florida</option><option>Georgia</option><option>Hawaii</option><option>Idaho</option><option>Illinois</option><option>Indiana</option><option>Iowa</option><option>Kansas</option><option>Kentucky</option><option>Louisiana</option><option>Maine</option><option>Maryland</option><option>Massachusetts</option><option>Michigan</option><option>Minnesota</option><option>Mississippi</option><option>Missouri</option><option>Montana</option><option>Nebraska</option><option>Nevada</option><option>New Hampshire</option><option>New Jersey</option><option>New Mexico</option><option>New York</option><option>North Carolina</option><option>North Dakota</option><option>Ohio</option><option>Oklahoma</option><option>Oregon</option><option>Pennsylvania</option><option>Rhode Island</option><option>South Carolina</option><option>South Dakota</option><option>Tennessee</option><option>Texas</option><option>Utah</option><option>Vermont</option><option>Virginia</option><option>Washington</option><option>West Virginia</option><option>Wisconsin</option><option>Wyoming</option></select>
+          </div>
+          <div class="field" style="margin-bottom:0"><label>City</label><input type="text" id="city" placeholder="Your city" /></div>
+        </div>
+        <div class="field"><label>ZIP Code</label><input type="text" id="zip" placeholder="00000" maxlength="10" /></div>
+      </div>
+    </div>
+    <hr class="divider">
+    <div class="field"><label>Business Hours <span class="hint">(optional)</span></label><textarea id="hoursInput" placeholder="e.g. Mon–Fri: 9am–6pm&#10;Saturday: 10am–4pm&#10;Sunday: Closed" style="min-height:90px"></textarea></div>
+    <div class="field"><label>Service Area <span class="hint">(if you travel to clients)</span></label><input type="text" id="serviceArea" placeholder="e.g. Greater Houston area, Nationwide" /></div>
+  </div>
+  <div class="nav-bar"><button class="btn-back" onclick="goTo(2)">← Back</button><button class="btn-next" onclick="goTo(4)">Continue — Products & Services →</button></div>
+</div>
+
+<!-- PAGE 4 -->
+<div class="page" id="page-4">
+  <div class="section-card">
+    <h2>Products & Services</h2>
+    <p class="section-sub">List what you offer — name, price, and a short description. Add as many as you need.</p>
+    <div id="productsSection">
+      <label style="margin-bottom:14px;display:block;">📦 Products</label>
+      <div class="item-list" id="productList">
+        <div class="item-card">
+          <button class="remove-item" onclick="removeItem(this)">×</button>
+          <div class="item-row">
+            <div><label style="font-size:11px;letter-spacing:.5px">Product Name</label><input type="text" placeholder="e.g. Silk Press" /></div>
+            <div><label style="font-size:11px;letter-spacing:.5px">Price</label><input type="text" placeholder="$45" /></div>
+          </div>
+          <textarea placeholder="Short description (optional)…" style="min-height:60px;font-size:13px"></textarea>
+        </div>
+      </div>
+      <button class="add-btn" onclick="addItem('productList','Product')">＋ Add another product</button>
+    </div>
+    <hr class="divider" id="offerDivider">
+    <div id="servicesSection">
+      <label style="margin-bottom:14px;display:block;">🛠️ Services</label>
+      <div class="item-list" id="serviceList">
+        <div class="item-card">
+          <button class="remove-item" onclick="removeItem(this)">×</button>
+          <div class="item-row">
+            <div><label style="font-size:11px;letter-spacing:.5px">Service Name</label><input type="text" placeholder="e.g. Full Set Acrylics" /></div>
+            <div><label style="font-size:11px;letter-spacing:.5px">Price</label><input type="text" placeholder="$75" /></div>
+          </div>
+          <textarea placeholder="Short description (optional)…" style="min-height:60px;font-size:13px"></textarea>
+        </div>
+      </div>
+      <button class="add-btn" onclick="addItem('serviceList','Service')">＋ Add another service</button>
+    </div>
+    <hr class="divider">
+    <div class="field">
+      <label>Do you have an About Us / mission statement?</label>
+      <div class="yn-group">
+        <button class="yn-btn" onclick="yn(this,'aboutYes','aboutReveal')">Yes, I have text</button>
+        <button class="yn-btn" onclick="yn(this,'aboutNo',null)">No, write one for me</button>
+      </div>
+      <div class="reveal" id="aboutReveal"><textarea id="aboutText" placeholder="Paste or type your About Us / mission statement here…" style="min-height:120px"></textarea></div>
+    </div>
+    <hr class="divider">
+    <div class="field">
+      <label>Any special offers or promos to feature?</label>
+      <div class="yn-group">
+        <button class="yn-btn" onclick="yn(this,'promoYes','promoReveal')">Yes, I have promos</button>
+        <button class="yn-btn" onclick="yn(this,'promoNo',null)">Not right now</button>
+      </div>
+      <div class="reveal" id="promoReveal"><textarea id="promoText" placeholder="e.g. New client special: 20% off first visit. Monthly deal: Free add-on with full set in July…" style="min-height:90px"></textarea></div>
+    </div>
+  </div>
+  <div class="nav-bar"><button class="btn-back" onclick="goTo(3)">← Back</button><button class="btn-next" onclick="goTo(5)">Continue — Contact & Social →</button></div>
+</div>
+
+<!-- PAGE 5 -->
+<div class="page" id="page-5">
+  <div class="section-card">
+    <h2>Contact & Social Media</h2>
+    <p class="section-sub">How can customers reach you and find you online?</p>
+    <div class="field">
+      <label>Do you have a business email?</label>
+      <div class="yn-group">
+        <button class="yn-btn" onclick="yn(this,'emailYes','emailReveal')">Yes</button>
+        <button class="yn-btn" onclick="yn(this,'emailNo',null)">Not yet</button>
+      </div>
+      <div class="reveal" id="emailReveal"><input type="email" id="bizEmail" placeholder="hello@yourbusiness.com" /></div>
+    </div>
+    <div class="field"><label>Phone number to display on website</label><input type="tel" id="displayPhone" placeholder="(555) 000-0000 — leave blank to skip" /></div>
+    <hr class="divider">
+    <div class="field">
+      <label>Do you have social media profiles?</label>
+      <div class="yn-group">
+        <button class="yn-btn" onclick="yn(this,'socialYes','socialReveal')">Yes, link them</button>
+        <button class="yn-btn" onclick="yn(this,'socialNo',null)">Not yet</button>
+      </div>
+      <div class="reveal" id="socialReveal">
+        <div class="social-list" id="socialList">
+          <div class="social-row"><div class="social-platform">📸 Instagram</div><input type="text" placeholder="@handle or full link" /></div>
+          <div class="social-row"><div class="social-platform">👍 Facebook</div><input type="text" placeholder="@handle or full link" /></div>
+          <div class="social-row"><div class="social-platform">🎵 TikTok</div><input type="text" placeholder="@handle or full link" /></div>
+          <div class="social-row"><div class="social-platform">💼 LinkedIn</div><input type="text" placeholder="URL or company page" /></div>
+          <div class="social-row"><div class="social-platform">▶️ YouTube</div><input type="text" placeholder="Channel name or link" /></div>
+          <div class="social-row"><div class="social-platform">📌 Pinterest</div><input type="text" placeholder="@handle or board link" /></div>
+          <div class="social-row"><div class="social-platform">🐦 X / Twitter</div><input type="text" placeholder="@handle" /></div>
+        </div>
+        <button class="add-btn" onclick="addSocial()">＋ Add another platform</button>
+      </div>
+    </div>
+    <hr class="divider">
+    <div class="field">
+      <label>Do you use an online booking tool?</label>
+      <div class="yn-group">
+        <button class="yn-btn" onclick="yn(this,'bookingLinkYes','bookingLinkReveal')">Yes, I have a link</button>
+        <button class="yn-btn" onclick="yn(this,'bookingLinkNo',null)">No</button>
+      </div>
+      <div class="reveal" id="bookingLinkReveal"><input type="url" id="bookingLink" placeholder="e.g. https://calendly.com/yourbusiness" /></div>
+    </div>
+  </div>
+  <div class="nav-bar"><button class="btn-back" onclick="goTo(4)">← Back</button><button class="btn-next" onclick="goTo(6)">Continue — Final Touches →</button></div>
+</div>
+
+<!-- PAGE 6 -->
+<div class="page" id="page-6">
+  <div class="section-card">
+    <h2>Final Touches</h2>
+    <p class="section-sub">Check everything you'd like included on your site. We'll handle all the setup.</p>
+    <div class="field">
+      <label>Additional features <span class="hint">(check all that apply)</span></label>
+      <div class="check-grid">
+        <label class="check-item" onclick="toggleCheck(this)"><input type="checkbox" value="booking"><div class="check-box"></div><div class="check-label">Online Booking<span class="check-sub">Appointment scheduling widget</span></div></label>
+        <label class="check-item" onclick="toggleCheck(this)"><input type="checkbox" value="chatbot"><div class="check-box"></div><div class="check-label">Live Chat / Chatbot<span class="check-sub">Chat bubble on the site</span></div></label>
+        <label class="check-item" onclick="toggleCheck(this)"><input type="checkbox" value="gallery"><div class="check-box"></div><div class="check-label">Photo Gallery<span class="check-sub">Portfolio or work showcase</span></div></label>
+        <label class="check-item" onclick="toggleCheck(this)"><input type="checkbox" value="reviews"><div class="check-box"></div><div class="check-label">Reviews Section<span class="check-sub">Google or Yelp embed</span></div></label>
+        <label class="check-item" onclick="toggleCheck(this)"><input type="checkbox" value="newsletter"><div class="check-box"></div><div class="check-label">Email Sign-Up<span class="check-sub">Collect customer emails</span></div></label>
+        <label class="check-item" onclick="toggleCheck(this)"><input type="checkbox" value="faq"><div class="check-box"></div><div class="check-label">FAQ Page<span class="check-sub">Answer common questions</span></div></label>
+        <label class="check-item" onclick="toggleCheck(this)"><input type="checkbox" value="menu"><div class="check-box"></div><div class="check-label">Digital Menu / Price List<span class="check-sub">Formatted pricing page</span></div></label>
+        <label class="check-item" onclick="toggleCheck(this)"><input type="checkbox" value="map"><div class="check-box"></div><div class="check-label">Google Maps Embed<span class="check-sub">Interactive map on contact page</span></div></label>
+        <label class="check-item" onclick="toggleCheck(this)"><input type="checkbox" value="ecommerce"><div class="check-box"></div><div class="check-label">Online Store<span class="check-sub">Sell products directly</span></div></label>
+        <label class="check-item" onclick="toggleCheck(this)"><input type="checkbox" value="blog"><div class="check-box"></div><div class="check-label">Blog / News Section<span class="check-sub">Regular content & updates</span></div></label>
+        <label class="check-item" onclick="toggleCheck(this)"><input type="checkbox" value="popup"><div class="check-box"></div><div class="check-label">Promo Pop-Up<span class="check-sub">Announce deals on arrival</span></div></label>
+        <label class="check-item" onclick="toggleCheck(this)"><input type="checkbox" value="waiver"><div class="check-box"></div><div class="check-label">Waiver / Intake Form<span class="check-sub">Digital forms for clients</span></div></label>
+      </div>
+    </div>
+    <div class="field" style="margin-top:14px"><label>Anything else you'd like? <span class="hint">(optional)</span></label><textarea id="otherFeatures" placeholder="Anything we didn't list — just describe it and we'll figure it out together." style="min-height:80px"></textarea></div>
+    <hr class="divider">
+    <div class="field">
+      <label>Do you have a domain name already?</label>
+      <div class="yn-group">
+        <button class="yn-btn" onclick="yn(this,'domainYes','domainReveal')">Yes, I have one</button>
+        <button class="yn-btn" onclick="yn(this,'domainNo','domainNoReveal')">No, I need one</button>
+      </div>
+      <div class="reveal" id="domainReveal"><input type="text" id="domainName" placeholder="e.g. mybusiness.com" /></div>
+      <div class="reveal" id="domainNoReveal"><input type="text" id="domainIdea" placeholder="Any name ideas? e.g. bellasnailbar.com — we'll check availability" /></div>
+    </div>
+    <hr class="divider">
+    <div class="field"><label>Launch date or deadline <span class="hint">(optional)</span></label><input type="text" id="deadline" placeholder="e.g. Before July 4th weekend, ASAP, no rush" /></div>
+    <div class="field"><label>Anything else we should know? <span class="hint">(optional)</span></label><textarea id="finalNotes" placeholder="Special instructions, things to avoid, questions you have…" style="min-height:80px"></textarea></div>
+  </div>
+  <div class="nav-bar">
+    <button class="btn-back" onclick="goTo(5)">← Back</button>
+    <button class="btn-submit" id="submitBtn" onclick="submitForm()">✦ Submit My Project Brief</button>
+  </div>
+</div>
+
+<!-- THANK YOU -->
+<div class="page" id="page-7">
+  <div class="section-card">
+    <div class="thankyou">
+      <div class="ty-icon">✓</div>
+      <h2>You're All Set</h2>
+      <div class="gold-rule"></div>
+      <p>Your project brief has been submitted to I.Q. Productionz. We'll review everything and reach out within 24 hours to confirm your timeline and next steps.</p>
+      <p style="margin-top:16px">Questions in the meantime? Email us at<br><a href="mailto:SarahParsons@IQProductionz.com" style="color:var(--gold);text-decoration:none">SarahParsons@IQProductionz.com</a></p>
+    </div>
+  </div>
+</div>
+
+<!-- FOOTER -->
+<div class="form-footer">
+  <img class="sig-logo" src="IQ-noglow_edited_edited.avif" alt="I.Q. Productionz" onerror="this.style.display='none'">
+  <div class="sig-text">A project by <a href="https://iqproductionz.com" target="_blank">IQProductionz.com</a> · Entertainment &amp; Metaphysical Health</div>
+</div>
+
+</div><!-- /form-body -->
+
+<script>
+  const EMAILJS_SERVICE  = 'service_75wx6fk';
+  const EMAILJS_TEMPLATE = 'template_nnmxioq';
+  const TO_EMAIL         = 'SarahParsons@IQProductionz.com';
+
+  let currentPage = 1;
+  const totalPages = 6;
+
+  function goTo(n) {
+    document.getElementById('page-' + currentPage).classList.remove('active');
+    document.getElementById('page-' + n).classList.add('active');
+    for (let i = 1; i <= totalPages; i++) {
+      const dot = document.getElementById('dot-' + i);
+      dot.className = 'step-dot' + (i < n ? ' done' : i === n ? ' active' : '');
+      if (i < totalPages) document.getElementById('line-' + i).className = 'step-line' + (i < n ? ' done' : '');
+    }
+    currentPage = n;
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+
+  function yn(btn, id, revealId) {
+    btn.closest('.yn-group').querySelectorAll('.yn-btn').forEach(b => b.className = 'yn-btn');
+    btn.classList.add(id.endsWith('Yes') ? 'selected-yes' : 'selected-no');
+    btn.closest('.field').querySelectorAll('.reveal').forEach(r => r.classList.remove('open'));
+    if (revealId) { const r = document.getElementById(revealId); if (r) r.classList.add('open'); }
+  }
+
+  function handleFiles(input, listId) {
+    const list = document.getElementById(listId);
+    if (list) list.innerHTML = Array.from(input.files).map(f => '✓ ' + f.name).join('<br>');
+  }
+
+  function addItem(listId, label) {
+    const list = document.getElementById(listId);
+    const card = document.createElement('div');
+    card.className = 'item-card';
+    card.innerHTML = `<button class="remove-item" onclick="removeItem(this)">×</button>
+      <div class="item-row">
+        <div><label style="font-size:11px;letter-spacing:.5px">Name</label><input type="text" placeholder="${label} name" /></div>
+        <div><label style="font-size:11px;letter-spacing:.5px">Price</label><input type="text" placeholder="$0" /></div>
+      </div>
+      <textarea placeholder="Description (optional)…" style="min-height:60px;font-size:13px"></textarea>`;
+    list.appendChild(card);
+  }
+
+  function removeItem(btn) {
+    const card = btn.closest('.item-card');
+    if (card.parentElement.children.length > 1) card.remove();
+  }
+
+  const extraPlatforms = ['Snapchat','Threads','Nextdoor','Google Business','Yelp','Etsy','Discord','WhatsApp Business','Reddit','Twitch','Vimeo'];
+  let socialIdx = 0;
+  function addSocial() {
+    const list = document.getElementById('socialList');
+    const row = document.createElement('div');
+    row.className = 'social-row';
+    row.innerHTML = `
+      <div style="flex:0 0 130px"><input type="text" placeholder="Platform name" style="font-size:13px;padding:11px 12px" value="${extraPlatforms[socialIdx % extraPlatforms.length]}" /></div>
+      <input type="text" placeholder="@handle or link" style="flex:1" />
+      <button class="remove-social" onclick="this.closest('.social-row').remove()">×</button>`;
+    socialIdx++;
+    list.appendChild(row);
+  }
+
+  function toggleCheck(el) {
+    el.classList.toggle('checked');
+    el.querySelector('input[type="checkbox"]').checked = el.classList.contains('checked');
+  }
+
+  function selectType(el, type) {
+    document.querySelectorAll('.type-card').forEach(c => c.classList.remove('selected'));
+    el.classList.add('selected');
+    document.getElementById('bizTypeOtherReveal').classList.toggle('open', type === 'other');
+    document.getElementById('productsSection').style.display = (type === 'services') ? 'none' : '';
+    document.getElementById('servicesSection').style.display = (type === 'products') ? 'none' : '';
+    document.getElementById('offerDivider').style.display    = (type === 'both' || type === 'other') ? '' : 'none';
+  }
+
+  function gv(id) { return (document.getElementById(id) || {}).value || ''; }
+
+  function collectFormData() {
+    const bizType = document.querySelector('.type-card.selected input')?.value || 'Not specified';
+
+    const products = Array.from(document.querySelectorAll('#productList .item-card')).map(c => {
+      const inp = c.querySelectorAll('input'), ta = c.querySelector('textarea');
+      return `  • ${inp[0].value||'—'} | ${inp[1].value||'—'} | ${ta.value||'No description'}`;
+    }).join('\n') || '  None listed';
+
+    const services = Array.from(document.querySelectorAll('#serviceList .item-card')).map(c => {
+      const inp = c.querySelectorAll('input'), ta = c.querySelector('textarea');
+      return `  • ${inp[0].value||'—'} | ${inp[1].value||'—'} | ${ta.value||'No description'}`;
+    }).join('\n') || '  None listed';
+
+    const socials = Array.from(document.querySelectorAll('#socialList .social-row')).map(r => {
+      const inputs = r.querySelectorAll('input');
+      const platform = r.querySelector('.social-platform')?.textContent?.trim() || inputs[0]?.value || '';
+      const handle = inputs[inputs.length-1]?.value || '';
+      return handle ? `  • ${platform}: ${handle}` : null;
+    }).filter(Boolean).join('\n') || '  None provided';
+
+    const features = Array.from(document.querySelectorAll('.check-item.checked input')).map(i => i.value).join(', ') || 'None selected';
+
+    const addrYes = document.querySelector('[onclick*="addrYes"].selected-yes');
+    const address = addrYes
+      ? [gv('street'), gv('city'), gv('stateSelect'), gv('zip')].filter(Boolean).join(', ')
+      : 'Online / mobile only';
+
+    return `━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+WEBSITE PROJECT BRIEF
+I.Q. Productionz
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+BUSINESS BASICS
+  Business Name:   ${gv('bizName')||'—'}
+  Owner/Contact:   ${gv('ownerName')||'—'}
+  Phone:           ${gv('ownerPhone')||'—'}
+  Business Type:   ${bizType}${bizType==='other'?' — '+gv('bizTypeOther'):''}
+  Tagline:         ${gv('tagline')||'—'}
+
+BRAND & DESIGN
+  Logo:            ${document.querySelector('[onclick*="logoYes"].selected-yes')?'Yes (file uploaded)':document.querySelector('[onclick*="logoNo"].selected-no')?'No — please create one':'—'}
+  Brand Colors:    ${gv('colorInput')||document.querySelector('[onclick*="colorNo"].selected-no')?'Choose for me':'—'}
+  Font Preference: ${gv('fontInput')||document.querySelector('[onclick*="fontNo"].selected-no')?'Choose for me':'—'}
+  Photos:          ${document.querySelector('[onclick*="photoYes"].selected-yes')?'Yes (files uploaded)':document.querySelector('[onclick*="photoNo"].selected-no')?'Use stock photos':'—'}
+  Vibe/Aesthetic:  ${gv('vibeInput')||'—'}
+  Inspiration:     ${gv('inspoInput')||'—'}
+
+LOCATION
+  Address:         ${address}
+  Business Hours:  ${gv('hoursInput').replace(/\n/g,' | ')||'—'}
+  Service Area:    ${gv('serviceArea')||'—'}
+
+PRODUCTS
+${products}
+
+SERVICES
+${services}
+
+ABOUT US / MISSION
+  ${gv('aboutText')||document.querySelector('[onclick*="aboutNo"].selected-no')?'Write one for us':'—'}
+
+PROMOS / SPECIAL OFFERS
+  ${gv('promoText')||document.querySelector('[onclick*="promoNo"].selected-no')?'None right now':'—'}
+
+CONTACT & SOCIAL
+  Business Email:  ${gv('bizEmail')||'—'}
+  Display Phone:   ${gv('displayPhone')||'—'}
+  Booking Link:    ${gv('bookingLink')||'—'}
+
+SOCIAL MEDIA
+${socials}
+
+FEATURES REQUESTED
+  ${features}
+  Other: ${gv('otherFeatures')||'—'}
+
+DOMAIN
+  ${gv('domainName')?'Has domain: '+gv('domainName'):gv('domainIdea')?'Needs domain — idea: '+gv('domainIdea'):'—'}
+
+TIMELINE
+  Deadline: ${gv('deadline')||'—'}
+
+ADDITIONAL NOTES
+  ${gv('finalNotes')||'—'}
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+Submitted via IQ Productionz Website Intake Form
+IQProductionz.com
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━`.trim();
+  }
+
+  async function submitForm() {
+    const btn = document.getElementById('submitBtn');
+    const overlay = document.getElementById('sendingOverlay');
+    btn.disabled = true;
+    overlay.classList.add('show');
+
+    const bizName   = gv('bizName') || 'New Client';
+    const ownerName = gv('ownerName') || 'Client';
+    const replyTo   = gv('bizEmail') || TO_EMAIL;
+
+    const params = {
+      to_email: TO_EMAIL,
+      subject:  'New Website Brief — ' + bizName,
+      name:     ownerName,
+      message:  collectFormData(),
+      reply_to: replyTo,
+    };
+
+    try {
+      await emailjs.send(EMAILJS_SERVICE, EMAILJS_TEMPLATE, params);
+      overlay.classList.remove('show');
+      goTo(7);
+    } catch (err) {
+      overlay.classList.remove('show');
+      btn.disabled = false;
+      alert('Something went wrong. Please try again, or email SarahParsons@IQProductionz.com directly.\n\nError: ' + (err.text || err.message || JSON.stringify(err)));
+      console.error('EmailJS error:', err);
+    }
+  }
+</script>
+</body>
+</html>

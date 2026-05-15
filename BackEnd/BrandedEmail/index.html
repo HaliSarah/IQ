@@ -1,0 +1,646 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>IQ Email Brand — I.Q. Productionz</title>
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700&family=Raleway:wght@300;400;500;600&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
+<script>emailjs.init("3vNjQbWmqzzOO6IK");</script>
+<style>
+:root {
+  --bg:      #333333;
+  --surface: #454545;
+  --card:    #454545;
+  --border:  #2e2b24;
+  --gold:    #c98a2e;
+  --gold-lt: #e0a84a;
+  --gold-dim:#7a5218;
+  --white:   #f0ece3;
+  --muted:   #A9A9A9;
+  --success: #4a8c62;
+  --danger:  #c0392b;
+  --radius:  8px;
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:'Raleway',sans-serif;background:var(--bg);color:var(--white);min-height:100vh;padding-bottom:60px;}
+
+/* HEADER */
+.hdr {
+  background:linear-gradient(160deg,#454545 0%,#333333 60%);
+  border-bottom:1px solid var(--border);
+  padding:40px 32px 32px; text-align:center; position:relative; overflow:hidden;
+}
+.hdr::before {
+  content:''; position:absolute; inset:0;
+  background:radial-gradient(ellipse at 50% 0%,rgba(201,138,46,0.13) 0%,transparent 70%);
+  pointer-events:none;
+}
+.logo-wrap{display:flex;align-items:center;justify-content:center;gap:14px;margin-bottom:20px;}
+.logo-wrap img{height:56px;width:auto;filter:drop-shadow(0 0 12px rgba(201,138,46,0.45));}
+.brand-name{font-family:'Cinzel',serif;font-size:20px;font-weight:700;color:var(--gold);letter-spacing:2px;line-height:1;}
+.brand-sub{font-size:9px;letter-spacing:4px;text-transform:uppercase;color:var(--muted);margin-top:4px;}
+.gold-rule{width:60px;height:2px;background:linear-gradient(90deg,transparent,var(--gold),transparent);margin:16px auto;}
+.hdr h1{font-family:'Cinzel',serif;font-size:clamp(18px,3.5vw,28px);font-weight:600;color:var(--white);letter-spacing:1px;text-transform:uppercase;margin-bottom:8px;}
+.hdr p{font-size:13px;color:var(--muted);max-width:440px;margin:0 auto;line-height:1.7;font-weight:300;}
+
+/* TABS */
+.tab-bar{display:flex;border-bottom:1px solid var(--border);background:var(--surface);max-width:760px;margin:0 auto;}
+.tab{flex:1;padding:14px 10px;text-align:center;font-family:'Cinzel',serif;font-size:11px;font-weight:600;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted);cursor:pointer;border-bottom:2px solid transparent;transition:all 0.2s;}
+.tab:hover{color:var(--white);}
+.tab.active{color:var(--gold);border-bottom-color:var(--gold);}
+
+/* BODY */
+.page-body{max-width:760px;margin:0 auto;padding:32px 24px 0;}
+
+/* CARD */
+.card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:28px;margin-bottom:18px;position:relative;overflow:hidden;}
+.card::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,transparent,var(--gold),transparent);}
+.card h2{font-family:'Cinzel',serif;font-size:14px;font-weight:600;color:var(--gold);letter-spacing:1.5px;text-transform:uppercase;margin-bottom:16px;}
+
+/* NOTE BOX */
+.note{background:#3a3528;border-left:3px solid var(--gold);padding:14px 18px;border-radius:var(--radius);font-size:12px;color:var(--white);line-height:1.9;margin-bottom:20px;}
+.note code{background:rgba(201,138,46,0.2);color:var(--gold-lt);padding:2px 6px;border-radius:4px;font-size:11px;}
+.note strong{color:var(--gold);}
+
+/* FIELDS */
+.field{margin-bottom:16px;}
+.field:last-child{margin-bottom:0;}
+.lbl{font-size:10px;letter-spacing:2px;color:var(--gold);text-transform:uppercase;display:block;margin-bottom:7px;font-weight:600;}
+.inp{width:100%;padding:11px 14px;border:1px solid var(--border);border-radius:var(--radius);font-family:'Raleway',sans-serif;font-size:14px;color:var(--white);background:var(--bg);outline:none;transition:border 0.2s,box-shadow 0.2s;appearance:none;}
+.inp::placeholder{color:var(--muted);}
+.inp:focus{border-color:var(--gold);box-shadow:0 0 0 3px rgba(201,138,46,0.15);}
+textarea.inp{resize:vertical;min-height:200px;line-height:1.7;}
+.hint{font-size:11px;color:var(--muted);margin-top:5px;font-style:italic;line-height:1.6;}
+.row-2{display:grid;grid-template-columns:1fr 1fr;gap:14px;}
+
+/* BUILDER BOXES */
+.builder-box{background:#3a3528;border:1px dashed var(--border);border-radius:var(--radius);padding:16px 18px;margin-top:10px;}
+.builder-box .builder-title{font-size:10px;letter-spacing:2px;color:var(--gold);text-transform:uppercase;margin-bottom:12px;font-weight:600;}
+.builder-row{display:flex;gap:10px;flex-wrap:wrap;align-items:flex-end;}
+.builder-field{flex:1;min-width:120px;}
+.builder-field .lbl{font-size:9px;margin-bottom:5px;}
+.builder-add{background:var(--gold);color:#333333;border:none;padding:10px 18px;border-radius:var(--radius);font-family:'Raleway',sans-serif;font-size:12px;font-weight:700;cursor:pointer;white-space:nowrap;transition:all 0.2s;}
+.builder-add:hover{background:var(--gold-lt);}
+
+/* BUTTONS */
+.btn-row{display:flex;gap:10px;flex-wrap:wrap;margin-top:22px;}
+.btn-row .btn{flex:1;min-width:140px;}
+.btn{padding:13px 20px;border:none;border-radius:var(--radius);font-family:'Cinzel',serif;font-size:11px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;cursor:pointer;transition:all 0.2s;}
+.btn-gold{background:linear-gradient(135deg,var(--gold),#a87025);color:#333333;box-shadow:0 4px 14px rgba(201,138,46,0.3);}
+.btn-gold:hover{background:linear-gradient(135deg,var(--gold-lt),var(--gold));box-shadow:0 4px 22px rgba(201,138,46,0.45);}
+.btn-gold:disabled{opacity:.5;cursor:not-allowed;box-shadow:none;}
+.btn-outline{background:transparent;color:var(--gold);border:1px solid var(--gold);}
+.btn-outline:hover{background:rgba(201,138,46,0.1);}
+.btn-test{background:linear-gradient(135deg,#555,#444);color:var(--white);border:1px solid var(--border);}
+.btn-test:hover{background:linear-gradient(135deg,#666,#555);}
+.btn-test:disabled{opacity:.5;cursor:not-allowed;}
+
+/* STATUS */
+.status{font-size:13px;margin-top:14px;padding:12px 16px;border-radius:var(--radius);display:none;text-align:center;font-weight:500;}
+.status.ok{background:rgba(74,140,98,0.2);color:#a8d5b8;border:1px solid rgba(74,140,98,0.4);display:block;}
+.status.err{background:rgba(192,57,43,0.15);color:#e8a89e;border:1px solid rgba(192,57,43,0.3);display:block;}
+
+/* PREVIEW */
+#preview-frame{width:100%;height:620px;border:1px solid var(--border);border-radius:var(--radius);margin-top:14px;display:none;background:white;}
+
+/* TABS CONTENT */
+.tab-panel{display:none;}
+.tab-panel.active{display:block;}
+
+/* DIVIDER */
+.divider{border:none;border-top:1px solid var(--border);margin:20px 0;}
+
+/* SIGNATURE PREVIEW */
+.sig-preview{background:var(--bg);border:1px solid var(--border);border-radius:var(--radius);padding:16px 20px;margin-top:10px;font-size:13px;line-height:2;}
+.sig-preview .sig-name{font-family:'Cinzel',serif;font-size:16px;color:var(--gold);font-weight:600;}
+.sig-preview .sig-title{font-size:11px;color:var(--muted);letter-spacing:1px;text-transform:uppercase;}
+.sig-preview .sig-link{color:var(--gold);font-size:11px;}
+
+@media(max-width:540px){
+  .hdr{padding:28px 18px 24px;}
+  .card{padding:20px 16px;}
+  .row-2{grid-template-columns:1fr;}
+  .btn-row{flex-direction:column;}
+  .tab{font-size:9px;padding:12px 6px;}
+}
+</style>
+</head>
+<body>
+<div style="background:#454545;border-bottom:1px solid #2e2b24;padding:10px 18px;display:flex;justify-content:space-between;align-items:center;position:sticky;top:0;z-index:1000;">
+  <span style="font-family:'Cinzel',Georgia,serif;font-size:10px;letter-spacing:2px;color:#A9A9A9;text-transform:uppercase;"><strong style="color:#c98a2e;">BackEnd</strong> · Branded Email</span>
+  <a href="../" style="font-family:'Cinzel',Georgia,serif;padding:7px 16px;border:1px solid #7a5218;border-radius:6px;color:#e0a84a;font-size:10px;letter-spacing:1.5px;text-decoration:none;text-transform:uppercase;">↩ BackEnd Home</a>
+</div>
+
+<!-- HEADER -->
+<div class="hdr">
+  <div class="logo-wrap">
+    <img src="IQ-noglow_edited_edited.avif" alt="I.Q. Productionz" onerror="this.style.display='none'">
+    <div>
+      <div class="brand-name">I.Q. Productionz</div>
+      <div class="brand-sub">Inner Quality Productionz</div>
+    </div>
+  </div>
+  <div class="gold-rule"></div>
+  <h1>IQ Email Brand</h1>
+  <p>Send premium branded emails to clients — proposals, follow-ups, receipts, and custom messages — all on your IQ Productionz identity.</p>
+</div>
+
+<!-- TABS -->
+<div style="background:var(--surface);border-bottom:1px solid var(--border);">
+  <div class="tab-bar">
+    <div class="tab active" onclick="switchTab('compose')">✦ Compose</div>
+    <div class="tab" onclick="switchTab('outreach')">📡 Outreach</div>
+    <div class="tab" onclick="switchTab('followup')">🔁 Follow-Up</div>
+    <div class="tab" onclick="switchTab('settings')">⚙ Signature</div>
+  </div>
+</div>
+
+<div class="page-body">
+
+<!-- ══════════ TAB: COMPOSE ══════════ -->
+<div class="tab-panel active" id="tab-compose">
+
+  <div class="note">
+    <strong>EmailJS Template Setup</strong> — your template needs: <code>to_email</code> &nbsp;<code>subject</code> &nbsp;<code>{{{message}}}</code> (triple braces = renders HTML)<br>
+    Use <strong>template_nnmxioq</strong> or create a new one at emailjs.com for outbound client emails.<br><br>
+    Use <strong>#BUTTON</strong> on its own line in your message body to insert a call-to-action button (build it in the button builder below).
+  </div>
+
+  <!-- Template ID override -->
+  <div class="card">
+    <h2>Send Settings</h2>
+    <div class="row-2">
+      <div class="field">
+        <label class="lbl">EmailJS Template ID</label>
+        <input type="text" class="inp" id="templateId" value="template_nnmxioq" placeholder="template_xxxxxxx">
+      </div>
+      <div class="field">
+        <label class="lbl">Your Email (CC copy to you)</label>
+        <input type="email" class="inp" id="consultantEmail" value="SarahParsons@IQProductionz.com" placeholder="your@email.com">
+      </div>
+    </div>
+  </div>
+
+  <!-- Recipient -->
+  <div class="card">
+    <h2>Recipient</h2>
+    <div class="row-2">
+      <div class="field">
+        <label class="lbl">Client Email *</label>
+        <input type="email" class="inp" id="clientEmail" placeholder="client@email.com">
+      </div>
+      <div class="field">
+        <label class="lbl">Client First Name *</label>
+        <input type="text" class="inp" id="clientName" placeholder="e.g. Marcus">
+      </div>
+    </div>
+    <div class="field">
+      <label class="lbl">Subject Line *</label>
+      <input type="text" class="inp" id="emailSubject" value="Your Website Project — I.Q. Productionz">
+    </div>
+  </div>
+
+  <!-- Message -->
+  <div class="card">
+    <h2>Message Body</h2>
+    <div class="field">
+      <textarea class="inp" id="messageBody" placeholder="Type your message here. Plain text or basic HTML both work.&#10;&#10;Line breaks are preserved automatically.&#10;&#10;Use #BUTTON on its own line to insert a call-to-action button.&#10;&#10;Example:&#10;Here's a summary of your website project details and next steps..."></textarea>
+      <div class="hint">Plain text is fine — line breaks become paragraphs automatically. You can also use basic HTML tags like &lt;b&gt;, &lt;a href=""&gt;, etc.</div>
+    </div>
+
+    <!-- Hyperlink Builder -->
+    <div class="builder-box">
+      <div class="builder-title">🔗 Hyperlink Builder — inserts a link at your cursor</div>
+      <div class="builder-row">
+        <div class="builder-field">
+          <div class="lbl">Link Text (what they see)</div>
+          <input type="text" class="inp" id="linkText" placeholder="e.g. View Your Project Brief" style="padding:9px 12px;font-size:13px;">
+        </div>
+        <div class="builder-field">
+          <div class="lbl">URL</div>
+          <input type="url" class="inp" id="linkUrl" placeholder="https://iqproductionz.com" style="padding:9px 12px;font-size:13px;">
+        </div>
+        <button class="builder-add" onclick="insertHyperlink()">+ Insert Link</button>
+      </div>
+    </div>
+
+    <!-- Button Builder -->
+    <div class="builder-box" style="margin-top:10px;">
+      <div class="builder-title">🟡 Button Builder — inserts a #BUTTON into your message</div>
+      <div class="builder-row">
+        <div class="builder-field">
+          <div class="lbl">Button Text</div>
+          <input type="text" class="inp" id="btnText" placeholder="e.g. Book Your Project" style="padding:9px 12px;font-size:13px;">
+        </div>
+        <div class="builder-field">
+          <div class="lbl">Button URL</div>
+          <input type="url" class="inp" id="btnUrl" placeholder="https://iqproductionz.com" style="padding:9px 12px;font-size:13px;">
+        </div>
+        <button class="builder-add" onclick="insertButton()">+ Add to Message</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Send -->
+  <div class="btn-row">
+    <button class="btn btn-outline" onclick="previewEmail()">Preview in Window</button>
+    <button class="btn btn-test" id="testBtn" onclick="sendEmail('test')">Send Test to Me</button>
+    <button class="btn btn-gold" id="sendBtn" onclick="sendEmail('client')">Send to Client →</button>
+  </div>
+  <div id="statusMsg" class="status"></div>
+  <iframe id="preview-frame"></iframe>
+</div>
+
+<!-- ══════════ TAB: OUTREACH ══════════ -->
+<div class="tab-panel" id="tab-outreach">
+  <div class="note">
+    <strong>Cold Outreach Templates</strong> — click any template to load it into the Compose tab, then customize before sending. Built for your Launch-Ready Website Package pitch.
+  </div>
+
+  <div class="card" style="cursor:pointer;" onclick="loadTemplate('cold-dm')">
+    <h2>📱 Cold DM / Instagram Message</h2>
+    <p style="font-size:13px;color:var(--muted);line-height:1.7;margin-top:8px;">Short, punchy, no-pressure opener. Perfect for sliding into a business's DMs when they have no website or a dead one.</p>
+    <div style="margin-top:14px;padding:14px;background:var(--bg);border-radius:var(--radius);font-size:13px;line-height:1.8;color:var(--white);">
+      Hey [Name]! Love what you're building with [Business]. Quick question — are you working on a website? I build clean, custom sites for small businesses in 72 hours flat, $350 one-time, no monthly fees. Happy to show you examples if you're curious. 🙌
+    </div>
+    <div style="margin-top:10px;font-size:11px;color:var(--gold);letter-spacing:1px;">→ Click to load into Compose</div>
+  </div>
+
+  <div class="card" style="cursor:pointer;" onclick="loadTemplate('email-cold')">
+    <h2>📧 Cold Email — No Website</h2>
+    <p style="font-size:13px;color:var(--muted);line-height:1.7;margin-top:8px;">Professional outreach for businesses you find on Google Maps that have no web presence at all.</p>
+    <div style="margin-top:14px;padding:14px;background:var(--bg);border-radius:var(--radius);font-size:13px;line-height:1.8;color:var(--white);">
+      Subject: Your Business Deserves a Website — Done in 72 Hours<br><br>
+      Hi [Name],<br><br>I came across [Business Name] and I think you're leaving money on the table without a website. I build clean, professional sites for local businesses — delivered in 72 hours for a flat $350. No retainer. No monthly fees. You own it.<br><br>I'd love to show you a quick example. Mind if I send one over?
+    </div>
+    <div style="margin-top:10px;font-size:11px;color:var(--gold);letter-spacing:1px;">→ Click to load into Compose</div>
+  </div>
+
+  <div class="card" style="cursor:pointer;" onclick="loadTemplate('email-outdated')">
+    <h2>🔧 Cold Email — Outdated Website</h2>
+    <p style="font-size:13px;color:var(--muted);line-height:1.7;margin-top:8px;">For businesses that have a website but it looks like it was built in 2009. Tactful but honest.</p>
+    <div style="margin-top:14px;padding:14px;background:var(--bg);border-radius:var(--radius);font-size:13px;line-height:1.8;color:var(--white);">
+      Subject: Quick Thought About Your Website<br><br>
+      Hi [Name],<br><br>I checked out [Business Name] online and your work is impressive — but your website doesn't do it justice. I specialize in rebuilding small business sites in 72 hours for $350 flat. Modern, mobile-friendly, and built to convert visitors into customers.<br><br>Want me to mock up what yours could look like?
+    </div>
+    <div style="margin-top:10px;font-size:11px;color:var(--gold);letter-spacing:1px;">→ Click to load into Compose</div>
+  </div>
+
+  <div class="card" style="cursor:pointer;" onclick="loadTemplate('proposal')">
+    <h2>📋 Project Proposal Email</h2>
+    <p style="font-size:13px;color:var(--muted);line-height:1.7;margin-top:8px;">Send after an initial conversation. Summarizes the scope, price, and next steps professionally.</p>
+    <div style="margin-top:14px;padding:14px;background:var(--bg);border-radius:var(--radius);font-size:13px;line-height:1.8;color:var(--white);">
+      Subject: Your Website Project Proposal — I.Q. Productionz<br><br>
+      Hi [Name],<br><br>
+      Great talking with you! Here's a quick summary of what I'll deliver:<br><br>
+      ✦ 3–5 page custom website (Home, About, Services, Contact + one more)<br>
+      ✦ Mobile-friendly & fast-loading<br>
+      ✦ Domain setup included<br>
+      ✦ Delivered in 72 hours<br>
+      ✦ Flat rate: $350 — no monthly fees, ever<br><br>
+      To get started, I just need a 50% deposit ($175) and your completed intake form. Ready to lock it in?
+    </div>
+    <div style="margin-top:10px;font-size:11px;color:var(--gold);letter-spacing:1px;">→ Click to load into Compose</div>
+  </div>
+
+  <div class="card" style="cursor:pointer;" onclick="loadTemplate('delivery')">
+    <h2>🚀 Project Delivery Email</h2>
+    <p style="font-size:13px;color:var(--muted);line-height:1.7;margin-top:8px;">The big reveal. Send when the site is live. Professional, exciting, and includes next steps.</p>
+    <div style="margin-top:14px;padding:14px;background:var(--bg);border-radius:var(--radius);font-size:13px;line-height:1.8;color:var(--white);">
+      Subject: 🚀 Your Website Is Live — [Business Name]<br><br>
+      Hi [Name],<br><br>
+      Your site is live! Go check it out: [website URL]<br><br>
+      Here's what's included and ready to go:<br>
+      ✦ All pages built and live<br>
+      ✦ Mobile optimized<br>
+      ✦ Domain connected<br>
+      ✦ Contact form active<br><br>
+      Your final balance of $175 is due today. You can send via [payment method].<br><br>
+      It's been a pleasure building this for you. Don't hesitate to reach out if you have any questions, and I'd love a review or referral if you're happy with the work! 🙌
+    </div>
+    <div style="margin-top:10px;font-size:11px;color:var(--gold);letter-spacing:1px;">→ Click to load into Compose</div>
+  </div>
+</div>
+
+<!-- ══════════ TAB: FOLLOW-UP ══════════ -->
+<div class="tab-panel" id="tab-followup">
+  <div class="note">
+    <strong>Follow-Up Templates</strong> — the money is in the follow-up. Most clients need 2–3 touches before saying yes. Use these to stay top of mind without being pushy.
+  </div>
+
+  <div class="card" style="cursor:pointer;" onclick="loadTemplate('followup-1')">
+    <h2>👋 Follow-Up #1 — 48 Hours After First Contact</h2>
+    <div style="margin-top:10px;padding:14px;background:var(--bg);border-radius:var(--radius);font-size:13px;line-height:1.8;color:var(--white);">
+      Hey [Name], just wanted to circle back on the website offer. I have an opening this week and wanted to give you first shot at it before I move to the next business on my list. Still just $350, live in 72 hours. Want to see a demo?
+    </div>
+    <div style="margin-top:10px;font-size:11px;color:var(--gold);letter-spacing:1px;">→ Click to load into Compose</div>
+  </div>
+
+  <div class="card" style="cursor:pointer;" onclick="loadTemplate('followup-2')">
+    <h2>💡 Follow-Up #2 — Value Add</h2>
+    <div style="margin-top:10px;padding:14px;background:var(--bg);border-radius:var(--radius);font-size:13px;line-height:1.8;color:var(--white);">
+      Hi [Name]! I put together a quick mock-up of what [Business Name]'s homepage could look like — no obligation, just wanted to show you the vision. Want me to send it over? Takes 2 seconds.
+    </div>
+    <div style="margin-top:10px;font-size:11px;color:var(--gold);letter-spacing:1px;">→ Click to load into Compose</div>
+  </div>
+
+  <div class="card" style="cursor:pointer;" onclick="loadTemplate('followup-last')">
+    <h2>🚪 Follow-Up #3 — Soft Close</h2>
+    <div style="margin-top:10px;padding:14px;background:var(--bg);border-radius:var(--radius);font-size:13px;line-height:1.8;color:var(--white);">
+      Hey [Name] — I won't keep bugging you, I promise! Last note: I have one website slot open this week at the $350 rate. After that my calendar fills up. If timing isn't right, totally understand — I'll be here when it is. Just reply "yes" and we're rolling. 🙌
+    </div>
+    <div style="margin-top:10px;font-size:11px;color:var(--gold);letter-spacing:1px;">→ Click to load into Compose</div>
+  </div>
+
+  <div class="card" style="cursor:pointer;" onclick="loadTemplate('referral')">
+    <h2>⭐ Post-Delivery — Review & Referral Ask</h2>
+    <div style="margin-top:10px;padding:14px;background:var(--bg);border-radius:var(--radius);font-size:13px;line-height:1.8;color:var(--white);">
+      Hi [Name]! Just checking in to make sure everything is running smoothly on the site. If you're happy with how it turned out, I'd really appreciate a Google review — it helps me find more clients like you. And if you know any other business owners who need a website, send them my way and I'll give you $50 off your next project. Thanks for trusting me with your brand! 🙌
+    </div>
+    <div style="margin-top:10px;font-size:11px;color:var(--gold);letter-spacing:1px;">→ Click to load into Compose</div>
+  </div>
+</div>
+
+<!-- ══════════ TAB: SIGNATURE ══════════ -->
+<div class="tab-panel" id="tab-settings">
+  <div class="card">
+    <h2>Email Signature Settings</h2>
+    <p style="font-size:13px;color:var(--muted);margin-bottom:20px;line-height:1.6;">This signature appears at the bottom of every email you send. Customize it below.</p>
+    <div class="row-2">
+      <div class="field"><label class="lbl">Your Full Name</label><input type="text" class="inp" id="sigName" value="Sarah Parsons"></div>
+      <div class="field"><label class="lbl">Your Title</label><input type="text" class="inp" id="sigTitle" value="Web Designer & Creative Director"></div>
+    </div>
+    <div class="row-2">
+      <div class="field"><label class="lbl">Phone (optional)</label><input type="text" class="inp" id="sigPhone" placeholder="(555) 000-0000"></div>
+      <div class="field"><label class="lbl">Website</label><input type="text" class="inp" id="sigWeb" value="IQProductionz.com"></div>
+    </div>
+    <div class="field"><label class="lbl">Tagline / Sign-off line (optional)</label><input type="text" class="inp" id="sigTagline" placeholder="e.g. Building brands that mean business."></div>
+    <button class="btn btn-gold" style="margin-top:16px;width:auto;padding:11px 28px;" onclick="updateSigPreview()">Update Preview</button>
+    <div class="sig-preview" id="sigPreview" style="margin-top:16px;">
+      <div class="sig-name">Sarah Parsons</div>
+      <div class="sig-title">Web Designer & Creative Director</div>
+      <div class="sig-link">IQProductionz.com</div>
+      <div style="margin-top:4px;font-size:11px;color:var(--muted);">I.Q. Productionz · Entertainment & Metaphysical Health</div>
+    </div>
+  </div>
+</div>
+
+</div><!-- /page-body -->
+
+<script>
+const EJS_SERVICE  = 'service_75wx6fk';
+const EJS_TEMPLATE_DEFAULT = 'template_nnmxioq';
+
+// ── TAB SWITCHING ──
+function switchTab(name){
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+  event.target.classList.add('active');
+  document.getElementById('tab-' + name).classList.add('active');
+}
+
+// ── TEMPLATE LOADER ──
+const TEMPLATES = {
+  'cold-dm': {
+    subject: 'Quick Question About Your Website',
+    body: `Hey [Name]! Love what you're building with [Business]. Quick question — are you working on a website?\n\nI build clean, custom sites for small businesses in 72 hours flat, $350 one-time, no monthly fees. Happy to show you examples if you're curious. 🙌`
+  },
+  'email-cold': {
+    subject: 'Your Business Deserves a Website — Done in 72 Hours',
+    body: `Hi [Name],\n\nI came across [Business Name] and I think you're leaving money on the table without a website.\n\nI build clean, professional sites for local businesses — delivered in 72 hours for a flat $350. No retainer. No monthly fees. You own it outright.\n\nI'd love to show you a quick example. Mind if I send one over?`
+  },
+  'email-outdated': {
+    subject: 'Quick Thought About Your Website',
+    body: `Hi [Name],\n\nI checked out [Business Name] online and your work is impressive — but your website doesn't do it justice.\n\nI specialize in rebuilding small business sites in 72 hours for $350 flat. Modern, mobile-friendly, and built to convert visitors into customers.\n\nWant me to mock up what yours could look like?`
+  },
+  'proposal': {
+    subject: 'Your Website Project Proposal — I.Q. Productionz',
+    body: `Hi [Name],\n\nGreat talking with you! Here's a quick summary of what I'll deliver:\n\n✦ 3–5 page custom website (Home, About, Services, Contact + one more)\n✦ Mobile-friendly & fast-loading\n✦ Domain setup included\n✦ Delivered in 72 hours\n✦ Flat rate: $350 — no monthly fees, ever\n\nTo get started, I just need a 50% deposit ($175) and your completed intake form.\n\nReady to lock it in?`
+  },
+  'delivery': {
+    subject: '🚀 Your Website Is Live — [Business Name]',
+    body: `Hi [Name],\n\nYour site is live! Go check it out: [website URL]\n\nHere's what's included and ready to go:\n✦ All pages built and live\n✦ Mobile optimized\n✦ Domain connected\n✦ Contact form active\n\nYour final balance of $175 is due today. You can send via [payment method].\n\nIt's been a pleasure building this for you. Don't hesitate to reach out if you have any questions — and I'd love a review or referral if you're happy with the work! 🙌`
+  },
+  'followup-1': {
+    subject: 'Still Interested? One Spot Left This Week',
+    body: `Hey [Name], just wanted to circle back on the website offer.\n\nI have an opening this week and wanted to give you first shot at it before I move to the next business on my list.\n\nStill just $350, live in 72 hours. Want to see a demo?`
+  },
+  'followup-2': {
+    subject: 'I Made Something for [Business Name]',
+    body: `Hi [Name]!\n\nI put together a quick mock-up of what [Business Name]'s homepage could look like — no obligation, just wanted to show you the vision.\n\nWant me to send it over? Takes 2 seconds.`
+  },
+  'followup-last': {
+    subject: 'Last Note — Website Spot This Week',
+    body: `Hey [Name] — I won't keep bugging you, I promise!\n\nLast note: I have one website slot open this week at the $350 rate. After that my calendar fills up.\n\nIf timing isn't right, totally understand — I'll be here when it is. Just reply "yes" and we're rolling. 🙌`
+  },
+  'referral': {
+    subject: 'How\'s the Site Treating You? + A Little Thank You',
+    body: `Hi [Name]!\n\nJust checking in to make sure everything is running smoothly on the site.\n\nIf you're happy with how it turned out, I'd really appreciate a Google review — it helps me find more clients like you.\n\nAnd if you know any other business owners who need a website, send them my way and I'll give you $50 off your next project.\n\nThanks for trusting me with your brand! 🙌`
+  }
+};
+
+function loadTemplate(key){
+  const t = TEMPLATES[key];
+  if(!t) return;
+  document.getElementById('emailSubject').value = t.subject;
+  document.getElementById('messageBody').value = t.body;
+  // Switch to compose tab
+  document.querySelectorAll('.tab').forEach((el,i) => el.classList.toggle('active', i===0));
+  document.querySelectorAll('.tab-panel').forEach((el,i) => el.classList.toggle('active', i===0));
+  window.scrollTo({top:0,behavior:'smooth'});
+  showStatus('ok','Template loaded — customize it before sending!');
+}
+
+// ── HYPERLINK BUILDER ──
+function insertHyperlink(){
+  const text = document.getElementById('linkText').value.trim();
+  const url  = document.getElementById('linkUrl').value.trim();
+  if(!text || !url){ alert('Please fill in both the link text and URL.'); return; }
+  const ta = document.getElementById('messageBody');
+  const insert = `<a href="${url}">${text}</a>`;
+  const s = ta.selectionStart, e = ta.selectionEnd;
+  ta.value = ta.value.slice(0,s) + insert + ta.value.slice(e);
+  ta.selectionStart = ta.selectionEnd = s + insert.length;
+  ta.focus();
+  document.getElementById('linkText').value = '';
+  document.getElementById('linkUrl').value = '';
+}
+
+// ── BUTTON BUILDER ──
+function insertButton(){
+  const text = document.getElementById('btnText').value.trim();
+  const url  = document.getElementById('btnUrl').value.trim();
+  if(!text || !url){ alert('Please fill in both the button text and URL.'); return; }
+  const ta = document.getElementById('messageBody');
+  const s = ta.selectionStart;
+  const insert = `\n#BUTTON:${text}|${url}\n`;
+  ta.value = ta.value.slice(0,s) + insert + ta.value.slice(s);
+  ta.focus();
+  document.getElementById('btnText').value = '';
+  document.getElementById('btnUrl').value = '';
+}
+
+// ── SIGNATURE PREVIEW ──
+function updateSigPreview(){
+  const n  = document.getElementById('sigName').value || 'Sarah Parsons';
+  const ti = document.getElementById('sigTitle').value || '';
+  const ph = document.getElementById('sigPhone').value || '';
+  const w  = document.getElementById('sigWeb').value || '';
+  const tg = document.getElementById('sigTagline').value || '';
+  document.getElementById('sigPreview').innerHTML = `
+    <div class="sig-name">${n}</div>
+    ${ti?`<div class="sig-title">${ti}</div>`:''}
+    ${ph?`<div style="font-size:12px;color:var(--muted)">${ph}</div>`:''}
+    ${w?`<div class="sig-link">${w}</div>`:''}
+    <div style="margin-top:4px;font-size:11px;color:var(--muted);">I.Q. Productionz · Entertainment &amp; Metaphysical Health</div>
+    ${tg?`<div style="font-size:12px;color:var(--gold-dim);font-style:italic;margin-top:4px;">${tg}</div>`:''}
+  `;
+}
+
+// ── EMAIL HTML BUILDER ──
+function buildEmailHtml(clientName, rawContent){
+  const sigName    = document.getElementById('sigName').value || 'Sarah Parsons';
+  const sigTitle   = document.getElementById('sigTitle').value || 'Web Designer & Creative Director';
+  const sigPhone   = document.getElementById('sigPhone').value || '';
+  const sigWeb     = document.getElementById('sigWeb').value || 'IQProductionz.com';
+  const sigTagline = document.getElementById('sigTagline').value || '';
+  const consultantEmail = document.getElementById('consultantEmail').value || 'SarahParsons@IQProductionz.com';
+
+  // Process content: line breaks → <br>, #BUTTON tags → gold buttons, preserve HTML
+  let body = rawContent
+    .replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')  // escape HTML chars in plain text
+    .replace(/\n/g,'<br>');
+
+  // Undo escaping for real HTML tags users may have typed (we allow <a>, <b>, <strong>, <em>, <u>)
+  body = rawContent; // Use raw – let basic HTML pass through for power users
+  body = body.replace(/\n/g,'<br>');
+
+  // Process #BUTTON:text|url
+  body = body.replace(/#BUTTON:([^|]+)\|([^\n<]+)/g, (_, btnTxt, btnUrl) =>
+    `<br><div style="text-align:center;margin:22px 0;">` +
+    `<a href="${btnUrl.trim()}" style="display:inline-block;padding:13px 32px;background:linear-gradient(135deg,#c98a2e,#a87025);color:#333;text-decoration:none;font-family:'Cinzel',Georgia,serif;font-size:12px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;border-radius:6px;">${btnTxt.trim()}</a>` +
+    `</div><br>`
+  );
+
+  return `<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700&family=Raleway:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+body{margin:0;padding:0;background:#3a3a3a;font-family:'Raleway',Arial,sans-serif;}
+.wrap{max-width:600px;margin:0 auto;background:#454545;border-radius:10px;overflow:hidden;box-shadow:0 6px 32px rgba(0,0,0,0.4);}
+.email-hdr{background:linear-gradient(160deg,#454545 0%,#333 100%);padding:32px 40px;text-align:center;border-bottom:2px solid #c98a2e;position:relative;}
+.email-hdr::after{content:'';display:block;width:60px;height:2px;background:linear-gradient(90deg,transparent,#c98a2e,transparent);margin:14px auto 0;}
+.email-hdr h1{margin:0;font-family:'Cinzel',Georgia,serif;font-size:22px;font-weight:700;color:#c98a2e;letter-spacing:3px;text-transform:uppercase;}
+.email-hdr p{margin:6px 0 0;font-size:10px;color:#A9A9A9;letter-spacing:3px;text-transform:uppercase;}
+.email-body{padding:36px 40px;background:#454545;}
+.greeting{font-family:'Cinzel',Georgia,serif;font-size:22px;color:#f0ece3;font-weight:400;margin:0 0 6px;}
+.gold-line{width:40px;height:1px;background:linear-gradient(90deg,#c98a2e,#e0a84a);margin:0 0 20px;}
+.content{font-size:14px;color:#f0ece3;line-height:1.9;margin:0 0 24px;}
+.sig-block{border-top:1px solid #2e2b24;margin-top:32px;padding-top:24px;}
+.sig-name{font-family:'Cinzel',Georgia,serif;font-size:17px;color:#c98a2e;font-weight:600;margin:0 0 2px;}
+.sig-title{font-size:11px;color:#A9A9A9;letter-spacing:1px;text-transform:uppercase;margin:0 0 6px;}
+.sig-link{font-size:12px;color:#c98a2e;text-decoration:none;}
+.email-ftr{background:#333;padding:16px 40px;text-align:center;font-size:11px;color:#7a7468;letter-spacing:1px;border-top:1px solid #2e2b24;}
+.email-ftr a{color:#c98a2e;text-decoration:none;}
+@media(max-width:600px){.email-body{padding:24px 20px;}.email-hdr{padding:24px 20px;}}
+</style></head>
+<body><div style="padding:20px 16px;background:#3a3a3a;">
+<div class="wrap">
+<div class="email-hdr">
+  <h1>I.Q. Productionz</h1>
+  <p>Inner Quality Productionz</p>
+</div>
+<div class="email-body">
+  <p class="greeting">Hello, ${clientName},</p>
+  <div class="gold-line"></div>
+  <div class="content">${body}</div>
+  <div class="sig-block">
+    <div class="sig-name">${sigName}</div>
+    <div class="sig-title">${sigTitle}</div>
+    ${sigPhone?`<div style="font-size:12px;color:#A9A9A9;margin-bottom:2px;">${sigPhone}</div>`:''}
+    <a href="https://${sigWeb}" class="sig-link">${sigWeb}</a>
+    <div style="font-size:11px;color:#7a7468;margin-top:6px;">I.Q. Productionz &bull; Entertainment &amp; Metaphysical Health</div>
+    ${sigTagline?`<div style="font-size:12px;color:#7a5218;font-style:italic;margin-top:4px;">${sigTagline}</div>`:''}
+  </div>
+</div>
+<div class="email-ftr">I.Q. Productionz &bull; <a href="https://iqproductionz.com">IQProductionz.com</a> &bull; <a href="mailto:${consultantEmail}">${consultantEmail}</a></div>
+</div></div></body></html>`;
+}
+
+// ── PREVIEW ──
+function previewEmail(){
+  const clientName = document.getElementById('clientName').value.trim() || 'Client';
+  const recs       = document.getElementById('messageBody').value.trim() || '(Your message will appear here)';
+  const html       = buildEmailHtml(clientName, recs);
+  const win = window.open('','_blank','width=700,height=800,scrollbars=yes');
+  win.document.write(html);
+  win.document.close();
+}
+
+// ── SEND ──
+async function sendEmail(mode){
+  const templateId      = document.getElementById('templateId').value.trim() || EJS_TEMPLATE_DEFAULT;
+  const clientEmail     = document.getElementById('clientEmail').value.trim();
+  const clientName      = document.getElementById('clientName').value.trim();
+  const subject         = document.getElementById('emailSubject').value.trim();
+  const recs            = document.getElementById('messageBody').value.trim();
+  const consultantEmail = document.getElementById('consultantEmail').value.trim();
+
+  if(mode==='client'){
+    if(!clientEmail||!clientEmail.includes('@')){ showStatus('err','Please enter a valid client email.'); return; }
+    if(!clientName){ showStatus('err','Please enter the client\'s first name.'); return; }
+  }
+  if(!recs){ showStatus('err','Please write your message before sending.'); return; }
+
+  const sendTo   = mode==='test' ? consultantEmail : clientEmail;
+  const nameFor  = mode==='test' ? (clientName||'Client') + ' (TEST)' : clientName;
+  const subjectL = mode==='test' ? '[TEST] ' + subject : subject;
+
+  const btn = document.getElementById(mode==='test' ? 'testBtn' : 'sendBtn');
+  btn.textContent = 'Sending…'; btn.disabled = true;
+
+  const html = buildEmailHtml(nameFor, recs);
+
+  try {
+    await emailjs.send(EJS_SERVICE, templateId, {
+      to_email: sendTo,
+      subject:  subjectL,
+      message:  html,
+      reply_to: consultantEmail,
+      name:     document.getElementById('sigName').value || 'Sarah Parsons'
+    });
+
+    // Consultant copy on real sends
+    if(mode==='client'){
+      const ccHtml = buildEmailHtml(clientName, recs);
+      await emailjs.send(EJS_SERVICE, templateId, {
+        to_email: consultantEmail,
+        subject:  'SENT: ' + subject + ' → ' + clientName,
+        message:  ccHtml,
+        reply_to: clientEmail,
+        name:     document.getElementById('sigName').value || 'Sarah Parsons'
+      });
+    }
+
+    const msg = mode==='test'
+      ? '✓ Test email sent to ' + consultantEmail + '! Check your inbox.'
+      : '✓ Email sent to ' + clientName + ' (' + clientEmail + ')! A copy was sent to your inbox.';
+    showStatus('ok', msg);
+  } catch(e){
+    console.error(e);
+    showStatus('err','Send failed: ' + (e.text||e.message||JSON.stringify(e)));
+  }
+
+  btn.textContent = mode==='test' ? 'Send Test to Me' : 'Send to Client →';
+  btn.disabled = false;
+}
+
+function showStatus(type, msg){
+  const el = document.getElementById('statusMsg');
+  el.className = 'status ' + type;
+  el.textContent = msg;
+  el.scrollIntoView({behavior:'smooth',block:'nearest'});
+}
+</script>
+</body>
+</html>

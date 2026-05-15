@@ -1,0 +1,266 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Launch-Ready Website Pitch — I.Q. Productionz</title>
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700&family=Raleway:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#333333;--surface:#454545;--card:#454545;--border:#2e2b24;--gold:#c98a2e;--gold-lt:#e0a84a;--gold-dim:#7a5218;--white:#f0ece3;--muted:#A9A9A9;--success:#4a8c62;--radius:8px;}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:'Raleway',sans-serif;background:var(--bg);color:var(--white);min-height:100vh;padding-bottom:80px;}
+
+.hdr{background:linear-gradient(160deg,#454545 0%,#333333 60%);border-bottom:1px solid var(--border);padding:48px 32px 40px;text-align:center;position:relative;overflow:hidden;}
+.hdr::before{content:'';position:absolute;inset:0;background:radial-gradient(ellipse at 50% 0%,rgba(201,138,46,0.13) 0%,transparent 70%);pointer-events:none;}
+.logo-wrap{display:flex;align-items:center;justify-content:center;gap:14px;margin-bottom:20px;}
+.logo-wrap img{height:56px;width:auto;filter:drop-shadow(0 0 12px rgba(201,138,46,0.45));}
+.brand-name{font-family:'Cinzel',serif;font-size:20px;font-weight:700;color:var(--gold);letter-spacing:2px;}
+.brand-sub{font-size:9px;letter-spacing:4px;text-transform:uppercase;color:var(--muted);margin-top:4px;}
+.gold-rule{width:60px;height:2px;background:linear-gradient(90deg,transparent,var(--gold),transparent);margin:16px auto;}
+.hdr h1{font-family:'Cinzel',serif;font-size:clamp(20px,4vw,38px);font-weight:700;color:var(--white);letter-spacing:1px;text-transform:uppercase;margin-bottom:8px;}
+.eyebrow{font-size:10px;letter-spacing:4px;text-transform:uppercase;color:var(--gold);margin-bottom:14px;}
+.hdr .sub{font-size:14px;color:var(--muted);max-width:520px;margin:0 auto;line-height:1.7;font-weight:300;}
+
+.body{max-width:800px;margin:0 auto;padding:48px 24px 0;}
+
+/* STATS ROW */
+.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-bottom:40px;}
+.stat-card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:24px 20px;text-align:center;position:relative;overflow:hidden;}
+.stat-card::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,transparent,var(--gold),transparent);}
+.stat-num{font-family:'Cinzel',serif;font-size:36px;font-weight:700;color:var(--gold);line-height:1;}
+.stat-label{font-size:11px;color:var(--muted);letter-spacing:1.5px;text-transform:uppercase;margin-top:6px;}
+
+/* SECTION */
+.section{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:32px;margin-bottom:20px;position:relative;overflow:hidden;}
+.section::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,transparent,var(--gold),transparent);}
+.section h2{font-family:'Cinzel',serif;font-size:16px;font-weight:600;color:var(--gold);letter-spacing:2px;text-transform:uppercase;margin-bottom:18px;display:flex;align-items:center;gap:10px;}
+.section h2 .icon{font-size:18px;}
+p{font-size:14px;color:var(--white);line-height:1.9;margin-bottom:14px;font-weight:300;}
+p:last-child{margin-bottom:0;}
+strong{color:var(--gold-lt);font-weight:600;}
+
+/* STEP LIST */
+.steps{display:flex;flex-direction:column;gap:14px;margin-top:4px;}
+.step{display:flex;gap:16px;align-items:flex-start;}
+.step-num{width:32px;height:32px;min-width:32px;background:linear-gradient(135deg,var(--gold),#a87025);border-radius:50%;display:flex;align-items:center;justify-content:center;font-family:'Cinzel',serif;font-size:12px;font-weight:700;color:#333;margin-top:2px;}
+.step-body h3{font-size:14px;font-weight:600;color:var(--white);margin-bottom:4px;}
+.step-body p{font-size:13px;color:var(--muted);margin:0;line-height:1.7;}
+
+/* TARGET LIST */
+.target-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin-top:4px;}
+.target-item{background:var(--bg);border:1px solid var(--border);border-radius:var(--radius);padding:12px 16px;display:flex;align-items:center;gap:10px;font-size:13px;color:var(--white);}
+.target-item .t-icon{font-size:20px;}
+
+/* PITCH SCRIPTS */
+.script-box{background:var(--bg);border:1px solid var(--border);border-left:3px solid var(--gold);border-radius:var(--radius);padding:20px 24px;margin-bottom:14px;}
+.script-label{font-size:10px;letter-spacing:2px;text-transform:uppercase;color:var(--gold);margin-bottom:10px;font-weight:700;}
+.script-text{font-size:14px;color:var(--white);line-height:1.9;font-weight:300;font-style:italic;}
+.script-text strong{font-style:normal;}
+
+/* OBJECTIONS */
+.obj-list{display:flex;flex-direction:column;gap:12px;}
+.obj-card{background:var(--bg);border:1px solid var(--border);border-radius:var(--radius);padding:16px 20px;}
+.obj-q{font-size:13px;color:var(--muted);margin-bottom:6px;font-weight:500;}
+.obj-q::before{content:'❝ ';color:var(--gold-dim);}
+.obj-a{font-size:13px;color:var(--white);line-height:1.7;font-weight:300;}
+.obj-a::before{content:'→ ';color:var(--gold);}
+
+/* DIVIDER */
+.divider{border:none;border-top:1px solid var(--border);margin:24px 0;}
+
+/* PRICING TABLE */
+.price-table{width:100%;border-collapse:collapse;margin-top:4px;}
+.price-table th{text-align:left;font-size:10px;letter-spacing:2px;text-transform:uppercase;color:var(--gold);padding:10px 14px;border-bottom:1px solid var(--border);}
+.price-table td{padding:12px 14px;font-size:13px;border-bottom:1px solid var(--border);color:var(--white);line-height:1.6;}
+.price-table tr:last-child td{border-bottom:none;}
+.price-table td:first-child{font-weight:600;}
+.price-table .highlight td{background:rgba(201,138,46,0.08);color:var(--gold-lt);}
+
+/* CTA */
+.cta-box{background:linear-gradient(160deg,#454545 0%,#3a3528 100%);border:1px solid var(--gold-dim);border-radius:var(--radius);padding:32px;text-align:center;margin-top:12px;position:relative;overflow:hidden;}
+.cta-box::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,transparent,var(--gold),transparent);}
+.cta-box h2{font-family:'Cinzel',serif;font-size:20px;font-weight:700;color:var(--gold);letter-spacing:1px;text-transform:uppercase;margin-bottom:10px;}
+.cta-box p{color:var(--muted);font-size:14px;line-height:1.8;max-width:500px;margin:0 auto 20px;}
+.cta-btn{display:inline-block;padding:14px 36px;background:linear-gradient(135deg,var(--gold),#a87025);color:#333;text-decoration:none;font-family:'Cinzel',serif;font-size:12px;font-weight:700;letter-spacing:2px;text-transform:uppercase;border-radius:var(--radius);box-shadow:0 4px 20px rgba(201,138,46,0.35);cursor:pointer;border:none;transition:all 0.2s;}
+.cta-btn:hover{background:linear-gradient(135deg,var(--gold-lt),var(--gold));box-shadow:0 4px 28px rgba(201,138,46,0.5);}
+
+@media(max-width:540px){
+  .stats{grid-template-columns:1fr;}.target-grid{grid-template-columns:1fr;}
+  .hdr{padding:32px 18px 28px;}.section{padding:22px 16px;}
+}
+</style>
+</head>
+<body>
+
+<div style="background:#454545;border-bottom:1px solid #2e2b24;padding:10px 18px;display:flex;justify-content:space-between;align-items:center;position:sticky;top:0;z-index:1000;">
+  <span style="font-family:'Cinzel',Georgia,serif;font-size:10px;letter-spacing:2px;color:#A9A9A9;text-transform:uppercase;"><strong style="color:#c98a2e;">BackEnd</strong> · Pitch Assist</span>
+  <a href="../" style="font-family:'Cinzel',Georgia,serif;padding:7px 16px;border:1px solid #7a5218;border-radius:6px;color:#e0a84a;font-size:10px;letter-spacing:1.5px;text-decoration:none;text-transform:uppercase;">↩ BackEnd Home</a>
+</div>
+
+<div class="hdr">
+  <div class="logo-wrap">
+    <img src="IQ-noglow_edited_edited.avif" alt="I.Q. Productionz" onerror="this.style.display='none'">
+    <div>
+      <div class="brand-name">I.Q. Productionz</div>
+      <div class="brand-sub">Inner Quality Productionz</div>
+    </div>
+  </div>
+  <div class="gold-rule"></div>
+  <div class="eyebrow">Path 1 — Business Strategy</div>
+  <h1>Launch-Ready Website Packages</h1>
+  <p class="sub">A clean, live website delivered in 72 hours for $300–$400 flat. No retainers. No fluff. Just results.</p>
+</div>
+
+<div class="body">
+
+  <!-- STATS -->
+  <div class="stats">
+    <div class="stat-card"><div class="stat-num">72</div><div class="stat-label">Hours to Deliver</div></div>
+    <div class="stat-card"><div class="stat-num">$350</div><div class="stat-label">Flat Rate Per Site</div></div>
+    <div class="stat-card"><div class="stat-num">3</div><div class="stat-label">Clients = $1,050</div></div>
+  </div>
+
+  <!-- WHY THIS WORKS -->
+  <div class="section">
+    <h2><span class="icon">⚡</span>Why This Works for You</h2>
+    <p>You already have everything you need to start today. No audience required. No ad spend. No agency overhead. Just your existing skills, a laptop, and 48 hours of focused outreach.</p>
+    <p>Your edge over agencies: <strong>speed, price, and personal service.</strong> A small business owner gets a real human who picks up the phone — not a ticket in a queue. That's the pitch, and it sells itself.</p>
+    <div class="divider"></div>
+    <div class="steps">
+      <div class="step"><div class="step-num">1</div><div class="step-body"><h3>Design & Photography Skills</h3><p>You can shoot product photos and headshots on-site. Most clients don't have either. That alone is worth $100–$200 added to your rate.</p></div></div>
+      <div class="step"><div class="step-num">2</div><div class="step-body"><h3>Domain Purchasing Knowledge</h3><p>Buying and connecting a domain for a client is a $15 task that you can charge $30–$50 markup for. Easy upsell every single project.</p></div></div>
+      <div class="step"><div class="step-num">3</div><div class="step-body"><h3>Social Media + Content Creation</h3><p>After the site is live, offer a monthly social media package. That's your recurring revenue stream — built directly from your web clients.</p></div></div>
+      <div class="step"><div class="step-num">4</div><div class="step-body"><h3>Visual Recording Skills</h3><p>A short launch reel or promo video for their new site is a premium add-on that almost no $350 web designer can offer. You can.</p></div></div>
+    </div>
+  </div>
+
+  <!-- WHO TO TARGET -->
+  <div class="section">
+    <h2><span class="icon">🎯</span>Who to Target</h2>
+    <p>Open Google Maps right now. Search your city. Look for businesses that either have <strong>no website listed</strong>, a dead link, or a site that looks like it was built before smartphones existed. These are your clients.</p>
+    <div class="target-grid">
+      <div class="target-item"><span class="t-icon">🍔</span>Food Trucks & Pop-Ups</div>
+      <div class="target-item"><span class="t-icon">💅</span>Nail Salons & Lash Studios</div>
+      <div class="target-item"><span class="t-icon">✂️</span>Barbers & Hair Stylists</div>
+      <div class="target-item"><span class="t-icon">📸</span>Independent Photographers</div>
+      <div class="target-item"><span class="t-icon">🔨</span>Contractors & Handymen</div>
+      <div class="target-item"><span class="t-icon">🧘</span>Personal Trainers & Coaches</div>
+      <div class="target-item"><span class="t-icon">🌿</span>Estheticians & Spa Services</div>
+      <div class="target-item"><span class="t-icon">🎵</span>Independent Musicians & Artists</div>
+      <div class="target-item"><span class="t-icon">🍰</span>Home Bakers & Caterers</div>
+      <div class="target-item"><span class="t-icon">🚗</span>Auto Detailers & Mobile Mechanics</div>
+    </div>
+  </div>
+
+  <!-- PITCH SCRIPTS -->
+  <div class="section">
+    <h2><span class="icon">💬</span>Pitch Scripts That Convert</h2>
+    <p>Keep it human, keep it short. You're not selling a contract — you're offering to solve a problem they already know they have.</p>
+
+    <div class="script-box">
+      <div class="script-label">📱 Instagram / Facebook DM — Cold Opener</div>
+      <div class="script-text">Hey [Name]! Love what you're doing with [Business Name]. Quick question — do you have a website? I build clean, custom sites for local businesses in <strong>72 hours flat for $350</strong>, one-time fee, no monthly costs. Happy to show you some examples if you're curious! 🙌</div>
+    </div>
+
+    <div class="script-box">
+      <div class="script-label">📞 Phone / Walk-In Script — Direct Pitch</div>
+      <div class="script-text">Hey, my name is Sarah — I do web design for local businesses. I noticed you guys don't have a website yet and I think that's costing you customers. I build clean, professional sites in <strong>72 hours for a flat $350 — no monthly fees, ever.</strong> I can show you some examples right now if you've got 2 minutes?</div>
+    </div>
+
+    <div class="script-box">
+      <div class="script-label">📧 Cold Email — No Website</div>
+      <div class="script-text">Subject: <strong>Your Business Deserves a Website — Done in 72 Hours</strong><br><br>Hi [Name], I came across [Business Name] on Google Maps and I think you're leaving customers on the table without a website. I build clean, professional sites for local businesses delivered in <strong>72 hours for a flat $350</strong>. No retainer. No monthly fees. You own it. Can I send you a quick example?</div>
+    </div>
+
+    <div class="script-box">
+      <div class="script-label">🔧 Cold Email — Outdated Website</div>
+      <div class="script-text">Subject: <strong>Quick Thought About Your Website</strong><br><br>Hi [Name], I checked out [Business Name] online and your work is clearly impressive — but your website doesn't do it justice. I specialize in rebuilding small business sites in <strong>72 hours for $350 flat</strong>. Modern, mobile-friendly, and built to actually convert visitors into customers. Want me to mock up what yours could look like?</div>
+    </div>
+  </div>
+
+  <!-- WHAT YOU DELIVER -->
+  <div class="section">
+    <h2><span class="icon">📦</span>What You Deliver</h2>
+    <table class="price-table">
+      <thead><tr><th>Deliverable</th><th>Details</th></tr></thead>
+      <tbody>
+        <tr><td>Home Page</td><td>Hero section, tagline, call-to-action, brand colors & fonts</td></tr>
+        <tr><td>About Page</td><td>Owner story, mission, photos — we write it if they don't have one</td></tr>
+        <tr><td>Services / Products Page</td><td>All offerings, prices, descriptions pulled from their intake form</td></tr>
+        <tr><td>Contact Page</td><td>Form, phone, email, address, Google Maps embed, business hours</td></tr>
+        <tr><td>Social Media Links</td><td>All icons linked in header or footer</td></tr>
+        <tr class="highlight"><td>Domain Setup</td><td>Buy & connect their domain — charge $30–$50 markup on top of base price</td></tr>
+        <tr class="highlight"><td>Mobile Optimized</td><td>Looks great on every device — this alone beats 80% of their competition</td></tr>
+      </tbody>
+    </table>
+    <div class="divider"></div>
+    <p><strong>Build tools to use:</strong> Squarespace, Wix, Framer, or Webflow — pick one and master it. Framer is fastest for premium-looking results. Squarespace is easiest for clients to manage themselves after handoff.</p>
+    <p><strong>Your portfolio:</strong> Build one real or mock demo site today for a fake business — or redesign a bad local one as a spec piece. That's your entire portfolio. Done. Send the link in every DM.</p>
+  </div>
+
+  <!-- PRICING & UPSELLS -->
+  <div class="section">
+    <h2><span class="icon">💰</span>Pricing & Upsells</h2>
+    <table class="price-table">
+      <thead><tr><th>Package</th><th>Price</th><th>What's Included</th></tr></thead>
+      <tbody>
+        <tr><td>Starter Site</td><td>$300</td><td>3 pages — Home, Services, Contact. No frills, fast turnaround.</td></tr>
+        <tr class="highlight"><td>Launch-Ready ✦</td><td>$350</td><td>5 pages + domain setup + social links. Your go-to offer.</td></tr>
+        <tr><td>Premium</td><td>$450–$500</td><td>5 pages + booking widget + gallery + promo pop-up + photo session.</td></tr>
+        <tr><td>Add-On: Domain</td><td>+$35–$50</td><td>Buy & connect their custom domain. 15-minute task, real value to them.</td></tr>
+        <tr><td>Add-On: Photo Session</td><td>+$75–$100</td><td>30-min product/headshot shoot. You have the camera — use it.</td></tr>
+        <tr><td>Add-On: Social Pack</td><td>+$150/mo</td><td>8–12 posts/month with captions. Your recurring revenue.</td></tr>
+        <tr><td>Add-On: Launch Video</td><td>+$100–$150</td><td>30–60 sec promo reel for their new site. Nobody else is offering this at $350.</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- OBJECTION HANDLING -->
+  <div class="section">
+    <h2><span class="icon">🛡️</span>Handling Objections</h2>
+    <div class="obj-list">
+      <div class="obj-card">
+        <div class="obj-q">I can't afford it right now.</div>
+        <div class="obj-a">I get it — that's exactly why I don't charge monthly. It's one flat payment and you own it forever. I also do a 50/50 split: half to start, half when it's live.</div>
+      </div>
+      <div class="obj-card">
+        <div class="obj-q">I already have a Facebook page, that's good enough.</div>
+        <div class="obj-a">Facebook is great for community — but Google can't rank your Facebook page when someone searches for what you do. A website puts you on the map, literally. And you own it — Facebook can take your page down tomorrow.</div>
+      </div>
+      <div class="obj-card">
+        <div class="obj-q">Can I see examples of your work?</div>
+        <div class="obj-a">Absolutely — here's my portfolio: [your demo link]. I also offer to build a free homepage mockup so you can see exactly what yours would look like before committing.</div>
+      </div>
+      <div class="obj-card">
+        <div class="obj-q">What happens if I need changes later?</div>
+        <div class="obj-a">Minor tweaks in the first 7 days are included. After that I offer a small hourly rate or you can make changes yourself — I'll give you a quick walkthrough so you're never stuck.</div>
+      </div>
+      <div class="obj-card">
+        <div class="obj-q">72 hours sounds too fast. Will it be quality?</div>
+        <div class="obj-a">The intake form I send you collects everything I need upfront — your info, photos, colors, content. Once I have that, 72 hours is plenty for a clean, professional 3–5 page site. Quality is my reputation. I'll show you my demo so you can judge for yourself.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ACTION PLAN -->
+  <div class="section">
+    <h2><span class="icon">🗓️</span>Your 48-Hour Action Plan</h2>
+    <div class="steps">
+      <div class="step"><div class="step-num">1</div><div class="step-body"><h3>Today — Build Your Demo (2–3 hours)</h3><p>Pick a local business type (nail salon, food truck, barber) and build a spec site in Squarespace or Framer. Make it clean and premium. This is your entire portfolio. Host it free and grab the link.</p></div></div>
+      <div class="step"><div class="step-num">2</div><div class="step-body"><h3>Today — Build Your Outreach List (1 hour)</h3><p>Open Google Maps. Search "nail salon [your city]," "barber [your city]," "food truck [your city]." Filter for businesses with no website or a bad one. Screenshot each one. Build a list of 20–30 names and Instagram handles.</p></div></div>
+      <div class="step"><div class="step-num">3</div><div class="step-body"><h3>Tonight / Tomorrow — Send 20 DMs</h3><p>Use the cold DM script above. Personalize the business name. Keep it under 3 sentences. Lead with curiosity, not a sales pitch. Goal: get a response, not a sale. Aim for 20 DMs per day.</p></div></div>
+      <div class="step"><div class="step-num">4</div><div class="step-body"><h3>When They Reply — Send the Intake Form</h3><p>Paste the link to your client intake form. Tell them it takes 5 minutes. Once you have it back, you can quote them officially and collect the 50% deposit via Venmo, Cash App, or PayPal.</p></div></div>
+      <div class="step"><div class="step-num">5</div><div class="step-body"><h3>After 3 Clients — Stack the Model</h3><p>You're at $1,050+. Now add recurring revenue: offer a $150/month social media content package to each past client. Three clients = $450/month passive. Keep outreaching and it compounds.</p></div></div>
+    </div>
+  </div>
+
+  <!-- CTA -->
+  <div class="cta-box">
+    <h2>The Only Move Is to Start</h2>
+    <p>You have every skill, every tool, and every advantage to hit $1,000 in the next 7 days. The clients exist. The need is real. All that's left is the first DM.</p>
+    <button class="cta-btn" onclick="window.open('IQEmailBrand.html','_blank')">Open Email Sender →</button>
+  </div>
+
+</div><!-- /body -->
+</body>
+</html>

@@ -1,0 +1,362 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PersonalJS — Personal Reply Sender</title>
+<script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;1,300;1,400&family=Jost:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{--pink:#e8507a;--pink-dark:#c93a62;--gold:#c9a96e;--dark:#2a1a20;--gray:#8a7a80;}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:'Jost',sans-serif;background:#fdf6f8;min-height:100vh;padding:24px;}
+.card{background:white;border-radius:16px;padding:40px;max-width:720px;margin:0 auto;box-shadow:0 4px 40px rgba(232,80,122,0.10);}
+h1{font-family:'Cormorant Garamond',serif;font-size:2rem;color:var(--dark);margin-bottom:4px;}
+.sub{font-size:13px;color:var(--gray);margin-bottom:28px;line-height:1.7;}
+.field{margin-bottom:16px;}
+.lbl{font-size:10px;letter-spacing:2px;color:var(--gold);text-transform:uppercase;display:block;margin-bottom:6px;}
+.inp{width:100%;padding:12px 14px;border:1.5px solid #e8d5db;border-radius:10px;font-family:'Jost',sans-serif;font-size:14px;color:var(--dark);outline:none;transition:border 0.2s;background:white;}
+.inp:focus{border-color:var(--pink);}
+textarea.inp{resize:vertical;min-height:220px;line-height:1.7;}
+.hint{font-size:11px;color:var(--gray);margin-top:5px;font-style:italic;line-height:1.6;}
+.btn{background:linear-gradient(135deg,var(--pink),var(--pink-dark));color:white;border:none;padding:13px 24px;font-family:'Jost',sans-serif;font-weight:600;font-size:11px;letter-spacing:2.5px;text-transform:uppercase;cursor:pointer;border-radius:50px;transition:all 0.3s;}
+.btn:hover{transform:translateY(-2px);box-shadow:0 6px 20px rgba(232,80,122,0.4);}
+.btn:disabled{opacity:0.55;cursor:not-allowed;transform:none;box-shadow:none;}
+.btn-outline{background:transparent;color:var(--pink);border:1.5px solid var(--pink);}
+.btn-outline:hover{background:#fce4ec;box-shadow:none;}
+.btn-test{background:linear-gradient(135deg,var(--gold),#a88040);color:white;border:none;}
+.btn-test:hover{transform:translateY(-2px);box-shadow:0 6px 20px rgba(201,169,110,0.4);}
+.divider{border:none;border-top:1px solid #f0e8eb;margin:24px 0;}
+.note{background:#fff8f0;border-left:3px solid var(--gold);padding:14px 18px;border-radius:8px;font-size:12px;color:var(--dark);line-height:1.9;margin-bottom:24px;}
+.note code{background:#f0e8eb;padding:2px 6px;border-radius:4px;font-size:11px;}
+.status{font-size:13px;margin-top:14px;padding:12px 16px;border-radius:8px;display:none;text-align:center;}
+.status.ok{background:#f0fff4;color:#2d6a4f;border:1px solid #b7e4c7;display:block;}
+.status.err{background:#fff0f0;color:#c62828;border:1px solid #ffcdd2;display:block;}
+.btn-row{display:flex;gap:10px;flex-wrap:wrap;margin-top:20px;}
+.btn-row .btn{flex:1;min-width:140px;}
+/* Button builder */
+.btn-builder{background:#fff5f8;border:1.5px dashed #e8d5db;border-radius:10px;padding:16px 18px;margin-top:10px;}
+.btn-builder-row{display:flex;gap:10px;flex-wrap:wrap;align-items:flex-end;}
+.btn-builder-field{flex:1;min-width:120px;}
+.btn-builder input{width:100%;padding:9px 12px;border:1.5px solid #e8d5db;border-radius:8px;font-family:'Jost',sans-serif;font-size:13px;outline:none;}
+.btn-builder input:focus{border-color:var(--pink);}
+.btn-builder .add-btn{background:var(--pink);color:white;border:none;padding:9px 18px;border-radius:8px;font-family:'Jost',sans-serif;font-size:12px;font-weight:600;cursor:pointer;white-space:nowrap;}
+/* Preview iframe */
+#preview-frame{width:100%;height:600px;border:1px solid #e8d5db;border-radius:12px;margin-top:12px;display:none;}
+@media(max-width:480px){.card{padding:24px 18px;}.btn-row{flex-direction:column;}}
+</style>
+</head>
+<body>
+<div style="background:#454545;border-bottom:1px solid #2e2b24;padding:10px 18px;display:flex;justify-content:space-between;align-items:center;position:sticky;top:0;z-index:1000;">
+  <span style="font-family:'Cinzel',Georgia,serif;font-size:10px;letter-spacing:2px;color:#A9A9A9;text-transform:uppercase;"><strong style="color:#c98a2e;">BackEnd</strong> · Mary Kay · Branded Email</span>
+  <a href="../../" style="font-family:'Cinzel',Georgia,serif;padding:7px 16px;border:1px solid #7a5218;border-radius:6px;color:#e0a84a;font-size:10px;letter-spacing:1.5px;text-decoration:none;text-transform:uppercase;">↩ BackEnd Home</a>
+</div>
+<div class="card">
+
+  <h1>Personal Reply Sender</h1>
+  <p class="sub">Send a branded, formatted recommendation email to a client. Use the test button to preview in your inbox before sending.</p>
+
+  <!-- ─── SETUP NOTE ─────────────────────────────── -->
+  <div class="note">
+    <strong style="color:var(--gold);">EmailJS Template Setup</strong> — your template only needs:<br>
+    <code>to_email</code> &nbsp;<code>subject</code> &nbsp;<code>{{{message}}}</code> (triple braces = HTML)<br>
+    Based on your screenshot this is already configured correctly in template <code>template_z5qi34i</code>.
+    <br><br>
+    <strong style="color:var(--gold);">Editing the email HTML</strong> — look for these comment markers in the JS below:<br>
+    <code>&lt;!-- PUT CLIENT NAME HERE --&gt;</code> &nbsp;
+    <code>&lt;!-- PUT RECOMMENDATIONS HERE --&gt;</code> &nbsp;
+    <code>&lt;!-- BUTTON CODE --&gt;</code>
+  </div>
+
+  <!-- ─── CLIENT INFO ───────────────────────────── -->
+  <div style="display:flex;gap:14px;flex-wrap:wrap;">
+    <div class="field" style="flex:1;min-width:180px;">
+      <label class="lbl">Client Email *</label>
+      <input type="email" class="inp" id="client-email" placeholder="client@email.com">
+    </div>
+    <div class="field" style="flex:1;min-width:140px;">
+      <label class="lbl">Client First Name *</label>
+      <input type="text" class="inp" id="client-name" placeholder="e.g. Jessica">
+    </div>
+  </div>
+
+  <div class="field">
+    <label class="lbl">Email Subject *</label>
+    <input type="text" class="inp" id="email-subject" value="Your Personalized Mary Kay Recommendations ✨">
+  </div>
+
+  <!-- ─── RECOMMENDATIONS ───────────────────────── -->
+  <div class="field">
+    <label class="lbl">Your Recommendations *</label>
+    <textarea class="inp" id="recommendations" placeholder="Type or paste your recommendations here. Plain text or basic HTML both work.&#10;&#10;Use #BUTTON to add a button — see the button builder below.&#10;&#10;Example:&#10;Based on your concerns, I recommend starting with the TimeWise® Miracle Set..."></textarea>
+    <div class="hint">Plain text is fine — line breaks are preserved automatically. You can also paste HTML. Use <strong>#BUTTON</strong> on its own line to insert a button (build it below).</div>
+  </div>
+
+  <!-- ─── HYPERLINK BUILDER ───────────────────────── -->
+  <div class="btn-builder" style="margin-top:10px;">
+    <div style="font-size:10px;letter-spacing:2px;color:var(--gold);text-transform:uppercase;margin-bottom:10px;">🔗 Hyperlink Builder — inserts a clickable link at your cursor</div>
+    <div class="btn-builder-row">
+      <div class="btn-builder-field">
+        <div class="lbl" style="font-size:9px;">Link Text (what they see)</div>
+        <input type="text" id="link-text" placeholder="e.g. TimeWise® Miracle Set">
+      </div>
+      <div class="btn-builder-field">
+        <div class="lbl" style="font-size:9px;">URL</div>
+        <input type="url" id="link-url" placeholder="https://www.marykay.com/sistahay/...">
+      </div>
+      <button class="add-btn" onclick="insertHyperlink()">+ Insert Link</button>
+    </div>
+    <div style="font-size:10px;color:var(--gray);margin-top:8px;font-style:italic;">Tip: Click where you want the link in your message first, then click Insert Link.</div>
+  </div>
+
+  <!-- ─── BUTTON BUILDER ────────────────────────── -->
+  <div class="btn-builder" style="margin-top:10px;">
+    <div style="font-size:10px;letter-spacing:2px;color:var(--gold);text-transform:uppercase;margin-bottom:10px;">🛍 Button Builder — inserts a #BUTTON into your message</div>
+    <div class="btn-builder-row">
+      <div class="btn-builder-field">
+        <div class="lbl" style="font-size:9px;">Button Text</div>
+        <input type="text" id="btn-text" placeholder="e.g. Shop Now">
+      </div>
+      <div class="btn-builder-field">
+        <div class="lbl" style="font-size:9px;">Button Link (URL)</div>
+        <input type="url" id="btn-link" placeholder="https://www.marykay.com/sistahay/...">
+      </div>
+      <button class="add-btn" onclick="insertButton()">+ Add to Message</button>
+    </div>
+  </div>
+
+  <!-- ─── SEND BUTTONS ──────────────────────────── -->
+  <div class="btn-row">
+    <button class="btn btn-outline" onclick="previewEmail()">Preview in New Window</button>
+    <button class="btn btn-test" id="test-btn" onclick="sendEmail('test')">Send Test to Me</button>
+    <button class="btn" id="send-btn" onclick="sendEmail('client')">Send to Client →</button>
+  </div>
+
+  <div id="status-msg" class="status"></div>
+  <iframe id="preview-frame" title="Email Preview"></iframe>
+
+  <hr class="divider">
+  <p style="font-size:11px;color:var(--gray);text-align:center;line-height:1.7;">
+    Service: <strong>MaryKay</strong> &nbsp;·&nbsp; Reply-to: <strong>sistahaymarykay@gmail.com</strong>
+  </p>
+
+</div>
+
+<script>
+// ─── CONFIG ───────────────────────────────────────────
+const EJS_PUBLIC_KEY   = 'zmLo4nV99WWp2KjiR';
+const EJS_SERVICE_ID   = 'MaryKay';
+const CONSULTANT_EMAIL = 'sistahaymarykay@gmail.com';
+const PERSONALJS_URL   = 'https://iqproductionz.com/BackEnd/MaryKay/BrandedEmail/';
+
+const EJS_TEMPLATE_PERSONAL = 'template_z5qi34i'; // personal reply template ID
+
+window.addEventListener('load', function(){
+  if(window.emailjs) emailjs.init({ publicKey: EJS_PUBLIC_KEY });
+  // Pre-load client name + email — URL params first, then sessionStorage fallback
+  const params = new URLSearchParams(window.location.search);
+  const pName  = params.get('name')  || (()=>{try{return sessionStorage.getItem('mk_client_name');}catch(e){return '';}})();
+  const pEmail = params.get('email') || (()=>{try{return sessionStorage.getItem('mk_client_email');}catch(e){return '';}})();
+  if(pName)  document.getElementById('client-name').value  = decodeURIComponent(pName);
+  if(pEmail) document.getElementById('client-email').value = decodeURIComponent(pEmail);
+});
+
+// ─── BUTTON BUILDER ───────────────────────────────────
+function insertHyperlink(){
+  const text = document.getElementById('link-text').value.trim();
+  const url  = document.getElementById('link-url').value.trim();
+  if(!text || !url){ alert('Please enter both link text and a URL.'); return; }
+  const ta  = document.getElementById('recommendations');
+  const insert = '<a href="' + url + '" target="_blank" style="color:#e8507a;text-decoration:none;font-weight:500;">' + text + '</a>';
+  const start = ta.selectionStart;
+  const end   = ta.selectionEnd;
+  // If text is selected in textarea, wrap it; otherwise insert at cursor
+  const selected = ta.value.slice(start, end);
+  const replacement = selected
+    ? '<a href="' + url + '" target="_blank" style="color:#e8507a;text-decoration:none;font-weight:500;">' + selected + '</a>'
+    : insert;
+  ta.value = ta.value.slice(0, start) + replacement + ta.value.slice(end);
+  ta.focus();
+  // Clear fields
+  document.getElementById('link-text').value = '';
+  document.getElementById('link-url').value = '';
+}
+
+function insertButton(){
+  const text = document.getElementById('btn-text').value.trim();
+  const link = document.getElementById('btn-link').value.trim();
+  if(!text || !link){ alert('Please enter both button text and a link.'); return; }
+  const ta = document.getElementById('recommendations');
+  const insert = '\n#BUTTON ' + text + ' | ' + link + '\n';
+  const pos = ta.selectionStart;
+  ta.value = ta.value.slice(0, pos) + insert + ta.value.slice(pos);
+  // Clear fields
+  document.getElementById('btn-text').value = '';
+  document.getElementById('btn-link').value = '';
+}
+
+// ─── BUILD EMAIL HTML ─────────────────────────────────
+function buildEmailHtml(clientName, rawContent, clientEmail){
+  // Process #BUTTON markers in the content
+  // Format: #BUTTON Button Text | https://link.com
+  let body = rawContent.trim();
+
+  // Convert #BUTTON lines to HTML buttons
+  body = body.replace(/^#BUTTON\s+([^|]+)\|\s*(.+)$/gm, function(_, btnText, btnUrl){
+    // <!-- BUTTON CODE -->
+    return '<div style="text-align:center;margin:20px 0;">' +
+      '<a href="' + btnUrl.trim() + '" target="_blank" ' +
+      'style="display:inline-block;background:linear-gradient(135deg,#e8507a,#c93a62);' +
+      'color:white;border-radius:50px;padding:14px 32px;font-size:12px;' +
+      'font-family:Jost,Arial,sans-serif;font-weight:600;letter-spacing:2px;' +
+      'text-transform:uppercase;text-decoration:none;">' +
+      btnText.trim() + '</a></div>';
+  });
+
+  // Convert plain text line breaks to paragraphs (if not already HTML)
+  if(!body.includes('<p') && !body.includes('<div') && !body.includes('<br')){
+    body = body.split('\n').map(function(l){
+      l = l.trim();
+      if(!l) return '';
+      if(l.startsWith('<div')) return l; // already HTML (button)
+      return '<p style="font-size:14px;color:#3d2530;line-height:1.9;margin:0 0 14px;">' + l + '</p>';
+    }).join('\n');
+  }
+
+  // <!-- PUT CLIENT NAME HERE --> — clientName is injected below
+  // <!-- PUT CLIENT EMAIL HERE --> — clientEmail is injected in the consultant copy
+  // <!-- PUT RECOMMENDATIONS HERE --> — body is injected below
+
+  return '<!DOCTYPE html><html><head><meta charset="UTF-8">' +
+  '<style>' +
+  'body{margin:0;padding:0;background:#fdf6f8;font-family:Jost,Arial,sans-serif;}' +
+  '.wrap{max-width:600px;margin:0 auto;background:#fff;border-radius:16px;overflow:hidden;box-shadow:0 4px 24px rgba(232,80,122,0.10);}' +
+  '.hdr{background:linear-gradient(135deg,#e8507a,#c93a62);padding:32px 40px;text-align:center;}' +
+  '.hdr h1{margin:0;font-family:\'Cormorant Garamond\',Georgia,serif;font-size:28px;font-weight:300;color:#fff;letter-spacing:3px;text-transform:uppercase;}' +
+  '.hdr p{margin:6px 0 0;font-size:12px;color:rgba(255,255,255,0.85);letter-spacing:2px;text-transform:uppercase;}' +
+  '.body{padding:32px 40px;}' +
+  '.divider{width:40px;height:1px;background:linear-gradient(90deg,#e8507a,#c9a96e);margin:0 0 22px;}' +
+  '.recs{background:#fff5f8;border-left:3px solid #e8507a;padding:20px 24px;border-radius:10px;margin:24px 0;}' +
+  '.ftr{background:#fce4ec;padding:18px 40px;text-align:center;font-size:11px;color:#a06070;letter-spacing:1px;}' +
+  '.ftr a{color:#e8507a;}' +
+  '@media(max-width:600px){.body{padding:24px 20px;}.hdr{padding:24px 20px;}}' +
+  '</style></head>' +
+  '<body><div style="padding:24px 16px;background:#fdf6f8;">' +
+  '<div class="wrap">' +
+  '<div class="hdr"><h1>Mary Kay</h1><p>Your Personalized Recommendations</p></div>' +
+  '<div class="body">' +
+  // <!-- PUT CLIENT NAME HERE -->
+  '<p style="font-family:\'Cormorant Garamond\',Georgia,serif;font-size:26px;color:#2a1a20;font-weight:300;margin:0 0 6px;">Dear ' + clientName + ',</p>' +
+  '<div class="divider"></div>' +
+  '<p style="font-size:14px;color:#3d2530;line-height:1.9;margin:0 0 20px;">Thank you for your patience! After reviewing your assessment and personal message, here are my personalized recommendations just for you:</p>' +
+  // <!-- PUT RECOMMENDATIONS HERE -->
+  '<div class="recs">' + body + '</div>' +
+  '<p style="font-size:13px;color:#8a7a80;line-height:1.9;margin:20px 0;">As always, I&rsquo;m here to answer any questions along the way. Don&rsquo;t hesitate to reach out!</p>' +
+  '<div style="border-top:1px solid #f0e8eb;margin-top:32px;padding-top:24px;">' +
+  '<p style="font-family:\'Cormorant Garamond\',Georgia,serif;font-size:20px;color:#6b3fa0;font-weight:400;margin:0 0 2px;font-style:italic;">Skin-cerely yours,</p>' +
+  '<p style="font-family:\'Cormorant Garamond\',Georgia,serif;font-size:17px;color:#2a1a20;margin:0 0 10px;">Hali Sarah Parsons</p>' +
+  '<p style="font-size:11px;color:#b09090;margin:0 0 2px;letter-spacing:1px;text-transform:uppercase;">Mary Kay Independent Beauty Consultant</p>' +
+  '<p style="font-size:11px;color:#b09090;margin:0 0 2px;"><a href="mailto:sistahaymarykay@gmail.com" style="color:#e8507a;text-decoration:none;font-weight:500;">sistahaymarykay@gmail.com</a></p>' +
+  '<p style="font-size:11px;color:#b09090;margin:0;"><a href="https://www.marykay.com/sistahay/en/ibcprofile" target="_blank" style="color:#e8507a;text-decoration:none;font-weight:500;">marykay.com/sistahay</a></p>' +
+  '</div>' +
+  '</div>' +
+  '<div class="ftr">Mary Kay Independent Beauty Consultant<br><a href="mailto:sistahaymarykay@gmail.com">sistahaymarykay@gmail.com</a></div>' +
+  '</div></div></body></html>';
+}
+
+// Consultant copy: same but adds client email and link to PersonalJS
+function buildConsultantCopy(clientName, clientEmail, rawContent){
+  const clientHtml = buildEmailHtml(clientName, rawContent, clientEmail);
+  // Inject client info banner after .hdr
+  const banner =
+    '<div style="background:#fff8f0;border-left:3px solid #c9a96e;padding:12px 40px;font-size:12px;color:#3d2530;line-height:1.8;">' +
+    // <!-- PUT CLIENT EMAIL HERE -->
+    '<strong style="color:#c9a96e;">Sent to:</strong> ' + clientName + ' &lt;<a href="mailto:' + clientEmail + '" style="color:#e8507a;text-decoration:none;">' + clientEmail + '</a>&gt;' +
+    '<br><a href="' + PERSONALJS_URL + '" target="_blank" style="color:#e8507a;font-size:11px;text-decoration:none;font-weight:500;">\u2192 Open PersonalJS to send another reply</a>' +
+    '</div>';
+  return clientHtml.replace('<div class="body">', banner + '<div class="body">');
+}
+
+// ─── PREVIEW ──────────────────────────────────────────
+function previewEmail(){
+  const clientName  = document.getElementById('client-name').value.trim() || 'Client';
+  const clientEmail = document.getElementById('client-email').value.trim() || 'client@email.com';
+  const recs        = document.getElementById('recommendations').value.trim() || '(Your recommendations will appear here)';
+  const html        = buildEmailHtml(clientName, recs, clientEmail);
+
+  // Open in new window for full render
+  const win = window.open('', '_blank', 'width=700,height=800,scrollbars=yes');
+  win.document.write(html);
+  win.document.close();
+}
+
+// ─── SEND ─────────────────────────────────────────────
+async function sendEmail(mode){
+  const templateId  = EJS_TEMPLATE_PERSONAL;
+  const clientEmail = document.getElementById('client-email').value.trim();
+  const clientName  = document.getElementById('client-name').value.trim();
+  const subject     = document.getElementById('email-subject').value.trim();
+  const recs        = document.getElementById('recommendations').value.trim();
+
+  if(!templateId){ showStatus('err', 'Please enter your EmailJS Template ID at the top.'); return; }
+  if(mode === 'client'){
+    if(!clientEmail || !clientEmail.includes('@')){ showStatus('err', 'Please enter a valid client email.'); return; }
+    if(!clientName){ showStatus('err', 'Please enter the client\'s first name.'); return; }
+  }
+  if(!recs){ showStatus('err', 'Please enter your recommendations.'); return; }
+
+  const sendTo   = mode === 'test' ? CONSULTANT_EMAIL : clientEmail;
+  const nameFor  = mode === 'test' ? 'Hali Sarah (TEST)' : clientName;
+  const subjectL = mode === 'test' ? '[TEST] ' + subject : subject;
+
+  const btn = document.getElementById(mode === 'test' ? 'test-btn' : 'send-btn');
+  btn.textContent = 'Sending\u2026'; btn.disabled = true;
+
+  const html = mode === 'test'
+    ? buildEmailHtml(nameFor, recs, CONSULTANT_EMAIL)
+    : buildEmailHtml(clientName, recs, clientEmail);
+
+  // Consultant BCC copy (only on real sends)
+  try {
+    await emailjs.send(EJS_SERVICE_ID, templateId, {
+      to_email:  sendTo,
+      subject:   subjectL,
+      message:   html,
+      reply_to:  CONSULTANT_EMAIL,
+      name:      'Hali Sarah Parsons'
+    });
+
+    // Send consultant copy on real send
+    if(mode === 'client'){
+      const consultantHtml = buildConsultantCopy(clientName, clientEmail, recs);
+      await emailjs.send(EJS_SERVICE_ID, templateId, {
+        to_email:  CONSULTANT_EMAIL,
+        subject:   'SENT: ' + subject + ' \u2192 ' + clientName,
+        message:   consultantHtml,
+        reply_to:  clientEmail,
+        name:      'Hali Sarah Parsons'
+      });
+    }
+
+    const msg = mode === 'test'
+      ? '\u2713 Test email sent to ' + CONSULTANT_EMAIL + '! Check your inbox to verify formatting.'
+      : '\u2713 Email sent to ' + clientName + ' (' + clientEmail + ')! A copy was sent to your inbox.';
+    showStatus('ok', msg);
+    btn.textContent = mode === 'test' ? 'Send Test to Me' : 'Send to Client \u2192';
+    btn.disabled = false;
+  } catch(e){
+    console.error(e);
+    showStatus('err', 'Send failed: ' + (e.text || e.message || JSON.stringify(e)));
+    btn.textContent = mode === 'test' ? 'Send Test to Me' : 'Send to Client \u2192';
+    btn.disabled = false;
+  }
+}
+
+function showStatus(type, msg){
+  const el = document.getElementById('status-msg');
+  el.className = 'status ' + type;
+  el.textContent = msg;
+}
+</script>
+</body>
+</html>
