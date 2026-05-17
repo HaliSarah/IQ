@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Haligricity — The Practice of Wholeness</title>
-<meta name="description" content="Haligricity. From halig (whole, healed) and the living current of practice. A new synthesis of body, breath, sound, movement, eating, and connection — rooted in many traditions, named anew.">
+<meta name="description" content="Haligricity. New Age Mysticism Synthesis. A living, breathing current of synthesized mysticism — woven from many traditions and named anew.">
 <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700&family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
 <script>emailjs.init("3vNjQbWmqzzOO6IK");</script>
@@ -14,6 +14,7 @@
     --bg-soft:     #FFFAEC;
     --gold:        #C9A227;
     --gold-mid:    #DAA520;
+    --gold-light-link: #E8C455;
     --gold-border: #B8860B;
     --gold-light:  #FFF8DC;
     --gold-pale:   #FFFAEC;
@@ -69,22 +70,15 @@
     background: radial-gradient(circle at 50% 0%, rgba(201,162,39,0.10) 0%, transparent 60%);
     pointer-events:none;
   }
-  .symbol-wrap {
-    width:88px; height:88px;
-    margin:0 auto 26px;
-    position:relative;
-    z-index:1;
-  }
+  .symbol-wrap { width:88px; height:88px; margin:0 auto 26px; position:relative; z-index:1; }
   .symbol-glow {
-    position:absolute; inset:-14px;
-    border-radius:50%;
+    position:absolute; inset:-14px; border-radius:50%;
     background: radial-gradient(circle, rgba(201,162,39,0.28) 0%, transparent 70%);
     animation: pulse 3.5s ease-in-out infinite;
   }
   /* WHY: logo rotated 45deg everywhere per spec */
   .symbol-svg {
-    width:100%; height:100%;
-    position:relative;
+    width:100%; height:100%; position:relative;
     transform: rotate(45deg);
     filter: drop-shadow(0 0 10px rgba(201,162,39,0.4));
   }
@@ -93,7 +87,7 @@
     50%     { transform: scale(1.15); opacity: 1; }
   }
   .hero .eyebrow {
-    font-family:'Cinzel',serif; font-size:10px; letter-spacing:.4em;
+    font-family:'Cinzel',serif; font-size:11px; letter-spacing:.4em;
     color:var(--gold-border); text-transform:uppercase; margin-bottom:14px;
   }
   .hero h1 {
@@ -104,8 +98,7 @@
   }
   .hero .tagline {
     font-style:italic; color:var(--gray);
-    font-size:1.05rem; max-width:520px; margin:0 auto 8px;
-    line-height:1.6;
+    font-size:1.05rem; max-width:560px; margin:0 auto 8px; line-height:1.6;
   }
   .hero .pronounce {
     font-size:.85rem; color:var(--gold-border); letter-spacing:.08em;
@@ -117,18 +110,16 @@
   section { margin-top: 56px; }
   .section-eyebrow {
     font-family:'Cinzel',serif; font-size:10px; letter-spacing:.35em;
-    color:var(--gold-border); text-transform:uppercase; margin-bottom:8px;
-    text-align:center;
+    color:var(--gold-border); text-transform:uppercase; margin-bottom:8px; text-align:center;
   }
   .section-title {
     font-family:'Cinzel',serif; font-weight:600;
     font-size:clamp(1.4rem, 3.5vw, 1.9rem);
-    color:var(--purple); text-align:center; margin-bottom:6px;
-    letter-spacing:.04em;
+    color:var(--purple); text-align:center; margin-bottom:6px; letter-spacing:.04em;
   }
   .section-sub {
     text-align:center; color:var(--gray); font-style:italic;
-    font-size:.98rem; max-width:540px; margin:0 auto 28px; line-height:1.6;
+    font-size:.98rem; max-width:560px; margin:0 auto 28px; line-height:1.6;
   }
   .gold-divider {
     width:60px; height:2px;
@@ -140,8 +131,7 @@
   .ety-card {
     background:#fff; border:1.5px solid var(--gold-border);
     border-radius:14px; padding:32px 28px; margin-bottom:18px;
-    box-shadow:0 2px 14px rgba(180,140,0,.07);
-    position:relative;
+    box-shadow:0 2px 14px rgba(180,140,0,.07); position:relative;
   }
   .ety-card::before {
     content:''; position:absolute; top:0; left:24px; right:24px; height:2px;
@@ -153,10 +143,13 @@
     margin-bottom:10px; text-transform:uppercase;
   }
   .ety-card h3 .greek { font-style:italic; color:var(--gold-border); font-weight:400; margin-left:8px; }
+  .ety-card h3 .layer { font-style:italic; color:var(--gold-mid); font-weight:400; margin-left:8px; font-size:.85em; text-transform:none; letter-spacing:0; }
   .ety-card p { font-size:1rem; line-height:1.75; color:var(--ink); margin-bottom:10px; }
   .ety-card p:last-child { margin-bottom:0; }
   .ety-card strong { color:var(--purple); }
   .ety-card em { color:var(--gold-border); }
+  .ety-card ul { margin:8px 0 12px 22px; }
+  .ety-card ul li { font-size:.98rem; line-height:1.75; color:var(--ink); margin-bottom:6px; }
   .root-chain {
     display:flex; flex-wrap:wrap; align-items:center; justify-content:center;
     gap:10px; margin:18px 0 10px; font-family:'Cinzel',serif; font-size:.85rem;
@@ -168,8 +161,7 @@
 
   /* TWO-COL TERM CARDS */
   .term-grid {
-    display:grid; grid-template-columns:repeat(auto-fit, minmax(320px, 1fr));
-    gap:18px;
+    display:grid; grid-template-columns:repeat(auto-fit, minmax(320px, 1fr)); gap:18px;
   }
   .term-card {
     background:var(--purple); color:#fff;
@@ -194,12 +186,22 @@
     margin-bottom:14px; padding-bottom:14px;
     border-bottom:1px solid rgba(201,168,224,.3);
   }
-  .term-card p { font-size:.98rem; line-height:1.75; color:rgba(255,255,255,.92); }
+  .term-card p { font-size:.98rem; line-height:1.75; color:rgba(255,255,255,.92); margin-bottom:8px; }
+  /* lighter-gold links inside the purple term card */
+  .term-card .var-link {
+    display:inline-block; margin-top:6px; margin-right:10px;
+    color: var(--gold-light-link);
+    font-family:'Cinzel',serif; font-size:.74rem; letter-spacing:.13em;
+    text-transform:uppercase; text-decoration:none;
+    border-bottom:1px solid rgba(232,196,85,0.45);
+    padding-bottom:2px; transition:color .2s, border-color .2s;
+  }
+  .term-card .var-link:hover { color:#fff; border-color:#fff; }
+  .var-link-row { margin-top:14px; display:flex; flex-wrap:wrap; gap:4px 14px; }
 
   /* PRACTICE CARDS */
   .practice-grid {
-    display:grid; grid-template-columns:repeat(auto-fit, minmax(240px, 1fr));
-    gap:16px;
+    display:grid; grid-template-columns:repeat(auto-fit, minmax(240px, 1fr)); gap:16px;
   }
   .practice-card {
     background:#fff; border:1.5px solid var(--gold-border); border-radius:12px;
@@ -217,14 +219,10 @@
     box-shadow:0 6px 22px rgba(74,16,96,.18);
   }
   .practice-card:hover::before { opacity:1; }
-  .practice-mini-sym {
-    width:34px; height:34px; margin-bottom:6px;
-    transform: rotate(45deg);
-  }
+  .practice-mini-sym { width:34px; height:34px; margin-bottom:6px; transform: rotate(45deg); }
   .practice-card h4 {
     font-family:'Cinzel',serif; color:var(--purple);
-    font-size:.95rem; letter-spacing:.06em; text-transform:uppercase;
-    font-weight:600;
+    font-size:.95rem; letter-spacing:.06em; text-transform:uppercase; font-weight:600;
   }
   .practice-card p { font-size:.88rem; color:var(--gray); line-height:1.6; }
   .practice-card .go {
@@ -245,10 +243,7 @@
     background:var(--gold-pale); border:1px solid var(--gold-border);
     border-radius:10px; padding:12px; text-align:center;
   }
-  .vishnu .img-frame img {
-    max-width:100%; height:auto; border-radius:6px;
-    display:block; margin:0 auto;
-  }
+  .vishnu .img-frame img { max-width:100%; height:auto; border-radius:6px; display:block; margin:0 auto; }
   .vishnu .img-frame .caption {
     font-family:'Cinzel',serif; font-size:.7rem; letter-spacing:.15em;
     text-transform:uppercase; color:var(--gold-border); margin-top:10px;
@@ -270,22 +265,119 @@
     text-transform:uppercase; cursor:pointer; text-decoration:none;
     transition:all .2s; box-shadow:0 3px 10px rgba(184,134,11,.25);
   }
-  .dl-btn:hover, .download-link:hover {
-    transform:translateY(-1px);
-    box-shadow:0 5px 16px rgba(184,134,11,.4);
-  }
-  .dl-btn.purple, .download-link.purple {
-    background:var(--purple);
-  }
-  .dl-btn.purple:hover, .download-link.purple:hover {
-    background:var(--purple-mid);
-  }
+  .dl-btn:hover, .download-link:hover { transform:translateY(-1px); box-shadow:0 5px 16px rgba(184,134,11,.4); }
+  .dl-btn.purple, .download-link.purple { background:var(--purple); }
+  .dl-btn.purple:hover, .download-link.purple:hover { background:var(--purple-mid); }
   .dl-btn .arrow { font-size:.9rem; }
+
+  /* VARESSENCE CARDS GRID */
+  .vares-grid {
+    display:grid; grid-template-columns:repeat(auto-fit, minmax(260px, 1fr)); gap:18px;
+  }
+  .vares-card {
+    background:#fff; border:1.5px solid var(--gold-border); border-radius:14px;
+    padding:22px 22px 24px; display:flex; flex-direction:column; gap:12px;
+    box-shadow:0 2px 12px rgba(180,140,0,.08);
+  }
+  .vares-card h4 {
+    font-family:'Cinzel',serif; color:var(--purple);
+    font-size:1rem; letter-spacing:.05em; text-transform:uppercase; font-weight:600;
+  }
+  .vares-card .vares-img {
+    width:100%; border-radius:8px; border:1px solid var(--gold-border);
+    background:var(--gold-pale); object-fit:contain; max-height:280px;
+  }
+  .vares-card .vares-actions { display:flex; flex-wrap:wrap; gap:8px; }
+  .vares-card .mini-link {
+    font-family:'Cinzel',serif; font-size:.72rem; letter-spacing:.12em;
+    text-transform:uppercase; padding:7px 14px; border:1px solid var(--gold-mid);
+    border-radius:6px; color:var(--gold-mid); background:transparent;
+    text-decoration:none; transition:all .2s;
+  }
+  .vares-card .mini-link:hover { background:var(--gold-mid); color:#fff; }
+  .vares-card .mini-link.solid { background:var(--gold-mid); color:#fff; }
+  .vares-card .mini-link.solid:hover { background:var(--gold); }
+
+  /* ROUTINE LIST */
+  .routine-card {
+    background:#fff; border:1.5px solid var(--gold-border); border-radius:14px;
+    padding:30px 28px; margin-bottom:18px; position:relative;
+    box-shadow:0 2px 14px rgba(180,140,0,.07);
+  }
+  .routine-card::before {
+    content:''; position:absolute; top:0; left:24px; right:24px; height:2px;
+    background:linear-gradient(90deg,transparent,var(--gold),transparent);
+  }
+  .routine-title {
+    font-family:'Cinzel',serif; font-size:1.15rem; letter-spacing:.05em;
+    text-transform:uppercase; color:var(--purple); font-weight:600; margin-bottom:6px;
+  }
+  .routine-flow {
+    font-family:'Cinzel',serif; font-size:.74rem; letter-spacing:.14em;
+    text-transform:uppercase; color:var(--gold-border); margin-bottom:18px;
+  }
+  .step {
+    display:flex; gap:16px; align-items:flex-start;
+    padding:14px 0; border-top:1px solid var(--line);
+  }
+  .step:first-of-type { border-top:none; padding-top:8px; }
+  .step-num {
+    width:32px; height:32px; min-width:32px;
+    background:linear-gradient(135deg, var(--gold) 0%, var(--gold-mid) 100%);
+    color:#fff; border-radius:50%;
+    display:flex; align-items:center; justify-content:center;
+    font-family:'Cinzel',serif; font-size:.85rem; font-weight:700;
+    box-shadow:0 2px 8px rgba(184,134,11,.25);
+  }
+  .step-body { flex:1; }
+  .step-body h5 {
+    font-family:'Cinzel',serif; color:var(--purple);
+    font-size:.92rem; letter-spacing:.06em; text-transform:uppercase;
+    font-weight:600; margin-bottom:6px;
+  }
+  .step-body p { font-size:.96rem; line-height:1.7; color:var(--ink); margin-bottom:6px; }
+  .step-body p:last-child { margin-bottom:0; }
+  .step-body .affirm {
+    background:var(--purple-light); border-left:3px solid var(--purple);
+    padding:12px 16px; border-radius:0 8px 8px 0;
+    font-style:italic; color:var(--purple); font-size:.95rem; line-height:1.6;
+    margin:8px 0;
+  }
+  .step-body a { color:var(--purple-mid); }
+  .step-body a:hover { color:var(--purple); }
+
+  /* DINING SECTION */
+  .dining-card {
+    background:#fff; border:1.5px solid var(--gold-border); border-radius:14px;
+    padding:30px 28px; box-shadow:0 2px 14px rgba(180,140,0,.07);
+    display:grid; grid-template-columns:1fr 1fr; gap:24px;
+  }
+  @media (max-width:680px) { .dining-card { grid-template-columns:1fr; } }
+  .dining-card .vares-img { max-height:340px; }
+  .dining-steps { font-size:.98rem; line-height:1.75; color:var(--ink); }
+  .dining-steps ol { margin-left:20px; }
+  .dining-steps ol li { margin-bottom:10px; }
+  .ashe-links {
+    margin-top:16px; padding:14px 16px; background:var(--gold-pale);
+    border:1px solid var(--gold-border); border-radius:8px;
+  }
+  .ashe-links .ashe-title {
+    font-family:'Cinzel',serif; color:var(--purple);
+    font-size:.78rem; letter-spacing:.12em; text-transform:uppercase;
+    font-weight:600; margin-bottom:8px;
+  }
+  .ashe-links ul { list-style:none; margin:0; }
+  .ashe-links ul li { padding:3px 0; font-size:.86rem; }
+  .ashe-links ul li a {
+    color:var(--gold-border); text-decoration:none;
+    font-family:'Cinzel',serif; font-size:.74rem; letter-spacing:.06em;
+    border-bottom:1px dotted var(--gold-mid); padding-bottom:1px;
+  }
+  .ashe-links ul li a:hover { color:var(--purple); border-color:var(--purple); }
 
   /* BOOKS GRID */
   .books-grid {
-    display:grid; grid-template-columns:repeat(auto-fit, minmax(260px, 1fr));
-    gap:16px;
+    display:grid; grid-template-columns:repeat(auto-fit, minmax(260px, 1fr)); gap:16px;
   }
   .book-card {
     background:#fff; border:1.5px solid var(--gold-border); border-radius:12px;
@@ -312,18 +404,14 @@
 
   /* REGION GRID (food guide + history) */
   .region-grid {
-    display:grid; grid-template-columns:repeat(auto-fit, minmax(220px, 1fr));
-    gap:14px;
+    display:grid; grid-template-columns:repeat(auto-fit, minmax(220px, 1fr)); gap:14px;
   }
   .region-card {
     background:#fff; border:1.5px solid var(--gold-border); border-radius:10px;
     padding:18px 18px 16px; transition:all .2s;
     display:flex; flex-direction:column; gap:6px;
   }
-  .region-card:hover {
-    border-color:var(--purple-mid);
-    box-shadow:0 4px 14px rgba(74,16,96,.12);
-  }
+  .region-card:hover { border-color:var(--purple-mid); box-shadow:0 4px 14px rgba(74,16,96,.12); }
   .region-card .area {
     font-family:'Cinzel',serif; font-size:.7rem; letter-spacing:.12em;
     text-transform:uppercase; color:var(--gold-border);
@@ -339,13 +427,9 @@
     padding:6px 12px; border:1px solid var(--gold-border); border-radius:6px;
     transition:all .2s;
   }
-  .region-card a.download-mini:hover {
-    background:var(--purple); color:#fff; border-color:var(--purple);
-  }
-
+  .region-card a.download-mini:hover { background:var(--purple); color:#fff; border-color:var(--purple); }
   .history-grid {
-    display:grid; grid-template-columns:repeat(auto-fit, minmax(240px, 1fr));
-    gap:14px;
+    display:grid; grid-template-columns:repeat(auto-fit, minmax(240px, 1fr)); gap:14px;
   }
 
   /* REQUEST FORM */
@@ -361,25 +445,20 @@
   .request-form .form-sub { font-size:.92rem; color:var(--gray); margin-bottom:18px; font-style:italic; line-height:1.6; }
   .request-form label {
     display:block; font-family:'Cinzel',serif; font-size:.72rem;
-    letter-spacing:.15em; text-transform:uppercase; color:var(--gold-border);
-    margin-bottom:6px;
+    letter-spacing:.15em; text-transform:uppercase; color:var(--gold-border); margin-bottom:6px;
   }
   .request-form input, .request-form textarea {
     width:100%; padding:11px 14px; border:1.5px solid var(--gold-border);
     border-radius:8px; background:var(--gold-pale); font-family:Georgia,serif;
     font-size:.95rem; color:var(--ink); margin-bottom:14px;
-    transition:border-color .2s, background .2s;
-    outline:none;
+    transition:border-color .2s, background .2s; outline:none;
   }
-  .request-form input:focus, .request-form textarea:focus {
-    border-color:var(--purple); background:#fff;
-  }
+  .request-form input:focus, .request-form textarea:focus { border-color:var(--purple); background:#fff; }
   .request-form textarea { min-height:90px; resize:vertical; }
   .request-form .row { display:grid; grid-template-columns:1fr 1fr; gap:14px; }
   @media(max-width:520px) { .request-form .row { grid-template-columns:1fr; } }
   .submit-btn {
-    background:var(--purple); color:#fff;
-    border:none; border-radius:8px; padding:13px 28px;
+    background:var(--purple); color:#fff; border:none; border-radius:8px; padding:13px 28px;
     font-family:'Cinzel',serif; font-size:.82rem; letter-spacing:.12em;
     text-transform:uppercase; cursor:pointer; transition:background .2s;
   }
@@ -391,8 +470,7 @@
   .ftr {
     text-align:center; margin-top:64px; padding:28px 16px 0;
     border-top:1.5px solid var(--gold-border);
-    font-family:'Cinzel',serif; font-size:.78rem; letter-spacing:.1em;
-    color:var(--gold-border);
+    font-family:'Cinzel',serif; font-size:.78rem; letter-spacing:.1em; color:var(--gold-border);
   }
   .ftr .blessing { color:var(--purple); margin-bottom:6px; }
   .ftr a { color:var(--gold-border); text-decoration:none; }
@@ -403,7 +481,7 @@
 
 <nav class="top-nav">
   <div class="crumbs"><strong>Haligricity</strong></div>
-  <a class="nav-home" href="https://iqproductionz.com/">↩ Site Home</a>
+  <a class="nav-home" href="https://IQProductionz.com/">↩ Site Home</a>
 </nav>
 
 <!-- ─── HERO ─────────────────────────────── -->
@@ -420,9 +498,9 @@
       <line x1="64" y1="40" x2="76" y2="40" stroke="#C9A227" stroke-width="1" opacity="0.5"/>
     </svg>
   </div>
-  <div class="eyebrow">A New Synthesis — Old Roots</div>
+  <div class="eyebrow">New Age Mysticism Synthesis</div>
   <h1>Haligricity</h1>
-  <p class="tagline">The practice of wholeness. A living, breathing current of body, sound, mudra, mantra, food, and connection — woven from many traditions and named anew.</p>
+  <p class="tagline">The practice of wholeness. A living, breathing current of synthesized mysticism — woven from many traditions and named anew.</p>
   <div class="pronounce">/ ˈhɑːl·ɪ·ˌɡrɪs·ɪ·ti /</div>
 </header>
 
@@ -432,6 +510,7 @@
 <section>
   <div class="section-eyebrow">Etymology</div>
   <h2 class="section-title">What the Name Holds</h2>
+  <p class="section-sub">Nine layered roots. Each one was chosen deliberately — together they tell you what Haligricity actually <em>is</em>.</p>
   <div class="gold-divider"></div>
 
   <div class="ety-card">
@@ -441,7 +520,24 @@
   </div>
 
   <div class="ety-card">
-    <h3>Holi · Halig · Holy</h3>
+    <h3>Hologram <span class="layer">Layer 1 · Root Concept</span></h3>
+    <p>Every part of a hologram contains the information of the whole. Cut a holographic plate in half and you do not get two halves — you get two whole images at lower resolution. This is the <strong>organizing principle of Haligricity</strong>: each practice, each belief, each person reflects the whole.</p>
+    <p>You are not a fragment trying to become complete. <strong>You are a fractal of the infinite</strong> — already carrying the pattern of the whole within you. The work is not to assemble yourself. The work is to tune what is already there.</p>
+  </div>
+
+  <div class="ety-card">
+    <h3>Hala <span class="layer">Layer 2 · Phonetic Anchor</span></h3>
+    <p>The sound <strong>Hala</strong> reaches in three directions at once:</p>
+    <ul>
+      <li><strong>Halo</strong> — the radiant ring of light that surrounds figures in sacred art across nearly every tradition. Energy in visible harmony.</li>
+      <li><strong>Circle / Cycle</strong> — the eternal rotation. The seasons. The breath. The body's rhythms. Hala lives in things that return.</li>
+      <li><strong>Halal</strong> — that which is pure, permissible, clean. A Haligric life is a clean life in the deepest sense: clean energy, clean speech, clean intention.</li>
+    </ul>
+    <p>The phoneme <em>Hala</em> binds these together — the visible light, the cyclical motion, the moral cleanliness — all in one syllable.</p>
+  </div>
+
+  <div class="ety-card">
+    <h3>Holi · Halig · Holy <span class="layer">Linguistic Root</span></h3>
     <p>The word <strong>holy</strong> comes from Old English <em>hālig</em>, from Proto-Germanic <em>*hailagaz</em> — itself from <em>*hailaz</em>, meaning <strong>whole, uninjured, of good omen</strong>. That same root gave us the words <em>whole</em> and <em>heal</em>.</p>
     <div class="root-chain">
       <span class="word">*kailo-</span>
@@ -461,6 +557,55 @@
   </div>
 
   <div class="ety-card">
+    <h3>Hali <span class="layer">Layer 3 · The Founder's Name</span></h3>
+    <p><strong>Hali Sarah Parsons</strong> recognized that her own name was already embedded in the word. This is fitting and intentional: the founder's philosophy and the founder's identity cannot be separated. Haligricity is a <strong>lived system</strong>, not an abstracted one — it was developed by a person living it, refined through her body and her years, and offered from that same embodied place.</p>
+    <p>When you say "Haligric," you are naming a practice. You are also naming the practitioner who first walked it.</p>
+  </div>
+
+  <div class="ety-card">
+    <h3>Haile · Halle <span class="greek">ሃይለ</span></h3>
+    <p>In the <strong>Ge'ez and Amharic languages of Ethiopia</strong> — the liturgical tongue of the Ethiopian Orthodox Church and the living language of the Rastafari tradition — <em>Haile</em> (pronounced <strong>Hally</strong>) means <strong>Power</strong>.</p>
+    <p>His Imperial Majesty <strong>Haile Selassie I</strong> — born Tafari Makonnen — took his throne name from this word: <em>Haile Selassie</em> means "Power of the Trinity." In Rastafari theology, Haile Selassie is revered as the returned Christ, the Lion of Judah, the living embodiment of divine power on Earth. The name <em>Haile</em> therefore carries not just linguistic but deeply sacred weight across the African diaspora.</p>
+    <div class="root-chain">
+      <span class="word">Haile</span>
+      <span class="arrow">→</span>
+      <span class="word">Power</span>
+      <span class="arrow">→</span>
+      <span class="word">Halle-gricity</span>
+      <span class="arrow">→</span>
+      <span class="word">Power-Gricity</span>
+    </div>
+    <p>Read through this lens, <strong>Haligricity</strong> is literally <em>Power-Gricity</em>: the electricity of power, the current of wholeness made active. The Rastafari thread woven through the name honors the African spiritual lineage that reminds us divine power is not distant or abstract — it walks on Earth, it speaks in language, and it lives in the body.</p>
+    <p><em>Jah lives.</em></p>
+  </div>
+
+  <div class="ety-card">
+    <h3>-icity · Electricity · Current</h3>
+    <p>The suffix <strong>-icity</strong> descends from the Latin <em>-itas</em> (quality, state of being) fused with the Greek <em>-ikos</em> (pertaining to). It appears in words like <em>electricity</em>, <em>authenticity</em>, <em>elasticity</em> — all pointing to a <strong>fundamental quality or living force</strong> inherent in something.</p>
+    <p><em>Electricity</em> itself comes from the Greek <em>ēlektron</em> (amber), because rubbing amber produced a visible spark — the first recorded observation of static charge. Early natural philosophers understood electrical current as a <strong>living force moving through matter</strong>: invisible, but undeniably real, felt before it was measured.</p>
+    <div class="root-chain">
+      <span class="word">ēlektron</span>
+      <span class="arrow">→</span>
+      <span class="word">electricus</span>
+      <span class="arrow">→</span>
+      <span class="word">electricity</span>
+      <span class="arrow">→</span>
+      <span class="word">-icity</span>
+      <span class="arrow">→</span>
+      <span class="word">Haligr<em>icity</em></span>
+    </div>
+    <p><strong>Haligricity</strong> borrows this suffix deliberately. The name does not describe a static belief system — it names a <em>current</em>: the living force that moves through a whole, unbroken, healed body. You are not practicing Haligricity. You are <em>conducting</em> it.</p>
+  </div>
+
+  <div class="ety-card">
+    <h3>-gricity <span class="layer">Layer 4 · From "City," Not "-ism"</span></h3>
+    <p>An <strong>-ism</strong> is a closed system: a doctrine you follow, a set of rules that keep people in line, a belief structure that asks for loyalty. We deliberately did <em>not</em> use that suffix.</p>
+    <p>A <strong>city</strong> is something else entirely: a place where everyone is welcome. The suffix <strong>-gricity</strong> signals radical inclusion. <strong>There is no membership requirement. There is no worthiness test. The city has room for all who choose to live here.</strong></p>
+    <p>Our synthesis is as free as all things are in their true nature. The only systems that exist <em>naturally</em> are the structures that mathematically hold everything together — the golden ratio, fractal geometry, the cycles of the body and the sky. There is a foundation everyone needs, but that foundation tunes and changes over time as we tune into ourselves — using our emotional code and the heart's bio-field, which stretches roughly <strong>ten times wider than the brain's</strong>. This is the heart–mind coherence that Joe Dispenza and Gregg Braden both point to.</p>
+    <p>We all know creating a routine is healthy. We are wired to work best and most efficiently with one — <strong>especially when it supports our basic needs</strong>: sleep, exercise, healthy meals tied to the seasons. A routine that fits the body's nature is not a cage. It is the trellis the vine grows on.</p>
+  </div>
+
+  <div class="ety-card">
     <h3>Why This Matters for Haligricity</h3>
     <p>The Haligric path — in its very name — carries <em>halig</em>, the old form of holy. <strong>Haligricity is not naming itself after religion.</strong> It is naming itself after wholeness, the original meaning.</p>
     <p>The body–breath–sound–movement–eating–connection practices in the <em>Well-Being</em> book are not "spiritual" in the churchy sense — they are <strong>haligric in the oldest sense</strong>: practices that return a person to their whole, unbroken, healed state.</p>
@@ -471,16 +616,21 @@
 <!-- ─── COINED TERMS ─────────────────────────────── -->
 <section>
   <div class="section-eyebrow">Coined by Sarah</div>
-  <h2 class="section-title">Vericence &amp; Tetralty</h2>
+  <h2 class="section-title">Varessence &amp; Tetralty</h2>
   <p class="section-sub">Two original terms — pillars of the Haligric vocabulary.</p>
   <div class="gold-divider"></div>
 
   <div class="term-grid">
     <div class="term-card">
       <div class="badge">Term One</div>
-      <h3>Vericence</h3>
-      <div class="build"><strong>Ver-</strong> (Truth · Voice) &nbsp;+&nbsp; <strong>-icence</strong> (from Luminescence / Presence)</div>
-      <p>The act of speaking your truth into light. It is not a prayer — it is a declaration. You aren't asking for light; you are acknowledging that the light <em>is</em> you.</p>
+      <h3>Varessence</h3>
+      <div class="build"><strong>Var-</strong> (Truth · Voice) &nbsp;+&nbsp; <strong>-essence</strong> (Essence · Presence)</div>
+      <p>The act of speaking your truth into light. It is not a prayer — it is a declaration. You aren't asking for light; you are acknowledging that the light <em>is</em> you. There are three Varessences in the Haligric path: the <em>Rising</em>, the <em>Astral</em>, and the <em>Dining</em>.</p>
+      <div class="var-link-row">
+        <a class="var-link" href="https://IQProductionz.com/Haligricity/Varessence/Rising-Varessence.png" target="_blank">Rising Varessence ↗</a>
+        <a class="var-link" href="https://IQProductionz.com/Haligricity/Varessence/Astral-Varessence.png" target="_blank">Astral Varessente ↗</a>
+        <a class="var-link" href="https://IQProductionz.com/Haligricity/Varessence/Dining-Varessence.png" target="_blank">Dining Varessence ↗</a>
+      </div>
     </div>
 
     <div class="term-card">
@@ -492,6 +642,48 @@
   </div>
 </section>
 
+<!-- ─── VARESSENCE TEXTS (view + download) ─────────────────────────────── -->
+<section>
+  <div class="section-eyebrow">The Three Varessences</div>
+  <h2 class="section-title">View &amp; Download</h2>
+  <p class="section-sub">Each Varessence is a spoken declaration — print it, keep it near your practice space, speak it aloud until you feel it.</p>
+  <div class="gold-divider"></div>
+
+  <div class="vares-grid">
+
+    <div class="vares-card">
+      <h4>Rising Varessence</h4>
+      <img class="vares-img" src="https://IQProductionz.com/Haligricity/Varessence/Rising-Varessence.png" alt="Rising Varessence — spoken declaration for the opening of the day" onerror="this.style.display='none'">
+      <p style="font-size:.92rem;color:var(--gray);line-height:1.6;">Spoken at the opening of the day, hands at heart center: <em>"I honor myself, on this day, and shine my light, along the way."</em></p>
+      <div class="vares-actions">
+        <a class="mini-link" href="https://IQProductionz.com/Haligricity/Varessence/Rising-Varessence.png" target="_blank">View</a>
+        <a class="mini-link solid" href="https://IQProductionz.com/Haligricity/Varessence/Rising-Varessence.png" download>⬇ Download</a>
+      </div>
+    </div>
+
+    <div class="vares-card">
+      <h4>Astral Varessente</h4>
+      <img class="vares-img" src="https://IQProductionz.com/Haligricity/Varessence/Astral-Varessence.png" alt="Astral Varessente — closing declaration before sleep" onerror="this.style.display='none'">
+      <p style="font-size:.92rem;color:var(--gray);line-height:1.6;">Spoken at the close of the day (Spanish form of Varessence): <em>"Gratitude fills my heart, I've done my part. I send love from the end to the start."</em></p>
+      <div class="vares-actions">
+        <a class="mini-link" href="https://IQProductionz.com/Haligricity/Varessence/Astral-Varessence.png" target="_blank">View</a>
+        <a class="mini-link solid" href="https://IQProductionz.com/Haligricity/Varessence/Astral-Varessence.png" download>⬇ Download</a>
+      </div>
+    </div>
+
+    <div class="vares-card">
+      <h4>Dining Varessence</h4>
+      <img class="vares-img" src="https://IQProductionz.com/Haligricity/Varessence/Dining-Varessence.png" alt="Dining Varessence — declaration spoken over food" onerror="this.style.display='none'">
+      <p style="font-size:.92rem;color:var(--gray);line-height:1.6;">Spoken over food with hand-cultivation movements: <em>"I plant the seeds of greatness… Ashe' Gratitude circulates in me!"</em></p>
+      <div class="vares-actions">
+        <a class="mini-link" href="https://IQProductionz.com/Haligricity/Varessence/Dining-Varessence.png" target="_blank">View</a>
+        <a class="mini-link solid" href="https://IQProductionz.com/Haligricity/Varessence/Dining-Varessence.png" download>⬇ Download</a>
+      </div>
+    </div>
+
+  </div>
+</section>
+
 <!-- ─── PRACTICES ─────────────────────────────── -->
 <section>
   <div class="section-eyebrow">Practices</div>
@@ -500,7 +692,7 @@
   <div class="gold-divider"></div>
 
   <div class="practice-grid">
-    <a class="practice-card" href="./FindYourPractice/">
+    <a class="practice-card" href="https://IQProductionz.com/Haligricity/FindYourPractice/">
       <svg class="practice-mini-sym" viewBox="0 0 80 80" fill="none">
         <circle cx="40" cy="40" r="32" stroke="#C9A227" stroke-width="1.4" opacity="0.8"/>
         <rect x="16" y="16" width="48" height="48" stroke="#C9A227" stroke-width="1.4" opacity="0.55"/>
@@ -511,7 +703,7 @@
       <span class="go">Begin Quiz →</span>
     </a>
 
-    <a class="practice-card" href="./Mudras/Quiz/">
+    <a class="practice-card" href="https://IQProductionz.com/Haligricity/Mudras/Quiz/">
       <svg class="practice-mini-sym" viewBox="0 0 80 80" fill="none">
         <circle cx="40" cy="40" r="32" stroke="#C9A227" stroke-width="1.4" opacity="0.8"/>
         <rect x="16" y="16" width="48" height="48" stroke="#C9A227" stroke-width="1.4" opacity="0.55"/>
@@ -522,7 +714,7 @@
       <span class="go">Find Your Mudra →</span>
     </a>
 
-    <a class="practice-card" href="./Pranayama/Quiz/">
+    <a class="practice-card" href="https://IQProductionz.com/Haligricity/Pranayama/Quiz/">
       <svg class="practice-mini-sym" viewBox="0 0 80 80" fill="none">
         <circle cx="40" cy="40" r="32" stroke="#C9A227" stroke-width="1.4" opacity="0.8"/>
         <rect x="16" y="16" width="48" height="48" stroke="#C9A227" stroke-width="1.4" opacity="0.55"/>
@@ -550,11 +742,207 @@
     <div>
       <h3>How to Form It</h3>
       <p>Lift your right hand to your face. <strong>Fold the index and middle fingers down into the palm.</strong> Keep the thumb, ring finger, and little finger extended. You will use the thumb to gently close the right nostril, and the ring + little fingers to close the left nostril.</p>
-      <p>This is the traditional hand position for <em>Nadi Shodhana</em> (alternate-nostril breath) — a foundational Haligric pranayama for clearing the energetic channels and steadying the mind.</p>
-      <a class="dl-btn purple" href="./Pranayama/Pranayama_Complete_Guide.pdf" download>
+      <p>This is the traditional hand position for <em>Nadi Shodhana</em> (alternate-nostril breath), <em>Surya Bhedana</em> (the morning solar breath), and <em>Chandra Bhedana</em> (the evening lunar breath) — foundational Haligric pranayamas for moving and balancing the channels.</p>
+      <a class="dl-btn purple" href="https://IQProductionz.com/Haligricity/Pranayama/Pranayama_Complete_Guide.pdf" download>
         <span class="arrow">⬇</span> Download Pranayama Guide
       </a>
     </div>
+  </div>
+</section>
+
+<!-- ─── DAILY PRACTICE ROUTINES ─────────────────────────────── -->
+<section>
+  <div class="section-eyebrow">Movement · Sound · Breath</div>
+  <h2 class="section-title">Daily Practice Routines</h2>
+  <p class="section-sub">Two practice arcs — Rising and Astral. Each opens with the Varessence and closes by sealing the field. The body is wired to thrive on rhythm; this is the trellis.</p>
+  <div class="gold-divider"></div>
+
+  <!-- RISING ROUTINE -->
+  <div class="routine-card">
+    <div class="routine-title">Rising Routine</div>
+    <div class="routine-flow">Varessence · Bowls · Pranayama · Mudra · Qigong · Yoga · Lymph</div>
+
+    <div class="step">
+      <div class="step-num">1</div>
+      <div class="step-body">
+        <h5>Rising Varessence</h5>
+        <p>Hands together at the heart center. Speak the Rising Varessence aloud — repeat if needed, until you can feel it land in the body.</p>
+        <div class="affirm">"I honor myself, on this day, and shine my light, along the way."</div>
+      </div>
+    </div>
+
+    <div class="step">
+      <div class="step-num">2</div>
+      <div class="step-body">
+        <h5>Singing Bowl — Clear the Dreamworld</h5>
+        <p>Strike or rim your singing bowls (brass or crystal) <strong>three times</strong> to clear the residue of the dreamworld and signal the body that a new day has begun. Each time, let the tone fully fade before you begin the next. This is the threshold — one world ends, another opens.</p>
+        <p>Begin with the <strong>highest note</strong> you have and play each one for however long feels right. Usually the tone will vibrate just right to signal that you've cleared each chakra. For the following frequencies, rimming only needs one wake-up dong. When you reach the <strong>lowest note</strong>, you have fully arrived back into your body.</p>
+      </div>
+    </div>
+
+    <div class="step">
+      <div class="step-num">3</div>
+      <div class="step-body">
+        <h5>Pranayama — Surya Bhedana (Rising Breath)</h5>
+        <p>Form Vishnu Mudra with your right hand. <strong>Surya Bhedana</strong> — the right-nostril solar breath — is the wake-up pranayama: inhale through the right (solar) nostril, exhale through the left. Repeat for 5–10 rounds to fire up the body's heat and clarity.</p>
+      </div>
+    </div>
+
+    <div class="step">
+      <div class="step-num">4</div>
+      <div class="step-body">
+        <h5>Mudra — Pull a Card</h5>
+        <p>Pull your daily, weekly, or monthly mudra from a card deck. Hold the gesture for whatever feels right. Two recommended decks:</p>
+        <p style="margin-top:6px;">
+          • <a href="https://a.co/d/0iRBMojL" target="_blank" rel="noopener">Mudra Card Deck (favorite)</a><br>
+          • <a href="https://a.co/d/0cvLWrB3" target="_blank" rel="noopener">72-Card Mudra Deck</a>
+        </p>
+      </div>
+    </div>
+
+    <div class="step">
+      <div class="step-num">5</div>
+      <div class="step-body">
+        <h5>Qigong — Rising</h5>
+        <p>Move stagnant overnight energy and wake the meridian channels before the body is asked to stretch or strengthen.
+        <a href="https://www.youtube.com/watch?v=y2RAEnWreoE&list=PL_Fc1LFovCG1LQrd0z0IXxdidHx4sucT4" target="_blank" rel="noopener">Watch Rising Qigong →</a></p>
+      </div>
+    </div>
+
+    <div class="step">
+      <div class="step-num">6</div>
+      <div class="step-body">
+        <h5>Yoga — Sun Salutation</h5>
+        <p>Follow the Qigong with a <a href="https://youtu.be/mtO2fRmh8D8?si=t36HMZ4_YJ0CKxzd" target="_blank" rel="noopener">sun salutation practice</a> to build heat, open the joints, and anchor the body in the physical world before the day begins.</p>
+      </div>
+    </div>
+
+    <div class="step">
+      <div class="step-num">7</div>
+      <div class="step-body">
+        <h5>Three Lymph Drainages — Neck, Armpits, Tummy</h5>
+        <p>Seal the rising practice with three gentle lymph drainages in order:</p>
+        <p style="margin-top:6px;">
+          • <strong>Neck</strong> — soft circular sweeps down the sides of the neck toward the collarbones.<br>
+          • <strong>Armpits</strong> — open the arm, pump the armpit hollow with the opposite hand 10–15 times each side.<br>
+          • <strong>Tummy</strong> — flat-handed clockwise circles around the navel to wake the gut.
+        </p>
+        <p>This opens the body's drainage highway so everything you do for the rest of the day can move freely.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- ASTRAL ROUTINE -->
+  <div class="routine-card">
+    <div class="routine-title">Astral Routine</div>
+    <div class="routine-flow">Yoga · Qigong · Pranayama · Bowls · Varessente</div>
+
+    <div class="step">
+      <div class="step-num">1</div>
+      <div class="step-body">
+        <h5>Yoga — Evening Wind Down</h5>
+        <p>Begin standing and fold forward over your toes, knees softly bent, hands on opposite elbows or brushing the floor as you sway the back of the body gently side to side. Let the spine decompress and the breath slow.</p>
+        <p>Move to the floor. Sit tall and begin slow twists — eyes reaching toward the far corners of the room, finding the edge of your peripheral vision on each side. Then shift to fast twists with hands clasped to shake loose what the day has held. Release into a forward fold and let the head drop heavy.</p>
+        <p>Open the legs wide for side-to-side stretches, one arm long overhead. Come into Child's Pose and rest. Close in Savasana for at least five minutes — not sleep, conscious release.</p>
+      </div>
+    </div>
+
+    <div class="step">
+      <div class="step-num">2</div>
+      <div class="step-body">
+        <h5>Qigong — Astral</h5>
+        <p>Move into Astral Qigong to dissolve any remaining tension and prepare the subtle body for the hours of unconscious renewal ahead.
+        <a href="https://www.youtube.com/watch?v=p-VPr5bs3eg&list=PL_Fc1LFovCG3xwotqf737-tWMOcM_ynQn&index=2" target="_blank" rel="noopener">Watch Astral Qigong →</a></p>
+      </div>
+    </div>
+
+    <div class="step">
+      <div class="step-num">3</div>
+      <div class="step-body">
+        <h5>Pranayama — Chandra Bhedana (Wind-Down Breath)</h5>
+        <p>Form Vishnu Mudra. <strong>Chandra Bhedana</strong> — the left-nostril lunar breath — is the wind-down pranayama: inhale through the left (lunar) nostril, exhale through the right. Repeat for 5–10 rounds to cool the body and quiet the mind. For an even softer ending, transition into <em>Bhramari</em> (humming bee breath) for the final rounds.</p>
+      </div>
+    </div>
+
+    <div class="step">
+      <div class="step-num">4</div>
+      <div class="step-body">
+        <h5>Singing Bowl — Cleanse the Day</h5>
+        <p>Close the practice with your singing bowls (brass or crystal) to cleanse the accumulated energy of the day before sleep. Use the same methods as the rising bowls — <strong>but in reverse order</strong>: begin with the lowest note and climb to the highest. Let the sound move through the room and through you. When the last tone fades completely, the field is clear.</p>
+      </div>
+    </div>
+
+    <div class="step">
+      <div class="step-num">5</div>
+      <div class="step-body">
+        <h5>Astral Varessente — Seal the Day</h5>
+        <p>Hands together at the heart center. Speak the Astral Varessente aloud — the Spanish form of Varessence — to seal the day before sleep.</p>
+        <div class="affirm">"Gratitude fills my heart, I've done my part. I send love from the end to the start."</div>
+      </div>
+    </div>
+  </div>
+
+</section>
+
+<!-- ─── DINING VARESSENCE ─────────────────────────────── -->
+<section>
+  <div class="section-eyebrow">Eating as Practice</div>
+  <h2 class="section-title">Dining Varessence</h2>
+  <p class="section-sub">A hand-and-breath ritual spoken over food. Cultivate energy from sky and earth, direct it into your meal, and seal with Ashe'.</p>
+  <div class="gold-divider"></div>
+
+  <div class="dining-card">
+    <img class="vares-img" src="https://IQProductionz.com/Haligricity/Varessence/Dining-Varessence.png" alt="Dining Varessence reference card" onerror="this.style.display='none'">
+
+    <div class="dining-steps">
+      <h4 style="font-family:'Cinzel',serif;color:var(--purple);font-size:1rem;letter-spacing:.05em;text-transform:uppercase;margin-bottom:14px;">Hand Movements for Energy Cultivation</h4>
+      <ol>
+        <li><strong>Rub the hands together</strong> briskly until you feel warmth and tingling — friction wakes the meridians in the palms.</li>
+        <li><strong>Open the hands to the sky</strong>, palms up, to draw down celestial energy.</li>
+        <li><strong>Twist the wrists to scoop the earth energy</strong>, then direct both hands toward your food.</li>
+        <li><strong>Speak the Dining Varessence:</strong></li>
+      </ol>
+
+      <div style="background:var(--purple-light);border-left:3px solid var(--purple);padding:14px 16px;border-radius:0 8px 8px 0;font-style:italic;color:var(--purple);line-height:1.7;font-size:.98rem;margin:12px 0;">
+        "I plant the seeds of greatness, merging nutrient-dense sensations. I invite my seat of power woven in what I devour."
+      </div>
+
+      <p><strong>Seal with Ashe'</strong> — snap the fingers in alternating bursts, three snaps per hand:</p>
+      <div style="background:var(--gold-pale);border-left:3px solid var(--gold);padding:14px 16px;border-radius:0 8px 8px 0;font-style:italic;color:var(--gold-border);line-height:1.6;font-size:.98rem;margin:12px 0;">
+        "Ashe'. Gratitude circulates in me."
+      </div>
+
+      <div class="ashe-links">
+        <div class="ashe-title">Your Haligric Library — Linked at Ashe'</div>
+        <ul>
+          <li>📜 <a href="https://IQProductionz.com/Haligricity/Varessence/Rising-Varessence.png">IQProductionz.com/Haligricity/Varessence/Rising-Varessence</a></li>
+          <li>🌙 <a href="https://IQProductionz.com/Haligricity/Varessence/Astral-Varessence.png">IQProductionz.com/Haligricity/Varessence/Astral-Varessence</a></li>
+          <li>🍽 <a href="https://IQProductionz.com/Haligricity/Varessence/Dining-Varessence.png">IQProductionz.com/Haligricity/Varessence/Dining-Varessence</a></li>
+          <li>🌬 <a href="https://IQProductionz.com/Haligricity/Pranayama/Pranayama_Complete_Guide.pdf">IQProductionz.com/Haligricity/Pranayama/Pranayama_Complete_Guide</a></li>
+          <li>🌀 <a href="https://IQProductionz.com/Haligricity/FindYourPractice/">IQProductionz.com/Haligricity/FindYourPractice</a></li>
+          <li>🤲 <a href="https://IQProductionz.com/Haligricity/Mudras/Quiz/">IQProductionz.com/Haligricity/Mudras/Quiz</a></li>
+          <li>🍂 <a href="https://IQProductionz.com/Haligricity/FoodGuide/">IQProductionz.com/Haligricity/FoodGuide</a></li>
+          <li>📚 <a href="https://IQProductionz.com/Haligricity/HistoryCollection/">IQProductionz.com/Haligricity/HistoryCollection</a></li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ─── REAL MAGIC ─────────────────────────────── -->
+<section>
+  <div class="section-eyebrow">Foundational Workbook</div>
+  <h2 class="section-title">Real Magic · An Introduction</h2>
+  <div class="gold-divider"></div>
+
+  <div class="ety-card">
+    <p>Written by Hali Sarah Parsons and published February 10, 2017 — <em>Real Magic: An Introduction</em> is the first written record of the belief system that would grow into Haligricity. It was written as a workbook: practical, personal, and designed to be <em>used</em>, not just read.</p>
+    <p>If you are new to the Haligric path, this is where to begin. It introduces the concepts of energy, intention, and the nature of reality that underpin every practice in the Well-Being and Rituals books.</p>
+    <p style="margin-top:14px;">
+      <a class="dl-btn purple" href="https://realmagicintro.wixsite.com/mymagicworkbook" target="_blank" rel="noopener">
+        <span class="arrow">↗</span> Visit Real Magic Introduction
+      </a>
+    </p>
   </div>
 </section>
 
@@ -570,36 +958,53 @@
     <div class="book-card">
       <span class="tag">Foundation Text</span>
       <h4>Haligricity — A Philosophy</h4>
-      <p>The core text. Lays out the worldview, the etymology of the word <em>halig</em>, the framework of Vericence and Tetralty, and the relationship between wholeness, healing, and current.</p>
+      <p>The core text. Lays out the worldview, the etymology of <em>halig</em>, the framework of Varessence and Tetralty, and the relationship between wholeness, healing, and current. Sample: <em>"You are not broken. You have never been broken. You have been in a process — sometimes a painful one — of becoming whole. Haligricity does not fix you. It names what you already are."</em></p>
       <div class="meta">Status: Final draft — refining</div>
     </div>
 
     <div class="book-card">
       <span class="tag">Practice Manual</span>
       <h4>Haligric — Well-Being</h4>
-      <p>The hands-on book: daily practices for body, breath, sound, movement, eating, and connection. Everything you need to live haligrically without committing to any one tradition's branding.</p>
+      <p>The hands-on book: daily practices for body, breath, sound, movement, eating, and connection. Sample: <em>"Begin at the rise of the day with the neck — always the neck first. Open the lymphatic highway before anything else moves. The body knows the order. Trust it."</em></p>
       <div class="meta">Status: Final draft — refining</div>
     </div>
 
     <div class="book-card">
       <span class="tag">Ritual Guide</span>
       <h4>Haligric — Rituals</h4>
-      <p>Ceremony, seasonal observances, life-passage rites, and personal rituals — drawn from many traditions and re-rooted in the language of wholeness.</p>
+      <p>Ceremony, seasonal observances, life-passage rites, and personal rituals — drawn from many traditions and re-rooted in the language of wholeness. Sample: <em>"Open your space before you enter it. You are not walking into a room — you are walking into a field. Acknowledge the field. The field will acknowledge you."</em></p>
       <div class="meta">Status: Final draft — refining</div>
     </div>
 
-    <div class="book-card">
+    <div class="book-card" id="controversial-card">
       <span class="tag draft">Controversial</span>
       <h4>Haligric — Controversial Manual</h4>
       <p>The harder questions: cultural appropriation, religious gatekeeping, modern witchcraft, and the responsibility that comes with naming something new. For readers willing to sit with discomfort.</p>
-      <div class="meta">Status: Draft — placeholder</div>
+      <div class="meta" style="margin-bottom:12px;">Access: Passcode protected</div>
+      <div id="cm-gate" style="display:flex;flex-direction:column;gap:8px;">
+        <input type="password" id="cm-pass" placeholder="Enter passcode"
+               style="padding:9px 12px;border:1.5px solid var(--gold-border);border-radius:6px;background:var(--gold-pale);font-family:Georgia,serif;font-size:.9rem;color:var(--ink);outline:none;"
+               onkeydown="if(event.key==='Enter')checkPass()">
+        <button onclick="checkPass()"
+                style="padding:9px 16px;background:var(--purple);color:#fff;border:none;border-radius:6px;font-family:'Cinzel',serif;font-size:.72rem;letter-spacing:.12em;text-transform:uppercase;cursor:pointer;">
+          Unlock
+        </button>
+        <div id="cm-msg" style="font-size:.82rem;color:var(--gold-border);font-style:italic;display:none;"></div>
+      </div>
+      <a id="cm-link" href="https://IQProductionz.com/Haligricity/HaligricControversialManual.pdf" download
+         style="display:none;margin-top:8px;" class="dl-btn purple">
+        <span class="arrow">⬇</span> Download Controversial Manual
+      </a>
     </div>
 
     <div class="book-card">
       <span class="tag draft">Advanced</span>
       <h4>Real Magic · Book 2 — Advanced Practice</h4>
-      <p>The next volume of the Real Magic series. Deeper energy work, longer practice arcs, and the integration of Vericence and Tetralty into ongoing daily life.</p>
-      <div class="meta">Status: Draft — placeholder</div>
+      <p>The next volume of the Real Magic series. Deeper energy work, longer practice arcs, and the integration of Varessence and Tetralty into ongoing daily life. Sample: <em>"The beginner asks what to do. The advanced practitioner asks what is already happening — and learns to work with it."</em></p>
+      <div class="meta" style="margin-bottom:10px;">Status: In progress (2026)</div>
+      <a class="dl-btn" href="https://realmagicintro.wixsite.com/mymagicworkbook" target="_blank" rel="noopener" style="font-size:.7rem;">
+        <span class="arrow">↗</span> Read Real Magic Introduction
+      </a>
     </div>
 
   </div>
@@ -609,41 +1014,40 @@
 <section>
   <div class="section-eyebrow">Eating as Practice</div>
   <h2 class="section-title">Regional Food Guides</h2>
-  <p class="section-sub">Each guide pulls together native foods, seasonal eating, and regional traditions — page-numbered from page 4 onward (the first three pages are cover &amp; intro). Free to download.</p>
+  <p class="section-sub">Each guide pulls together native foods, seasonal eating, and regional traditions — page-numbered from page 4 onward. Free to download.</p>
   <div class="gold-divider"></div>
 
   <div class="region-grid">
-
     <div class="region-card">
       <span class="area">United States · North</span>
       <span class="place">New England</span>
-      <a class="download-mini" href="./FoodGuide/USA/North/New-England.pdf" download>⬇ Download PDF</a>
+      <a class="download-mini" href="https://IQProductionz.com/Haligricity/FoodGuide/USA/North/New-England.pdf" download>⬇ Download PDF</a>
     </div>
-
     <div class="region-card">
       <span class="area">United States · PNW</span>
       <span class="place">Pacific Northwest</span>
-      <a class="download-mini" href="./FoodGuide/USA/PNW/Pacific-Northwest.pdf" download>⬇ Download PDF</a>
+      <a class="download-mini" href="https://IQProductionz.com/Haligricity/FoodGuide/USA/PNW/Pacific-Northwest.pdf" download>⬇ Download PDF</a>
     </div>
-
     <div class="region-card">
       <span class="area">United States · West</span>
       <span class="place">Pacific Coast</span>
-      <a class="download-mini" href="./FoodGuide/USA/West/Pacific-Coast.pdf" download>⬇ Download PDF</a>
+      <a class="download-mini" href="https://IQProductionz.com/Haligricity/FoodGuide/USA/West/Pacific-Coast.pdf" download>⬇ Download PDF</a>
     </div>
-
     <div class="region-card">
       <span class="area">United States · Rockies</span>
       <span class="place">The Rockies</span>
-      <a class="download-mini" href="./FoodGuide/USA/Rockies/Rockies.pdf" download>⬇ Download PDF</a>
+      <a class="download-mini" href="https://IQProductionz.com/Haligricity/FoodGuide/USA/Rockies/Rockies.pdf" download>⬇ Download PDF</a>
     </div>
-
     <div class="region-card">
       <span class="area">United States · South</span>
       <span class="place">The South</span>
-      <a class="download-mini" href="./FoodGuide/USA/South/The-South.pdf" download>⬇ Download PDF</a>
+      <a class="download-mini" href="https://IQProductionz.com/Haligricity/FoodGuide/USA/South/The-South.pdf" download>⬇ Download PDF</a>
     </div>
-
+    <div class="region-card" style="border-color:var(--purple-mid);background:var(--purple-light);">
+      <span class="area" style="color:var(--purple-mid);">Your Region</span>
+      <span class="place" style="color:var(--purple);">Request One</span>
+      <span style="font-size:.85rem;color:var(--gray);font-style:italic;line-height:1.5;">Fill out the form at the bottom of the page and we'll research and add your region.</span>
+    </div>
   </div>
 </section>
 
@@ -652,26 +1056,40 @@
   <div class="section-eyebrow">Comparative History</div>
   <h2 class="section-title">The History Collection</h2>
   <p class="section-sub">Deep-dive PDFs into the world's spiritual, philosophical, and ritual traditions. Each one is downloadable. If your region or tradition isn't listed, request it below.</p>
+  <div style="background:var(--purple-light);border:1.5px solid var(--purple-mid);border-radius:10px;padding:16px 20px;margin-bottom:8px;text-align:center;">
+    <span style="font-family:'Cinzel',serif;font-size:.78rem;letter-spacing:.12em;text-transform:uppercase;color:var(--purple);font-weight:600;">Note —</span>
+    <span style="font-size:.92rem;color:var(--purple);"> These documents influenced the creation of Haligricity. Some refer to the synthesis as <em>The Living Way</em>, as they were created prior to the coining of the name.</span>
+  </div>
   <div class="gold-divider"></div>
 
   <div class="history-grid">
-    <div class="region-card"><span class="area">Indigenous · Americas</span><span class="place">All My Relations — Native American Beliefs</span><a class="download-mini" href="./HistoryCollection/All_My_Relations_Native_American_Beliefs.pdf" download>⬇ Download PDF</a></div>
-    <div class="region-card"><span class="area">Indonesia</span><span class="place">Balinese Beliefs, Rituals &amp; Traditions</span><a class="download-mini" href="./HistoryCollection/Balinese_Beliefs_Rituals_and_Traditions.pdf" download>⬇ Download PDF</a></div>
-    <div class="region-card"><span class="area">India · Hindu</span><span class="place">Bhagavad-Gita for Awakening</span><a class="download-mini" href="./HistoryCollection/Bhagavad-Gita-For-Awakeninging-full-2-2021.pdf" download>⬇ Download PDF</a></div>
-    <div class="region-card"><span class="area">China</span><span class="place">Confucianism — A Complete Philosophy Guide</span><a class="download-mini" href="./HistoryCollection/Confucianism_Complete_Philosophy_Guide.pdf" download>⬇ Download PDF</a></div>
-    <div class="region-card"><span class="area">Synthesis</span><span class="place">Five Paths of the Living World</span><a class="download-mini" href="./HistoryCollection/Five_Paths_of_the_Living_World.pdf" download>⬇ Download PDF</a></div>
-    <div class="region-card"><span class="area">India</span><span class="place">Hinduism — Deep Dive into Rituals, Deities, Texts</span><a class="download-mini" href="./HistoryCollection/Hinduism_DeepDive_Rituals_Deities_Texts.pdf" download>⬇ Download PDF</a></div>
-    <div class="region-card"><span class="area">Middle East</span><span class="place">Islam &amp; Samaritanism — Complete Guide</span><a class="download-mini" href="./HistoryCollection/Islam_and_Samaritanism_Complete_Guide.pdf" download>⬇ Download PDF</a></div>
-    <div class="region-card"><span class="area">Northern Europe</span><span class="place">Norse Runes &amp; Pagan/Wiccan Gods</span><a class="download-mini" href="./HistoryCollection/Norse_Runes_and_Pagan_Wiccan_Gods.pdf" download>⬇ Download PDF</a></div>
-    <div class="region-card"><span class="area">Caribbean · Diaspora</span><span class="place">Rastafari — A Deep Dive</span><a class="download-mini" href="./HistoryCollection/Rastafari_A_Deep_Dive.pdf" download>⬇ Download PDF</a></div>
-    <div class="region-card"><span class="area">Modern Movement</span><span class="place">Scientology — A Complete Factual Guide</span><a class="download-mini" href="./HistoryCollection/Scientology_Complete_Factual_Guide.pdf" download>⬇ Download PDF</a></div>
-    <div class="region-card"><span class="area">Mesoamerica</span><span class="place">Serpent &amp; Star — Aztec &amp; Mayan Beliefs</span><a class="download-mini" href="./HistoryCollection/Serpent_and_Star_Aztec_Mayan_Beliefs.pdf" download>⬇ Download PDF</a></div>
-    <div class="region-card"><span class="area">Eastern Mediterranean</span><span class="place">The Byzantine Empire — Faith &amp; Ritual</span><a class="download-mini" href="./HistoryCollection/The_Byzantine_Empire_Faith_and_Ritual.pdf" download>⬇ Download PDF</a></div>
-    <div class="region-card"><span class="area">Celtic · British Isles</span><span class="place">The Druids — A Deep Dive</span><a class="download-mini" href="./HistoryCollection/The_Druids_A_Deep_Dive.pdf" download>⬇ Download PDF</a></div>
-    <div class="region-card"><span class="area">Ancient Egypt</span><span class="place">The Heliopolitan Philosophy — A Deep Dive</span><a class="download-mini" href="./HistoryCollection/The_Heliopolitan_Philosophy_A_Deep_Dive.pdf" download>⬇ Download PDF</a></div>
-    <div class="region-card"><span class="area">Synthesis</span><span class="place">The Indwelling Divine — Seven Paths</span><a class="download-mini" href="./HistoryCollection/The_Indwelling_Divine_Seven_Paths.pdf" download>⬇ Download PDF</a></div>
-    <div class="region-card"><span class="area">Ancient Egypt</span><span class="place">The Wisdom of Kemet — Egyptian Beliefs</span><a class="download-mini" href="./HistoryCollection/The_Wisdom_of_Kemet_Egyptian_Beliefs.pdf" download>⬇ Download PDF</a></div>
-    <div class="region-card"><span class="area">Mesoamerica</span><span class="place">Zapotec Beliefs, Rituals &amp; Traditions</span><a class="download-mini" href="./HistoryCollection/Zapotec_Beliefs_Rituals_and_Traditions.pdf" download>⬇ Download PDF</a></div>
+    <div class="region-card" style="border-color:var(--purple-mid);background:var(--purple-light);">
+      <span class="area" style="color:var(--purple-mid);">Foundation · Haligricity</span>
+      <span class="place" style="color:var(--purple);">Real Magic · An Introduction</span>
+      <span style="font-size:.85rem;color:var(--gray);line-height:1.5;">The workbook that began it all — written by Hali Sarah Parsons, published February 10, 2017. The Living Way before it had a name.</span>
+      <a class="download-mini" href="https://realmagicintro.wixsite.com/mymagicworkbook" target="_blank" rel="noopener" style="border-color:var(--purple-mid);color:var(--purple);">↗ Visit Book</a>
+    </div>
+
+    <div class="region-card"><span class="area">Indigenous · Americas</span><span class="place">All My Relations — Native American Beliefs</span><a class="download-mini" href="https://IQProductionz.com/Haligricity/HistoryCollection/All_My_Relations_Native_American_Beliefs.pdf" download>⬇ Download PDF</a></div>
+    <div class="region-card"><span class="area">Indigenous · Australia</span><span class="place">Australian Aboriginal Beliefs, Rituals &amp; Traditions</span><a class="download-mini" href="https://IQProductionz.com/Haligricity/HistoryCollection/Australian_Aboriginal_Beliefs_Rituals_and_Traditions.pdf" download>⬇ Download PDF</a></div>
+    <div class="region-card"><span class="area">Indonesia</span><span class="place">Balinese Beliefs, Rituals &amp; Traditions</span><a class="download-mini" href="https://IQProductionz.com/Haligricity/HistoryCollection/Balinese_Beliefs_Rituals_and_Traditions.pdf" download>⬇ Download PDF</a></div>
+    <div class="region-card"><span class="area">India · Hindu</span><span class="place">Bhagavad-Gita for Awakening</span><a class="download-mini" href="https://IQProductionz.com/Haligricity/HistoryCollection/Bhagavad-Gita-For-Awakeninging-full-2-2021.pdf" download>⬇ Download PDF</a></div>
+    <div class="region-card"><span class="area">West Africa</span><span class="place">Bobo &amp; Bwa Beliefs, Rituals &amp; Traditions</span><a class="download-mini" href="https://IQProductionz.com/Haligricity/HistoryCollection/Bobo_Bwa_Beliefs_Rituals_and_Traditions.pdf" download>⬇ Download PDF</a></div>
+    <div class="region-card"><span class="area">China</span><span class="place">Confucianism — A Complete Philosophy Guide</span><a class="download-mini" href="https://IQProductionz.com/Haligricity/HistoryCollection/Confucianism_Complete_Philosophy_Guide.pdf" download>⬇ Download PDF</a></div>
+    <div class="region-card"><span class="area">Synthesis</span><span class="place">Five Paths of the Living World</span><a class="download-mini" href="https://IQProductionz.com/Haligricity/HistoryCollection/Five_Paths_of_the_Living_World.pdf" download>⬇ Download PDF</a></div>
+    <div class="region-card"><span class="area">Hellenic · Mystery</span><span class="place">Greek Mysteries &amp; Hermeticism</span><a class="download-mini" href="https://IQProductionz.com/Haligricity/HistoryCollection/Greek_Mysteries_and_Hermeticism.pdf" download>⬇ Download PDF</a></div>
+    <div class="region-card"><span class="area">India</span><span class="place">Hinduism — Deep Dive into Rituals, Deities, Texts</span><a class="download-mini" href="https://IQProductionz.com/Haligricity/HistoryCollection/Hinduism_DeepDive_Rituals_Deities_Texts.pdf" download>⬇ Download PDF</a></div>
+    <div class="region-card"><span class="area">Middle East</span><span class="place">Islam &amp; Samaritanism — Complete Guide</span><a class="download-mini" href="https://IQProductionz.com/Haligricity/HistoryCollection/Islam_and_Samaritanism_Complete_Guide.pdf" download>⬇ Download PDF</a></div>
+    <div class="region-card"><span class="area">Northern Europe</span><span class="place">Norse Runes &amp; Pagan/Wiccan Gods</span><a class="download-mini" href="https://IQProductionz.com/Haligricity/HistoryCollection/Norse_Runes_and_Pagan_Wiccan_Gods.pdf" download>⬇ Download PDF</a></div>
+    <div class="region-card"><span class="area">Caribbean · Diaspora</span><span class="place">Rastafari — A Deep Dive</span><a class="download-mini" href="https://IQProductionz.com/Haligricity/HistoryCollection/Rastafari_A_Deep_Dive.pdf" download>⬇ Download PDF</a></div>
+    <div class="region-card"><span class="area">Modern Movement</span><span class="place">Scientology — A Complete Factual Guide</span><a class="download-mini" href="https://IQProductionz.com/Haligricity/HistoryCollection/Scientology_Complete_Factual_Guide.pdf" download>⬇ Download PDF</a></div>
+    <div class="region-card"><span class="area">Mesoamerica</span><span class="place">Serpent &amp; Star — Aztec &amp; Mayan Beliefs</span><a class="download-mini" href="https://IQProductionz.com/Haligricity/HistoryCollection/Serpent_and_Star_Aztec_Mayan_Beliefs.pdf" download>⬇ Download PDF</a></div>
+    <div class="region-card"><span class="area">Eastern Mediterranean</span><span class="place">The Byzantine Empire — Faith &amp; Ritual</span><a class="download-mini" href="https://IQProductionz.com/Haligricity/HistoryCollection/The_Byzantine_Empire_Faith_and_Ritual.pdf" download>⬇ Download PDF</a></div>
+    <div class="region-card"><span class="area">Celtic · British Isles</span><span class="place">The Druids — A Deep Dive</span><a class="download-mini" href="https://IQProductionz.com/Haligricity/HistoryCollection/The_Druids_A_Deep_Dive.pdf" download>⬇ Download PDF</a></div>
+    <div class="region-card"><span class="area">Ancient Egypt</span><span class="place">The Heliopolitan Philosophy — A Deep Dive</span><a class="download-mini" href="https://IQProductionz.com/Haligricity/HistoryCollection/The_Heliopolitan_Philosophy_A_Deep_Dive.pdf" download>⬇ Download PDF</a></div>
+    <div class="region-card"><span class="area">Synthesis</span><span class="place">The Indwelling Divine — Seven Paths</span><a class="download-mini" href="https://IQProductionz.com/Haligricity/HistoryCollection/The_Indwelling_Divine_Seven_Paths.pdf" download>⬇ Download PDF</a></div>
+    <div class="region-card"><span class="area">Ancient Egypt</span><span class="place">The Wisdom of Kemet — Egyptian Beliefs</span><a class="download-mini" href="https://IQProductionz.com/Haligricity/HistoryCollection/The_Wisdom_of_Kemet_Egyptian_Beliefs.pdf" download>⬇ Download PDF</a></div>
+    <div class="region-card"><span class="area">Mesoamerica</span><span class="place">Zapotec Beliefs, Rituals &amp; Traditions</span><a class="download-mini" href="https://IQProductionz.com/Haligricity/HistoryCollection/Zapotec_Beliefs_Rituals_and_Traditions.pdf" download>⬇ Download PDF</a></div>
   </div>
 
   <!-- REGION REQUEST FORM -->
@@ -701,10 +1119,57 @@
 
 <footer class="ftr">
   <div class="blessing"><strong>Grand Rising.</strong> · <strong>Be More You.</strong> · <strong>Ashe.</strong></div>
-  Haligricity · Hali Sarah Parsons · <a href="https://iqproductionz.com/">IQProductionz.com</a>
+  Haligricity · Hali Sarah Parsons · <a href="https://IQProductionz.com/">IQProductionz.com</a>
 </footer>
 
 <script>
+/* ============================================================
+   BRAND-NAME CASE NORMALIZER
+   Ensures the brand "IQProductionz" always renders with the
+   first three letters capitalized (IQP). Walks every visible
+   text node on load and corrects any case variant: iqproductionz,
+   IQproductionz, IqProductionz, etc.  Anchor hrefs are skipped —
+   URL paths are case-sensitive and have already been written in
+   the canonical form on this page.
+   ============================================================ */
+(function fixBrandName() {
+  var canonical = 'IQProductionz';
+  var rx = /iqproductionz/gi;
+
+  function walk(node) {
+    if (node.nodeType === 3) {
+      var v = node.nodeValue;
+      if (v && rx.test(v)) {
+        rx.lastIndex = 0;
+        node.nodeValue = v.replace(rx, canonical);
+      }
+      return;
+    }
+    if (node.nodeType !== 1) return;
+    var tag = node.tagName;
+    if (tag === 'SCRIPT' || tag === 'STYLE') return;
+    for (var i = 0; i < node.childNodes.length; i++) walk(node.childNodes[i]);
+  }
+  document.addEventListener('DOMContentLoaded', function() { walk(document.body); });
+})();
+
+function checkPass() {
+  var pass = document.getElementById('cm-pass').value.trim().toLowerCase();
+  var msg  = document.getElementById('cm-msg');
+  var link = document.getElementById('cm-link');
+  var gate = document.getElementById('cm-gate');
+  msg.style.display = 'block';
+  if (pass === 'sacred') {
+    msg.textContent = 'Access granted. Grand Rising.';
+    msg.style.color = 'var(--purple)';
+    gate.style.display = 'none';
+    link.style.display = 'inline-flex';
+  } else {
+    msg.textContent = 'Incorrect passcode.';
+    msg.style.color = 'var(--gold-border)';
+  }
+}
+
 function submitRequest() {
   var name  = document.getElementById('req-name').value.trim();
   var email = document.getElementById('req-email').value.trim();
@@ -739,7 +1204,7 @@ function submitRequest() {
     document.getElementById('req-why').value = '';
   }).catch(function(err) {
     console.error(err);
-    msg.textContent = 'Something went wrong sending. Please email us directly at hello@iqproductionz.com.';
+    msg.textContent = 'Something went wrong sending. Please email us directly at hello@IQProductionz.com.';
     msg.style.color = '#B8860B';
   });
 }
