@@ -28,7 +28,7 @@ src="https://www.facebook.com/tr?id=1401417148668967&ev=PageView&noscript=1"/></
   if(!sid){sid='mk_'+Math.random().toString(36).substr(2,9)+Date.now().toString(36);try{history.replaceState(null,'',window.location.pathname+'?sid='+sid);}catch(e){}}
   window._sessionId=sid;
   /* #NOTES: Update this URL to your actual live website link if you want the save feature to link back properly */
-  window._resumeUrl='https://iqproductionz.com/MaryKay/Assess/?sid='+sid;
+  window._resumeUrl='https://MaryKay.IQProductionz.com/Assess/?sid='+sid;
 })();
 </script>
 
@@ -380,7 +380,7 @@ select.form-input{appearance:none;background-image:url("data:image/svg+xml,%3Csv
       
       <div style="display:flex;justify-content:space-between;align-items:flex-end;margin-top:20px;flex-wrap:wrap;gap:12px;">
         <button onclick="backFromResults()" style="background:none;border:none;font-size:11px;color:#b09090;cursor:pointer;padding:4px 8px;letter-spacing:1px;">← Back</button>
-        <button onclick="window.location.href='https://iqproductionz.com/MaryKay/SocialMediaCollect/FullAssess/'" style="background:none;border:none;font-size:11px;color:#b09090;cursor:pointer;padding:4px 8px;letter-spacing:1px;">Retake the Assessment</button>
+        <button onclick="window.location.href='https://MaryKay.IQProductionz.com/SocialMediaCollect/FullAssess/'" style="background:none;border:none;font-size:11px;color:#b09090;cursor:pointer;padding:4px 8px;letter-spacing:1px;">Retake the Assessment</button>
       </div>
     </div>
   </div>
@@ -393,7 +393,7 @@ select.form-input{appearance:none;background-image:url("data:image/svg+xml,%3Csv
     <div style="font-family:'Cormorant Garamond',serif;font-size:1.8rem;color:var(--dark);margin-bottom:12px;">Thank You for Your Time!</div>
     <p style="font-size:14px;color:var(--gray);line-height:1.9;margin-bottom:28px;">Feel free to browse Mary Kay products whenever you're ready.</p>
     <a href="https://www.marykay.com/sistahay/en/home" target="_blank" class="btn-primary">Browse Mary Kay →</a>
-    <div style="margin-top:20px;"><button onclick="window.location.href='https://iqproductionz.com/MaryKay/Assess/'" style="background:none;border:none;font-size:11px;color:#b09090;cursor:pointer;letter-spacing:1px;">Retake the Assessment</button></div>
+    <div style="margin-top:20px;"><button onclick="window.location.href='https://MaryKay.IQProductionz.com/Assess/'" style="background:none;border:none;font-size:11px;color:#b09090;cursor:pointer;letter-spacing:1px;">Retake the Assessment</button></div>
   </div>
 </div>
 
@@ -1311,7 +1311,7 @@ async function doSubmitProfile(){
         '<a href="https://www.youtube.com/watch?v=lDkwtF-EdpE" target="_blank" style="display:block;max-width:480px;margin:0 auto 20px;border-radius:12px;overflow:hidden;text-decoration:none;">' +
           '<img src="https://img.youtube.com/vi/lDkwtF-EdpE/hqdefault.jpg" alt="Mary Kay Opportunity" style="display:block;width:100%;border-radius:12px;">' +
         '</a>' +
-        '<a href="https://iqproductionz.com/MaryKay/Opportunity/" style="display:inline-block;background:linear-gradient(135deg,#e8507a,#c93a62);color:#fff;border-radius:50px;padding:14px 36px;font-size:13px;font-family:Jost,Arial,sans-serif;font-weight:600;letter-spacing:2px;text-transform:uppercase;text-decoration:none;">Become A Consultant \u2192</a>' +
+        '<a href="https://MaryKay.IQProductionz.com/Opportunity/" style="display:inline-block;background:linear-gradient(135deg,#e8507a,#c93a62);color:#fff;border-radius:50px;padding:14px 36px;font-size:13px;font-family:Jost,Arial,sans-serif;font-weight:600;letter-spacing:2px;text-transform:uppercase;text-decoration:none;">Become A Consultant \u2192</a>' +
       '</div>'
     : '';
 
@@ -1348,7 +1348,7 @@ async function doSubmitProfile(){
   if(tyEl) tyEl.textContent = first + '!';
   btn.textContent = 'Submit'; btn.disabled = false;
   if(window.fbq) fbq('track','Lead');
-  window.location.href = 'https://iqproductionz.com/MaryKay/SocialMediaCollect/ThankYou/?name='+encodeURIComponent(first)+(wantsOpp?'&opp=1':'');
+  window.location.href = 'https://MaryKay.IQProductionz.com/SocialMediaCollect/ThankYou/?name='+encodeURIComponent(first)+(wantsOpp?'&opp=1':'');
 
   // #NOTES: Actually fires the EmailJS API connection. Done in the background.
   if(window.emailjs){

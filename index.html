@@ -8,6 +8,30 @@
 -->
 <html lang="en">
 <head>
+  <!DOCTYPE html>
+<html lang="en">
+<head>
+    <script>
+        // Force URL capitalization to IQProductionz.com
+        (function() {
+            var currentUrl = window.location.href;
+            // Check if the lowercase domain is in the address bar
+            if (window.location.hostname === "iqproductionz.com" || window.location.hostname === "www.iqproductionz.com") {
+                // If it doesn't match the exact capitalized version, redirect it
+                if (!currentUrl.includes("IQProductionz.com")) {
+                    var updatedUrl = currentUrl.replace(/iqproductionz\.com/i, "IQProductionz.com");
+                    window.location.replace(updatedUrl);
+                }
+            }
+        })();
+    </script>
+
+    <meta charset="UTF-8">
+    <title>IQ Productionz</title>
+    </head>
+<body>
+    </body>
+</html>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Home | I.Q. Productionz</title>
