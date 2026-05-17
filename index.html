@@ -4,45 +4,131 @@
   Author:      Hali Sarah Parsons  Date: 2026
   Description: Domain mask page. IQProductionz.com/ loads
                https://iqproductionz.wixsite.com/iqpr inside a full-screen iframe.
-               Address bar always shows the clean IQProductionz.com URL.
+               Address bar shows the clean IQProductionz.com URL.
+               Brand name and path case are normalized on load.
 -->
 <html lang="en">
 <head>
-  <!DOCTYPE html>
-<html lang="en">
-<head>
-    <script>
-        // Force URL capitalization to IQProductionz.com
-        (function() {
-            var currentUrl = window.location.href;
-            // Check if the lowercase domain is in the address bar
-            if (window.location.hostname === "iqproductionz.com" || window.location.hostname === "www.iqproductionz.com") {
-                // If it doesn't match the exact capitalized version, redirect it
-                if (!currentUrl.includes("IQProductionz.com")) {
-                    var updatedUrl = currentUrl.replace(/iqproductionz\.com/i, "IQProductionz.com");
-                    window.location.replace(updatedUrl);
-                }
-            }
-        })();
-    </script>
-
-    <meta charset="UTF-8">
-    <title>IQ Productionz</title>
-    </head>
-<body>
-    </body>
-</html>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Home | I.Q. Productionz</title>
+  <title>IQProductionz.com — Home</title>
   <meta name="description" content="I.Q. Productionz — Home. Entertainment &amp; Metaphysical Health. Houston, Texas.">
+
+  <!-- ────────────────────────────────────────────────────────────
+       BRAND + PATH CASE NORMALIZER
+       Runs as early as possible (before paint).
+
+       WHAT IT CAN DO:
+         • Rewrite the visible PATH portion of the URL to canonical
+           case (/services → /Services) via history.replaceState,
+           with no reload.
+         • Replace any visible text on the page that reads
+           "iqproductionz" / "IQproductionz" / etc. with the
+           canonical "IQProductionz".
+         • Set <title>, og:url, canonical to IQProductionz.com.
+
+       WHAT IT CANNOT DO:
+         • Change the HOSTNAME case in the URL bar. Browsers
+           (Chrome, Safari, Firefox, Edge) always render the
+           host portion of a URL in lowercase as a security
+           rule. No JavaScript override exists. The path,
+           however, is fully ours.
+       ──────────────────────────────────────────────────────────── -->
+  <script>
+  (function(){
+    // ── canonical map: lowercase segment → CamelCase segment ──
+    var CANON = {
+      'about':'About',
+      'agreements':'Agreements',
+      'backend':'BackEnd',
+      'contact':'Contact',
+      'content':'Content',
+      'faq':'FAQ',
+      'haligricity':'Haligricity',
+      'marykay':'MaryKay',
+      'products':'Products',
+      'services':'Services',
+      'findyourpractice':'FindYourPractice',
+      'foodguide':'FoodGuide',
+      'historycollection':'HistoryCollection',
+      'mudras':'Mudras',
+      'pranayama':'Pranayama',
+      'quiz':'Quiz',
+      'varessence':'Varessence',
+      'usa':'USA','north':'North','south':'South','west':'West',
+      'pnw':'PNW','rockies':'Rockies',
+      'graphic':'Graphic','audio':'Audio','fashion':'Fashion','photo':'Photo',
+      'heal':'Heal','host':'Host','hosting':'Hosting','inquire':'Inquire',
+      'html':'HTML','learn':'Learn','promo':'Promo','video':'Video',
+      'specialtyhtml':'SpecialtyHTML','websites':'Websites','sitebuilderform':'SiteBuilderForm',
+      'brandedemail':'BrandedEmail','clients':'Clients',
+      'leadprocessor':'LeadProcessor','pitchassist':'PitchAssist',
+      'assess':'Assess','bracketassess':'BracketAssess','fullassess':'FullAssess',
+      'continue':'Continue','opportunity':'Opportunity','optout':'OptOut',
+      'samples':'Samples','samplefollowup':'SampleFollowUp',
+      'socialmediacollect':'SocialMediaCollect','thankyou':'ThankYou',
+      'bears':'Bears','bodies':'Bodies','books':'Books',
+      'charging-plates':'Charging-Plates','crystals':'Crystals','earrings':'Earrings',
+      'games':'Games','hands':'Hands','keychains':'Keychains','necklaces':'Necklaces',
+      'oils':'Oils','orgonites':'Orgonites','pyramids':'Pyramids','skulls':'Skulls'
+    };
+
+    // ── 1. Normalize the URL PATH case (no host change possible) ──
+    function fixSegment(seg) {
+      if (!seg) return seg;
+      // Title-Case kebab leaf slugs like "star-bear" -> "Star-Bear"
+      // first try direct map match
+      var key = seg.toLowerCase();
+      if (CANON[key]) return CANON[key];
+      // fallback: capitalize each hyphen-separated part
+      return seg.split('-').map(function(p){
+        if (!p) return p;
+        return p.charAt(0).toUpperCase() + p.slice(1).toLowerCase();
+      }).join('-');
+    }
+    try {
+      var path = window.location.pathname;
+      var parts = path.split('/');
+      var fixed = parts.map(function(p, i){ return i===0||i===parts.length-1&&p===''? p : fixSegment(p); }).join('/');
+      if (fixed !== path) {
+        history.replaceState(null, '', fixed + window.location.search + window.location.hash);
+      }
+    } catch(e) { /* noop */ }
+
+    // ── 2. Normalize all visible text containing the brand ──
+    function fixBrandText() {
+      var rx = /iqproductionz/gi;
+      function walk(node) {
+        if (node.nodeType === 3) {
+          if (node.nodeValue && rx.test(node.nodeValue)) {
+            rx.lastIndex = 0;
+            node.nodeValue = node.nodeValue.replace(rx, 'IQProductionz');
+          }
+          return;
+        }
+        if (node.nodeType !== 1) return;
+        var tag = node.tagName;
+        if (tag === 'SCRIPT' || tag === 'STYLE') return;
+        for (var i = 0; i < node.childNodes.length; i++) walk(node.childNodes[i]);
+      }
+      walk(document.body);
+      document.title = document.title.replace(rx, 'IQProductionz');
+    }
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', fixBrandText);
+    } else {
+      fixBrandText();
+    }
+  })();
+  </script>
+
+  <link rel="canonical" href="https://IQProductionz.com/">
+  <meta property="og:url" content="https://IQProductionz.com/">
   <link href="https://fonts.googleapis.com/css2?family=Cinzel+Decorative&display=swap" rel="stylesheet">
   <style>
     * { margin:0; padding:0; box-sizing:border-box; }
     html, body { width:100%; height:100%; overflow:hidden; background:#2a2720; }
-    #wix-frame {
-      position:fixed; top:0; left:0; width:100%; height:100%; border:none;
-    }
+    #wix-frame { position:fixed; top:0; left:0; width:100%; height:100%; border:none; }
     #loader {
       position:fixed; inset:0;
       background:#2a2720 url('https://static.wixstatic.com/media/b63ec4_d6fad9165f744284a4b90915a9fbbbc5~mv2.jpg/v1/fill/w_288,h_271,al_c,q_80,usm_0.66_1.00_0.01,enc_avif,quality_auto/b63ec4_d6fad9165f744284a4b90915a9fbbbc5~mv2.jpg') center/cover;
@@ -72,12 +158,12 @@
       border-radius:50%; animation:spin 1s linear infinite; margin-top:1.1rem;
     }
     @keyframes spin { to { transform:rotate(360deg); } }
-</style>
+  </style>
 </head>
 <body>
   <div id="loader">
     <img src="https://static.wixstatic.com/media/b63ec4_2117e26bc8e646c8ad8b0050222de71b~mv2.png/v1/fill/w_295,h_92,al_c,q_85,usm_0.66_1.00_0.01,enc_avif,quality_auto/IQ-noglow_edited_edited.png" alt="I.Q. Productionz">
-    <p>Loading</p>
+    <p>Loading IQProductionz.com</p>
     <div class="spinner"></div>
   </div>
   <iframe id="wix-frame" src="https://iqproductionz.wixsite.com/iqpr" title="Home | I.Q. Productionz"
@@ -87,6 +173,6 @@
     const loader = document.getElementById('loader');
     frame.addEventListener('load', () => setTimeout(() => loader.classList.add('hidden'), 300));
     setTimeout(() => loader.classList.add('hidden'), 6000);
-</script>
+  </script>
 </body>
 </html>

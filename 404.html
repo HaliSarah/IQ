@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<!--
+  Title:       I.Q. Productionz — 404 / Case-Correcting Redirect
+  Author:      Hali Sarah Parsons  Date: 2026
+  Description: GitHub Pages serves this when a path doesn't match a real
+               folder. Because GitHub Pages is case-sensitive, a visitor
+               who types iqproductionz.com/services (lowercase) gets a 404.
+               This page case-corrects the path against the canonical
+               folder map and silently redirects to the right one. If no
+               canonical match is found, a styled 404 message is shown.
+-->
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Redirecting — IQProductionz.com</title>
+  <meta name="robots" content="noindex">
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel+Decorative&family=Cinzel:wght@400;600&family=Raleway:wght@300;400;500&display=swap" rel="stylesheet">
+
+  <!-- Tiny case-correcting redirect — runs BEFORE the body paints -->
+  <script>
+  (function(){
+    // ── canonical map: lowercase segment → CamelCase / canonical segment ──
+    var CANON = {
+      'about':'About',
+      'agreements':'Agreements',
+      'backend':'BackEnd',
+      'contact':'Contact',
+      'content':'Content',
+      'faq':'FAQ',
+      'haligricity':'Haligricity',
+      'marykay':'MaryKay',
+      'products':'Products',
+      'services':'Services',
+      'findyourpractice':'FindYourPractice',
+      'foodguide':'FoodGuide',
+      'historycollection':'HistoryCollection',
+      'mudras':'Mudras',
+      'pranayama':'Pranayama',
+      'quiz':'Quiz',
+      'varessence':'Varessence',
+      'usa':'USA','north':'North','south':'South','west':'West',
+      'pnw':'PNW','rockies':'Rockies',
+      'graphic':'Graphic','audio':'Audio','fashion':'Fashion','photo':'Photo',
+      'heal':'Heal','host':'Host','hosting':'Hosting','inquire':'Inquire',
+      'html':'HTML','learn':'Learn','promo':'Promo','video':'Video',
+      'specialtyhtml':'SpecialtyHTML','websites':'Websites','sitebuilderform':'SiteBuilderForm',
+      'brandedemail':'BrandedEmail','clients':'Clients',
+      'leadprocessor':'LeadProcessor','pitchassist':'PitchAssist',
+      'assess':'Assess','bracketassess':'BracketAssess','fullassess':'FullAssess',
+      'continue':'Continue','opportunity':'Opportunity','optout':'OptOut',
+      'samples':'Samples','samplefollowup':'SampleFollowUp',
+      'socialmediacollect':'SocialMediaCollect','thankyou':'ThankYou',
+      'bears':'Bears','bodies':'Bodies','books':'Books',
+      'charging-plates':'Charging-Plates','crystals':'Crystals','earrings':'Earrings',
+      'games':'Games','hands':'Hands','keychains':'Keychains','necklaces':'Necklaces',
+      'oils':'Oils','orgonites':'Orgonites','pyramids':'Pyramids','skulls':'Skulls'
+    };
+
+    function fixSegment(seg) {
+      if (!seg) return seg;
+      var key = seg.toLowerCase();
+      if (CANON[key]) return CANON[key];
+      // fallback for product-leaf slugs like "star-bear" → "Star-Bear"
+      return seg.split('-').map(function(p){
+        if (!p) return p;
+        return p.charAt(0).toUpperCase() + p.slice(1).toLowerCase();
+      }).join('-');
+    }
+
+    try {
+      var path = window.location.pathname;
+      var parts = path.split('/');
+      var fixed = parts.map(function(p, i){
+        // keep leading "" empty piece and trailing empty piece intact
+        if (i === 0 || (i === parts.length - 1 && p === '')) return p;
+        return fixSegment(p);
+      }).join('/');
+
+      // Only redirect if (a) the case actually changes AND
+      // (b) the corrected path is different from what we were given.
+      // The browser will hit the corrected URL fresh; if THAT also
+      // 404s, this page loads again, but with the case already
+      // canonical it won't loop — it falls through to the styled
+      // 404 message below.
+      if (fixed !== path) {
+        window.location.replace(fixed + window.location.search + window.location.hash);
+      }
+    } catch(e) { /* fall through to the styled 404 */ }
+  })();
+  </script>
+
+  <style>
+    * { margin:0; padding:0; box-sizing:border-box; }
+    html, body { width:100%; min-height:100%; background:#2a2720; color:#f0ece3; font-family:'Raleway',sans-serif; }
+    body { display:flex; align-items:center; justify-content:center; padding:40px 20px; min-height:100vh; }
+    .card {
+      max-width:520px; width:100%;
+      background:rgba(0,0,0,0.35);
+      border:1px solid rgba(201,138,46,0.35);
+      border-radius:14px;
+      padding:48px 36px;
+      text-align:center;
+      box-shadow:0 0 40px rgba(201,138,46,0.08);
+      position:relative;
+    }
+    .card::before {
+      content:''; position:absolute; top:0; left:24px; right:24px; height:2px;
+      background:linear-gradient(90deg, transparent, #c98a2e, transparent);
+    }
+    img.logo { height:64px; width:auto; margin-bottom:22px; filter:drop-shadow(0 0 12px rgba(201,138,46,0.5)); }
+    h1 {
+      font-family:'Cinzel',serif; font-size:1.05rem; letter-spacing:0.3em;
+      text-transform:uppercase; color:#c98a2e; margin-bottom:8px;
+    }
+    .four-oh-four {
+      font-family:'Cinzel Decorative',serif; font-size:3.5rem;
+      color:#e0a84a; letter-spacing:0.1em; margin-bottom:14px; line-height:1;
+    }
+    .gold-rule { width:60px; height:2px; background:linear-gradient(90deg,transparent,#c98a2e,transparent); margin:18px auto; }
+    p { font-size:0.95rem; line-height:1.7; color:#cfc8b8; font-weight:300; margin-bottom:18px; }
+    code { color:#e0a84a; font-size:0.85rem; background:rgba(201,138,46,0.08); padding:2px 8px; border-radius:4px; }
+    .actions { display:flex; flex-wrap:wrap; gap:12px; justify-content:center; margin-top:14px; }
+    a.btn {
+      padding:11px 22px; border-radius:6px;
+      font-family:'Cinzel',serif; font-size:0.78rem; letter-spacing:0.15em;
+      text-transform:uppercase; text-decoration:none;
+      transition:all 0.2s; display:inline-flex; align-items:center; gap:8px;
+    }
+    a.btn-primary {
+      background:linear-gradient(135deg, #c98a2e, #a87025); color:#2a2720;
+      box-shadow:0 3px 14px rgba(201,138,46,0.3);
+    }
+    a.btn-primary:hover { background:linear-gradient(135deg, #e0a84a, #c98a2e); box-shadow:0 4px 20px rgba(201,138,46,0.45); }
+    a.btn-ghost { border:1px solid #7a5218; color:#e0a84a; background:transparent; }
+    a.btn-ghost:hover { background:#7a5218; color:#fff; }
+    .quick-links { margin-top:24px; padding-top:20px; border-top:1px solid rgba(201,138,46,0.15); }
+    .quick-links-title {
+      font-family:'Cinzel',serif; font-size:0.7rem; letter-spacing:0.2em;
+      text-transform:uppercase; color:#A9A9A9; margin-bottom:10px;
+    }
+    .ql-row { display:flex; flex-wrap:wrap; gap:6px 14px; justify-content:center; }
+    .ql-row a { font-size:0.82rem; color:#e0a84a; text-decoration:none; border-bottom:1px dotted #7a5218; padding-bottom:1px; }
+    .ql-row a:hover { color:#fff; border-color:#fff; }
+  </style>
+</head>
+<body>
+  <div class="card">
+    <img class="logo" src="https://static.wixstatic.com/media/b63ec4_2117e26bc8e646c8ad8b0050222de71b~mv2.png/v1/fill/w_295,h_92,al_c,q_85,usm_0.66_1.00_0.01,enc_avif,quality_auto/IQ-noglow_edited_edited.png" alt="I.Q. Productionz">
+    <h1>Page Not Found</h1>
+    <div class="four-oh-four">404</div>
+    <div class="gold-rule"></div>
+    <p>The page you were looking for isn't here — or the link may have been retired.</p>
+    <p>Tried: <code id="tried-path">—</code></p>
+
+    <div class="actions">
+      <a class="btn btn-primary" href="/">↩ Return Home</a>
+      <a class="btn btn-ghost" href="/Contact/">Get in Touch</a>
+    </div>
+
+    <div class="quick-links">
+      <div class="quick-links-title">Or jump to a section</div>
+      <div class="ql-row">
+        <a href="/Services/">Services</a>
+        <a href="/Products/">Products</a>
+        <a href="/Haligricity/">Haligricity</a>
+        <a href="/About/">About</a>
+        <a href="/FAQ/">FAQ</a>
+        <a href="/Agreements/">Agreements</a>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // Display the path the visitor tried — purely cosmetic.
+    var tried = document.getElementById('tried-path');
+    if (tried) tried.textContent = window.location.pathname || '/';
+  </script>
+</body>
+</html>
