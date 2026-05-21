@@ -1,0 +1,877 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Email Brand Intake — I.Q. Productionz</title>
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700&family=Raleway:wght@300;400;500;600&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
+<script>window.addEventListener('load', function(){ emailjs.init('3vNjQbWmqzzOO6IK-'); });</script>
+<style>
+:root {
+  --bg:      #333333;
+  --surface: #454545;
+  --card:    #454545;
+  --border:  #2e2b24;
+  --gold:    #c98a2e;
+  --gold-lt: #e0a84a;
+  --gold-dim:#7a5218;
+  --white:   #f0ece3;
+  --muted:   #A9A9A9;
+  --success: #4a8c62;
+  --radius:  8px;
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:'Raleway',sans-serif;background:var(--bg);color:var(--white);min-height:100vh;padding-bottom:80px;}
+
+/* TOP BAR */
+.topbar{background:#454545;border-bottom:1px solid #2e2b24;padding:10px 18px;display:flex;justify-content:space-between;align-items:center;position:sticky;top:0;z-index:1000;}
+.topbar-label{font-family:'Cinzel',Georgia,serif;font-size:10px;letter-spacing:2px;color:#A9A9A9;text-transform:uppercase;}
+.topbar-label strong{color:#c98a2e;}
+.topbar-back{font-family:'Cinzel',Georgia,serif;padding:7px 16px;border:1px solid #7a5218;border-radius:6px;color:#e0a84a;font-size:10px;letter-spacing:1.5px;text-decoration:none;text-transform:uppercase;}
+
+/* HEADER */
+.hdr{background:linear-gradient(160deg,#454545 0%,#333333 60%);border-bottom:1px solid var(--border);padding:44px 32px 36px;text-align:center;position:relative;overflow:hidden;}
+.hdr::before{content:'';position:absolute;inset:0;background:radial-gradient(ellipse at 50% 0%,rgba(201,138,46,0.13) 0%,transparent 70%);pointer-events:none;}
+.logo-wrap{display:flex;align-items:center;justify-content:center;gap:14px;margin-bottom:20px;}
+.logo-wrap img{height:56px;width:auto;filter:drop-shadow(0 0 12px rgba(201,138,46,0.45));}
+.brand-name{font-family:'Cinzel',serif;font-size:20px;font-weight:700;color:var(--gold);letter-spacing:2px;line-height:1;}
+.brand-sub{font-size:9px;letter-spacing:4px;text-transform:uppercase;color:var(--muted);margin-top:4px;}
+.gold-rule{width:60px;height:2px;background:linear-gradient(90deg,transparent,var(--gold),transparent);margin:16px auto;}
+.hdr h1{font-family:'Cinzel',serif;font-size:clamp(18px,3.5vw,30px);font-weight:600;color:var(--white);letter-spacing:1px;text-transform:uppercase;margin-bottom:8px;}
+.hdr p{font-size:13px;color:var(--muted);max-width:480px;margin:0 auto;line-height:1.7;font-weight:300;}
+
+/* PROGRESS */
+.progress-wrap{background:var(--surface);border-bottom:1px solid var(--border);padding:18px 32px 20px;}
+.progress-steps{display:flex;align-items:center;max-width:700px;margin:0 auto;}
+.step-dot{display:flex;flex-direction:column;align-items:center;gap:5px;flex:0 0 auto;}
+.step-dot .dot{width:28px;height:28px;border-radius:50%;border:2px solid var(--border);display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;color:var(--muted);transition:all 0.3s;font-family:'Cinzel',serif;}
+.step-dot .dot-label{font-size:8px;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted);white-space:nowrap;transition:color 0.3s;}
+.step-dot.active .dot{background:var(--gold);border-color:var(--gold);color:#333;box-shadow:0 0 10px rgba(201,138,46,0.5);}
+.step-dot.active .dot-label{color:var(--gold-lt);}
+.step-dot.done .dot{background:var(--success);border-color:var(--success);color:#fff;}
+.step-dot.done .dot-label{color:var(--muted);}
+.step-line{flex:1;height:1px;background:var(--border);margin-bottom:20px;transition:background 0.3s;}
+.step-line.done{background:var(--success);}
+
+/* BODY */
+.form-body{max-width:700px;margin:0 auto;padding:36px 24px 0;}
+
+/* CARD */
+.card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:28px;margin-bottom:18px;position:relative;overflow:hidden;}
+.card::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,transparent,var(--gold),transparent);}
+.card h2{font-family:'Cinzel',serif;font-size:15px;font-weight:600;color:var(--gold);letter-spacing:1.5px;text-transform:uppercase;margin-bottom:6px;}
+.card .card-sub{font-size:12px;color:var(--muted);margin-bottom:22px;line-height:1.6;font-weight:300;}
+
+/* NOTE */
+.note{background:#3a3528;border-left:3px solid var(--gold);padding:13px 17px;border-radius:var(--radius);font-size:12px;color:var(--white);line-height:1.9;margin-bottom:18px;}
+.note strong{color:var(--gold);}
+.note code{background:rgba(201,138,46,0.2);color:var(--gold-lt);padding:2px 5px;border-radius:3px;font-size:11px;}
+
+/* FIELDS */
+.field{margin-bottom:18px;}
+.field:last-child{margin-bottom:0;}
+.lbl{font-size:10px;letter-spacing:2px;color:var(--gold);text-transform:uppercase;display:block;margin-bottom:7px;font-weight:600;}
+.lbl .req{color:var(--gold-lt);margin-left:2px;}
+.lbl .hint{font-weight:400;color:var(--muted);font-size:10px;margin-left:6px;text-transform:none;letter-spacing:0;}
+.inp{width:100%;padding:11px 14px;border:1px solid var(--border);border-radius:var(--radius);font-family:'Raleway',sans-serif;font-size:14px;color:var(--white);background:var(--bg);outline:none;transition:border 0.2s,box-shadow 0.2s;appearance:none;}
+.inp::placeholder{color:var(--muted);}
+.inp:focus{border-color:var(--gold);box-shadow:0 0 0 3px rgba(201,138,46,0.15);}
+textarea.inp{resize:vertical;min-height:90px;line-height:1.7;}
+select.inp{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%237a7468' stroke-width='2'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 14px center;padding-right:40px;background-color:var(--bg);}
+select.inp option{background:var(--surface);}
+.row-2{display:grid;grid-template-columns:1fr 1fr;gap:14px;}
+.row-3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px;}
+
+/* COLOR PICKER ROW */
+.color-row{display:flex;gap:10px;align-items:center;}
+.color-swatch{width:38px;height:38px;min-width:38px;border-radius:var(--radius);border:1px solid var(--border);cursor:pointer;background:#c98a2e;}
+.color-row .inp{flex:1;}
+
+/* YES/NO */
+.yn-group{display:flex;gap:10px;}
+.yn-btn{flex:1;padding:10px;border:1px solid var(--border);border-radius:var(--radius);background:var(--bg);font-family:'Raleway',sans-serif;font-size:13px;font-weight:600;cursor:pointer;transition:all 0.2s;color:var(--muted);text-align:center;letter-spacing:.5px;}
+.yn-btn:hover{border-color:var(--gold-dim);color:var(--white);}
+.yn-btn.sel-yes{background:var(--gold);border-color:var(--gold);color:#333;}
+.yn-btn.sel-no{background:var(--bg);border-color:var(--muted);color:var(--white);}
+
+/* REVEAL */
+.reveal{display:none;margin-top:12px;}
+.reveal.open{display:block;}
+
+/* UPLOAD */
+.upload-zone{border:1px dashed var(--border);border-radius:var(--radius);padding:22px 18px;text-align:center;cursor:pointer;transition:all 0.2s;background:var(--bg);position:relative;}
+.upload-zone:hover{border-color:var(--gold);background:#3a3528;}
+.upload-zone input[type="file"]{position:absolute;inset:0;opacity:0;cursor:pointer;width:100%;border:none;}
+.upload-zone .up-icon{font-size:24px;margin-bottom:6px;}
+.upload-zone .up-text{font-size:12px;color:var(--muted);}
+.upload-zone .up-text strong{color:var(--gold);}
+.upload-zone .file-list{margin-top:8px;font-size:11px;color:var(--success);text-align:left;}
+
+/* SOCIAL LIST */
+.social-list{display:flex;flex-direction:column;gap:9px;}
+.social-row{display:flex;gap:9px;align-items:center;}
+.social-tag{flex:0 0 120px;padding:10px 11px;border:1px solid var(--border);border-radius:var(--radius);font-size:12px;font-weight:600;background:#2a2a2a;color:var(--muted);}
+.social-row .inp{flex:1;}
+.remove-social{background:none;border:none;font-size:15px;cursor:pointer;color:var(--muted);padding:4px;}
+.remove-social:hover{color:var(--gold);}
+.add-btn{display:inline-flex;align-items:center;gap:7px;padding:9px 16px;border:1px dashed var(--border);border-radius:var(--radius);background:none;font-family:'Raleway',sans-serif;font-size:12px;font-weight:700;letter-spacing:.5px;color:var(--muted);cursor:pointer;transition:all 0.2s;margin-top:8px;}
+.add-btn:hover{border-color:var(--gold);color:var(--gold);}
+
+/* TEMPLATE STYLE PICKER */
+.style-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:4px;}
+.style-card{border:1px solid var(--border);border-radius:var(--radius);padding:14px 12px;cursor:pointer;transition:all 0.2s;background:var(--bg);text-align:center;user-select:none;}
+.style-card:hover{border-color:var(--gold-dim);}
+.style-card.selected{border-color:var(--gold);background:#3a3528;}
+.style-card .style-preview{font-size:22px;margin-bottom:6px;}
+.style-card .style-name{font-size:11px;font-weight:600;color:var(--white);}
+.style-card .style-desc{font-size:10px;color:var(--muted);margin-top:2px;}
+.style-card input{display:none;}
+
+/* NAV */
+.nav-bar{display:flex;justify-content:space-between;align-items:center;margin-top:28px;gap:12px;}
+.btn-back{padding:12px 22px;border:1px solid var(--border);border-radius:var(--radius);background:none;font-family:'Raleway',sans-serif;font-size:12px;font-weight:700;letter-spacing:.5px;color:var(--muted);cursor:pointer;transition:all 0.2s;}
+.btn-back:hover{border-color:var(--muted);color:var(--white);}
+.btn-next,.btn-submit{flex:1;padding:13px 22px;background:linear-gradient(135deg,var(--gold),#a87025);color:#333;border:none;border-radius:var(--radius);font-family:'Cinzel',serif;font-size:12px;font-weight:700;letter-spacing:1px;text-transform:uppercase;cursor:pointer;transition:all 0.2s;box-shadow:0 4px 14px rgba(201,138,46,0.25);}
+.btn-next:hover,.btn-submit:hover{background:linear-gradient(135deg,var(--gold-lt),var(--gold));box-shadow:0 4px 22px rgba(201,138,46,0.4);}
+.btn-submit:disabled{opacity:.5;cursor:not-allowed;}
+
+/* DIVIDER */
+.divider{border:none;border-top:1px solid var(--border);margin:20px 0;}
+
+/* PAGES */
+.page{display:none;}
+.page.active{display:block;}
+
+/* SENDING */
+.sending-overlay{position:fixed;inset:0;background:rgba(51,51,51,0.93);flex-direction:column;align-items:center;justify-content:center;z-index:999;display:none;}
+.sending-overlay.show{display:flex;}
+.spinner{width:44px;height:44px;border:3px solid var(--border);border-top-color:var(--gold);border-radius:50%;animation:spin .8s linear infinite;margin-bottom:18px;}
+@keyframes spin{to{transform:rotate(360deg);}}
+.sending-overlay p{color:var(--gold);font-family:'Cinzel',serif;letter-spacing:2px;font-size:13px;}
+
+/* THANK YOU */
+.thankyou{text-align:center;padding:52px 24px;}
+.ty-icon{width:68px;height:68px;background:var(--gold);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:28px;margin:0 auto 22px;box-shadow:0 0 28px rgba(201,138,46,0.4);}
+.thankyou h2{font-family:'Cinzel',serif;font-size:24px;color:var(--gold);letter-spacing:1px;text-transform:uppercase;margin-bottom:10px;}
+.thankyou p{font-size:13px;color:var(--muted);line-height:1.8;max-width:400px;margin:0 auto;font-weight:300;}
+
+/* STATUS */
+.status{font-size:13px;margin-top:14px;padding:12px 16px;border-radius:var(--radius);display:none;text-align:center;font-weight:500;}
+.status.ok{background:rgba(74,140,98,0.2);color:#a8d5b8;border:1px solid rgba(74,140,98,0.4);display:block;}
+.status.err{background:rgba(192,57,43,0.15);color:#e8a89e;border:1px solid rgba(192,57,43,0.3);display:block;}
+
+/* FOOTER */
+.form-footer{text-align:center;padding:24px 20px 0;margin-top:6px;}
+.sig-text{font-size:11px;color:var(--muted);letter-spacing:1px;}
+.sig-text a{color:var(--gold);text-decoration:none;transition:color .2s ease;}
+.sig-text a:hover{color:#fff;}
+
+@media(max-width:540px){
+  .hdr{padding:28px 16px 24px;}
+  .card{padding:20px 15px;}
+  .row-2,.row-3,.style-grid{grid-template-columns:1fr;}
+  .step-dot .dot-label{display:none;}
+  .nav-bar .btn-back{display:none;}
+}
+</style>
+</head>
+<body>
+
+<!-- OVERLAY -->
+<div class="sending-overlay" id="sendingOverlay">
+  <div class="spinner"></div>
+  <p>Sending Brief…</p>
+</div>
+
+<!-- TOP BAR -->
+<div class="topbar">
+  <span class="topbar-label"><strong>BackEnd</strong> · Email Brand Intake</span>
+  <a href="../" class="topbar-back">↩ BackEnd Home</a>
+</div>
+
+<!-- HEADER -->
+<div class="hdr">
+  <div class="logo-wrap">
+    <img src="https://iqproductionz.com/Content/Images/Main/IQ-noglow_Updated.avif" alt="I.Q. Productionz" onerror="this.style.display='none'">
+  </div>
+  <div class="gold-rule"></div>
+  <h1>Email Brand Setup Intake</h1>
+  <p>Fill this out so we can build your custom branded email sender. Takes about 5 minutes.</p>
+</div>
+
+<!-- PROGRESS -->
+<div class="progress-wrap">
+  <div class="progress-steps">
+    <div class="step-dot active" id="dot-1"><div class="dot">1</div><div class="dot-label">Business</div></div>
+    <div class="step-line" id="line-1"></div>
+    <div class="step-dot" id="dot-2"><div class="dot">2</div><div class="dot-label">Brand</div></div>
+    <div class="step-line" id="line-2"></div>
+    <div class="step-dot" id="dot-3"><div class="dot">3</div><div class="dot-label">Email Setup</div></div>
+    <div class="step-line" id="line-3"></div>
+    <div class="step-dot" id="dot-4"><div class="dot">4</div><div class="dot-label">Signature</div></div>
+    <div class="step-line" id="line-4"></div>
+    <div class="step-dot" id="dot-5"><div class="dot">5</div><div class="dot-label">Templates</div></div>
+  </div>
+</div>
+
+<div class="form-body">
+
+<!-- ═══ PAGE 1: BUSINESS INFO ═══ -->
+<div class="page active" id="page-1">
+  <div class="card">
+    <h2>Business Information</h2>
+    <p class="card-sub">Tell us about the business this email brand is for.</p>
+
+    <div class="row-2">
+      <div class="field">
+        <label class="lbl">Business Name <span class="req">*</span></label>
+        <input type="text" class="inp" id="bizName" placeholder="e.g. Bella's Nail Bar" />
+      </div>
+      <div class="field">
+        <label class="lbl">Industry / Type</label>
+        <input type="text" class="inp" id="bizType" placeholder="e.g. Nail Salon, Barber, Food Truck" />
+      </div>
+    </div>
+
+    <div class="row-2">
+      <div class="field">
+        <label class="lbl">Owner / Contact Name <span class="req">*</span></label>
+        <input type="text" class="inp" id="ownerName" placeholder="Full name" />
+      </div>
+      <div class="field">
+        <label class="lbl">Contact Phone</label>
+        <input type="tel" class="inp" id="ownerPhone" placeholder="(555) 000-0000" />
+      </div>
+    </div>
+
+    <div class="row-2">
+      <div class="field">
+        <label class="lbl">Business Email <span class="req">*</label>
+        <input type="email" class="inp" id="bizEmail" placeholder="hello@yourbusiness.com" />
+      </div>
+      <div class="field">
+        <label class="lbl">Website <span class="hint">(if they have one)</span></label>
+        <input type="text" class="inp" id="bizWebsite" placeholder="yourbusiness.com" />
+      </div>
+    </div>
+
+    <div class="field">
+      <label class="lbl">Business Tagline <span class="hint">(optional)</span></label>
+      <input type="text" class="inp" id="bizTagline" placeholder="e.g. Fresh nails, happy lives." />
+    </div>
+
+    <div class="field">
+      <label class="lbl">What does this business do? <span class="req">*</span></label>
+      <textarea class="inp" id="bizDesc" placeholder="2–3 sentences describing what they do, who they serve, and their vibe. This helps us write their email copy." style="min-height:80px;"></textarea>
+    </div>
+  </div>
+
+  <div class="nav-bar">
+    <button class="btn-next" onclick="goTo(2)">Continue — Brand & Design →</button>
+  </div>
+</div>
+
+<!-- ═══ PAGE 2: BRAND ═══ -->
+<div class="page" id="page-2">
+  <div class="card">
+    <h2>Brand & Visual Identity</h2>
+    <p class="card-sub">This is what makes their emails look like theirs — not a generic template.</p>
+
+    <!-- Logo -->
+    <div class="field">
+      <label class="lbl">Do they have a logo?</label>
+      <div class="yn-group">
+        <button class="yn-btn" onclick="yn(this,'logoYes','logoReveal')">Yes, uploading it</button>
+        <button class="yn-btn" onclick="yn(this,'logoNo',null)">No logo yet</button>
+      </div>
+      <div class="reveal" id="logoReveal">
+        <div class="upload-zone">
+          <input type="file" accept="image/*,.svg,.ai,.eps,.pdf" onchange="handleFile(this,'logoList')" multiple>
+          <div class="up-icon">🖼️</div>
+          <div class="up-text"><strong>Click to upload logo</strong><br><span style="font-size:11px">PNG, SVG, AI, PDF — any format works</span></div>
+          <div class="file-list" id="logoList"></div>
+        </div>
+      </div>
+    </div>
+
+    <hr class="divider">
+
+    <!-- Colors -->
+    <div class="field">
+      <label class="lbl">Primary Brand Color <span class="hint">(main color used on everything)</span></label>
+      <div class="color-row">
+        <input type="color" class="color-swatch" id="primaryColorPicker" value="#c98a2e" oninput="syncColor('primaryColorPicker','primaryColorHex')">
+        <input type="text" class="inp" id="primaryColorHex" placeholder="#c98a2e or color name" oninput="syncHex('primaryColorHex','primaryColorPicker')" />
+      </div>
+    </div>
+
+    <div class="field">
+      <label class="lbl">Secondary / Accent Color <span class="hint">(optional)</span></label>
+      <div class="color-row">
+        <input type="color" class="color-swatch" id="secondaryColorPicker" value="#333333" oninput="syncColor('secondaryColorPicker','secondaryColorHex')">
+        <input type="text" class="inp" id="secondaryColorHex" placeholder="#333333 or color name" oninput="syncHex('secondaryColorHex','secondaryColorPicker')" />
+      </div>
+    </div>
+
+    <div class="field">
+      <label class="lbl">Background Color for Emails</label>
+      <div class="color-row">
+        <input type="color" class="color-swatch" id="bgColorPicker" value="#f5f5f5" oninput="syncColor('bgColorPicker','bgColorHex')">
+        <input type="text" class="inp" id="bgColorHex" placeholder="#f5f5f5 — light is usually safest" oninput="syncHex('bgColorHex','bgColorPicker')" />
+      </div>
+    </div>
+
+    <hr class="divider">
+
+    <!-- Font -->
+    <div class="field">
+      <label class="lbl">Preferred Font Style <span class="hint">(we'll match it from Google Fonts)</span></label>
+      <select class="inp" id="fontStyle">
+        <option value="">— Choose a vibe —</option>
+        <option value="Cinzel / Raleway">Elegant & Serif (like I.Q. Productionz)</option>
+        <option value="Playfair Display / Lato">Luxury & Editorial</option>
+        <option value="Montserrat / Open Sans">Modern & Clean</option>
+        <option value="Cormorant Garamond / Jost">Soft & Feminine</option>
+        <option value="Oswald / Roboto">Bold & Masculine</option>
+        <option value="Pacifico / Raleway">Fun & Playful</option>
+        <option value="custom">I have a specific font in mind →</option>
+      </select>
+    </div>
+    <div class="reveal" id="fontCustomReveal">
+      <input type="text" class="inp" id="fontCustom" placeholder="e.g. Futura, Bodoni, or a Google Fonts name" />
+    </div>
+
+    <hr class="divider">
+
+    <!-- Email style -->
+    <div class="field">
+      <label class="lbl">Email Layout Style</label>
+      <div class="style-grid" id="styleGrid">
+        <label class="style-card" onclick="selectStyle(this,'dark')">
+          <input type="radio" name="emailStyle" value="dark">
+          <div class="style-preview">🌑</div>
+          <div class="style-name">Dark & Premium</div>
+          <div class="style-desc">Like IQ Productionz — dark bg, gold accents</div>
+        </label>
+        <label class="style-card selected" onclick="selectStyle(this,'light')">
+          <input type="radio" name="emailStyle" value="light" checked>
+          <div class="style-preview">☀️</div>
+          <div class="style-name">Light & Clean</div>
+          <div class="style-desc">White bg, crisp text, wide appeal</div>
+        </label>
+        <label class="style-card" onclick="selectStyle(this,'colorblock')">
+          <input type="radio" name="emailStyle" value="colorblock">
+          <div class="style-preview">🎨</div>
+          <div class="style-name">Color Block</div>
+          <div class="style-desc">Branded header color, white body</div>
+        </label>
+      </div>
+    </div>
+
+    <!-- Brand photos -->
+    <div class="field" style="margin-top:20px">
+      <label class="lbl">Do they have brand photos to include in emails?</label>
+      <div class="yn-group">
+        <button class="yn-btn" onclick="yn(this,'photoYes','photoReveal')">Yes, uploading them</button>
+        <button class="yn-btn" onclick="yn(this,'photoNo',null)">No, use icons/stock</button>
+      </div>
+      <div class="reveal" id="photoReveal">
+        <div class="upload-zone">
+          <input type="file" accept="image/*" multiple onchange="handleFile(this,'photoList')">
+          <div class="up-icon">📸</div>
+          <div class="up-text"><strong>Upload brand photos</strong><br><span style="font-size:11px">Product shots, headshots, storefront — whatever fits the brand</span></div>
+          <div class="file-list" id="photoList"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="nav-bar">
+    <button class="btn-back" onclick="goTo(1)">← Back</button>
+    <button class="btn-next" onclick="goTo(3)">Continue — Email Setup →</button>
+  </div>
+</div>
+
+<!-- ═══ PAGE 3: EMAIL SETUP ═══ -->
+<div class="page" id="page-3">
+  <div class="card">
+    <h2>Email Configuration</h2>
+    <p class="card-sub">How their email sender tool will be set up — who sends, who receives, and how it's addressed.</p>
+
+    <div class="row-2">
+      <div class="field">
+        <label class="lbl">Sending Email Address <span class="req">*</span><br><span class="hint" style="display:block;margin-top:2px">Emails go OUT from this address</span></label>
+        <input type="email" class="inp" id="sendFromEmail" placeholder="hello@theirbusiness.com" />
+      </div>
+      <div class="field">
+        <label class="lbl">CC / Copy-to Email <span class="hint">(receives a copy of every send)</span></label>
+        <input type="email" class="inp" id="ccEmail" placeholder="owner@theirbusiness.com" />
+      </div>
+    </div>
+
+    <div class="field">
+      <label class="lbl">Default Email Subject Line <span class="hint">(they can always change this per send)</span></label>
+      <input type="text" class="inp" id="defaultSubject" placeholder="e.g. Your Order From Bella's Nail Bar ✨" />
+    </div>
+
+    <div class="field">
+      <label class="lbl">Default Greeting Style</label>
+      <select class="inp" id="greetingStyle">
+        <option value="Hi">Hi [Name],</option>
+        <option value="Hello">Hello [Name],</option>
+        <option value="Dear">Dear [Name],</option>
+        <option value="Salutations">Salutations [Name],</option>
+        <option value="Hey">Hey [Name]!</option>
+        <option value="custom">Custom greeting →</option>
+      </select>
+    </div>
+    <div class="reveal" id="greetingCustomReveal">
+      <input type="text" class="inp" id="greetingCustom" placeholder="e.g. Welcome back, [Name] —" />
+    </div>
+
+    <hr class="divider">
+
+    <div class="field">
+      <label class="lbl">Do they want attachment support? <span class="hint">(lets them attach files to emails)</span></label>
+      <div class="yn-group">
+        <button class="yn-btn" onclick="yn(this,'attachYes',null)">Yes, include it</button>
+        <button class="yn-btn" onclick="yn(this,'attachNo',null)">Not needed</button>
+      </div>
+    </div>
+
+    <div class="field">
+      <label class="lbl">Do they want a hyperlink / button builder?</label>
+      <div class="yn-group">
+        <button class="yn-btn" onclick="yn(this,'builderYes',null)">Yes, include it</button>
+        <button class="yn-btn" onclick="yn(this,'builderNo',null)">Keep it simple</button>
+      </div>
+    </div>
+
+    <div class="field">
+      <label class="lbl">Do they want email template presets?<br><span class="hint" style="display:block;margin-top:2px">(pre-written messages they can load in one click)</span></label>
+      <div class="yn-group">
+        <button class="yn-btn" onclick="yn(this,'presetsYes','presetsReveal')">Yes, build presets</button>
+        <button class="yn-btn" onclick="yn(this,'presetsNo',null)">No presets needed</button>
+      </div>
+      <div class="reveal" id="presetsReveal">
+        <label class="lbl" style="margin-top:12px">What kind of emails will they send most? <span class="hint">(check all that apply — we'll pre-write these)</span></label>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:4px;" id="presetChecks">
+          <label class="yn-btn" style="display:flex;align-items:center;gap:8px;cursor:pointer;justify-content:flex-start;padding:10px 14px;" onclick="togglePreset(this)"><input type="checkbox" value="order_confirm" style="display:none"> <span class="pc-box" style="width:14px;height:14px;border:1.5px solid var(--border);border-radius:3px;display:inline-block;flex-shrink:0;"></span> Order Confirmation</label>
+          <label class="yn-btn" style="display:flex;align-items:center;gap:8px;cursor:pointer;justify-content:flex-start;padding:10px 14px;" onclick="togglePreset(this)"><input type="checkbox" value="appointment" style="display:none"> <span class="pc-box" style="width:14px;height:14px;border:1.5px solid var(--border);border-radius:3px;display:inline-block;flex-shrink:0;"></span> Appointment Reminder</label>
+          <label class="yn-btn" style="display:flex;align-items:center;gap:8px;cursor:pointer;justify-content:flex-start;padding:10px 14px;" onclick="togglePreset(this)"><input type="checkbox" value="follow_up" style="display:none"> <span class="pc-box" style="width:14px;height:14px;border:1.5px solid var(--border);border-radius:3px;display:inline-block;flex-shrink:0;"></span> Post-Visit Follow-Up</label>
+          <label class="yn-btn" style="display:flex;align-items:center;gap:8px;cursor:pointer;justify-content:flex-start;padding:10px 14px;" onclick="togglePreset(this)"><input type="checkbox" value="promo" style="display:none"> <span class="pc-box" style="width:14px;height:14px;border:1.5px solid var(--border);border-radius:3px;display:inline-block;flex-shrink:0;"></span> Promo / Special Offer</label>
+          <label class="yn-btn" style="display:flex;align-items:center;gap:8px;cursor:pointer;justify-content:flex-start;padding:10px 14px;" onclick="togglePreset(this)"><input type="checkbox" value="invoice" style="display:none"> <span class="pc-box" style="width:14px;height:14px;border:1.5px solid var(--border);border-radius:3px;display:inline-block;flex-shrink:0;"></span> Invoice / Payment Due</label>
+          <label class="yn-btn" style="display:flex;align-items:center;gap:8px;cursor:pointer;justify-content:flex-start;padding:10px 14px;" onclick="togglePreset(this)"><input type="checkbox" value="welcome" style="display:none"> <span class="pc-box" style="width:14px;height:14px;border:1.5px solid var(--border);border-radius:3px;display:inline-block;flex-shrink:0;"></span> New Client Welcome</label>
+          <label class="yn-btn" style="display:flex;align-items:center;gap:8px;cursor:pointer;justify-content:flex-start;padding:10px 14px;" onclick="togglePreset(this)"><input type="checkbox" value="review_ask" style="display:none"> <span class="pc-box" style="width:14px;height:14px;border:1.5px solid var(--border);border-radius:3px;display:inline-block;flex-shrink:0;"></span> Review Request</label>
+          <label class="yn-btn" style="display:flex;align-items:center;gap:8px;cursor:pointer;justify-content:flex-start;padding:10px 14px;" onclick="togglePreset(this)"><input type="checkbox" value="referral" style="display:none"> <span class="pc-box" style="width:14px;height:14px;border:1.5px solid var(--border);border-radius:3px;display:inline-block;flex-shrink:0;"></span> Referral Ask</label>
+        </div>
+        <textarea class="inp" id="customPresets" placeholder="Any other specific emails they need written? Describe them here…" style="min-height:70px;margin-top:10px;"></textarea>
+      </div>
+    </div>
+  </div>
+
+  <div class="nav-bar">
+    <button class="btn-back" onclick="goTo(2)">← Back</button>
+    <button class="btn-next" onclick="goTo(4)">Continue — Signature →</button>
+  </div>
+</div>
+
+<!-- ═══ PAGE 4: SIGNATURE ═══ -->
+<div class="page" id="page-4">
+  <div class="card">
+    <h2>Email Signature</h2>
+    <p class="card-sub">This appears at the bottom of every email they send. Keep it professional and on-brand.</p>
+
+    <div class="row-2">
+      <div class="field">
+        <label class="lbl">Signer's Full Name <span class="req">*</span></label>
+        <input type="text" class="inp" id="sigName" placeholder="e.g. Bella Johnson" />
+      </div>
+      <div class="field">
+        <label class="lbl">Title / Role</label>
+        <input type="text" class="inp" id="sigTitle" placeholder="e.g. Owner & Lead Stylist" />
+      </div>
+    </div>
+
+    <div class="row-2">
+      <div class="field">
+        <label class="lbl">Signature Phone</label>
+        <input type="tel" class="inp" id="sigPhone" placeholder="(555) 000-0000" />
+      </div>
+      <div class="field">
+        <label class="lbl">Signature Website</label>
+        <input type="text" class="inp" id="sigWeb" placeholder="bellasnailbar.com" />
+      </div>
+    </div>
+
+    <div class="field">
+      <label class="lbl">Sign-off line <span class="hint">(the line before their name)</span></label>
+      <input type="text" class="inp" id="sigSignoff" placeholder="e.g. With love, / Warmly, / Talk soon," />
+    </div>
+
+    <div class="field">
+      <label class="lbl">Signature tagline <span class="hint">(optional one-liner under the name)</span></label>
+      <input type="text" class="inp" id="sigTagline" placeholder="e.g. Building brands that mean business." />
+    </div>
+
+    <hr class="divider">
+
+    <div class="field">
+      <label class="lbl">Social media to include in signature</label>
+      <div class="social-list" id="sigSocialList">
+        <div class="social-row">
+          <div class="social-tag">📸 Instagram</div>
+          <input type="text" class="inp" placeholder="@handle or link" />
+          <button class="remove-social" onclick="removeSocial(this)">×</button>
+        </div>
+        <div class="social-row">
+          <div class="social-tag">👍 Facebook</div>
+          <input type="text" class="inp" placeholder="@handle or link" />
+          <button class="remove-social" onclick="removeSocial(this)">×</button>
+        </div>
+        <div class="social-row">
+          <div class="social-tag">🎵 TikTok</div>
+          <input type="text" class="inp" placeholder="@handle or link" />
+          <button class="remove-social" onclick="removeSocial(this)">×</button>
+        </div>
+      </div>
+      <button class="add-btn" onclick="addSocial()">＋ Add another platform</button>
+    </div>
+
+    <hr class="divider">
+
+    <div class="field">
+      <label class="lbl">Footer legal line <span class="hint">(optional — appears at very bottom)</span></label>
+      <input type="text" class="inp" id="footerLegal" placeholder="e.g. © 2025 Bella's Nail Bar. All rights reserved." />
+    </div>
+  </div>
+
+  <div class="nav-bar">
+    <button class="btn-back" onclick="goTo(3)">← Back</button>
+    <button class="btn-next" onclick="goTo(5)">Continue — Final Notes →</button>
+  </div>
+</div>
+
+<!-- ═══ PAGE 5: FINAL NOTES ═══ -->
+<div class="page" id="page-5">
+  <div class="card">
+    <h2>Final Notes & Delivery</h2>
+    <p class="card-sub">Anything else we should know before building their email brand tool.</p>
+
+    <div class="field">
+      <label class="lbl">Tone of Voice <span class="hint">(how should their emails sound?)</span></label>
+      <select class="inp" id="toneOfVoice">
+        <option value="">— Choose a tone —</option>
+        <option value="professional">Professional & Formal</option>
+        <option value="warm">Warm & Friendly</option>
+        <option value="luxury">Luxury & Elevated</option>
+        <option value="fun">Fun & Casual</option>
+        <option value="bold">Bold & Direct</option>
+        <option value="nurturing">Nurturing & Supportive</option>
+        <option value="custom">Other — I'll describe it</option>
+      </select>
+    </div>
+    <div class="reveal" id="toneCustomReveal">
+      <textarea class="inp" id="toneCustom" placeholder="Describe the tone in your own words…" style="min-height:70px;"></textarea>
+    </div>
+
+    <div class="field">
+      <label class="lbl">Anything specific they want in their emails?</label>
+      <textarea class="inp" id="specificRequests" placeholder="e.g. Always include their booking link, use a specific sign-off phrase, avoid certain words, include a loyalty points reminder, always mention their Instagram…" style="min-height:90px;"></textarea>
+    </div>
+
+    <div class="field">
+      <label class="lbl">Things to avoid or NOT include</label>
+      <textarea class="inp" id="avoidList" placeholder="e.g. No pricing in emails, don't mention competitors, no all-caps…" style="min-height:70px;"></textarea>
+    </div>
+
+    <div class="field">
+      <label class="lbl">Inspiration — emails or brands they love <span class="hint">(optional)</span></label>
+      <input type="text" class="inp" id="emailInspo" placeholder="e.g. Glossier, Sephora, Apple — or paste a link to an email they liked" />
+    </div>
+
+    <hr class="divider">
+
+    <div class="field">
+      <label class="lbl">Deadline or Rush? <span class="hint">(optional)</span></label>
+      <input type="text" class="inp" id="deadline" placeholder="e.g. Need it by Friday, ASAP, no rush" />
+    </div>
+
+    <div class="field">
+      <label class="lbl">Anything else we should know? <span class="hint">(optional)</span></label>
+      <textarea class="inp" id="finalNotes" placeholder="Special instructions, access info, questions, context…" style="min-height:70px;"></textarea>
+    </div>
+  </div>
+
+  <div id="statusMsg" class="status"></div>
+
+  <div class="nav-bar">
+    <button class="btn-back" onclick="goTo(4)">← Back</button>
+    <button class="btn-submit" id="submitBtn" onclick="submitForm()">✦ Submit Email Brand Brief</button>
+  </div>
+</div>
+
+<!-- ═══ THANK YOU ═══ -->
+<div class="page" id="page-6">
+  <div class="card">
+    <div class="thankyou">
+      <div class="ty-icon">✓</div>
+      <h2>Brief Received</h2>
+      <div class="gold-rule"></div>
+      <p>Your email brand brief has been submitted. We'll review everything and reach out to confirm next steps within 24 hours.</p>
+      <p style="margin-top:14px">Questions? <a href="mailto:SarahParsons@IQProductionz.com" style="color:var(--gold);text-decoration:none">SarahParsons@IQProductionz.com</a></p>
+    </div>
+  </div>
+</div>
+
+<!-- FOOTER -->
+<div class="form-footer">
+  <div class="sig-text">A service by <a href="https://iqproductionz.com" target="_blank">IQProductionz.com</a> · Entertainment & Metaphysical Health</div>
+</div>
+
+</div><!-- /form-body -->
+
+<script>
+const EJS_SERVICE  = 'service_75wx6fk';
+const EJS_TEMPLATE = 'template_nnmxioq';
+const TO_EMAIL     = 'SarahParsons@IQProductionz.com';
+
+let currentPage = 1;
+const totalPages = 5;
+
+// ── NAVIGATION ──
+function goTo(n) {
+  document.getElementById('page-' + currentPage).classList.remove('active');
+  document.getElementById('page-' + n).classList.add('active');
+  for (let i = 1; i <= totalPages; i++) {
+    const dot = document.getElementById('dot-' + i);
+    if (!dot) continue;
+    dot.className = 'step-dot' + (i < n ? ' done' : i === n ? ' active' : '');
+    const line = document.getElementById('line-' + i);
+    if (line) line.className = 'step-line' + (i < n ? ' done' : '');
+  }
+  currentPage = n;
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+// ── YES/NO ──
+function yn(btn, id, revealId) {
+  btn.closest('.yn-group').querySelectorAll('.yn-btn').forEach(b => {
+    b.classList.remove('sel-yes','sel-no');
+  });
+  btn.classList.add(id.endsWith('Yes') ? 'sel-yes' : 'sel-no');
+  btn.closest('.field').querySelectorAll('.reveal').forEach(r => r.classList.remove('open'));
+  if (revealId) { const r = document.getElementById(revealId); if (r) r.classList.add('open'); }
+}
+
+// ── FILE HANDLER ──
+function handleFile(input, listId) {
+  const list = document.getElementById(listId);
+  if (list) list.innerHTML = Array.from(input.files).map(f => '✓ ' + f.name).join('<br>');
+}
+
+// ── COLOR SYNC ──
+function syncColor(pickerId, hexId) {
+  document.getElementById(hexId).value = document.getElementById(pickerId).value;
+}
+function syncHex(hexId, pickerId) {
+  const val = document.getElementById(hexId).value.trim();
+  if (/^#[0-9a-fA-F]{6}$/.test(val)) document.getElementById(pickerId).value = val;
+}
+
+// ── STYLE PICKER ──
+function selectStyle(el) {
+  document.querySelectorAll('.style-card').forEach(c => c.classList.remove('selected'));
+  el.classList.add('selected');
+}
+
+// ── FONT REVEAL ──
+document.getElementById('fontStyle').addEventListener('change', function(){
+  const rev = document.getElementById('fontCustomReveal');
+  rev.classList.toggle('open', this.value === 'custom');
+});
+
+// ── GREETING REVEAL ──
+document.getElementById('greetingStyle').addEventListener('change', function(){
+  const rev = document.getElementById('greetingCustomReveal');
+  rev.classList.toggle('open', this.value === 'custom');
+});
+
+// ── TONE REVEAL ──
+document.getElementById('toneOfVoice').addEventListener('change', function(){
+  const rev = document.getElementById('toneCustomReveal');
+  rev.classList.toggle('open', this.value === 'custom');
+});
+
+// ── PRESET CHECKBOXES ──
+function togglePreset(el) {
+  const cb = el.querySelector('input[type="checkbox"]');
+  const box = el.querySelector('.pc-box');
+  cb.checked = !cb.checked;
+  if (cb.checked) {
+    el.style.borderColor = 'var(--gold)';
+    el.style.color = 'var(--gold)';
+    box.style.background = 'var(--gold)';
+    box.style.borderColor = 'var(--gold)';
+  } else {
+    el.style.borderColor = '';
+    el.style.color = '';
+    box.style.background = '';
+    box.style.borderColor = '';
+  }
+}
+
+// ── SOCIAL ──
+const extraPlatforms = ['▶️ YouTube','📌 Pinterest','🐦 X / Twitter','💼 LinkedIn','📸 Snapchat','🧵 Threads','⭐ Google Business','🌟 Yelp'];
+let socialIdx = 0;
+function addSocial() {
+  const list = document.getElementById('sigSocialList');
+  const row = document.createElement('div');
+  row.className = 'social-row';
+  const plat = extraPlatforms[socialIdx % extraPlatforms.length];
+  socialIdx++;
+  row.innerHTML = `
+    <div style="flex:0 0 120px"><input type="text" class="inp" value="${plat}" style="font-size:12px;padding:9px 10px;"></div>
+    <input type="text" class="inp" placeholder="@handle or link" />
+    <button class="remove-social" onclick="removeSocial(this)">×</button>`;
+  list.appendChild(row);
+}
+function removeSocial(btn) { btn.closest('.social-row').remove(); }
+
+// ── COLLECT DATA ──
+function gv(id) { return (document.getElementById(id)||{}).value||''; }
+
+function collectData() {
+  const selectedStyle = document.querySelector('.style-card.selected input')?.value || 'light';
+  const selectedFont  = gv('fontStyle') === 'custom' ? gv('fontCustom') : gv('fontStyle');
+  const greeting      = gv('greetingStyle') === 'custom' ? gv('greetingCustom') : gv('greetingStyle');
+  const tone          = gv('toneOfVoice') === 'custom' ? gv('toneCustom') : gv('toneOfVoice');
+
+  const presets = Array.from(document.querySelectorAll('#presetChecks input:checked')).map(i => i.value).join(', ') || 'None';
+
+  const socials = Array.from(document.querySelectorAll('#sigSocialList .social-row')).map(r => {
+    const inputs = r.querySelectorAll('input');
+    const plat = r.querySelector('.social-tag')?.textContent?.trim() || inputs[0]?.value || '';
+    const handle = inputs[inputs.length - 1]?.value || '';
+    return handle ? `  • ${plat}: ${handle}` : null;
+  }).filter(Boolean).join('\n') || '  None';
+
+  const hasAttach   = document.querySelector('[onclick*="attachYes"].sel-yes') ? 'Yes' : 'No';
+  const hasBuilder  = document.querySelector('[onclick*="builderYes"].sel-yes') ? 'Yes' : 'No';
+  const hasPresets  = document.querySelector('[onclick*="presetsYes"].sel-yes') ? 'Yes' : 'No';
+  const hasLogo     = document.querySelector('[onclick*="logoYes"].sel-yes') ? 'Yes (uploaded)' : 'No';
+  const hasPhotos   = document.querySelector('[onclick*="photoYes"].sel-yes') ? 'Yes (uploaded)' : 'No / use stock';
+
+  return `
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+EMAIL BRAND SETUP BRIEF
+I.Q. Productionz
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+BUSINESS INFO
+  Name:           ${gv('bizName')||'—'}
+  Industry:       ${gv('bizType')||'—'}
+  Owner/Contact:  ${gv('ownerName')||'—'}
+  Phone:          ${gv('ownerPhone')||'—'}
+  Business Email: ${gv('bizEmail')||'—'}
+  Website:        ${gv('bizWebsite')||'—'}
+  Tagline:        ${gv('bizTagline')||'—'}
+  Description:    ${gv('bizDesc')||'—'}
+
+BRAND & VISUAL
+  Logo:           ${hasLogo}
+  Primary Color:  ${gv('primaryColorHex')||gv('primaryColorPicker')||'—'}
+  Secondary Color:${gv('secondaryColorHex')||gv('secondaryColorPicker')||'—'}
+  BG Color:       ${gv('bgColorHex')||gv('bgColorPicker')||'—'}
+  Font Style:     ${selectedFont||'—'}
+  Email Layout:   ${selectedStyle}
+  Brand Photos:   ${hasPhotos}
+
+EMAIL CONFIGURATION
+  Send-From Email:  ${gv('sendFromEmail')||'—'}
+  CC / Copy Email:  ${gv('ccEmail')||'—'}
+  Default Subject:  ${gv('defaultSubject')||'—'}
+  Greeting Style:   ${greeting||'—'}
+  Attachment Support: ${hasAttach}
+  Link/Button Builder: ${hasBuilder}
+  Email Presets:    ${hasPresets}
+  Preset Types:     ${presets}
+  Custom Preset Notes: ${gv('customPresets')||'—'}
+
+EMAIL SIGNATURE
+  Name:       ${gv('sigName')||'—'}
+  Title:      ${gv('sigTitle')||'—'}
+  Phone:      ${gv('sigPhone')||'—'}
+  Website:    ${gv('sigWeb')||'—'}
+  Sign-off:   ${gv('sigSignoff')||'—'}
+  Tagline:    ${gv('sigTagline')||'—'}
+  Footer:     ${gv('footerLegal')||'—'}
+  Socials:
+${socials}
+
+TONE & CONTENT
+  Tone of Voice:   ${tone||'—'}
+  Specific Wants:  ${gv('specificRequests')||'—'}
+  Things to Avoid: ${gv('avoidList')||'—'}
+  Inspiration:     ${gv('emailInspo')||'—'}
+
+TIMELINE
+  Deadline: ${gv('deadline')||'—'}
+
+ADDITIONAL NOTES
+  ${gv('finalNotes')||'—'}
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+Submitted via IQ Email Brand Intake
+IQProductionz.com
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━`.trim();
+}
+
+// ── SUBMIT ──
+async function submitForm() {
+  const btn = document.getElementById('submitBtn');
+  const overlay = document.getElementById('sendingOverlay');
+
+  const bizName   = gv('bizName') || 'New Client';
+  const ownerName = gv('ownerName') || 'Client';
+  const replyTo   = gv('bizEmail') || TO_EMAIL;
+
+  if (!gv('bizName')) { showStatus('err','Please enter the business name before submitting.'); return; }
+  if (!gv('ownerName')) { showStatus('err','Please enter the owner/contact name.'); return; }
+  if (!gv('bizEmail')) { showStatus('err','Please enter a business email address.'); return; }
+
+  btn.disabled = true;
+  overlay.classList.add('show');
+
+  const params = {
+    to_email: TO_EMAIL,
+    to_name:  'Sarah Parsons',
+    subject:  'Email Brand Brief — ' + bizName,
+    name:     ownerName,
+    message:  collectData(),
+    reply_to: replyTo,
+    from_name: ownerName
+  };
+
+  try {
+    await emailjs.send(EJS_SERVICE, EJS_TEMPLATE, params);
+    overlay.classList.remove('show');
+    goTo(6);
+  } catch(err) {
+    overlay.classList.remove('show');
+    btn.disabled = false;
+    showStatus('err', 'Something went wrong. Please try again or email SarahParsons@IQProductionz.com directly.\nError: ' + (err.text || err.message || JSON.stringify(err)));
+    console.error('EmailJS error:', err);
+  }
+}
+
+function showStatus(type, msg) {
+  const el = document.getElementById('statusMsg');
+  el.className = 'status ' + type;
+  el.textContent = msg;
+  el.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+}
+</script>
+</body>
+</html>

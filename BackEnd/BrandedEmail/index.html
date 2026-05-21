@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -124,6 +125,24 @@ textarea.inp{resize:vertical;min-height:200px;line-height:1.7;}
   .btn-row{flex-direction:column;}
   .tab{font-size:9px;padding:12px 6px;}
 }
+
+  /* ATTACHMENT INPUT */
+  .attach-label {
+    display:flex; align-items:center; gap:10px; cursor:pointer;
+    border:1.5px dashed var(--gold-dim); border-radius:8px;
+    padding:10px 14px; font-size:.9rem; color:var(--gold);
+    background:rgba(201,138,46,0.05); transition:all .2s;
+    user-select:none;
+  }
+  .attach-label:hover { border-color:var(--gold); background:rgba(201,138,46,0.1); }
+  .attach-icon { font-size:1.2rem; }
+  .attach-clear {
+    display:inline-block; margin-top:6px; padding:4px 10px;
+    background:none; border:1px solid #c0392b; border-radius:4px;
+    color:#c0392b; font-size:.78rem; cursor:pointer; transition:all .2s;
+  }
+  .attach-clear:hover { background:#c0392b; color:#fff; }
+
 </style>
 </head>
 <body>
@@ -132,21 +151,15 @@ textarea.inp{resize:vertical;min-height:200px;line-height:1.7;}
   <a href="../" style="font-family:'Cinzel',Georgia,serif;padding:7px 16px;border:1px solid #7a5218;border-radius:6px;color:#e0a84a;font-size:10px;letter-spacing:1.5px;text-decoration:none;text-transform:uppercase;">↩ BackEnd Home</a>
 </div>
 
-<!-- HEADER -->
 <div class="hdr">
   <div class="logo-wrap">
-    <img src="IQ-noglow_edited_edited.avif" alt="I.Q. Productionz" onerror="this.style.display='none'">
-    <div>
-      <div class="brand-name">I.Q. Productionz</div>
-      <div class="brand-sub">Inner Quality Productionz</div>
-    </div>
+    <img src="https://iqproductionz.com/Content/Images/Main/IQ-noglow_Updated.avif" alt="I.Q. Productionz" onerror="this.style.display='none'">
   </div>
   <div class="gold-rule"></div>
   <h1>IQ Email Brand</h1>
   <p>Send premium branded emails to clients — proposals, follow-ups, receipts, and custom messages — all on your IQ Productionz identity.</p>
 </div>
 
-<!-- TABS -->
 <div style="background:var(--surface);border-bottom:1px solid var(--border);">
   <div class="tab-bar">
     <div class="tab active" onclick="switchTab('compose')">✦ Compose</div>
@@ -158,16 +171,8 @@ textarea.inp{resize:vertical;min-height:200px;line-height:1.7;}
 
 <div class="page-body">
 
-<!-- ══════════ TAB: COMPOSE ══════════ -->
 <div class="tab-panel active" id="tab-compose">
 
-  <div class="note">
-    <strong>EmailJS Template Setup</strong> — your template needs: <code>to_email</code> &nbsp;<code>subject</code> &nbsp;<code>{{{message}}}</code> (triple braces = renders HTML)<br>
-
-    Use <strong>#BUTTON</strong> on its own line in your message body to insert a call-to-action button (build it in the button builder below).
-  </div>
-
-  <!-- Template ID override -->
   <div class="card">
     <h2>Send Settings</h2>
     <div class="field">
@@ -176,7 +181,6 @@ textarea.inp{resize:vertical;min-height:200px;line-height:1.7;}
     </div>
   </div>
 
-  <!-- Recipient -->
   <div class="card">
     <h2>Recipient</h2>
     <div class="row-2">
@@ -195,7 +199,6 @@ textarea.inp{resize:vertical;min-height:200px;line-height:1.7;}
     </div>
   </div>
 
-  <!-- Message -->
   <div class="card">
     <h2>Message Body</h2>
     <div class="field">
@@ -203,7 +206,6 @@ textarea.inp{resize:vertical;min-height:200px;line-height:1.7;}
       <div class="hint">Plain text is fine — line breaks become paragraphs automatically. You can also use basic HTML tags like &lt;b&gt;, &lt;a href=""&gt;, etc.</div>
     </div>
 
-    <!-- Hyperlink Builder -->
     <div class="builder-box">
       <div class="builder-title">🔗 Hyperlink Builder — inserts a link at your cursor</div>
       <div class="builder-row">
@@ -219,7 +221,6 @@ textarea.inp{resize:vertical;min-height:200px;line-height:1.7;}
       </div>
     </div>
 
-    <!-- Button Builder -->
     <div class="builder-box" style="margin-top:10px;">
       <div class="builder-title">🟡 Button Builder — inserts a #BUTTON into your message</div>
       <div class="builder-row">
@@ -236,7 +237,18 @@ textarea.inp{resize:vertical;min-height:200px;line-height:1.7;}
     </div>
   </div>
 
-  <!-- Send -->
+  <div class="field" style="margin-bottom:12px;">
+    <label class="lbl">Attachment <span style="font-weight:300;font-size:.8rem;color:var(--muted);">(optional)</span></label>
+    <label class="attach-label" for="attachFile">
+      <span class="attach-icon">📎</span>
+      <span id="attachFileName">Choose file to attach…</span>
+      <input type="file" id="attachFile" name="my_file"
+             accept=".pdf,.doc,.docx,.jpg,.jpeg,.png,.gif,.txt,.csv,.xls,.xlsx,.ppt,.pptx"
+             onchange="updateAttachName(this)" style="display:none;">
+    </label>
+    <button type="button" class="attach-clear" id="attachClear" onclick="clearAttach()" style="display:none;">✕ Remove</button>
+  </div>
+
   <div class="btn-row">
     <button class="btn btn-outline" onclick="previewEmail()">Preview in Window</button>
     <button class="btn btn-test" id="testBtn" onclick="sendEmail('test')">Send Test to Me</button>
@@ -246,7 +258,6 @@ textarea.inp{resize:vertical;min-height:200px;line-height:1.7;}
   <iframe id="preview-frame"></iframe>
 </div>
 
-<!-- ══════════ TAB: OUTREACH ══════════ -->
 <div class="tab-panel" id="tab-outreach">
   <div class="note">
     <strong>Cold Outreach Templates</strong> — click any template to load it into the Compose tab, then customize before sending. Built for your Launch-Ready Website Package pitch.
@@ -317,7 +328,6 @@ textarea.inp{resize:vertical;min-height:200px;line-height:1.7;}
   </div>
 </div>
 
-<!-- ══════════ TAB: FOLLOW-UP ══════════ -->
 <div class="tab-panel" id="tab-followup">
   <div class="note">
     <strong>Follow-Up Templates</strong> — the money is in the follow-up. Most clients need 2–3 touches before saying yes. Use these to stay top of mind without being pushy.
@@ -356,7 +366,6 @@ textarea.inp{resize:vertical;min-height:200px;line-height:1.7;}
   </div>
 </div>
 
-<!-- ══════════ TAB: SIGNATURE ══════════ -->
 <div class="tab-panel" id="tab-settings">
   <div class="card">
     <h2>Email Signature Settings</h2>
@@ -380,9 +389,7 @@ textarea.inp{resize:vertical;min-height:200px;line-height:1.7;}
   </div>
 </div>
 
-</div><!-- /page-body -->
-
-<script>
+</div><script>
 const EJS_SERVICE  = 'service_75wx6fk';
 const EJS_TEMPLATE_DEFAULT = 'template_nnmxioq';
 
@@ -524,8 +531,7 @@ body{margin:0;padding:0;background:#3a3a3a;font-family:'Raleway',Arial,sans-seri
 .wrap{max-width:600px;margin:0 auto;background:#454545;border-radius:10px;overflow:hidden;box-shadow:0 6px 32px rgba(0,0,0,0.4);}
 .email-hdr{background:linear-gradient(160deg,#454545 0%,#333 100%);padding:32px 40px;text-align:center;border-bottom:2px solid #c98a2e;position:relative;}
 .email-hdr::after{content:'';display:block;width:60px;height:2px;background:linear-gradient(90deg,transparent,#c98a2e,transparent);margin:14px auto 0;}
-.email-hdr h1{margin:0;font-family:'Cinzel',Georgia,serif;font-size:22px;font-weight:700;color:#c98a2e;letter-spacing:3px;text-transform:uppercase;}
-.email-hdr p{margin:6px 0 0;font-size:10px;color:#A9A9A9;letter-spacing:3px;text-transform:uppercase;}
+.email-hdr img{display:block;height:56px;width:auto;margin:0 auto;filter:drop-shadow(0 0 12px rgba(201,138,46,0.45));}
 .email-body{padding:36px 40px;background:#454545;}
 .greeting{font-family:'Cinzel',Georgia,serif;font-size:22px;color:#f0ece3;font-weight:400;margin:0 0 6px;}
 .gold-line{width:40px;height:1px;background:linear-gradient(90deg,#c98a2e,#e0a84a);margin:0 0 20px;}
@@ -535,17 +541,34 @@ body{margin:0;padding:0;background:#3a3a3a;font-family:'Raleway',Arial,sans-seri
 .sig-title{font-size:11px;color:#A9A9A9;letter-spacing:1px;text-transform:uppercase;margin:0 0 6px;}
 .sig-link{font-size:12px;color:#c98a2e;text-decoration:none;}
 .email-ftr{background:#333;padding:16px 40px;text-align:center;font-size:11px;color:#7a7468;letter-spacing:1px;border-top:1px solid #2e2b24;}
-.email-ftr a{color:#c98a2e;text-decoration:none;} .content a{color:#c98a2e;text-decoration:none;border-bottom:1px solid rgba(201,138,46,0.4);} .content a:hover{color:#e0a84a;}
+.email-ftr a{color:#e0a84a;text-decoration:none;transition:color .2s ease;} .email-ftr a:hover{color:#fff;} .content a{color:#e8b86d;text-decoration:none;border-bottom:1px solid rgba(201,138,46,0.4);} .content a:hover{color:#f5d08a;}
 @media(max-width:600px){.email-body{padding:24px 20px;}.email-hdr{padding:24px 20px;}}
+
+  /* ATTACHMENT INPUT */
+  .attach-label {
+    display:flex; align-items:center; gap:10px; cursor:pointer;
+    border:1.5px dashed var(--gold-dim); border-radius:8px;
+    padding:10px 14px; font-size:.9rem; color:var(--gold);
+    background:rgba(201,138,46,0.05); transition:all .2s;
+    user-select:none;
+  }
+  .attach-label:hover { border-color:var(--gold); background:rgba(201,138,46,0.1); }
+  .attach-icon { font-size:1.2rem; }
+  .attach-clear {
+    display:inline-block; margin-top:6px; padding:4px 10px;
+    background:none; border:1px solid #c0392b; border-radius:4px;
+    color:#c0392b; font-size:.78rem; cursor:pointer; transition:all .2s;
+  }
+  .attach-clear:hover { background:#c0392b; color:#fff; }
+
 </style></head>
 <body><div style="padding:20px 16px;background:#3a3a3a;">
 <div class="wrap">
 <div class="email-hdr">
-  <h1>I.Q. Productionz</h1>
-  <p>Inner Quality Productionz</p>
+  <img src="https://iqproductionz.com/Content/Images/Main/IQ-noglow_Updated.avif" alt="I.Q. Productionz">
 </div>
 <div class="email-body">
-  <p class="greeting">${clientName ? 'Salutations, ' + clientName + ',' : 'Salutations,'}</p>
+  <p class="greeting">${clientName ? 'Salutations ' + clientName + ',' : 'Salutations,'}</p>
   <div class="gold-line"></div>
   <div class="content">${body}</div>
   <div class="sig-block">
@@ -597,27 +620,56 @@ async function sendEmail(mode){
   /* WHY: Log params before send so we can diagnose template variable mismatches */
   console.log('Sending via EmailJS:', {service: EJS_SERVICE, template: templateId, to: sendTo, subject: subjectL});
 
+  /* WHY: use sendForm if attachment present — only sendForm can carry files */
+  const attachFile = document.getElementById('attachFile');
+  const hasFile    = attachFile && attachFile.files && attachFile.files.length > 0;
+
+  /* Build a hidden form for sendForm when attachment is needed */
+  async function doSend(toEmail, subj, msgHtml, replyTo, fromName) {
+    if (hasFile) {
+      const frm = document.createElement('form');
+      frm.style.display = 'none';
+      const fields = {
+        to_email: toEmail, to_name: nameFor, subject: subj,
+        message: msgHtml, reply_to: replyTo, from_name: fromName
+      };
+      for (const [k,v] of Object.entries(fields)) {
+        const inp = document.createElement('input');
+        inp.name = k; inp.value = v; frm.appendChild(inp);
+      }
+      // Clone the file input into the form
+      const fileClone = attachFile.cloneNode(true);
+      fileClone.name = 'my_file';
+      frm.appendChild(fileClone);
+      document.body.appendChild(frm);
+      const result = await emailjs.sendForm(EJS_SERVICE, templateId, frm);
+      document.body.removeChild(frm);
+      return result;
+    } else {
+      return await emailjs.send(EJS_SERVICE, templateId, {
+        to_email: toEmail, to_name: nameFor, subject: subj,
+        message: msgHtml, reply_to: replyTo, from_name: fromName
+      });
+    }
+  }
+
   try {
+    await doSend(sendTo, subjectL, html, consultantEmail,
+                 document.getElementById('sigName').value || 'Sarah Parsons');
+    /* old send call replaced — kept for reference:
     await emailjs.send(EJS_SERVICE, templateId, {
-      to_email:  sendTo,
-      to_name:   nameFor,
-      subject:   subjectL,
-      message:   html,
-      reply_to:  consultantEmail,
+      to_email:  sendTo, to_name: nameFor, subject: subjectL,
+      message:   html, reply_to: consultantEmail,
       from_name: document.getElementById('sigName').value || 'Sarah Parsons'
-    });
+    }); */
 
     // Consultant copy on real sends
     if(mode==='client'){
       const ccHtml = buildEmailHtml(clientName, recs);
-      await emailjs.send(EJS_SERVICE, templateId, {
-        to_email:  consultantEmail,
-        to_name:   'Sarah Parsons',
-        subject:   'SENT: ' + subject + ' → ' + clientName,
-        message:   ccHtml,
-        reply_to:  clientEmail,
-        from_name: document.getElementById('sigName').value || 'Sarah Parsons'
-      });
+      await doSend(consultantEmail,
+                   'SENT: ' + subject + ' → ' + (clientName||'(no name)'),
+                   ccHtml, clientEmail,
+                   document.getElementById('sigName').value || 'Sarah Parsons');
     }
 
     const msg = mode==='test'
@@ -639,6 +691,27 @@ function showStatus(type, msg){
   el.textContent = msg;
   el.scrollIntoView({behavior:'smooth',block:'nearest'});
 }
+
+function updateAttachName(input) {
+  var label = document.getElementById('attachFileName');
+  var clear  = document.getElementById('attachClear');
+  if (input.files && input.files.length) {
+    label.textContent = input.files[0].name;
+    clear.style.display = 'inline-block';
+  } else {
+    label.textContent = 'Choose file to attach…';
+    clear.style.display = 'none';
+  }
+}
+function clearAttach() {
+  var input = document.getElementById('attachFile');
+  input.value = '';
+  document.getElementById('attachFileName').textContent = 'Choose file to attach…';
+  document.getElementById('attachClear').style.display = 'none';
+}
+
 </script>
 </body>
 </html>
+
+```

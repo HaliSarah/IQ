@@ -157,14 +157,11 @@ textarea{resize:vertical;min-height:80px;line-height:1.6;}
   <!-- HEADER -->
   <div class="form-header">
     <div class="logo-wrap">
-<div class="logo-text">
-        <div class="brand-name">I.Q. Productionz</div>
-        <div class="brand-sub">Inner Quality Productionz</div>
-      </div>
+      <img src="https://iqproductionz.com/Content/Images/Main/IQ-noglow_Updated.avif" alt="I.Q. Productionz" onerror="this.style.display='none'">
     </div>
     <div class="gold-rule"></div>
     <h1>Hosting Inquiry</h1>
-    <p>Fill out the form below and we'll follow up to get you set up within 24 business hours.</p>
+    <p>Fill out the form below and we'll follow up to get you set up within 24 business hours. Be sure to submit 50% of the total via CashApp <strong style='color:var(--gold);'>$IQENT</strong>.</p>
   </div>
 
   <div class="form-body">
@@ -253,10 +250,7 @@ textarea{resize:vertical;min-height:80px;line-height:1.6;}
 <div id="thank-you-page">
   <div class="form-header">
     <div class="logo-wrap">
-<div class="logo-text">
-        <div class="brand-name">I.Q. Productionz</div>
-        <div class="brand-sub">Inner Quality Productionz</div>
-      </div>
+      <img src="https://iqproductionz.com/Content/Images/Main/IQ-noglow_Updated.avif" alt="I.Q. Productionz" onerror="this.style.display='none'">
     </div>
   </div>
   <div class="thankyou">
@@ -306,7 +300,7 @@ function submitForm() {
   const first = name.split(' ')[0];
   document.getElementById('ty-title').textContent = 'Thank You, ' + first + '!';
 
-  emailjs.send('IQProductionz', 'template_iq_contact', {
+  emailjs.send('service_75wx6fk', 'template_nnmxioq', {
     subject: 'NEW Hosting Inquiry - ' + name,
     name,
     message: (business ? 'Business: ' + business + '\n' : '') +
