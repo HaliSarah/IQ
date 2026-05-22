@@ -580,7 +580,7 @@ body{margin:0;padding:0;background:#3a3a3a;font-family:'Raleway',Arial,sans-seri
     ${sigTagline?`<div style="font-size:12px;color:#7a5218;font-style:italic;margin-top:4px;">${sigTagline}</div>`:''}
   </div>
 </div>
-<div class="email-ftr">I.Q. Productionz &bull; <a href="https://iqproductionz.com">IQProductionz.com</a> &bull; <a href="mailto:${consultantEmail}">${consultantEmail}</a></div>
+<div class="email-ftr">I.Q. Productionz &bull; <a href="https://iqproductionz.com" style="color:#e0a84a;text-decoration:none;">IQProductionz.com</a> &bull; <a href="mailto:${consultantEmail}" style="color:#e0a84a;text-decoration:none;">${consultantEmail}</a></div>
 </div></div></body></html>`;
 }
 
@@ -664,13 +664,6 @@ async function sendEmail(mode){
     }); */
 
     // Consultant copy on real sends
-    if(mode==='client'){
-      const ccHtml = buildEmailHtml(clientName, recs);
-      await doSend(consultantEmail,
-                   'SENT: ' + subject + ' → ' + (clientName||'(no name)'),
-                   ccHtml, clientEmail,
-                   document.getElementById('sigName').value || 'Sarah Parsons');
-    }
 
     const msg = mode==='test'
       ? '✓ Test email sent to ' + consultantEmail + '! Check your inbox.'
