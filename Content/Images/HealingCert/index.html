@@ -305,6 +305,16 @@ body {
   .cert-grid { grid-template-columns:1fr; padding:0 16px; margin-top:32px; }
   .page-header { padding:36px 18px 32px; }
 }
+
+  /* WHY: Wild Moon Herbs is the only card in row 1 — centered */
+  .cert-card.featured {
+    max-width:340px;
+    margin:0 auto;
+    grid-column: 1 / -1;
+    justify-self: center;
+    width:100%;
+  }
+
 </style>
 </head>
 <body>
@@ -326,13 +336,35 @@ body {
 <!-- CERT GRID -->
 <div class="cert-grid">
 
+  <!-- Wild Moon Herbs — Shamanic Herbalism -->
+  <div class="cert-card featured">
+    <div class="cert-preview" onclick="openImgLB(this)">
+      <img src="https://IQProductionz.com/Content/Images/HealingCert/Herbalism.jpg" alt="Wild Moon Herbs — Shamanic Herbalism Apprenticeship Certificate">
+    </div>
+    <div class="cert-body">
+      <div class="cert-discipline">Shamanic Herbalism</div>
+      <div class="cert-title">Shamanic Herbalism Apprenticeship</div>
+      <div class="cert-meta">
+        <span>Wild Moon Herbs</span>
+      </div>
+      <div class="cert-actions">
+        <a class="btn-view" href="https://IQProductionz.com/Content/Images/HealingCert/Herbalism.jpg" target="_blank" rel="noopener">View Certificate</a>
+        <a class="btn-download" href="https://IQProductionz.com/Content/Images/HealingCert/Herbalism.jpg" download>⬇ Download</a>
+      </div>
+    </div>
+  </div>
+
   <!-- Reiki Level I -->
   <div class="cert-card">
-    <div class="cert-preview" onclick="openLB('https://IQProductionz.com/Content/Images/HealingCert/Reiki1.pdf')">
-      <div class="pdf-thumb">
-        <div class="cert-icon">🏆</div>
-        <div class="cert-name-preview">Reiki I · Certificate</div>
-      </div>
+    <div class="cert-preview" onclick="window.open('https://IQProductionz.com/Content/Images/HealingCert/Reiki1.pdf','_blank')">
+      <object data="https://IQProductionz.com/Content/Images/HealingCert/Reiki1.pdf"
+              type="application/pdf" width="100%" height="100%"
+              style="pointer-events:none;">
+        <div class="pdf-thumb">
+          <div class="cert-icon">🏆</div>
+          <div class="cert-name-preview">Reiki I · Certificate</div>
+        </div>
+      </object>
     </div>
     <div class="cert-body">
       <div class="cert-discipline">Energy Healing</div>
@@ -390,11 +422,8 @@ body {
 
   <!-- Sound Healer Level 1 -->
   <div class="cert-card">
-    <div class="cert-preview" onclick="openLB('https://IQProductionz.com/Content/Images/HealingCert/CertifiedSoundHealerLevel_1.pdf')">
-      <div class="pdf-thumb">
-        <div class="cert-icon">🔔</div>
-        <div class="cert-name-preview">Sound Healer Level 1</div>
-      </div>
+    <div class="cert-preview" onclick="window.open('https://IQProductionz.com/Content/Images/HealingCert/CertifiedSoundHealerLevel_1.pdf','_blank')">
+      <img src="https://IQProductionz.com/Content/Images/HealingCert/SoundThumbnail.png" alt="Sound Healer Level 1 Certificate">
     </div>
     <div class="cert-body">
       <div class="cert-discipline">Sound Healing</div>
@@ -412,11 +441,15 @@ body {
 
   <!-- Crystal Singing Bowl -->
   <div class="cert-card">
-    <div class="cert-preview" onclick="openLB('https://IQProductionz.com/Content/Images/HealingCert/SingingBowl.pdf')">
-      <div class="pdf-thumb">
-        <div class="cert-icon">🪬</div>
-        <div class="cert-name-preview">Singing Bowl Sound Healer</div>
-      </div>
+    <div class="cert-preview" onclick="window.open('https://IQProductionz.com/Content/Images/HealingCert/SingingBowl.pdf','_blank')">
+      <object data="https://IQProductionz.com/Content/Images/HealingCert/SingingBowl.pdf"
+              type="application/pdf" width="100%" height="100%"
+              style="pointer-events:none;">
+        <div class="pdf-thumb">
+          <div class="cert-icon">🪬</div>
+          <div class="cert-name-preview">Singing Bowl Sound Healer</div>
+        </div>
+      </object>
     </div>
     <div class="cert-body">
       <div class="cert-discipline">Sound Healing</div>
@@ -435,11 +468,15 @@ body {
 
   <!-- Tuning Fork -->
   <div class="cert-card">
-    <div class="cert-preview" onclick="openLB('https://IQProductionz.com/Content/Images/HealingCert/TuningFork.pdf')">
-      <div class="pdf-thumb">
-        <div class="cert-icon">🎵</div>
-        <div class="cert-name-preview">Tuning Fork Sound Healer</div>
-      </div>
+    <div class="cert-preview" onclick="window.open('https://IQProductionz.com/Content/Images/HealingCert/TuningFork.pdf','_blank')">
+      <object data="https://IQProductionz.com/Content/Images/HealingCert/TuningFork.pdf"
+              type="application/pdf" width="100%" height="100%"
+              style="pointer-events:none;">
+        <div class="pdf-thumb">
+          <div class="cert-icon">🎵</div>
+          <div class="cert-name-preview">Tuning Fork Sound Healer</div>
+        </div>
+      </object>
     </div>
     <div class="cert-body">
       <div class="cert-discipline">Sound Healing</div>

@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<!--
+  Title:       Coming Soon — I.Q. Productionz
+  Author:      Hali Sarah Parsons  Date: 2026
+-->
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Coming Soon | I.Q. Productionz</title>
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700&family=Raleway:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg:       #333333;
+  --surface:  #454545;
+  --border:   #2e2b24;
+  --gold:     #c98a2e;
+  --gold-lt:  #e0a84a;
+  --gold-dim: #7a5218;
+  --white:    #f0ece3;
+  --muted:    #a9a9a9;
+}
+* { box-sizing:border-box; margin:0; padding:0; }
+
+body {
+  font-family:'Raleway',sans-serif;
+  background:var(--bg);
+  color:var(--white);
+  min-height:100vh;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:center;
+  padding:40px 24px;
+  text-align:center;
+  position:relative;
+  overflow:hidden;
+}
+
+/* Radial glow */
+body::before {
+  content:'';
+  position:fixed; inset:0;
+  background:radial-gradient(ellipse at 50% 30%, rgba(201,138,46,0.1) 0%, transparent 65%);
+  pointer-events:none;
+}
+
+/* Symbol */
+.symbol {
+  width:72px; height:72px;
+  margin:0 auto 28px;
+  position:relative;
+}
+.symbol svg {
+  width:100%; height:100%;
+  transform:rotate(45deg);
+  filter:drop-shadow(0 0 14px rgba(201,138,46,0.45));
+}
+
+.brand {
+  font-family:'Cinzel',serif;
+  font-size:11px;
+  letter-spacing:4px;
+  text-transform:uppercase;
+  color:var(--gold);
+  margin-bottom:20px;
+}
+
+.rule {
+  width:60px; height:2px;
+  background:linear-gradient(90deg,transparent,var(--gold),transparent);
+  margin:0 auto 28px;
+}
+
+.headline {
+  font-family:'Cinzel',serif;
+  font-size:clamp(28px,6vw,52px);
+  font-weight:600;
+  letter-spacing:2px;
+  text-transform:uppercase;
+  color:var(--white);
+  line-height:1.15;
+  margin-bottom:18px;
+}
+
+.headline span {
+  display:block;
+  font-size:clamp(14px,2.5vw,20px);
+  color:var(--gold);
+  letter-spacing:4px;
+  margin-top:8px;
+  font-weight:400;
+}
+
+.sub {
+  font-size:14px;
+  color:var(--muted);
+  font-weight:300;
+  max-width:460px;
+  line-height:1.8;
+  margin:0 auto 40px;
+}
+
+.back-btn {
+  display:inline-block;
+  padding:12px 28px;
+  background:transparent;
+  border:1.5px solid var(--gold-dim);
+  border-radius:8px;
+  font-family:'Cinzel',serif;
+  font-size:.72rem;
+  letter-spacing:1.5px;
+  text-transform:uppercase;
+  color:var(--gold);
+  text-decoration:none;
+  transition:all .2s;
+}
+.back-btn:hover {
+  background:var(--gold);
+  color:#333;
+  border-color:var(--gold);
+  box-shadow:0 4px 18px rgba(201,138,46,0.35);
+}
+
+.footer-text {
+  position:fixed;
+  bottom:24px;
+  font-size:11px;
+  color:var(--muted);
+  letter-spacing:1.5px;
+}
+.footer-text a { color:var(--gold); text-decoration:none; }
+</style>
+</head>
+<body>
+
+
+
+<img src="https://IQProductionz.com/Content/Images/Main/IQ-noglow_Updated.avif"
+     alt="I.Q. Productionz"
+     style="height:90px;width:auto;margin-bottom:28px;filter:drop-shadow(0 0 14px rgba(201,138,46,0.45));"
+     onerror="this.style.display='none'">
+<div class="rule"></div>
+
+<h1 class="headline">
+  Coming Soon
+  <span>Something is being built here</span>
+</h1>
+
+<p class="sub">
+  This page is currently under construction.<br>
+  Check back soon — Grand Rising.
+</p>
+
+<a class="back-btn" href="https://IQProductionz.com/">← Return Home</a>
+
+<div class="footer-text">
+  <a href="https://IQProductionz.com">IQProductionz.com</a>
+</div>
+
+</body>
+</html>
