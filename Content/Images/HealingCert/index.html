@@ -1,0 +1,554 @@
+<!DOCTYPE html>
+<!--
+  Title:       Healing Certifications — I.Q. Productionz
+  Author:      Hali Sarah Parsons  Date: 2026
+  Hosted at:   IQProductionz.com/Heal/Certifications/
+-->
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Healing Certifications | I.Q. Productionz</title>
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700&family=Raleway:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg:        #333333;
+  --surface:   #454545;
+  --border:    #2e2b24;
+  --gold:      #c98a2e;
+  --gold-lt:   #e0a84a;
+  --gold-dim:  #7a5218;
+  --gold-pale: rgba(201,138,46,0.08);
+  --white:     #f0ece3;
+  --muted:     #a9a9a9;
+  --radius:    10px;
+}
+* { box-sizing:border-box; margin:0; padding:0; }
+
+body {
+  font-family:'Raleway',sans-serif;
+  background:var(--bg);
+  color:var(--white);
+  min-height:100vh;
+  padding-bottom:64px;
+}
+
+/* ── HEADER ── */
+.page-header {
+  background:linear-gradient(160deg,#454545 0%,#333333 60%);
+  border-bottom:1px solid var(--border);
+  padding:52px 32px 44px;
+  text-align:center;
+  position:relative;
+  overflow:hidden;
+}
+.page-header::before {
+  content:'';
+  position:absolute;inset:0;
+  background:radial-gradient(ellipse at 50% 0%,rgba(201,138,46,0.12) 0%,transparent 70%);
+  pointer-events:none;
+}
+.header-brand {
+  position:relative;
+  font-family:'Cinzel',serif;
+  font-size:11px;
+  letter-spacing:4px;
+  text-transform:uppercase;
+  color:var(--gold);
+  margin-bottom:18px;
+}
+.header-rule {
+  width:60px;height:2px;
+  background:linear-gradient(90deg,transparent,var(--gold),transparent);
+  margin:0 auto 22px;
+}
+.header-title {
+  position:relative;
+  font-family:'Cinzel',serif;
+  font-size:clamp(22px,4vw,38px);
+  font-weight:600;
+  color:var(--white);
+  letter-spacing:1.5px;
+  text-transform:uppercase;
+  margin-bottom:12px;
+}
+.header-sub {
+  position:relative;
+  font-size:13px;
+  color:var(--muted);
+  font-weight:300;
+  max-width:500px;
+  margin:0 auto;
+  line-height:1.7;
+}
+
+/* ── GRID ── */
+.cert-grid {
+  display:grid;
+  grid-template-columns:repeat(auto-fit,minmax(300px,1fr));
+  gap:22px;
+  max-width:1060px;
+  margin:48px auto 0;
+  padding:0 24px;
+}
+
+/* ── CERT CARD ── */
+.cert-card {
+  background:var(--surface);
+  border:1px solid var(--border);
+  border-radius:var(--radius);
+  overflow:hidden;
+  position:relative;
+  display:flex;
+  flex-direction:column;
+  transition:transform 0.2s, box-shadow 0.2s;
+}
+.cert-card::before {
+  content:'';
+  position:absolute;top:0;left:0;right:0;height:2px;
+  background:linear-gradient(90deg,transparent,var(--gold),transparent);
+}
+.cert-card:hover {
+  transform:translateY(-3px);
+  box-shadow:0 8px 28px rgba(201,138,46,0.18);
+}
+
+/* Cert preview area */
+.cert-preview {
+  width:100%;
+  aspect-ratio:4/3;
+  background:#1a1714;
+  overflow:hidden;
+  position:relative;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  cursor:pointer;
+}
+.cert-preview img {
+  width:100%;
+  height:100%;
+  object-fit:cover;
+  object-position:top center;
+  transition:transform 0.35s ease;
+}
+.cert-card:hover .cert-preview img {
+  transform:scale(1.04);
+}
+/* PDF thumbnail placeholder */
+.cert-preview .pdf-thumb {
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:center;
+  gap:12px;
+  width:100%;
+  height:100%;
+  background:linear-gradient(160deg,#1e1c18 0%,#2a2720 100%);
+  padding:24px;
+  text-align:center;
+}
+.pdf-thumb .cert-icon {
+  font-size:2.4rem;
+  filter:drop-shadow(0 0 10px rgba(201,138,46,0.5));
+}
+.pdf-thumb .cert-name-preview {
+  font-family:'Cinzel',serif;
+  font-size:.72rem;
+  letter-spacing:.18em;
+  text-transform:uppercase;
+  color:var(--gold);
+}
+/* Zoom overlay */
+.cert-preview::after {
+  content:'↗ View';
+  position:absolute;
+  inset:0;
+  background:rgba(0,0,0,0.45);
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-family:'Cinzel',serif;
+  font-size:.72rem;
+  letter-spacing:.2em;
+  text-transform:uppercase;
+  color:var(--gold-lt);
+  opacity:0;
+  transition:opacity 0.2s;
+}
+.cert-card:hover .cert-preview::after {
+  opacity:1;
+}
+
+/* Card body */
+.cert-body {
+  padding:20px 22px 22px;
+  display:flex;
+  flex-direction:column;
+  gap:6px;
+  flex:1;
+}
+.cert-discipline {
+  font-family:'Cinzel',serif;
+  font-size:9px;
+  letter-spacing:2.5px;
+  text-transform:uppercase;
+  color:var(--gold);
+  margin-bottom:2px;
+}
+.cert-title {
+  font-family:'Cinzel',serif;
+  font-size:14px;
+  font-weight:600;
+  color:var(--white);
+  letter-spacing:.4px;
+  line-height:1.35;
+}
+.cert-meta {
+  font-size:12px;
+  color:var(--muted);
+  font-weight:300;
+  line-height:1.6;
+}
+.cert-meta span {
+  display:block;
+}
+.cert-actions {
+  margin-top:14px;
+  display:flex;
+  gap:8px;
+  flex-wrap:wrap;
+}
+.btn-view {
+  display:inline-block;
+  padding:9px 20px;
+  background:linear-gradient(135deg,var(--gold) 0%,#a87025 100%);
+  color:#333;
+  border:none;
+  border-radius:6px;
+  font-family:'Cinzel',serif;
+  font-size:.68rem;
+  font-weight:700;
+  letter-spacing:1.5px;
+  text-transform:uppercase;
+  text-decoration:none;
+  cursor:pointer;
+  transition:all 0.2s;
+  box-shadow:0 3px 12px rgba(201,138,46,0.25);
+}
+.btn-view:hover {
+  background:linear-gradient(135deg,var(--gold-lt) 0%,var(--gold) 100%);
+  box-shadow:0 4px 18px rgba(201,138,46,0.4);
+}
+.btn-download {
+  display:inline-block;
+  padding:9px 16px;
+  background:transparent;
+  color:var(--gold);
+  border:1px solid var(--gold-dim);
+  border-radius:6px;
+  font-family:'Cinzel',serif;
+  font-size:.68rem;
+  font-weight:600;
+  letter-spacing:1.5px;
+  text-transform:uppercase;
+  text-decoration:none;
+  cursor:pointer;
+  transition:all 0.2s;
+}
+.btn-download:hover {
+  background:var(--gold-pale);
+  border-color:var(--gold);
+}
+
+/* Lightbox */
+#lightbox {
+  display:none;
+  position:fixed;inset:0;
+  background:rgba(0,0,0,0.92);
+  z-index:999;
+  align-items:center;
+  justify-content:center;
+  padding:20px;
+  cursor:zoom-out;
+}
+#lightbox.open { display:flex; }
+#lightbox img {
+  max-width:90vw;
+  max-height:88vh;
+  border:1px solid rgba(201,138,46,0.3);
+  border-radius:8px;
+  box-shadow:0 0 60px rgba(0,0,0,0.8);
+  cursor:default;
+}
+#lightbox .lb-close {
+  position:fixed;top:20px;right:24px;
+  font-size:1.8rem;color:var(--gold);
+  cursor:pointer;background:none;border:none;
+  font-family:'Cinzel',serif;
+  transition:color 0.2s;
+}
+#lightbox .lb-close:hover { color:var(--white); }
+
+/* Footer */
+.page-footer {
+  text-align:center;
+  padding:40px 24px 0;
+  font-size:12px;
+  color:var(--muted);
+  font-weight:300;
+}
+.page-footer a { color:var(--gold); text-decoration:none; }
+.page-footer a:hover { color:var(--gold-lt); }
+
+@media(max-width:600px){
+  .cert-grid { grid-template-columns:1fr; padding:0 16px; margin-top:32px; }
+  .page-header { padding:36px 18px 32px; }
+}
+
+  /* WHY: Featured cards span full row, centered as a pair */
+  .featured-row {
+    grid-column: 1 / -1;
+    display:flex;
+    gap:22px;
+    justify-content:center;
+    flex-wrap:wrap;
+  }
+  .cert-card.featured {
+    max-width:340px;
+    width:100%;
+    flex:0 0 300px;
+  }
+
+</style>
+</head>
+<body>
+
+<!-- LIGHTBOX -->
+<div id="lightbox" onclick="closeLB(event)">
+  <button class="lb-close" onclick="closeLightbox()">✕</button>
+  <img id="lb-img" src="" alt="">
+</div>
+
+<!-- HEADER -->
+<div class="page-header">
+  <div class="header-brand">I.Q. Productionz · Hali Sarah Parsons</div>
+  <div class="header-rule"></div>
+  <h1 class="header-title">Healing Certifications</h1>
+  <p class="header-sub">Verified credentials in energy healing, sound therapy, and metaphysical practice.</p>
+</div>
+
+<!-- CERT GRID -->
+<div class="cert-grid">
+
+  <!-- Featured row: Wild Moon Herbs + Dowsing -->
+  <div class="featured-row">
+  <div class="cert-card featured">
+    <div class="cert-preview" onclick="openImgLB(this)">
+      <img src="https://IQProductionz.com/Content/Images/HealingCert/Herbalism.jpg" alt="Wild Moon Herbs — Shamanic Herbalism Apprenticeship Certificate">
+    </div>
+    <div class="cert-body">
+      <div class="cert-discipline">Shamanic Herbalism</div>
+      <div class="cert-title">Shamanic Herbalism Apprenticeship</div>
+      <div class="cert-meta">
+        <span>Wild Moon Herbs</span>
+      </div>
+      <div class="cert-actions">
+        <a class="btn-view" href="https://IQProductionz.com/Content/Images/HealingCert/Herbalism.jpg" target="_blank" rel="noopener">View Certificate</a>
+        <a class="btn-download" href="https://IQProductionz.com/Content/Images/HealingCert/Herbalism.jpg" download>⬇ Download</a>
+      </div>
+    </div>
+  </div>
+
+  <div class="cert-card featured">
+    <div class="cert-preview" style="background:linear-gradient(160deg,#1e1c18 0%,#2a2720 100%);display:flex;align-items:center;justify-content:center;flex-direction:column;gap:12px;cursor:default;">
+      <div style="font-size:2.4rem;filter:drop-shadow(0 0 10px rgba(201,138,46,0.5));">🔮</div>
+      <div style="font-family:'Cinzel',serif;font-size:.72rem;letter-spacing:.18em;text-transform:uppercase;color:var(--gold);">Dowsing Certificate</div>
+      <div style="font-size:.72rem;color:var(--muted);letter-spacing:.12em;text-transform:uppercase;">Coming Soon</div>
+    </div>
+    <div class="cert-body">
+      <div class="cert-discipline">Dowsing</div>
+      <div class="cert-title">Dowsing Certificate</div>
+      <div class="cert-meta">
+        <span style="font-style:italic;color:var(--muted);">Certificate coming soon</span>
+      </div>
+    </div>
+  </div>
+  </div><!-- end featured-row -->
+
+  <!-- Reiki Level I -->
+  <div class="cert-card">
+    <div class="cert-preview" onclick="window.open('https://IQProductionz.com/Content/Images/HealingCert/Reiki1.pdf','_blank')">
+      <object data="https://IQProductionz.com/Content/Images/HealingCert/Reiki1.pdf"
+              type="application/pdf" width="100%" height="100%"
+              style="pointer-events:none;">
+        <div class="pdf-thumb">
+          <div class="cert-icon">🏆</div>
+          <div class="cert-name-preview">Reiki I · Certificate</div>
+        </div>
+      </object>
+    </div>
+    <div class="cert-body">
+      <div class="cert-discipline">Energy Healing</div>
+      <div class="cert-title">Reiki I — Certificate of Completion</div>
+      <div class="cert-meta">
+        <span>Issued by Donna Evans, Reiki Master Teacher</span>
+        <span>Usui Shiki Ryoho tradition</span>
+      </div>
+      <div class="cert-actions">
+        <a class="btn-view" href="https://IQProductionz.com/Content/Images/HealingCert/Reiki1.pdf" target="_blank" rel="noopener">View Certificate</a>
+        <a class="btn-download" href="https://IQProductionz.com/Content/Images/HealingCert/Reiki1.pdf" download>⬇ Download</a>
+      </div>
+    </div>
+  </div>
+
+  <!-- Reiki Level II -->
+  <div class="cert-card">
+    <div class="cert-preview" onclick="openImgLB(this)">
+      <img src="https://IQProductionz.com/Content/Images/HealingCert/reiki2.jpg" alt="Usui Shiki Ryoho Reiki Level II Certificate">
+    </div>
+    <div class="cert-body">
+      <div class="cert-discipline">Energy Healing</div>
+      <div class="cert-title">Usui Shiki Ryoho Reiki — Level II</div>
+      <div class="cert-meta">
+        <span>Issued by Vicky Perez RMT, AD NATURAM</span>
+        <span>Lineage of Mrs. Hawayo Hiromi Takata</span>
+        <span>November 17, 2022</span>
+      </div>
+      <div class="cert-actions">
+        <a class="btn-view" href="https://IQProductionz.com/Content/Images/HealingCert/reiki2.jpg" target="_blank" rel="noopener">View Certificate</a>
+        <a class="btn-download" href="https://IQProductionz.com/Content/Images/HealingCert/reiki2.jpg" download>⬇ Download</a>
+      </div>
+    </div>
+  </div>
+
+  <!-- Quantum Facilitator -->
+  <div class="cert-card">
+    <div class="cert-preview" onclick="openImgLB(this)">
+      <img src="https://IQProductionz.com/Content/Images/HealingCert/Quantum1.png" alt="Quantum Facilitator 1 Healing Course Certificate">
+    </div>
+    <div class="cert-body">
+      <div class="cert-discipline">Quantum Healing</div>
+      <div class="cert-title">Quantum Facilitator 1 — Healing Course</div>
+      <div class="cert-meta">
+        <span>Issued by Seraphina Zia Aisana</span>
+        <span>Pure Radiant Soul</span>
+        <span>May 27, 2023</span>
+      </div>
+      <div class="cert-actions">
+        <a class="btn-view" href="https://IQProductionz.com/Content/Images/HealingCert/Quantum1.png" target="_blank" rel="noopener">View Certificate</a>
+        <a class="btn-download" href="https://IQProductionz.com/Content/Images/HealingCert/Quantum1.png" download>⬇ Download</a>
+      </div>
+    </div>
+  </div>
+
+  <!-- Sound Healer Level 1 -->
+  <div class="cert-card">
+    <div class="cert-preview" onclick="window.open('https://IQProductionz.com/Content/Images/HealingCert/CertifiedSoundHealerLevel1.pdf','_blank')">
+      <object data="https://IQProductionz.com/Content/Images/HealingCert/CertifiedSoundHealerLevel1.pdf"
+              type="application/pdf" width="100%" height="100%"
+              style="pointer-events:none;">
+        <div class="pdf-thumb">
+          <div class="cert-icon">🔔</div>
+          <div class="cert-name-preview">Sound Healer Level 1</div>
+        </div>
+      </object>
+    </div>
+    <div class="cert-body">
+      <div class="cert-discipline">Sound Healing</div>
+      <div class="cert-title">Certified Sound Healer — Level 1 Fundamentals</div>
+      <div class="cert-meta">
+        <span>Issued by Vickie Gould, Life Changing Energy</span>
+        <span>December 1, 2022</span>
+      </div>
+      <div class="cert-actions">
+        <a class="btn-view" href="https://IQProductionz.com/Content/Images/HealingCert/CertifiedSoundHealerLevel1.pdf" target="_blank" rel="noopener">View Certificate</a>
+        <a class="btn-download" href="https://IQProductionz.com/Content/Images/HealingCert/CertifiedSoundHealerLevel1.pdf" download>⬇ Download</a>
+      </div>
+    </div>
+  </div>
+
+  <!-- Crystal Singing Bowl -->
+  <div class="cert-card">
+    <div class="cert-preview" onclick="window.open('https://IQProductionz.com/Content/Images/HealingCert/SingingBowl.pdf','_blank')">
+      <object data="https://IQProductionz.com/Content/Images/HealingCert/SingingBowl.pdf"
+              type="application/pdf" width="100%" height="100%"
+              style="pointer-events:none;">
+        <div class="pdf-thumb">
+          <div class="cert-icon">🪬</div>
+          <div class="cert-name-preview">Singing Bowl Sound Healer</div>
+        </div>
+      </object>
+    </div>
+    <div class="cert-body">
+      <div class="cert-discipline">Sound Healing</div>
+      <div class="cert-title">Certified Singing Bowl Sound Healer</div>
+      <div class="cert-meta">
+        <span>Crystal Singing Bowl Certification</span>
+        <span>Issued by Vickie Gould, Life Changing Energy</span>
+        <span>December 2, 2022</span>
+      </div>
+      <div class="cert-actions">
+        <a class="btn-view" href="https://IQProductionz.com/Content/Images/HealingCert/SingingBowl.pdf" target="_blank" rel="noopener">View Certificate</a>
+        <a class="btn-download" href="https://IQProductionz.com/Content/Images/HealingCert/SingingBowl.pdf" download>⬇ Download</a>
+      </div>
+    </div>
+  </div>
+
+  <!-- Tuning Fork -->
+  <div class="cert-card">
+    <div class="cert-preview" onclick="window.open('https://IQProductionz.com/Content/Images/HealingCert/TuningFork.pdf','_blank')">
+      <object data="https://IQProductionz.com/Content/Images/HealingCert/TuningFork.pdf"
+              type="application/pdf" width="100%" height="100%"
+              style="pointer-events:none;">
+        <div class="pdf-thumb">
+          <div class="cert-icon">🎵</div>
+          <div class="cert-name-preview">Tuning Fork Sound Healer</div>
+        </div>
+      </object>
+    </div>
+    <div class="cert-body">
+      <div class="cert-discipline">Sound Healing</div>
+      <div class="cert-title">Certified Tuning Fork Sound Healer</div>
+      <div class="cert-meta">
+        <span>Tuning Fork Certification</span>
+        <span>Issued by Vickie Gould, Life Changing Energy</span>
+        <span>December 2, 2022</span>
+      </div>
+      <div class="cert-actions">
+        <a class="btn-view" href="https://IQProductionz.com/Content/Images/HealingCert/TuningFork.pdf" target="_blank" rel="noopener">View Certificate</a>
+        <a class="btn-download" href="https://IQProductionz.com/Content/Images/HealingCert/TuningFork.pdf" download>⬇ Download</a>
+      </div>
+    </div>
+  </div>
+
+</div><!-- end cert-grid -->
+
+<div class="page-footer">
+  <p>&copy; 2026 I.Q. Productionz &nbsp;·&nbsp; <a href="https://IQProductionz.com">IQProductionz.com</a> &nbsp;·&nbsp; <a href="https://IQProductionz.com/Heal">Healing Services</a></p>
+</div>
+
+<script>
+// Image lightbox
+function openImgLB(card) {
+  const img = card.querySelector('img');
+  if (!img) return;
+  document.getElementById('lb-img').src = img.src;
+  document.getElementById('lightbox').classList.add('open');
+}
+// PDF — just open in new tab (can't embed cross-origin PDFs in lightbox)
+function openLB(url) {
+  window.open(url, '_blank', 'noopener');
+}
+function closeLightbox() {
+  document.getElementById('lightbox').classList.remove('open');
+}
+function closeLB(e) {
+  if (e.target === document.getElementById('lightbox')) closeLightbox();
+}
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape') closeLightbox();
+});
+</script>
+</body>
+</html>
