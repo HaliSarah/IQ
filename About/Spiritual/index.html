@@ -85,7 +85,7 @@ body {
 /* ── GRID ── */
 .cert-grid {
   display:grid;
-  grid-template-columns:repeat(auto-fit,minmax(300px,1fr));
+  grid-template-columns:repeat(3,1fr);
   gap:22px;
   max-width:1060px;
   margin:48px auto 0;
@@ -306,18 +306,32 @@ body {
   .page-header { padding:36px 18px 32px; }
 }
 
-  /* WHY: Featured cards span full row, centered as a pair */
-  .featured-row {
+  /* holistic-row: solo card centered */
+  .holistic-row {
     grid-column: 1 / -1;
-    display:flex;
-    gap:22px;
-    justify-content:center;
-    flex-wrap:wrap;
+    display: flex;
+    justify-content: center;
   }
-  .cert-card.featured {
-    max-width:340px;
-    width:100%;
-    flex:0 0 300px;
+  .cert-card.holistic { max-width:360px; width:100%; }
+
+
+  /* Holistic Health — solo top row */
+  .holistic-row {
+    grid-column: 1 / -1;
+    display: flex;
+    justify-content: center;
+    margin-bottom: 0;
+  }
+  .cert-card.holistic {
+    max-width: 340px;
+    width: 100%;
+  }
+  /* Fix object/iframe orientation */
+  .cert-preview object,
+  .cert-preview iframe {
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
   }
 
 </style>
@@ -341,9 +355,31 @@ body {
 <!-- CERT GRID -->
 <div class="cert-grid">
 
-  <!-- Featured row: Wild Moon Herbs + Dowsing -->
-  <div class="featured-row">
-  <div class="cert-card featured">
+
+  <!-- Holistic Health Practitioner — solo top row -->
+  <div class="holistic-row">
+  <div class="cert-card holistic">
+    <div class="cert-preview" onclick="window.open('https://IQProductionz.com/Content/Images/HealingCert/Holistic-Health-Practitioner-Course.pdf','_blank')">
+      <iframe src="https://IQProductionz.com/Content/Images/HealingCert/Holistic-Health-Practitioner-Course.pdf#toolbar=0&navpanes=0&scrollbar=0&view=FitH&page=1" style="width:100%;height:100%;border:none;pointer-events:none;"></iframe>
+    </div>
+    <div class="cert-body">
+      <div class="cert-discipline">Holistic Health</div>
+      <div class="cert-title">Holistic Health Practitioner Course</div>
+      <div class="cert-meta">
+        <span>Issued by Centre of Excellence</span>
+        <span>150 CPD Hours · Pass</span>
+        <span>April 23, 2023</span>
+      </div>
+      <div class="cert-actions">
+        <a class="btn-view" href="https://IQProductionz.com/Content/Images/HealingCert/Holistic-Health-Practitioner-Course.pdf" target="_blank" rel="noopener">View Certificate</a>
+        <a class="btn-download" href="https://IQProductionz.com/Content/Images/HealingCert/Holistic-Health-Practitioner-Course.pdf" download>⬇ Download</a>
+      </div>
+    </div>
+  </div>
+  </div><!-- end holistic-row -->
+
+  <!-- Wild Moon Herbs -->
+  <div class="cert-card">
     <div class="cert-preview" onclick="openImgLB(this)">
       <img src="https://IQProductionz.com/Content/Images/HealingCert/Herbalism.jpg" alt="Wild Moon Herbs — Shamanic Herbalism Apprenticeship Certificate">
     </div>
@@ -360,33 +396,49 @@ body {
     </div>
   </div>
 
-  <div class="cert-card featured">
-    <div class="cert-preview" style="background:linear-gradient(160deg,#1e1c18 0%,#2a2720 100%);display:flex;align-items:center;justify-content:center;flex-direction:column;gap:12px;cursor:default;">
-      <div style="font-size:2.4rem;filter:drop-shadow(0 0 10px rgba(201,138,46,0.5));">🔮</div>
-      <div style="font-family:'Cinzel',serif;font-size:.72rem;letter-spacing:.18em;text-transform:uppercase;color:var(--gold);">Dowsing Certificate</div>
-      <div style="font-size:.72rem;color:var(--muted);letter-spacing:.12em;text-transform:uppercase;">Coming Soon</div>
+
+  <!-- Dowsing -->
+  <div class="cert-card">
+    <div class="cert-preview" onclick="window.open('https://IQProductionz.com/Content/Images/HealingCert/Dowsing.pdf','_blank')">
+      <iframe src="https://IQProductionz.com/Content/Images/HealingCert/Dowsing.pdf#toolbar=0&navpanes=0&scrollbar=0&view=FitH&page=1" style="width:100%;height:100%;border:none;pointer-events:none;"></iframe>
     </div>
     <div class="cert-body">
       <div class="cert-discipline">Dowsing</div>
       <div class="cert-title">Dowsing Certificate</div>
-      <div class="cert-meta">
-        <span style="font-style:italic;color:var(--muted);">Certificate coming soon</span>
+      <div class="cert-meta"><span>Certified Dowser</span></div>
+      <div class="cert-actions">
+        <a class="btn-view" href="https://IQProductionz.com/Content/Images/HealingCert/Dowsing.pdf" target="_blank" rel="noopener">View Certificate</a>
+        <a class="btn-download" href="https://IQProductionz.com/Content/Images/HealingCert/Dowsing.pdf" download>⬇ Download</a>
       </div>
     </div>
   </div>
-  </div><!-- end featured-row -->
+
+
+  <!-- Quantum Masterclass -->
+  <div class="cert-card">
+    <div class="cert-preview" onclick="window.open('https://IQProductionz.com/Content/Images/HealingCert/QuantumMasterclass.pdf','_blank')">
+      <iframe src="https://IQProductionz.com/Content/Images/HealingCert/QuantumMasterclass.pdf#toolbar=0&navpanes=0&scrollbar=0&view=FitH&page=1" style="width:100%;height:100%;border:none;pointer-events:none;"></iframe>
+    </div>
+    <div class="cert-body">
+      <div class="cert-discipline">Quantum Healing</div>
+      <div class="cert-title">A Master Class on Quantum Energy Healing</div>
+      <div class="cert-meta">
+        <span>Issued by Udemy</span>
+        <span>Instructor: Sachin Karve</span>
+        <span>5 Total Hours · April 23, 2023</span>
+      </div>
+      <div class="cert-actions">
+        <a class="btn-view" href="https://IQProductionz.com/Content/Images/HealingCert/QuantumMasterclass.pdf" target="_blank" rel="noopener">View Certificate</a>
+        <a class="btn-download" href="https://IQProductionz.com/Content/Images/HealingCert/QuantumMasterclass.pdf" download>⬇ Download</a>
+      </div>
+    </div>
+  </div>
+
 
   <!-- Reiki Level I -->
   <div class="cert-card">
     <div class="cert-preview" onclick="window.open('https://IQProductionz.com/Content/Images/HealingCert/Reiki1.pdf','_blank')">
-      <object data="https://IQProductionz.com/Content/Images/HealingCert/Reiki1.pdf"
-              type="application/pdf" width="100%" height="100%"
-              style="pointer-events:none;">
-        <div class="pdf-thumb">
-          <div class="cert-icon">🏆</div>
-          <div class="cert-name-preview">Reiki I · Certificate</div>
-        </div>
-      </object>
+      <iframe src="https://IQProductionz.com/Content/Images/HealingCert/Reiki1.pdf#toolbar=0&navpanes=0&scrollbar=0&view=FitH&page=1" style="width:100%;height:100%;border:none;pointer-events:none;"></iframe>
     </div>
     <div class="cert-body">
       <div class="cert-discipline">Energy Healing</div>
@@ -445,14 +497,7 @@ body {
   <!-- Sound Healer Level 1 -->
   <div class="cert-card">
     <div class="cert-preview" onclick="window.open('https://IQProductionz.com/Content/Images/HealingCert/CertifiedSoundHealerLevel1.pdf','_blank')">
-      <object data="https://IQProductionz.com/Content/Images/HealingCert/CertifiedSoundHealerLevel1.pdf"
-              type="application/pdf" width="100%" height="100%"
-              style="pointer-events:none;">
-        <div class="pdf-thumb">
-          <div class="cert-icon">🔔</div>
-          <div class="cert-name-preview">Sound Healer Level 1</div>
-        </div>
-      </object>
+      <iframe src="https://IQProductionz.com/Content/Images/HealingCert/CertifiedSoundHealerLevel1.pdf#toolbar=0&navpanes=0&scrollbar=0&view=FitH&page=1" style="width:100%;height:100%;border:none;pointer-events:none;"></iframe>
     </div>
     <div class="cert-body">
       <div class="cert-discipline">Sound Healing</div>
@@ -471,14 +516,7 @@ body {
   <!-- Crystal Singing Bowl -->
   <div class="cert-card">
     <div class="cert-preview" onclick="window.open('https://IQProductionz.com/Content/Images/HealingCert/SingingBowl.pdf','_blank')">
-      <object data="https://IQProductionz.com/Content/Images/HealingCert/SingingBowl.pdf"
-              type="application/pdf" width="100%" height="100%"
-              style="pointer-events:none;">
-        <div class="pdf-thumb">
-          <div class="cert-icon">🪬</div>
-          <div class="cert-name-preview">Singing Bowl Sound Healer</div>
-        </div>
-      </object>
+      <iframe src="https://IQProductionz.com/Content/Images/HealingCert/SingingBowl.pdf#toolbar=0&navpanes=0&scrollbar=0&view=FitH&page=1" style="width:100%;height:100%;border:none;pointer-events:none;"></iframe>
     </div>
     <div class="cert-body">
       <div class="cert-discipline">Sound Healing</div>
@@ -498,14 +536,7 @@ body {
   <!-- Tuning Fork -->
   <div class="cert-card">
     <div class="cert-preview" onclick="window.open('https://IQProductionz.com/Content/Images/HealingCert/TuningFork.pdf','_blank')">
-      <object data="https://IQProductionz.com/Content/Images/HealingCert/TuningFork.pdf"
-              type="application/pdf" width="100%" height="100%"
-              style="pointer-events:none;">
-        <div class="pdf-thumb">
-          <div class="cert-icon">🎵</div>
-          <div class="cert-name-preview">Tuning Fork Sound Healer</div>
-        </div>
-      </object>
+      <iframe src="https://IQProductionz.com/Content/Images/HealingCert/TuningFork.pdf#toolbar=0&navpanes=0&scrollbar=0&view=FitH&page=1" style="width:100%;height:100%;border:none;pointer-events:none;"></iframe>
     </div>
     <div class="cert-body">
       <div class="cert-discipline">Sound Healing</div>
@@ -525,7 +556,7 @@ body {
 </div><!-- end cert-grid -->
 
 <div class="page-footer">
-  <p>&copy; 2026 I.Q. Productionz &nbsp;·&nbsp; <a href="https://IQProductionz.com">IQProductionz.com</a> &nbsp;·&nbsp; <a href="https://IQProductionz.com/Heal">Healing Services</a></p>
+  <p>&copy; 2026 I.Q. Productionz &nbsp;·&nbsp; <a href="https://IQProductionz.com">IQProductionz.com</a> &nbsp;·&nbsp; <a href="https://IQProductionz.com/Services/Heal">Healing Services</a></p>
 </div>
 
 <script>
