@@ -313,7 +313,11 @@ body {
     display:flex;
     gap:22px;
     justify-content:center;
-    flex-wrap:wrap;
+    flex-wrap:nowrap;
+  }
+  .featured-row .cert-card {
+    flex: 0 0 calc(33.333% - 15px);
+    max-width: calc(33.333% - 15px);
   }
   .cert-card.featured {
     max-width:340px;
@@ -341,6 +345,14 @@ body {
     .featured-row .cert-card { max-width:100%; }
   }
 
+
+  .ss-arrow{position:absolute;top:50%;transform:translateY(-50%);background:rgba(0,0,0,.55);color:#fff;border:none;font-size:22px;line-height:1;padding:4px 10px;cursor:pointer;border-radius:4px;z-index:2;transition:background .2s;}
+  .ss-arrow:hover{background:rgba(201,138,46,.75);}
+  .ss-prev{left:6px;} .ss-next{right:6px;}
+  .ss-dots{position:absolute;bottom:8px;left:0;right:0;display:flex;justify-content:center;gap:5px;}
+  .ss-dot{width:8px;height:8px;border-radius:50%;border:none;background:rgba(255,255,255,.35);cursor:pointer;padding:0;transition:background .2s;}
+  .ss-dot.ss-active{background:#c98a2e;}
+  .section-divider{grid-column:1/-1;padding:28px 0 10px;border-top:1px solid var(--border);font-family:'Cinzel',serif;font-size:.72rem;letter-spacing:.15em;text-transform:uppercase;color:var(--gold);opacity:.7;}
 </style>
 </head>
 <body>
@@ -367,13 +379,9 @@ body {
       <iframe src="https://IQProductionz.com/Content/Images/AcademicCert/Adobe.pdf#toolbar=0&navpanes=0&scrollbar=0&view=FitH&page=1" style="width:100%;height:100%;border:none;pointer-events:none;"></iframe>
     </div>
     <div class="cert-body">
-      <div class="cert-discipline">Digital Media & Design</div>
+      <div class="cert-discipline">Digital Media &amp; Design</div>
       <div class="cert-title">Adobe Certified Associate — Print &amp; Digital Media Publication</div>
-      <div class="cert-meta">
-        <span>Adobe InDesign CS6</span>
-        <span>Issued by Adobe · Shantanu Narayen</span>
-        <span>May 6, 2019</span>
-      </div>
+      <div class="cert-meta"><span>Adobe InDesign CS6</span><span>Issued by Adobe · Shantanu Narayen</span><span>May 6, 2019</span></div>
       <div class="cert-actions">
         <a class="btn-view" href="https://IQProductionz.com/Content/Images/AcademicCert/Adobe.pdf" target="_blank" rel="noopener">View Certificate</a>
         <a class="btn-download" href="https://IQProductionz.com/Content/Images/AcademicCert/Adobe.pdf" download>⬇ Download</a>
@@ -387,20 +395,13 @@ body {
     <div class="cert-body">
       <div class="cert-discipline">Communications &amp; Media</div>
       <div class="cert-title">Associate in Applied Science — Communications &amp; New Media</div>
-      <div class="cert-meta">
-        <span>Southern Maine Community College</span>
-        <span>South Portland, Maine</span>
-        <span>December 14, 2019</span>
-      </div>
+      <div class="cert-meta"><span>Southern Maine Community College</span><span>South Portland, Maine</span><span>December 14, 2019</span></div>
       <div class="cert-actions">
         <a class="btn-view" href="https://IQProductionz.com/Content/Images/AcademicCert/CNM.pdf" target="_blank" rel="noopener">View Certificate</a>
         <a class="btn-download" href="https://IQProductionz.com/Content/Images/AcademicCert/CNM.pdf" download>⬇ Download</a>
       </div>
     </div>
   </div>
-  </div>
-
-
   <div class="cert-card">
     <div class="cert-preview" onclick="window.open('https://IQProductionz.com/Content/Images/AcademicCert/Arts.pdf','_blank')">
       <iframe src="https://IQProductionz.com/Content/Images/AcademicCert/Arts.pdf#toolbar=0&navpanes=0&scrollbar=0&view=FitH&page=1" style="width:100%;height:100%;border:none;pointer-events:none;"></iframe>
@@ -408,36 +409,15 @@ body {
     <div class="cert-body">
       <div class="cert-discipline">Liberal Arts</div>
       <div class="cert-title">Associate in Arts — Liberal Studies</div>
-      <div class="cert-meta">
-        <span>Southern Maine Community College</span>
-        <span>South Portland, Maine</span>
-        <span>August 18, 2017</span>
-      </div>
+      <div class="cert-meta"><span>Southern Maine Community College</span><span>South Portland, Maine</span><span>August 18, 2017</span></div>
       <div class="cert-actions">
         <a class="btn-view" href="https://IQProductionz.com/Content/Images/AcademicCert/Arts.pdf" target="_blank" rel="noopener">View Certificate</a>
         <a class="btn-download" href="https://IQProductionz.com/Content/Images/AcademicCert/Arts.pdf" download>⬇ Download</a>
       </div>
     </div>
   </div>
-
-  <div class="cert-card">
-    <div class="cert-preview" onclick="window.open('https://IQProductionz.com/Content/Images/AcademicCert/EFSETCertificate.pdf','_blank')">
-      <iframe src="https://IQProductionz.com/Content/Images/AcademicCert/EFSETCertificate.pdf#toolbar=0&navpanes=0&scrollbar=0&view=FitH&page=1" style="width:100%;height:100%;border:none;pointer-events:none;"></iframe>
-    </div>
-    <div class="cert-body">
-      <div class="cert-discipline">English Proficiency</div>
-      <div class="cert-title">EF SET Certificate — C1 Advanced</div>
-      <div class="cert-meta">
-        <span>EF Standard English Test</span>
-        <span>66/100 · Listening: 68 · Reading: 63</span>
-        <span>September 7, 2023</span>
-      </div>
-      <div class="cert-actions">
-        <a class="btn-view" href="https://IQProductionz.com/Content/Images/AcademicCert/EFSETCertificate.pdf" target="_blank" rel="noopener">View Certificate</a>
-        <a class="btn-download" href="https://IQProductionz.com/Content/Images/AcademicCert/EFSETCertificate.pdf" download>⬇ Download</a>
-      </div>
-    </div>
   </div>
+
   <div class="cert-card">
     <div class="cert-preview" onclick="window.open('https://IQProductionz.com/Content/Images/AcademicCert/Horticulture.pdf','_blank')">
       <iframe src="https://IQProductionz.com/Content/Images/AcademicCert/Horticulture.pdf#toolbar=0&navpanes=0&scrollbar=0&view=FitH&page=1" style="width:100%;height:100%;border:none;pointer-events:none;"></iframe>
@@ -445,17 +425,14 @@ body {
     <div class="cert-body">
       <div class="cert-discipline">Horticulture</div>
       <div class="cert-title">Associate in Applied Science — Horticulture</div>
-      <div class="cert-meta">
-        <span>Southern Maine Community College</span>
-        <span>South Portland, Maine</span>
-        <span>May 11, 2019</span>
-      </div>
+      <div class="cert-meta"><span>Southern Maine Community College</span><span>South Portland, Maine</span><span>May 11, 2019</span></div>
       <div class="cert-actions">
         <a class="btn-view" href="https://IQProductionz.com/Content/Images/AcademicCert/Horticulture.pdf" target="_blank" rel="noopener">View Certificate</a>
         <a class="btn-download" href="https://IQProductionz.com/Content/Images/AcademicCert/Horticulture.pdf" download>⬇ Download</a>
       </div>
     </div>
   </div>
+
   <div class="cert-card">
     <div class="cert-preview" onclick="window.open('https://IQProductionz.com/Content/Images/AcademicCert/Science.pdf','_blank')">
       <iframe src="https://IQProductionz.com/Content/Images/AcademicCert/Science.pdf#toolbar=0&navpanes=0&scrollbar=0&view=FitH&page=1" style="width:100%;height:100%;border:none;pointer-events:none;"></iframe>
@@ -463,51 +440,128 @@ body {
     <div class="cert-body">
       <div class="cert-discipline">Health Science</div>
       <div class="cert-title">Associate in Science — Health Science</div>
-      <div class="cert-meta">
-        <span>Southern Maine Community College</span>
-        <span>South Portland, Maine</span>
-        <span>May 9, 2020</span>
-      </div>
+      <div class="cert-meta"><span>Southern Maine Community College</span><span>South Portland, Maine</span><span>May 9, 2020</span></div>
       <div class="cert-actions">
         <a class="btn-view" href="https://IQProductionz.com/Content/Images/AcademicCert/Science.pdf" target="_blank" rel="noopener">View Certificate</a>
         <a class="btn-download" href="https://IQProductionz.com/Content/Images/AcademicCert/Science.pdf" download>⬇ Download</a>
       </div>
     </div>
   </div>
-  <div class="cert-card">
-    <div class="cert-preview" style="background:linear-gradient(160deg,#1e1c18 0%,#2a2720 100%);display:flex;align-items:center;justify-content:center;flex-direction:column;gap:12px;cursor:default;">
-      <div style="font-size:2.4rem;filter:drop-shadow(0 0 10px rgba(201,138,46,0.5));">🎵</div>
-      <div style="font-family:'Cinzel',serif;font-size:.72rem;letter-spacing:.18em;text-transform:uppercase;color:var(--gold);text-align:center;padding:0 12px;">Independent Artist Certificate</div>
-      <div style="font-size:.68rem;color:var(--muted);letter-spacing:.1em;text-transform:uppercase;">Recovering Document</div>
+
+  <div class="cert-card" id="ss_mi_card">
+    <div class="cert-preview" style="position:relative;">
+      <iframe id="ss_mi_iframe" src="https://IQProductionz.com/Content/Images/AcademicCert/MI.pdf#toolbar=0&navpanes=0&scrollbar=0&view=FitH&page=1" style="width:100%;height:100%;border:none;pointer-events:none;"></iframe>
+      <button class="ss-arrow ss-prev" onclick="ssPrev('ss_mi')">&#8249;</button>
+      <button class="ss-arrow ss-next" onclick="ssNext('ss_mi')">&#8250;</button>
+      <div class="ss-dots">
+        <button class="ss-dot ss-active" onclick="ssGo('ss_mi',0)"></button>
+        <button class="ss-dot" onclick="ssGo('ss_mi',1)"></button>
+      </div>
     </div>
     <div class="cert-body">
       <div class="cert-discipline">Music Business &amp; Recording</div>
       <div class="cert-title">Independent Artist Certificate</div>
-      <div class="cert-meta">
-        <span>Musicians Institute</span>
-        <span>Recording Engineering · Music Business &amp; Marketing · Songwriting</span>
-        <span>Recovering Document</span>
+      <div class="cert-meta"><span>Musicians Institute</span><span>Recording Engineering · Music Business &amp; Marketing · Songwriting</span></div>
+      <div class="cert-actions" style="flex-wrap:wrap;gap:5px;">
+        <a class="btn-view" href="https://IQProductionz.com/Content/Images/AcademicCert/MI.pdf" target="_blank" rel="noopener" style="font-size:.62rem;padding:7px 10px;">Certificate</a>
+        <a class="btn-view" href="https://IQProductionz.com/Content/Images/AcademicCert/MITranscriptP.pdf" target="_blank" rel="noopener" style="font-size:.62rem;padding:7px 10px;">Transcript</a>
       </div>
     </div>
   </div>
+
   <div class="cert-card">
-    <div class="cert-preview" style="background:linear-gradient(160deg,#1e1c18 0%,#2a2720 100%);display:flex;align-items:center;justify-content:center;flex-direction:column;gap:12px;cursor:default;">
-      <div style="font-size:2.4rem;filter:drop-shadow(0 0 10px rgba(201,138,46,0.5));">✂️</div>
-      <div style="font-family:'Cinzel',serif;font-size:.72rem;letter-spacing:.18em;text-transform:uppercase;color:var(--gold);text-align:center;padding:0 12px;">Associate in Product Development — Fashion Design</div>
-      <div style="font-size:.68rem;color:var(--muted);letter-spacing:.1em;text-transform:uppercase;">Recovering Document</div>
+    <div class="cert-preview" onclick="window.open('https://IQProductionz.com/Content/Images/AcademicCert/Barbizon.pdf','_blank')">
+      <iframe src="https://IQProductionz.com/Content/Images/AcademicCert/Barbizon.pdf#toolbar=0&navpanes=0&scrollbar=0&view=FitH&page=1" style="width:100%;height:100%;border:none;pointer-events:none;"></iframe>
+    </div>
+    <div class="cert-body">
+      <div class="cert-discipline">Performing Arts</div>
+      <div class="cert-title">Barbizon Modeling &amp; Acting — Certificate of Completion</div>
+      <div class="cert-meta"><span>Barbizon School of Modeling &amp; Acting</span></div>
+      <div class="cert-actions">
+        <a class="btn-view" href="https://IQProductionz.com/Content/Images/AcademicCert/Barbizon.pdf" target="_blank" rel="noopener">View Certificate</a>
+        <a class="btn-download" href="https://IQProductionz.com/Content/Images/AcademicCert/Barbizon.pdf" download>⬇ Download</a>
+      </div>
+    </div>
+  </div>
+
+  <div class="cert-card">
+    <div class="cert-preview" onclick="window.open('https://IQProductionz.com/Content/Images/AcademicCert/FIDM.pdf','_blank')">
+      <iframe src="https://IQProductionz.com/Content/Images/AcademicCert/FIDM.pdf#toolbar=0&navpanes=0&scrollbar=0&view=FitH&page=1" style="width:100%;height:100%;border:none;pointer-events:none;"></iframe>
     </div>
     <div class="cert-body">
       <div class="cert-discipline">Fashion &amp; Product Design</div>
       <div class="cert-title">Associate in Product Development — Fashion Design</div>
-      <div class="cert-meta">
-        <span>Fashion Institute of Design &amp; Merchandising</span>
-        <span>Now part of Arizona State University</span>
-        <span>Recovering Document</span>
+      <div class="cert-meta"><span>Fashion Institute of Design &amp; Merchandising</span><span>Now part of Arizona State University</span></div>
+      <div class="cert-actions">
+        <a class="btn-view" href="https://IQProductionz.com/Content/Images/AcademicCert/FIDM.pdf" target="_blank" rel="noopener">View Certificate</a>
+        <a class="btn-download" href="https://IQProductionz.com/Content/Images/AcademicCert/FIDM.pdf" download>⬇ Download</a>
       </div>
     </div>
   </div>
-</div>
 
+  <div class="cert-card">
+    <div class="cert-preview" onclick="window.open('https://IQProductionz.com/Content/Images/AcademicCert/Poetry.pdf','_blank')">
+      <iframe src="https://IQProductionz.com/Content/Images/AcademicCert/Poetry.pdf#toolbar=0&navpanes=0&scrollbar=0&view=FitH&page=1" style="width:100%;height:100%;border:none;pointer-events:none;"></iframe>
+    </div>
+    <div class="cert-body">
+      <div class="cert-discipline">Literary Arts</div>
+      <div class="cert-title">Published Work — Selected by the Editor</div>
+      <div class="cert-meta"><span>Poetry publication · Work chosen on behalf of the editor</span></div>
+      <div class="cert-actions">
+        <a class="btn-view" href="https://IQProductionz.com/Content/Images/AcademicCert/Poetry.pdf" target="_blank" rel="noopener">View Certificate</a>
+        <a class="btn-download" href="https://IQProductionz.com/Content/Images/AcademicCert/Poetry.pdf" download>⬇ Download</a>
+      </div>
+    </div>
+  </div>
+
+  <div class="section-divider">High School Recognition</div>
+
+  <div class="cert-card">
+    <div class="cert-preview" onclick="window.open('https://IQProductionz.com/Content/Images/AcademicCert/BHSADC.pdf','_blank')">
+      <iframe src="https://IQProductionz.com/Content/Images/AcademicCert/BHSADC.pdf#toolbar=0&navpanes=0&scrollbar=0&view=FitH&page=1" style="width:100%;height:100%;border:none;pointer-events:none;"></iframe>
+    </div>
+    <div class="cert-body">
+      <div class="cert-discipline">High School · Alternative Education</div>
+      <div class="cert-title">Most Improved — Four Years</div>
+      <div class="cert-meta"><span>Beverly High School</span></div>
+      <div class="cert-actions">
+        <a class="btn-view" href="https://IQProductionz.com/Content/Images/AcademicCert/BHSADC.pdf" target="_blank" rel="noopener">View Certificate</a>
+        <a class="btn-download" href="https://IQProductionz.com/Content/Images/AcademicCert/BHSADC.pdf" download>⬇ Download</a>
+      </div>
+    </div>
+  </div>
+
+  <div class="cert-card">
+    <div class="cert-preview" onclick="window.open('https://IQProductionz.com/Content/Images/AcademicCert/BHSART.pdf','_blank')">
+      <iframe src="https://IQProductionz.com/Content/Images/AcademicCert/BHSART.pdf#toolbar=0&navpanes=0&scrollbar=0&view=FitH&page=1" style="width:100%;height:100%;border:none;pointer-events:none;"></iframe>
+    </div>
+    <div class="cert-body">
+      <div class="cert-discipline">High School · Fashion &amp; Commercial Art</div>
+      <div class="cert-title">Excellence in Fashion Design &amp; Commercial Art</div>
+      <div class="cert-meta"><span>Beverly High School</span></div>
+      <div class="cert-actions">
+        <a class="btn-view" href="https://IQProductionz.com/Content/Images/AcademicCert/BHSART.pdf" target="_blank" rel="noopener">View Certificate</a>
+        <a class="btn-download" href="https://IQProductionz.com/Content/Images/AcademicCert/BHSART.pdf" download>⬇ Download</a>
+      </div>
+    </div>
+  </div>
+
+  <div class="cert-card">
+    <div class="cert-preview" onclick="window.open('https://IQProductionz.com/Content/Images/AcademicCert/RedBrick.pdf','_blank')">
+      <iframe src="https://IQProductionz.com/Content/Images/AcademicCert/RedBrick.pdf#toolbar=0&navpanes=0&scrollbar=0&view=FitH&page=1" style="width:100%;height:100%;border:none;pointer-events:none;"></iframe>
+    </div>
+    <div class="cert-body">
+      <div class="cert-discipline">High School · Fine Art</div>
+      <div class="cert-title">Red Brick Art Studio Exhibit Award</div>
+      <div class="cert-meta"><span>Beverly High School</span></div>
+      <div class="cert-actions">
+        <a class="btn-view" href="https://IQProductionz.com/Content/Images/AcademicCert/RedBrick.pdf" target="_blank" rel="noopener">View Certificate</a>
+        <a class="btn-download" href="https://IQProductionz.com/Content/Images/AcademicCert/RedBrick.pdf" download>⬇ Download</a>
+      </div>
+    </div>
+  </div>
+
+</div>
 <div class="page-footer">
   <p>&copy; 2026 I.Q. Productionz &nbsp;·&nbsp; <a href="https://IQProductionz.com">IQProductionz.com</a> &nbsp;·&nbsp; <a href="https://IQProductionz.com/Services">See Services</a></p>
 </div>
@@ -523,6 +577,15 @@ function openLB(url) { window.open(url, '_blank', 'noopener'); }
 function closeLightbox() { document.getElementById('lightbox').classList.remove('open'); }
 function closeLB(e) { if (e.target === document.getElementById('lightbox')) closeLightbox(); }
 document.addEventListener('keydown', e => { if (e.key === 'Escape') closeLightbox(); });
+</script>
+
+<script>
+var SS={};
+function ssRegister(id,files){SS[id]={files:files,cur:0};}
+function ssGo(id,idx){var s=SS[id];if(!s)return;s.cur=idx;var el=document.getElementById(id+'_iframe');if(el)el.src=s.files[idx]+'#toolbar=0&navpanes=0&scrollbar=0&view=FitH&page=1';document.querySelectorAll('#'+id+'_card .ss-dot').forEach(function(d,i){d.classList.toggle('ss-active',i===idx);});}
+function ssNext(id){var s=SS[id];ssGo(id,(s.cur+1)%s.files.length);}
+function ssPrev(id){var s=SS[id];ssGo(id,(s.cur-1+s.files.length)%s.files.length);}
+ssRegister('ss_mi',['https://IQProductionz.com/Content/Images/AcademicCert/MI.pdf','https://IQProductionz.com/Content/Images/AcademicCert/MITranscriptP.pdf']);
 </script>
 </body>
 </html>

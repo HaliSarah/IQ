@@ -1,0 +1,265 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Crystal Clear YouTube | I.Q. Productionz BackEnd</title>
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700&family=Raleway:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root{--bg:#333;--surface:#454545;--card:#3d3d3d;--border:#2e2b24;--gold:#c98a2e;--gold-lt:#e0a84a;--gold-dim:#7a5218;--white:#f0ece3;--muted:#A9A9A9;--radius:8px;}
+  *{box-sizing:border-box;margin:0;padding:0;}
+  body{font-family:'Raleway',sans-serif;background:var(--bg);color:var(--white);min-height:100vh;padding-bottom:80px;}
+  .top-nav{display:flex;justify-content:space-between;align-items:center;padding:14px 24px;background:var(--surface);border-bottom:1px solid var(--border);position:sticky;top:0;z-index:50;}
+  .crumbs{font-family:'Cinzel',serif;font-size:11px;letter-spacing:2px;color:var(--muted);text-transform:uppercase;}
+  .crumbs a{color:var(--gold);text-decoration:none;}
+  .nav-home{padding:8px 16px;border:1px solid var(--gold-dim);border-radius:var(--radius);background:transparent;color:var(--gold-lt);font-family:'Cinzel',serif;font-size:11px;letter-spacing:1.5px;text-transform:uppercase;text-decoration:none;transition:all .2s;}
+  .nav-home:hover{background:var(--gold);color:#333;}
+  .hdr{background:linear-gradient(160deg,#454545 0%,#333 60%);border-bottom:1px solid var(--border);padding:48px 32px 36px;text-align:center;position:relative;overflow:hidden;}
+  .hdr::before{content:'';position:absolute;inset:0;background:radial-gradient(ellipse at 50% 0%,rgba(201,138,46,.13) 0%,transparent 70%);pointer-events:none;}
+  .eyebrow{font-size:10px;letter-spacing:4px;text-transform:uppercase;color:var(--gold);margin-bottom:12px;}
+  .hdr h1{font-family:'Cinzel',serif;font-size:clamp(20px,3.5vw,34px);font-weight:600;color:var(--white);letter-spacing:2px;text-transform:uppercase;margin-bottom:10px;}
+  .gold-rule{width:60px;height:2px;background:linear-gradient(90deg,transparent,var(--gold),transparent);margin:16px auto;}
+  .hdr p{font-size:13px;color:var(--muted);max-width:520px;margin:0 auto;line-height:1.7;}
+  .body{max-width:840px;margin:0 auto;padding:44px 24px 0;}
+  .sec-title{font-family:'Cinzel',serif;font-size:13px;font-weight:600;color:var(--gold);letter-spacing:2px;text-transform:uppercase;margin-bottom:14px;margin-top:36px;}
+  .info-box{background:rgba(201,138,46,.07);border:1px solid var(--gold-dim);border-radius:var(--radius);padding:18px 20px;margin-bottom:24px;font-size:12px;line-height:1.8;color:var(--muted);}
+  .info-box strong{color:var(--gold-lt);}
+  .step-box{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:20px 24px;margin-bottom:24px;font-size:12px;line-height:2.1;color:var(--muted);}
+  .step-box strong{color:var(--gold-lt);}
+  .spec-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:12px;margin-bottom:28px;}
+  .spec-card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:16px 18px;text-align:center;}
+  .spec-label{font-family:'Cinzel',serif;font-size:9px;letter-spacing:2px;text-transform:uppercase;color:var(--muted);margin-bottom:6px;}
+  .spec-val{font-family:'JetBrains Mono',monospace;font-size:16px;color:var(--gold-lt);font-weight:500;}
+  .spec-unit{font-size:10px;color:var(--muted);margin-top:2px;}
+  .path-block{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:20px 24px;margin-bottom:14px;}
+  .path-label{font-family:'Cinzel',serif;font-size:11px;letter-spacing:2px;text-transform:uppercase;color:var(--gold);margin-bottom:4px;}
+  .path-note{font-size:11px;color:var(--muted);margin-bottom:10px;line-height:1.5;}
+  .path-input{width:100%;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:10px 14px;color:var(--white);font-family:'JetBrains Mono',monospace;font-size:12px;transition:border .2s;}
+  .path-input:focus{outline:none;border-color:var(--gold);}
+  .path-input::placeholder{color:var(--muted);}
+  .drop-zone{border:2px dashed var(--gold-dim);border-radius:var(--radius);padding:36px 24px;text-align:center;cursor:pointer;transition:all .2s;background:var(--card);}
+  .drop-zone:hover,.drop-zone.drag-over{border-color:var(--gold);background:rgba(201,138,46,.06);}
+  .file-list{margin-top:14px;display:flex;flex-direction:column;gap:8px;}
+  .file-item{display:flex;justify-content:space-between;align-items:center;background:var(--surface);border:1px solid var(--border);border-radius:6px;padding:10px 14px;}
+  .fname{color:var(--white);font-family:'JetBrains Mono',monospace;font-size:11px;flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+  .fsize{color:var(--muted);font-size:11px;white-space:nowrap;}
+  .cmd-block{background:#1e1e1e;border:1px solid #444;border-radius:var(--radius);padding:20px 22px;font-family:'JetBrains Mono',monospace;font-size:12px;line-height:1.9;color:#d4d4d4;overflow-x:auto;position:relative;white-space:pre-wrap;word-break:break-all;}
+  .cmd-label{font-size:10px;letter-spacing:2px;text-transform:uppercase;color:var(--gold);margin-bottom:12px;display:block;font-family:'Cinzel',serif;}
+  .cmd-copy{position:absolute;top:14px;right:14px;padding:5px 12px;font-family:'Cinzel',serif;font-size:9px;letter-spacing:1px;text-transform:uppercase;border:1px solid var(--gold-dim);border-radius:4px;background:transparent;color:var(--gold-lt);cursor:pointer;transition:all .2s;}
+  .cmd-copy:hover{background:var(--gold);color:#333;}
+  .run-btn{display:block;width:100%;margin-top:20px;padding:16px;font-family:'Cinzel',serif;font-size:12px;letter-spacing:2px;text-transform:uppercase;background:var(--gold);color:#333;border:none;border-radius:var(--radius);cursor:pointer;font-weight:700;transition:all .2s;}
+  .run-btn:hover{background:var(--gold-lt);}
+  .ftr{text-align:center;margin-top:56px;padding:28px 16px;border-top:1px solid var(--border);font-size:11px;color:var(--muted);letter-spacing:1px;}
+  .ftr a{color:var(--gold-lt);text-decoration:none;}
+</style>
+</head>
+<body>
+
+<nav class="top-nav">
+  <div class="crumbs"><a href="../">BackEnd</a><strong style="color:var(--muted)"> / FRYT</strong></div>
+  <a class="nav-home" href="../">↩ BackEnd Home</a>
+</nav>
+
+<header class="hdr">
+  <div class="eyebrow">Video Tools</div>
+  <h1>Crystal Clear YouTube</h1>
+  <div class="gold-rule"></div>
+  <p>Convert any video to YouTube's optimal 2K quality spec — 2560×1440, 24fps, square pixels, high bitrate. Drop files, copy the command, paste into Terminal.</p>
+</header>
+
+<div class="body">
+
+  <!-- HOW TO RUN -->
+  <div class="sec-title" style="margin-top:0;">How To Run</div>
+  <div class="step-box">
+    <strong>Step 1</strong> — Fill in your folder paths and drop your files below.<br>
+    <strong>Step 2</strong> — Click <strong>Copy Commands</strong> at the bottom.<br>
+    <strong>Step 3</strong> — Open Terminal: press <strong>Command + Space</strong>, type <strong>Terminal</strong>, hit Enter.<br>
+    <strong>Step 4</strong> — Paste with <strong>Command + V</strong> and hit Enter.<br>
+    <strong>Step 5</strong> — Wait. When you see <em>"All done!"</em> your files are ready to upload to YouTube.
+  </div>
+
+  <!-- SPEC DISPLAY -->
+  <div class="sec-title">Output Specifications</div>
+  <div class="spec-grid">
+    <div class="spec-card">
+      <div class="spec-label">Resolution</div>
+      <div class="spec-val">2560×1440</div>
+      <div class="spec-unit">2K / QHD</div>
+    </div>
+    <div class="spec-card">
+      <div class="spec-label">Frame Rate</div>
+      <div class="spec-val">24</div>
+      <div class="spec-unit">fps</div>
+    </div>
+    <div class="spec-card">
+      <div class="spec-label">Pixel Aspect</div>
+      <div class="spec-val">1:1</div>
+      <div class="spec-unit">Square Pixels</div>
+    </div>
+    <div class="spec-card">
+      <div class="spec-label">Keyframe Distance</div>
+      <div class="spec-val">72</div>
+      <div class="spec-unit">frames</div>
+    </div>
+    <div class="spec-card">
+      <div class="spec-label">Target Bitrate</div>
+      <div class="spec-val">40</div>
+      <div class="spec-unit">Mbps</div>
+    </div>
+    <div class="spec-card">
+      <div class="spec-label">Max Bitrate</div>
+      <div class="spec-val">50</div>
+      <div class="spec-unit">Mbps</div>
+    </div>
+  </div>
+
+  <div class="info-box">
+    <strong>Why these specs:</strong> YouTube recommends 2K uploads for maximum quality retention after their compression. Square pixels (SAR 1:1) prevent YouTube from re-interpreting non-square pixel sources incorrectly. A 72-frame keyframe distance gives YouTube's encoder clean reference frames for better quality. 40/50Mbps bitrate exceeds YouTube's recommended minimum for 2K, ensuring headroom after their re-encode.
+  </div>
+
+  <!-- PATHS -->
+  <div class="sec-title">Folder Paths</div>
+
+  <div class="path-block">
+    <div class="path-label">Source Folder — required</div>
+    <div class="path-note">Where your original video files are located.</div>
+    <input class="path-input" id="path-source" type="text" placeholder="/Users/yourname/Movies/originals" oninput="buildCmd()">
+  </div>
+
+  <div class="path-block">
+    <div class="path-label">Output Folder — optional</div>
+    <div class="path-note">Where converted files are saved. If left blank, saves to the same folder as your originals.</div>
+    <input class="path-input" id="path-out" type="text" placeholder="Leave blank — defaults to source folder" oninput="buildCmd()">
+  </div>
+
+  <!-- FILES -->
+  <div class="sec-title">Video Files</div>
+  <div class="drop-zone" id="drop-zone" onclick="document.getElementById('file-input').click()" ondragover="dragOver(event)" ondragleave="dragLeave(event)" ondrop="dropFiles(event)">
+    <p style="font-size:28px;margin-bottom:8px;">🎬</p>
+    <p><strong>Click to select</strong> or drag and drop video files here</p>
+    <p style="font-size:11px;margin-top:4px;">MP4 · MOV · MKV · AVI · Batch supported</p>
+  </div>
+  <input type="file" id="file-input" accept="video/*" multiple style="display:none" onchange="addFiles(this.files)">
+  <div class="file-list" id="file-list"></div>
+
+  <!-- COMMANDS -->
+  <div class="sec-title" style="margin-top:36px;">Commands</div>
+  <div class="cmd-block">
+    <span class="cmd-label">FFmpeg — Crystal Clear YouTube · Copy and paste into Terminal</span>
+    <button class="cmd-copy" onclick="copyCmd()">Copy</button>
+    <div id="cmd-text"></div>
+  </div>
+
+  <button class="run-btn" id="run-btn" onclick="copyAndConfirm()">
+    Copy Commands — Then Paste Into Terminal
+  </button>
+
+</div>
+
+<footer class="ftr">
+  I.Q. Productionz · BackEnd Tools · <a href="../">Portal Home</a> · <a href="https://iqproductionz.com/">IQProductionz.com</a>
+</footer>
+
+<script>
+var files = [];
+
+function sanitizePath(p){
+  p = p.trim().replace(/'/g,"\'");
+  // If path ends with a file extension, strip the filename — user pasted a file path not a folder
+  if(/\.[a-zA-Z0-9]{2,4}$/.test(p)){
+    p = p.replace(/[/\\][^/\\]+\.[a-zA-Z0-9]{2,4}$/, '');
+  }
+  return p.replace(/\/+$|\\+$/, '');
+}
+
+function addFiles(fl){
+  for(var i=0;i<fl.length;i++){
+    var f=fl[i];
+    if(!files.find(function(x){return x.name===f.name;})) files.push(f);
+  }
+  renderList(); buildCmd();
+}
+function dragOver(e){e.preventDefault();document.getElementById('drop-zone').classList.add('drag-over');}
+function dragLeave(e){document.getElementById('drop-zone').classList.remove('drag-over');}
+function dropFiles(e){e.preventDefault();dragLeave(e);addFiles(e.dataTransfer.files);}
+function removeFile(i){files.splice(i,1);renderList();buildCmd();}
+
+function renderList(){
+  document.getElementById('file-list').innerHTML=files.map(function(f,i){
+    var sz=f.size>1048576?(f.size/1048576).toFixed(1)+' MB':(f.size/1024).toFixed(0)+' KB';
+    return '<div class="file-item"><span class="fname">'+f.name+'</span>'
+      +'<span style="display:flex;gap:8px;align-items:center;">'
+      +'<span class="fsize">'+sz+'</span>'
+      +'<button onclick="removeFile('+i+')" style="background:none;border:none;color:var(--muted);cursor:pointer;font-size:14px;padding:0 4px;">x</button>'
+      +'</span></div>';
+  }).join('');
+}
+
+function buildCmd(){
+  var src    = sanitizePath(document.getElementById('path-source').value);
+  var outDir = sanitizePath(document.getElementById('path-out').value);
+  var names  = files.length>0 ? files.map(function(f){return f.name;}) : ['your-video.mp4'];
+
+  var lines = [];
+
+  // Build prefix — cd and mkdir run before ffmpeg using &&
+  var prefix = '';
+  if(src)    prefix += 'cd "'+src+'" && ';
+  if(outDir) prefix += 'mkdir -p "'+outDir+'" && ';
+
+  names.forEach(function(fname, idx){
+    var base = fname.replace(/\.[^.]+$/,'');
+    var out  = outDir
+      ? '"'+outDir+'/'+base+'_CrystalClear.mp4"'
+      : '"'+base+'_CrystalClear.mp4"';
+
+    if(idx>0) lines.push('');
+    // no comment lines — breaks zsh paste
+    lines.push(
+      prefix+'ffmpeg -i "'+fname+'" '+
+      '-vf "scale=2560:-1,crop=2560:1440:0:(ih-1440)/2,setsar=1" '+
+      '-r 24 '+
+      '-c:v libx264 '+
+      '-b:v 40M '+
+      '-maxrate 50M '+
+      '-bufsize 100M '+
+      '-g 72 '+
+      '-keyint_min 72 '+
+      '-sc_threshold 0 '+
+      '-c:a aac '+
+      '-b:a 384k '+
+      '-movflags +faststart '+
+      out
+    );
+  });
+
+  lines.push('');
+  lines.push('echo ""');
+  lines.push('echo "All done! Your Crystal Clear files are ready to upload to YouTube."');
+
+  document.getElementById('cmd-text').textContent = lines.join('\n');
+}
+
+function copyCmd(){
+  navigator.clipboard.writeText(document.getElementById('cmd-text').textContent).then(function(){
+    var btn=document.querySelector('.cmd-copy');
+    var o=btn.textContent; btn.textContent='✓ Copied';
+    setTimeout(function(){btn.textContent=o;},1800);
+  });
+}
+
+function copyAndConfirm(){
+  navigator.clipboard.writeText(document.getElementById('cmd-text').textContent).then(function(){
+    var btn=document.getElementById('run-btn');
+    var o=btn.textContent;
+    btn.textContent='✓ Copied — Open Terminal and paste with Command + V';
+    btn.style.background='#4a8c62';
+    setTimeout(function(){btn.textContent=o;btn.style.background='';},4000);
+  });
+}
+
+buildCmd();
+</script>
+</body>
+</html>

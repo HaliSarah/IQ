@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Video Editor | I.Q. Productionz BackEnd</title>
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700&family=Raleway:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{--bg:#333;--surface:#454545;--card:#454545;--border:#2e2b24;--gold:#c98a2e;--gold-lt:#e0a84a;--gold-dim:#7a5218;--white:#f0ece3;--muted:#A9A9A9;--radius:8px;}
+  *{box-sizing:border-box;margin:0;padding:0;}
+  body{font-family:'Raleway',sans-serif;background:var(--bg);color:var(--white);min-height:100vh;padding-bottom:80px;}
+  .top-nav{display:flex;justify-content:space-between;align-items:center;padding:16px 24px;background:var(--surface);border-bottom:1px solid var(--border);position:sticky;top:0;z-index:50;}
+  .crumbs{font-family:'Cinzel',serif;font-size:11px;letter-spacing:2px;color:var(--muted);text-transform:uppercase;}
+  .crumbs a{color:var(--gold);text-decoration:none;}
+  .nav-home{padding:9px 18px;border:1px solid var(--gold-dim);border-radius:var(--radius);background:transparent;color:var(--gold-lt);font-family:'Cinzel',serif;font-size:11px;letter-spacing:1.5px;text-transform:uppercase;text-decoration:none;transition:all .2s;}
+  .nav-home:hover{background:var(--gold);color:#333;border-color:var(--gold);}
+  .hdr{background:linear-gradient(160deg,#454545 0%,#333333 60%);border-bottom:1px solid var(--border);padding:56px 32px 44px;text-align:center;position:relative;overflow:hidden;}
+  .hdr::before{content:'';position:absolute;inset:0;background:radial-gradient(ellipse at 50% 0%,rgba(201,138,46,.13) 0%,transparent 70%);pointer-events:none;}
+  .eyebrow{font-size:10px;letter-spacing:4px;text-transform:uppercase;color:var(--gold);margin-bottom:14px;}
+  .hdr h1{font-family:'Cinzel',serif;font-size:clamp(22px,4vw,38px);font-weight:600;color:var(--white);letter-spacing:2px;text-transform:uppercase;margin-bottom:10px;}
+  .gold-rule{width:60px;height:2px;background:linear-gradient(90deg,transparent,var(--gold),transparent);margin:18px auto;}
+  .hdr p{font-size:13px;color:var(--muted);max-width:520px;margin:0 auto;line-height:1.7;font-weight:300;}
+  .body{max-width:760px;margin:0 auto;padding:48px 24px 0;}
+  .tool-grid{display:grid;grid-template-columns:1fr 1fr;gap:18px;}
+  @media(max-width:560px){.tool-grid{grid-template-columns:1fr;}}
+  .tool-card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:32px 28px;position:relative;overflow:hidden;text-decoration:none;color:var(--white);transition:all .25s;display:flex;flex-direction:column;gap:12px;}
+  .tool-card::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,transparent,var(--gold),transparent);opacity:.5;transition:opacity .25s;}
+  .tool-card:hover{border-color:var(--gold-dim);transform:translateY(-3px);box-shadow:0 8px 24px rgba(0,0,0,.35),0 0 24px rgba(201,138,46,.12);}
+  .tool-card:hover::before{opacity:1;}
+  .tool-icon{width:48px;height:48px;border-radius:10px;background:linear-gradient(135deg,var(--gold),#a87025);display:flex;align-items:center;justify-content:center;font-size:22px;box-shadow:0 4px 14px rgba(201,138,46,.25);}
+  .tool-name{font-family:'Cinzel',serif;font-size:15px;font-weight:600;color:var(--gold-lt);letter-spacing:1.5px;text-transform:uppercase;}
+  .tool-path{font-size:11px;color:var(--muted);letter-spacing:.5px;}
+  .tool-desc{font-size:13px;color:var(--white);line-height:1.65;font-weight:300;}
+  .tool-tag{display:inline-block;font-size:10px;letter-spacing:1px;text-transform:uppercase;padding:3px 9px;border-radius:20px;background:rgba(201,138,46,.12);color:var(--gold-lt);border:1px solid var(--gold-dim);}
+  .ftr{text-align:center;margin-top:56px;padding:28px 16px;border-top:1px solid var(--border);font-size:11px;color:var(--muted);letter-spacing:1px;}
+  .ftr a{color:var(--gold-lt);text-decoration:none;}
+</style>
+</head>
+<body>
+
+<nav class="top-nav">
+  <div class="crumbs"><a href="../">BackEnd</a><strong style="color:var(--muted)"> / Video Editor</strong></div>
+  <a class="nav-home" href="../">↩ BackEnd Home</a>
+</nav>
+
+<header class="hdr">
+  <div class="eyebrow">Video Tools</div>
+  <h1>Video Editor</h1>
+  <div class="gold-rule"></div>
+  <p>FFmpeg-powered video processing tools. Pick a workspace below.</p>
+</header>
+
+<div class="body">
+  <div class="tool-grid">
+
+    <a class="tool-card" href="./Smooth/">
+      <div class="tool-icon">🎞</div>
+      <div class="tool-name">Smoother</div>
+      <div class="tool-path">/BackEnd/VideoEdit/Smooth/</div>
+      <div class="tool-desc">Two-pass pipeline for AI-generated video — fill frames first then slow down for smooth playback at any speed.</div>
+      <div class="tool-tag">AI Video</div>
+    </a>
+
+    <a class="tool-card" href="./FRYT/">
+      <div class="tool-icon">✦</div>
+      <div class="tool-name">Crystal Clear YouTube</div>
+      <div class="tool-path">/BackEnd/VideoEdit/FRYT/</div>
+      <div class="tool-desc">Convert video to 2560×1440 at 24fps with square pixels, 72-frame keyframes, 40/50Mbps bitrate — optimized for YouTube 2K upload quality.</div>
+      <div class="tool-tag">YouTube</div>
+    </a>
+
+  </div>
+</div>
+
+<footer class="ftr">
+  I.Q. Productionz · BackEnd Tools · <a href="../">Portal Home</a> · <a href="https://iqproductionz.com/">IQProductionz.com</a>
+</footer>
+
+</body>
+</html>
