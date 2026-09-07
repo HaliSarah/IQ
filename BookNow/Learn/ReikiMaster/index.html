@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<!--
+  Title:       Reiki Master | I.Q. Productionz
+  Author:      Hali Sarah Parsons  Date: 2026  Modified By: Claude (Cowork)
+  Description: Become a SELC Reiki Master with I.Q. Productionz. Houston, Texas.
+               Single-tier Reiki booking form, split out of the combined Learn form
+               so each course level has its own dedicated page/folder under BookNow/Learn.
+               Submits via EmailJS to IQProductionz@gmail.com. Payment via Cash App $IQENT or PayPal.
+-->
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Reiki Master | I.Q. Productionz</title>
+  <link rel="canonical" href="https://iqproductionz.com/BookNow/Learn/ReikiMaster">
+  <meta name="description" content="Become a SELC Reiki Master with I.Q. Productionz. Houston, Texas.">
+  <meta property="og:title" content="Reiki Master | I.Q. Productionz">
+  <meta property="og:description" content="Become a SELC Reiki Master with I.Q. Productionz. Houston, Texas.">
+  <meta property="og:type" content="website">
+  <meta property="og:image" content="https://static.wixstatic.com/media/b63ec4_d6fad9165f744284a4b90915a9fbbbc5~mv2.jpg">
+  <meta property="og:url" content="https://iqproductionz.com/BookNow/Learn/ReikiMaster">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="Reiki Master | I.Q. Productionz">
+  <meta name="twitter:description" content="Become a SELC Reiki Master with I.Q. Productionz. Houston, Texas.">
+  <meta name="twitter:image" content="https://static.wixstatic.com/media/b63ec4_d6fad9165f744284a4b90915a9fbbbc5~mv2.jpg">
+  <meta name="robots" content="index, follow">
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700&family=Raleway:wght@300;400;500;600&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
+<script>emailjs.init("3vNjQbWmqzzOO6IK-");</script>
+<style>
+:root{
+  --bg:#333333;--surface:#454545;--card:#454545;--border:#2e2b24;
+  --gold:#c98a2e;--gold-lt:#e0a84a;--gold-dim:#7a5218;
+  --white:#f0ece3;--muted:#A9A9A9;--success:#4a8c62;--radius:8px;--error:#e05c5c;
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:'Raleway',sans-serif;background:var(--bg);color:var(--white);min-height:100vh;padding-bottom:80px;}
+.form-header{
+  background:linear-gradient(160deg,#454545 0%,#333333 60%);
+  border-bottom:1px solid var(--border);
+  padding:48px 32px 40px;text-align:center;position:relative;overflow:hidden;
+}
+.form-header::before{
+  content:'';position:absolute;inset:0;
+  background:radial-gradient(ellipse at 50% 0%,rgba(201,138,46,0.13) 0%,transparent 70%);
+  pointer-events:none;
+}
+.logo-wrap{display:flex;align-items:center;justify-content:center;gap:16px;margin-bottom:22px;text-align:center;}
+.logo-wrap img{height:62px;width:auto;filter:drop-shadow(0 0 14px rgba(201,138,46,0.45));}
+.gold-rule{width:60px;height:2px;background:linear-gradient(90deg,transparent,var(--gold),transparent);margin:18px auto;}
+.form-header h1{font-family:'Cinzel',serif;font-size:clamp(20px,4vw,34px);font-weight:600;color:var(--white);letter-spacing:1px;margin-bottom:10px;text-transform:uppercase;}
+.form-header p{font-size:13px;color:var(--muted);max-width:460px;margin:0 auto;line-height:1.7;font-weight:300;}
+.form-body{max-width:680px;margin:0 auto;padding:40px 24px 0;}
+.section-card{
+  background:var(--card);border:1px solid var(--border);border-radius:var(--radius);
+  padding:32px;margin-bottom:20px;position:relative;overflow:hidden;
+}
+.section-card::before{
+  content:'';position:absolute;top:0;left:0;right:0;height:2px;
+  background:linear-gradient(90deg,transparent,var(--gold),transparent);
+}
+.section-card h2{font-family:'Cinzel',serif;font-size:18px;font-weight:600;color:var(--gold);letter-spacing:1.5px;text-transform:uppercase;margin-bottom:6px;}
+.section-card .section-sub{font-size:13px;color:var(--muted);margin-bottom:28px;line-height:1.6;font-weight:300;}
+.field{margin-bottom:22px;}
+.field:last-child{margin-bottom:0;}
+label{display:block;font-size:12px;font-weight:600;letter-spacing:1px;text-transform:uppercase;color:var(--white);margin-bottom:8px;}
+label .req{color:var(--gold);margin-left:2px;}
+input[type="text"],input[type="email"],input[type="tel"],textarea{
+  width:100%;padding:12px 16px;border:1px solid var(--border);border-radius:var(--radius);
+  font-family:'Raleway',sans-serif;font-size:14px;color:var(--white);background:var(--surface);
+  transition:border-color 0.2s,box-shadow 0.2s;outline:none;
+}
+input::placeholder,textarea::placeholder{color:var(--muted);}
+input:focus,textarea:focus{border-color:var(--gold);box-shadow:0 0 0 3px rgba(201,138,46,0.15);}
+textarea{resize:vertical;min-height:80px;line-height:1.6;}
+.fields-row{display:grid;grid-template-columns:1fr 1fr;gap:14px;}
+.plan-cards{display:flex;flex-direction:column;gap:12px;margin-bottom:8px;}
+.plan-card{
+  padding:18px 20px;border:1px solid var(--border);border-radius:var(--radius);
+  cursor:pointer;transition:all 0.2s;background:var(--surface);user-select:none;
+  display:flex;align-items:flex-start;gap:14px;position:relative;overflow:hidden;
+}
+.plan-card::before{
+  content:'';position:absolute;top:0;left:0;right:0;height:1px;
+  background:linear-gradient(90deg,transparent,var(--gold),transparent);
+  opacity:0;transition:opacity 0.2s;
+}
+.plan-card:hover{border-color:var(--gold-dim);}
+.plan-card.selected{border-color:var(--gold);background:#1e1b14;}
+.plan-card.selected::before{opacity:1;}
+.radio-outer{
+  width:18px;height:18px;min-width:18px;
+  border:1.5px solid var(--border);border-radius:50%;
+  margin-top:3px;display:flex;align-items:center;justify-content:center;
+  transition:all 0.2s;flex-shrink:0;
+}
+.plan-card.selected .radio-outer{border-color:var(--gold);}
+.radio-dot{width:9px;height:9px;border-radius:50%;background:var(--gold);display:none;}
+.plan-card.selected .radio-dot{display:block;}
+.plan-info{flex:1;}
+.plan-name{font-size:14px;font-weight:600;color:var(--white);margin-bottom:4px;}
+.plan-desc{font-size:13px;color:var(--muted);line-height:1.6;font-weight:300;}
+.plan-price{
+  font-family:'Cinzel',serif;font-size:13px;font-weight:600;
+  color:var(--gold);white-space:nowrap;padding-top:3px;text-align:right;
+  flex-shrink:0;
+}
+.plan-iqent{font-size:11px;color:var(--muted);font-family:'Raleway',sans-serif;font-weight:300;}
+.submit-btn{
+  width:100%;padding:14px 24px;margin-top:8px;
+  background:linear-gradient(135deg,var(--gold) 0%,#a87025 100%);
+  color:#333333;border:none;border-radius:var(--radius);
+  font-family:'Cinzel',serif;font-size:13px;font-weight:700;
+  letter-spacing:1px;text-transform:uppercase;
+  cursor:pointer;transition:all 0.2s;
+  box-shadow:0 4px 16px rgba(201,138,46,0.25);
+}
+.submit-btn:hover{background:linear-gradient(135deg,var(--gold-lt) 0%,var(--gold) 100%);box-shadow:0 4px 24px rgba(201,138,46,0.4);}
+.error-msg{color:var(--error);font-size:13px;margin-top:12px;display:none;font-weight:300;}
+.error-msg.visible{display:block;}
+.thankyou{text-align:center;padding:60px 24px;}
+.ty-icon{width:72px;height:72px;background:var(--gold);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:30px;margin:0 auto 24px;box-shadow:0 0 32px rgba(201,138,46,0.4);}
+.thankyou h2{font-family:'Cinzel',serif;font-size:26px;font-weight:700;color:var(--gold);letter-spacing:1px;text-transform:uppercase;margin-bottom:12px;}
+.thankyou p{font-size:14px;color:var(--muted);line-height:1.8;max-width:420px;margin:0 auto 28px;font-weight:300;}
+.return-btn{
+  display:inline-block;padding:14px 36px;
+  background:linear-gradient(135deg,var(--gold) 0%,#a87025 100%);
+  color:#333333;border:none;border-radius:var(--radius);
+  font-family:'Cinzel',serif;font-size:13px;font-weight:700;
+  letter-spacing:1px;text-transform:uppercase;text-decoration:none;
+  cursor:pointer;transition:all 0.2s;box-shadow:0 4px 16px rgba(201,138,46,0.25);
+}
+.return-btn:hover{background:linear-gradient(135deg,var(--gold-lt) 0%,var(--gold) 100%);box-shadow:0 4px 24px rgba(201,138,46,0.4);}
+#form-page{display:block;}
+#thank-you-page{display:none;}
+@media(max-width:540px){
+  .fields-row{grid-template-columns:1fr;}
+  .form-header{padding:32px 18px 28px;}
+  .section-card{padding:22px 16px;}
+  .plan-card{flex-wrap:wrap;}
+  .plan-price{width:100%;text-align:left;}
+}
+</style>
+</head>
+<body>
+
+<div id="form-page">
+  <div class="form-header">
+    <div class="logo-wrap">
+      <img src="https://iqproductionz.com/Content/Images/Main/IQ-noglow_Updated.avif" alt="I.Q. Productionz" onerror="this.style.display='none'">
+    </div>
+    <div class="gold-rule"></div>
+    <h1>Become a SELC Reiki Master</h1>
+    <p>Individualize your practice, teach and give attunements, receive unique light codes, and learn business management.</p>
+  </div>
+
+  <div class="form-body">
+
+    <div class="section-card">
+      <h2>Your Info</h2>
+      <div class="section-sub">Name is required. Provide at least an email or phone so we can reach you.</div>
+      <div class="field">
+        <label>Name <span class="req">*</span></label>
+        <input type="text" id="name" placeholder="Your full name">
+      </div>
+      <div class="fields-row">
+        <div class="field">
+          <label>Email</label>
+          <input type="email" id="email" placeholder="you@email.com">
+        </div>
+        <div class="field">
+          <label>Phone</label>
+          <input type="tel" id="phone" placeholder="(555) 000-0000">
+        </div>
+      </div>
+    </div>
+
+    <div class="section-card">
+      <h2>Course Details</h2>
+      <div class="section-sub">Payment via Cash App — $IQENT — or PayPal. We'll follow up to schedule your instruction.</div>
+      <div class="plan-cards">
+        <div class="plan-card selected" id="plan-0">
+          <div class="radio-outer"><div class="radio-dot"></div></div>
+          <div class="plan-info">
+            <div class="plan-name">SELC Reiki Master</div>
+            <div class="plan-desc">Individualize your practice, teach and give attunements, receive unique light codes, and learn business management.</div>
+          </div>
+          <div class="plan-price">$444.44<div class="plan-iqent">— $IQENT or PayPal</div></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="section-card">
+      <h2>Additional Notes</h2>
+      <div class="section-sub">Anything else we should know — special requests, questions, or preferred dates/times.</div>
+      <div class="field">
+        <textarea id="notes" placeholder="Additional details, questions, or preferred scheduling..."></textarea>
+      </div>
+      <div class="error-msg" id="error-msg">Please fill in your name and at least an email or phone number.</div>
+      <button class="submit-btn" onclick="submitForm()" style="margin-top:16px;">Submit Request</button>
+    </div>
+
+  </div>
+</div>
+
+<div id="thank-you-page">
+  <div class="form-header">
+    <div class="logo-wrap">
+      <img src="https://iqproductionz.com/Content/Images/Main/IQ-noglow_Updated.avif" alt="I.Q. Productionz" onerror="this.style.display='none'">
+    </div>
+  </div>
+  <div class="thankyou">
+    <div class="ty-icon">✓</div>
+    <h2 id="ty-title">You're All Set!</h2>
+    <p>Your Reiki Master enrollment request has been received. We'll reach out to get you scheduled.</p>
+    <a class="return-btn" href="https://iqproductionz.com/BookNow/Learn">Back to Learn</a>
+  </div>
+</div>
+
+<script>
+function submitForm() {
+  const name  = document.getElementById('name').value.trim();
+  const email = document.getElementById('email').value.trim();
+  const phone = document.getElementById('phone').value.trim();
+  const error = document.getElementById('error-msg');
+  if (!name || (!email && !phone)) { error.classList.add('visible'); return; }
+  error.classList.remove('visible');
+
+  const notes = document.getElementById('notes').value.trim();
+
+  document.getElementById('form-page').style.display = 'none';
+  document.getElementById('thank-you-page').style.display = 'block';
+  const first = name.split(' ')[0];
+  document.getElementById('ty-title').textContent = 'Thank You, ' + first + '!';
+
+  emailjs.send('service_75wx6fk', 'template_nnmxioq', {
+    subject: 'NEW Reiki Master Enrollment - ' + name,
+    name,
+    message: (email ? 'Email: ' + email + '\n' : '') +
+             (phone ? 'Phone: ' + phone + '\n' : '') +
+             'Course: SELC Reiki Master – $444.44 — $IQENT or PayPal' +
+             (notes ? '\n\nNotes:\n' + notes : ''),
+  }).catch(err => console.error(err));
+}
+</script>
+</body>
+</html>

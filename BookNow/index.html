@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<!--
+  Title:       Book Now — I.Q. Productionz
+  Author:      Hali Sarah Parsons  Date: 2026  Modified By: Claude (Cowork)
+  Description: Central booking hub. Lists every service category with its rate and
+               links to that category's own intake form. Payment accepted via
+               Cash App ($IQENT) or PayPal — shown once at the bottom so it isn't
+               repeated on every card. WHY bottom-heavy: per-project layout preference,
+               the payment/contact block carries the most visual weight at the bottom.
+-->
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Book Now | I.Q. Productionz</title>
+<link rel="canonical" href="https://iqproductionz.com/BookNow">
+<meta name="description" content="Book any I.Q. Productionz service — websites, hosting, healing, courses, photo, audio, video, graphic design, promo & fashion. Houston, Texas.">
+<meta property="og:title" content="Book Now | I.Q. Productionz">
+<meta property="og:description" content="Book any I.Q. Productionz service — websites, hosting, healing, courses, photo, audio, video, graphic design, promo & fashion.">
+<meta property="og:type" content="website">
+<meta property="og:image" content="https://static.wixstatic.com/media/b63ec4_d6fad9165f744284a4b90915a9fbbbc5~mv2.jpg">
+<meta property="og:url" content="https://iqproductionz.com/BookNow">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Book Now | I.Q. Productionz">
+<meta name="twitter:description" content="Book any I.Q. Productionz service — websites, hosting, healing, courses, photo, audio, video, graphic design, promo & fashion.">
+<meta name="twitter:image" content="https://static.wixstatic.com/media/b63ec4_d6fad9165f744284a4b90915a9fbbbc5~mv2.jpg">
+<meta name="robots" content="index, follow">
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700&family=Raleway:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#333333;--surface:#454545;--card:#454545;--border:#2e2b24;
+  --gold:#c98a2e;--gold-lt:#e0a84a;--gold-dim:#7a5218;
+  --white:#f0ece3;--muted:#A9A9A9;--radius:8px;
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:'Raleway',sans-serif;background:var(--bg);color:var(--white);min-height:100vh;padding-bottom:60px;}
+
+.form-header{
+  background:linear-gradient(160deg,#454545 0%,#333333 60%);
+  border-bottom:1px solid var(--border);
+  padding:48px 32px 40px;text-align:center;position:relative;overflow:hidden;
+}
+.form-header::before{
+  content:'';position:absolute;inset:0;
+  background:radial-gradient(ellipse at 50% 0%,rgba(201,138,46,0.13) 0%,transparent 70%);
+  pointer-events:none;
+}
+.logo-wrap{display:flex;align-items:center;justify-content:center;margin-bottom:22px;}
+.logo-wrap img{height:62px;width:auto;filter:drop-shadow(0 0 14px rgba(201,138,46,0.45));}
+.gold-rule{width:60px;height:2px;background:linear-gradient(90deg,transparent,var(--gold),transparent);margin:18px auto;}
+.form-header h1{font-family:'Cinzel',serif;font-size:clamp(22px,4vw,36px);font-weight:600;color:var(--white);letter-spacing:1px;margin-bottom:10px;text-transform:uppercase;}
+.form-header p{font-size:13px;color:var(--muted);max-width:480px;margin:0 auto;line-height:1.7;font-weight:300;}
+
+.hub-body{max-width:900px;margin:0 auto;padding:40px 24px 0;}
+
+.cat-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:18px;margin-bottom:36px;}
+.cat-card{
+  background:var(--card);border:1px solid var(--border);border-radius:var(--radius);
+  padding:22px;text-decoration:none;color:var(--white);position:relative;overflow:hidden;
+  display:flex;flex-direction:column;gap:10px;transition:border-color 0.2s, transform 0.2s;
+}
+.cat-card::before{
+  content:'';position:absolute;top:0;left:0;right:0;height:2px;
+  background:linear-gradient(90deg,transparent,var(--gold),transparent);
+}
+.cat-card:hover{border-color:var(--gold);transform:translateY(-2px);}
+.cat-top{display:flex;justify-content:space-between;align-items:baseline;gap:10px;}
+.cat-name{font-family:'Cinzel',serif;font-size:16px;font-weight:700;color:var(--gold);letter-spacing:1px;text-transform:uppercase;}
+.cat-price{font-family:'Cinzel',serif;font-size:13px;font-weight:600;color:var(--white);white-space:nowrap;}
+.cat-desc{font-size:13px;color:var(--muted);line-height:1.6;font-weight:300;flex:1;}
+.cat-cta{font-size:11px;letter-spacing:1.5px;text-transform:uppercase;color:var(--gold-lt);font-weight:600;}
+
+/* ── PAYMENT / CONTACT — bottom-weighted per layout preference ── */
+.payment-section{
+  background:var(--card);border:1px solid var(--border);border-radius:var(--radius);
+  padding:36px 28px;text-align:center;position:relative;overflow:hidden;margin-bottom:20px;
+}
+.payment-section::before{
+  content:'';position:absolute;top:0;left:0;right:0;height:2px;
+  background:linear-gradient(90deg,transparent,var(--gold),transparent);
+}
+.payment-section h2{font-family:'Cinzel',serif;font-size:18px;font-weight:600;color:var(--gold);letter-spacing:1.5px;text-transform:uppercase;margin-bottom:10px;}
+.payment-section p{font-size:13px;color:var(--muted);line-height:1.7;font-weight:300;max-width:520px;margin:0 auto 24px;}
+.payment-options{display:flex;flex-wrap:wrap;justify-content:center;gap:16px;}
+.pay-btn{
+  display:inline-flex;align-items:center;gap:8px;padding:14px 28px;
+  background:linear-gradient(135deg,var(--gold) 0%,#a87025 100%);
+  color:#333333;border-radius:var(--radius);text-decoration:none;
+  font-family:'Cinzel',serif;font-size:13px;font-weight:700;letter-spacing:1px;text-transform:uppercase;
+  transition:all 0.2s;box-shadow:0 4px 16px rgba(201,138,46,0.25);
+}
+.pay-btn:hover{background:linear-gradient(135deg,var(--gold-lt) 0%,var(--gold) 100%);box-shadow:0 4px 24px rgba(201,138,46,0.4);}
+.pay-btn.secondary{background:var(--surface);color:var(--white);border:1px solid var(--gold-dim);box-shadow:none;}
+.pay-btn.secondary:hover{border-color:var(--gold);}
+
+.contact-footer{text-align:center;color:var(--muted);font-size:12px;line-height:2;font-weight:300;}
+.contact-footer a{color:var(--gold-lt);text-decoration:none;}
+
+@media(max-width:540px){
+  .form-header{padding:32px 18px 28px;}
+  .cat-grid{grid-template-columns:1fr;}
+  .payment-section{padding:28px 18px;}
+}
+</style>
+</head>
+<body>
+
+<div class="form-header">
+  <div class="logo-wrap">
+    <img src="https://iqproductionz.com/Content/Images/Main/IQ-noglow_Updated.avif" alt="I.Q. Productionz" onerror="this.style.display='none'">
+  </div>
+  <div class="gold-rule"></div>
+  <h1>Book Now</h1>
+  <p>Pick a service below to see details and submit your request. We'll follow up to confirm scheduling and payment.</p>
+</div>
+
+<div class="hub-body">
+
+  <div class="cat-grid">
+        <a class="cat-card" href="/BookNow/Websites">
+          <div class="cat-top">
+            <div class="cat-name">Websites</div>
+            <div class="cat-price">$350 flat</div>
+          </div>
+          <div class="cat-desc">Full custom website — 5 pages, mobile-ready, 72-hour turnaround.</div>
+          <div class="cat-cta">Book Now &rarr;</div>
+        </a>
+
+        <a class="cat-card" href="/BookNow/HTML">
+          <div class="cat-top">
+            <div class="cat-name">Specialty HTML</div>
+            <div class="cat-price">From $75</div>
+          </div>
+          <div class="cat-desc">Interactive tools, embeds & coded features for any site — quizzes, forms, landing pages & more.</div>
+          <div class="cat-cta">Book Now &rarr;</div>
+        </a>
+
+        <a class="cat-card" href="/BookNow/Hosting">
+          <div class="cat-top">
+            <div class="cat-name">Hosting</div>
+            <div class="cat-price">From $75 / $99 yr</div>
+          </div>
+          <div class="cat-desc">Domain transfer, or domain + unlimited professional email hosting.</div>
+          <div class="cat-cta">Book Now &rarr;</div>
+        </a>
+
+        <a class="cat-card" href="/BookNow/Heal">
+          <div class="cat-top">
+            <div class="cat-name">Heal</div>
+            <div class="cat-price">$74.99</div>
+          </div>
+          <div class="cat-desc">SELC Reiki virtual healing session.</div>
+          <div class="cat-cta">Book Now &rarr;</div>
+        </a>
+
+        <a class="cat-card" href="/BookNow/Learn">
+          <div class="cat-top">
+            <div class="cat-name">Learn</div>
+            <div class="cat-price">$444.44+</div>
+          </div>
+          <div class="cat-desc">SELC Reiki Level 1, Level 2, or Master certification.</div>
+          <div class="cat-cta">Book Now &rarr;</div>
+        </a>
+
+        <a class="cat-card" href="/BookNow/Photo">
+          <div class="cat-top">
+            <div class="cat-name">Photo</div>
+            <div class="cat-price">$25</div>
+          </div>
+          <div class="cat-desc">Photography session — free consultation included.</div>
+          <div class="cat-cta">Book Now &rarr;</div>
+        </a>
+
+        <a class="cat-card" href="/BookNow/Audio">
+          <div class="cat-top">
+            <div class="cat-name">Audio</div>
+            <div class="cat-price">$25</div>
+          </div>
+          <div class="cat-desc">Audio production — mixing or in-studio recording.</div>
+          <div class="cat-cta">Book Now &rarr;</div>
+        </a>
+
+        <a class="cat-card" href="/BookNow/Video">
+          <div class="cat-top">
+            <div class="cat-name">Video</div>
+            <div class="cat-price">$50</div>
+          </div>
+          <div class="cat-desc">Videography with storyboarding & editing — free consultation included.</div>
+          <div class="cat-cta">Book Now &rarr;</div>
+        </a>
+
+        <a class="cat-card" href="/BookNow/Graphic">
+          <div class="cat-top">
+            <div class="cat-name">Graphic</div>
+            <div class="cat-price">$25</div>
+          </div>
+          <div class="cat-desc">Photo touch-ups, logos, album art & webpages — free consultation included.</div>
+          <div class="cat-cta">Book Now &rarr;</div>
+        </a>
+
+        <a class="cat-card" href="/BookNow/Promo">
+          <div class="cat-top">
+            <div class="cat-name">Promo</div>
+            <div class="cat-price">$13</div>
+          </div>
+          <div class="cat-desc">Press release, social posting, podcast & CD promotion.</div>
+          <div class="cat-cta">Book Now &rarr;</div>
+        </a>
+
+        <a class="cat-card" href="/BookNow/Fashion">
+          <div class="cat-top">
+            <div class="cat-name">Fashion</div>
+            <div class="cat-price">$25</div>
+          </div>
+          <div class="cat-desc">Hemming, tailoring, graphic prints & custom design — free consultation included.</div>
+          <div class="cat-cta">Book Now &rarr;</div>
+        </a>
+  </div>
+
+  <!-- WHY: payment info lives once at the bottom, not repeated on every card, per bottom-heavy layout preference -->
+  <div class="payment-section">
+    <h2>Payment Options</h2>
+    <p>Most projects begin with a 50% deposit; balance due on delivery. Accepted via Cash App or PayPal — see your service's page for exact terms.</p>
+    <div class="payment-options">
+      <a class="pay-btn" href="https://paypal.me/IQPR?country.x=US&locale.x=en_US" target="_blank" rel="noopener">Pay with PayPal</a>
+      <span class="pay-btn secondary">Cash App — $IQENT</span>
+    </div>
+  </div>
+
+  <div class="contact-footer">
+    Questions? Email <a href="mailto:IQProductionz@gmail.com">IQProductionz@gmail.com</a><br>
+    <a href="https://iqproductionz.com/">Return to Home</a>
+  </div>
+
+</div>
+</body>
+</html>
