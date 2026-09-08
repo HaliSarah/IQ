@@ -1,28 +1,27 @@
 <!DOCTYPE html>
 <!--
-  Title:       Book Now — I.Q. Productionz
+  Title:       Rates — I.Q. Productionz
   Author:      Hali Sarah Parsons  Date: 2026  Modified By: Claude (Cowork)
-  Description: Central booking hub. Lists every service category with its rate and
-               links to that category's own intake form. Payment accepted via
-               Cash App ($IQENT) or PayPal — shown once at the bottom so it isn't
-               repeated on every card. WHY bottom-heavy: per-project layout preference,
-               the payment/contact block carries the most visual weight at the bottom.
+  Description: Rate-card variant of BookNow/index.html. Same layout, but each
+               card links to the service's info page (/Services/...) instead of
+               its booking form (/BookNow/...), so visitors can browse rates
+               without landing straight in a submission form.
 -->
 <html lang="en">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Book Now | I.Q. Productionz</title>
-<link rel="canonical" href="https://iqproductionz.com/BookNow">
-<meta name="description" content="Book any I.Q. Productionz service — websites, hosting, healing, courses, photo, audio, video, graphic design, promo & fashion. Houston, Texas.">
-<meta property="og:title" content="Book Now | I.Q. Productionz">
-<meta property="og:description" content="Book any I.Q. Productionz service — websites, hosting, healing, courses, photo, audio, video, graphic design, promo & fashion.">
+<title>Rates | I.Q. Productionz</title>
+<link rel="canonical" href="https://iqproductionz.com/Services/Rates">
+<meta name="description" content="Rates for every I.Q. Productionz service — websites, hosting, healing, courses, photo, audio, video, graphic design, promo & fashion. Houston, Texas.">
+<meta property="og:title" content="Rates | I.Q. Productionz">
+<meta property="og:description" content="Rates for every I.Q. Productionz service.">
 <meta property="og:type" content="website">
 <meta property="og:image" content="https://static.wixstatic.com/media/b63ec4_d6fad9165f744284a4b90915a9fbbbc5~mv2.jpg">
-<meta property="og:url" content="https://iqproductionz.com/BookNow">
+<meta property="og:url" content="https://iqproductionz.com/Services/Rates">
 <meta name="twitter:card" content="summary_large_image">
-<meta name="twitter:title" content="Book Now | I.Q. Productionz">
-<meta name="twitter:description" content="Book any I.Q. Productionz service — websites, hosting, healing, courses, photo, audio, video, graphic design, promo & fashion.">
+<meta name="twitter:title" content="Rates | I.Q. Productionz">
+<meta name="twitter:description" content="Rates for every I.Q. Productionz service.">
 <meta name="twitter:image" content="https://static.wixstatic.com/media/b63ec4_d6fad9165f744284a4b90915a9fbbbc5~mv2.jpg">
 <meta name="robots" content="index, follow">
 <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700&family=Raleway:wght@300;400;500;600&display=swap" rel="stylesheet">
@@ -70,7 +69,6 @@ body{font-family:'Raleway',sans-serif;background:var(--bg);color:var(--white);mi
 .cat-desc{font-size:13px;color:var(--muted);line-height:1.6;font-weight:300;flex:1;}
 .cat-cta{font-size:11px;letter-spacing:1.5px;text-transform:uppercase;color:var(--gold-lt);font-weight:600;}
 
-/* ── PAYMENT / CONTACT — bottom-weighted per layout preference ── */
 .payment-section{
   background:var(--card);border:1px solid var(--border);border-radius:var(--radius);
   padding:36px 28px;text-align:center;position:relative;overflow:hidden;margin-bottom:20px;
@@ -110,40 +108,40 @@ body{font-family:'Raleway',sans-serif;background:var(--bg);color:var(--white);mi
     <img src="https://iqproductionz.com/Content/Images/Main/IQ-noglow_Updated.avif" alt="I.Q. Productionz" onerror="this.style.display='none'">
   </div>
   <div class="gold-rule"></div>
-  <h1>Book Now</h1>
-  <p>Pick a service below to see details and submit your request. We'll follow up to confirm scheduling and payment.</p>
+  <h1>Rates</h1>
+  <p>Browse pricing for every service below. Tap a card for full details — booking happens on each service's own page.</p>
 </div>
 
 <div class="hub-body">
 
   <div class="cat-grid" style="grid-template-columns:repeat(3,1fr);">
     <div style="grid-column:1/-1;display:flex;gap:18px;justify-content:center;">
-        <a class="cat-card" href="../Services/Websites/SiteBuilderForm/" style="flex:0 0 calc(33.333% - 9px);max-width:calc(33.333% - 9px);">
+        <a class="cat-card" href="Websites/" style="flex:0 0 calc(33.333% - 9px);max-width:calc(33.333% - 9px);">
           <div class="cat-top">
             <div class="cat-name">Websites</div>
             <div class="cat-price">$350 flat</div>
           </div>
           <div class="cat-desc">Full custom website — 5 pages, mobile-ready, 72-hour turnaround.</div>
-          <div class="cat-cta">Book Now &rarr;</div>
+          <div class="cat-cta">View Details &rarr;</div>
         </a>
 
-        <a class="cat-card" href="../Services/SpecialtyHTML/" style="flex:0 0 calc(33.333% - 9px);max-width:calc(33.333% - 9px);">
+        <a class="cat-card" href="HTML/" style="flex:0 0 calc(33.333% - 9px);max-width:calc(33.333% - 9px);">
           <div class="cat-top">
             <div class="cat-name">Specialty HTML</div>
             <div class="cat-price">From $75</div>
           </div>
           <div class="cat-desc">Interactive tools, embeds & coded features for any site — quizzes, forms, landing pages & more.</div>
-          <div class="cat-cta">Book Now &rarr;</div>
+          <div class="cat-cta">View Details &rarr;</div>
         </a>
 
     </div>
-        <a class="cat-card" href="../Services/Hosting/Inquire/">
+        <a class="cat-card" href="Hosting/">
           <div class="cat-top">
             <div class="cat-name">Hosting</div>
             <div class="cat-price">From $75 / $99 yr</div>
           </div>
           <div class="cat-desc">Domain transfer, or domain + unlimited professional email hosting.</div>
-          <div class="cat-cta">Book Now &rarr;</div>
+          <div class="cat-cta">View Details &rarr;</div>
         </a>
 
         <a class="cat-card" href="Heal/">
@@ -152,7 +150,7 @@ body{font-family:'Raleway',sans-serif;background:var(--bg);color:var(--white);mi
             <div class="cat-price">$74.99</div>
           </div>
           <div class="cat-desc">SELC Reiki virtual healing session.</div>
-          <div class="cat-cta">Book Now &rarr;</div>
+          <div class="cat-cta">View Details &rarr;</div>
         </a>
 
         <a class="cat-card" href="Learn/">
@@ -161,7 +159,7 @@ body{font-family:'Raleway',sans-serif;background:var(--bg);color:var(--white);mi
             <div class="cat-price">$444.44+</div>
           </div>
           <div class="cat-desc">SELC Reiki Level 1, Level 2, or Master certification.</div>
-          <div class="cat-cta">Book Now &rarr;</div>
+          <div class="cat-cta">View Details &rarr;</div>
         </a>
 
         <a class="cat-card" href="Photo/">
@@ -170,7 +168,7 @@ body{font-family:'Raleway',sans-serif;background:var(--bg);color:var(--white);mi
             <div class="cat-price">$25</div>
           </div>
           <div class="cat-desc">Photography session — free consultation included.</div>
-          <div class="cat-cta">Book Now &rarr;</div>
+          <div class="cat-cta">View Details &rarr;</div>
         </a>
 
         <a class="cat-card" href="Audio/">
@@ -179,7 +177,7 @@ body{font-family:'Raleway',sans-serif;background:var(--bg);color:var(--white);mi
             <div class="cat-price">$25</div>
           </div>
           <div class="cat-desc">Audio production — mixing or in-studio recording.</div>
-          <div class="cat-cta">Book Now &rarr;</div>
+          <div class="cat-cta">View Details &rarr;</div>
         </a>
 
         <a class="cat-card" href="Video/">
@@ -188,7 +186,7 @@ body{font-family:'Raleway',sans-serif;background:var(--bg);color:var(--white);mi
             <div class="cat-price">$50</div>
           </div>
           <div class="cat-desc">Videography with storyboarding & editing — free consultation included.</div>
-          <div class="cat-cta">Book Now &rarr;</div>
+          <div class="cat-cta">View Details &rarr;</div>
         </a>
 
         <a class="cat-card" href="Graphic/">
@@ -197,7 +195,7 @@ body{font-family:'Raleway',sans-serif;background:var(--bg);color:var(--white);mi
             <div class="cat-price">$25</div>
           </div>
           <div class="cat-desc">Photo touch-ups, logos, album art & webpages — free consultation included.</div>
-          <div class="cat-cta">Book Now &rarr;</div>
+          <div class="cat-cta">View Details &rarr;</div>
         </a>
 
         <a class="cat-card" href="Promo/">
@@ -206,7 +204,7 @@ body{font-family:'Raleway',sans-serif;background:var(--bg);color:var(--white);mi
             <div class="cat-price">$13</div>
           </div>
           <div class="cat-desc">Press release, social posting, podcast & CD promotion.</div>
-          <div class="cat-cta">Book Now &rarr;</div>
+          <div class="cat-cta">View Details &rarr;</div>
         </a>
 
         <a class="cat-card" href="Fashion/">
@@ -215,11 +213,10 @@ body{font-family:'Raleway',sans-serif;background:var(--bg);color:var(--white);mi
             <div class="cat-price">$25</div>
           </div>
           <div class="cat-desc">Hemming, tailoring, graphic prints & custom design — free consultation included.</div>
-          <div class="cat-cta">Book Now &rarr;</div>
+          <div class="cat-cta">View Details &rarr;</div>
         </a>
   </div>
 
-  <!-- WHY: payment info lives once at the bottom, not repeated on every card, per bottom-heavy layout preference -->
   <div class="payment-section">
     <h2>Payment Options</h2>
     <p>Most projects begin with a 50% deposit; balance due on delivery. Accepted via Cash App or PayPal — see your service's page for exact terms.</p>
