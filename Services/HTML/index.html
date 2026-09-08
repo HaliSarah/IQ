@@ -1,592 +1,68 @@
 <!DOCTYPE html>
 <!--
-  Title:       Specialty HTML Request — I.Q. Productionz
-  Author:      Hali Sarah Parsons  Date: 2026
-  Style:       Matches SiteBuilder.html exactly — header, cards, fields, button
+  Title:       I.Q. Productionz — HTML
+  Author:      Hali Sarah Parsons  Date: 2026  Modified By: Claude (Cowork)
+  Description: Domain mask page. IQProductionz.com/Services/HTML loads
+               https://iqproductionz.wixsite.com/iqpr/html inside a full-screen iframe.
+               Address bar always shows the clean IQProductionz.com URL.
 -->
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Specialty HTML Request — I.Q. Productionz</title>
-  <link rel="canonical" href="https://iqproductionz.com/Services/HTML">
-  <meta property="og:title" content="Specialty HTML Request — I.Q. Productionz">
-  <meta property="og:description" content="I.Q. Productionz — Entertainment & Metaphysical Health. Houston, Texas.">
-  <meta property="og:type" content="website">
-  <meta property="og:image" content="https://static.wixstatic.com/media/b63ec4_d6fad9165f744284a4b90915a9fbbbc5~mv2.jpg">
-  <meta property="og:url" content="https://iqproductionz.com/Services/HTML">
-  <meta name="twitter:card" content="summary_large_image">
-  <meta name="twitter:title" content="Specialty HTML Request — I.Q. Productionz">
-  <meta name="twitter:description" content="I.Q. Productionz — Entertainment & Metaphysical Health. Houston, Texas.">
-  <meta name="twitter:image" content="https://static.wixstatic.com/media/b63ec4_d6fad9165f744284a4b90915a9fbbbc5~mv2.jpg">
-  <meta name="robots" content="index, follow">
-<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700&family=Raleway:wght@300;400;500;600&display=swap" rel="stylesheet">
-<script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
-<script>emailjs.init("3vNjQbWmqzzOO6IK-");</script>
-<style>
-:root{
-  --bg:#333333;--surface:#454545;--card:#454545;--border:#2e2b24;
-  --gold:#c98a2e;--gold-lt:#e0a84a;--gold-dim:#7a5218;
-  --white:#f0ece3;--muted:#A9A9A9;--success:#4a8c62;--radius:8px;--error:#e05c5c;
-}
-*{box-sizing:border-box;margin:0;padding:0;}
-body{font-family:'Raleway',sans-serif;background:var(--bg);color:var(--white);min-height:100vh;padding-bottom:80px;}
-
-/* ── HEADER — exact SiteBuilder style ── */
-.form-header{
-  background:linear-gradient(160deg,#454545 0%,#333333 60%);
-  border-bottom:1px solid var(--border);
-  padding:48px 32px 40px;text-align:center;position:relative;overflow:hidden;
-}
-.form-header::before{
-  content:'';position:absolute;inset:0;
-  background:radial-gradient(ellipse at 50% 0%,rgba(201,138,46,0.13) 0%,transparent 70%);
-  pointer-events:none;
-}
-.logo-wrap{display:flex;align-items:center;justify-content:center;gap:16px;margin-bottom:22px;text-align:center;}
-.logo-wrap img{height:62px;width:auto;filter:drop-shadow(0 0 14px rgba(201,138,46,0.45));}
-.logo-text .brand-name{font-family:'Cinzel',serif;font-size:22px;font-weight:700;color:var(--gold);letter-spacing:2px;line-height:1;text-align:center;}
-.logo-text .brand-sub{font-size:10px;letter-spacing:4px;text-transform:uppercase;color:var(--muted);margin-top:4px;text-align:center;}
-.gold-rule{width:60px;height:2px;background:linear-gradient(90deg,transparent,var(--gold),transparent);margin:18px auto;}
-.form-header h1{font-family:'Cinzel',serif;font-size:clamp(20px,4vw,34px);font-weight:600;color:var(--white);letter-spacing:1px;margin-bottom:10px;text-transform:uppercase;white-space:nowrap;}
-.form-header p{font-size:13px;color:var(--muted);max-width:460px;margin:0 auto;line-height:1.7;font-weight:300;}
-
-/* ── BODY ── */
-.form-body{max-width:680px;margin:0 auto;padding:40px 24px 0;}
-
-/* ── SECTION CARD — exact SiteBuilder style ── */
-.section-card{
-  background:var(--card);border:1px solid var(--border);border-radius:var(--radius);
-  padding:32px;margin-bottom:20px;position:relative;overflow:hidden;
-}
-.section-card::before{
-  content:'';position:absolute;top:0;left:0;right:0;height:2px;
-  background:linear-gradient(90deg,transparent,var(--gold),transparent);
-}
-.section-card h2{font-family:'Cinzel',serif;font-size:18px;font-weight:600;color:var(--gold);letter-spacing:1.5px;text-transform:uppercase;margin-bottom:6px;}
-.section-card .section-sub{font-size:13px;color:var(--muted);margin-bottom:28px;line-height:1.6;font-weight:300;}
-
-/* ── FIELDS ── */
-.field{margin-bottom:22px;}
-.field:last-child{margin-bottom:0;}
-label{display:block;font-size:12px;font-weight:600;letter-spacing:1px;text-transform:uppercase;color:var(--white);margin-bottom:8px;}
-label .req{color:var(--gold);margin-left:2px;}
-input[type="text"],input[type="email"],input[type="tel"],textarea{
-  width:100%;padding:12px 16px;border:1px solid var(--border);border-radius:var(--radius);
-  font-family:'Raleway',sans-serif;font-size:14px;color:var(--white);background:var(--surface);
-  transition:border-color 0.2s,box-shadow 0.2s;outline:none;
-}
-input::placeholder,textarea::placeholder{color:var(--muted);}
-input:focus,textarea:focus{border-color:var(--gold);box-shadow:0 0 0 3px rgba(201,138,46,0.15);}
-textarea{resize:vertical;min-height:80px;line-height:1.6;}
-.fields-row{display:grid;grid-template-columns:1fr 1fr;gap:14px;}
-
-/* ── SERVICE CHECKBOXES — SiteBuilder check-item style ── */
-.services-grid{display:flex;flex-direction:column;gap:10px;margin-bottom:8px;}
-
-.service-item{
-  border:1px solid var(--border);border-radius:var(--radius);
-  background:var(--surface);position:relative;overflow:hidden;
-  transition:border-color 0.2s;
-}
-.service-item.checked{border-color:var(--gold);}
-
-.item-header{
-  display:flex;align-items:flex-start;gap:12px;padding:14px 16px;
-  cursor:pointer;user-select:none;transition:background 0.2s;
-}
-.item-header:hover{background:rgba(255,255,255,0.03);}
-
-/* WHY: Exact SiteBuilder check-box style */
-.cb-box{
-  width:17px;height:17px;min-width:17px;
-  border:1.5px solid var(--border);border-radius:4px;
-  margin-top:2px;display:flex;align-items:center;justify-content:center;
-  transition:all 0.2s;flex-shrink:0;
-}
-.service-item.checked .cb-box{background:var(--gold);border-color:var(--gold);}
-.cb-box::after{content:'✓';color:#333333;font-size:10px;font-weight:900;display:none;}
-.service-item.checked .cb-box::after{display:block;}
-
-.service-label-wrap{flex:1;}
-.service-label{font-size:13px;font-weight:500;color:var(--white);line-height:1.4;}
-.service-price{font-size:11px;color:var(--muted);margin-top:2px;font-weight:300;}
-
-/* WHY: Instructions textarea expands when item is checked */
-.item-detail{display:none;padding:0 16px 14px 45px;}
-.service-item.checked .item-detail{display:block;}
-.detail-label{font-size:10px;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted);margin-bottom:6px;font-weight:600;}
-.detail-textarea{
-  width:100%;background:var(--bg);border:1px solid var(--border);
-  border-radius:var(--radius);padding:10px 12px;color:var(--white);
-  font-family:'Raleway',sans-serif;font-size:13px;font-weight:300;
-  outline:none;resize:vertical;min-height:64px;transition:border-color 0.2s,box-shadow 0.2s;
-}
-.detail-textarea::placeholder{color:var(--muted);}
-.detail-textarea:focus{border-color:var(--gold);box-shadow:0 0 0 3px rgba(201,138,46,0.15);}
-
-/* WHY: PDF upload zone — SiteBuilder upload-zone style */
-.pdf-upload-wrap{
-  border:1px dashed var(--border);border-radius:var(--radius);padding:18px 20px;
-  text-align:center;cursor:pointer;transition:all 0.2s;background:var(--bg);position:relative;
-  margin-bottom:10px;
-}
-.pdf-upload-wrap:hover{border-color:var(--gold);}
-.pdf-upload-wrap input[type="file"]{position:absolute;inset:0;opacity:0;cursor:pointer;width:100%;border:none;}
-.pdf-upload-text{font-size:13px;color:var(--muted);}
-.pdf-upload-text strong{color:var(--gold);}
-.pdf-file-name{margin-top:6px;font-size:12px;color:var(--success);}
-
-/* ── BUTTON — exact SiteBuilder btn-next style ── */
-.submit-btn{
-  width:100%;padding:14px 24px;margin-top:8px;
-  background:linear-gradient(135deg,var(--gold) 0%,#a87025 100%);
-  color:#333333;border:none;border-radius:var(--radius);
-  font-family:'Cinzel',serif;font-size:13px;font-weight:700;
-  letter-spacing:1px;text-transform:uppercase;
-  cursor:pointer;transition:all 0.2s;
-  box-shadow:0 4px 16px rgba(201,138,46,0.25);
-}
-.submit-btn:hover{background:linear-gradient(135deg,var(--gold-lt) 0%,var(--gold) 100%);box-shadow:0 4px 24px rgba(201,138,46,0.4);}
-
-.error-msg{color:var(--error);font-size:13px;margin-top:12px;display:none;font-weight:300;}
-.error-msg.visible{display:block;}
-
-/* ── THANK YOU — SiteBuilder style ── */
-.thankyou{text-align:center;padding:60px 24px;}
-.ty-icon{width:72px;height:72px;background:var(--gold);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:30px;margin:0 auto 24px;box-shadow:0 0 32px rgba(201,138,46,0.4);}
-.thankyou h2{font-family:'Cinzel',serif;font-size:26px;font-weight:700;color:var(--gold);letter-spacing:1px;text-transform:uppercase;margin-bottom:12px;}
-.thankyou p{font-size:14px;color:var(--muted);line-height:1.8;max-width:420px;margin:0 auto 28px;font-weight:300;}
-.return-btn{
-  display:inline-block;padding:14px 36px;
-  background:linear-gradient(135deg,var(--gold) 0%,#a87025 100%);
-  color:#333333;border:none;border-radius:var(--radius);
-  font-family:'Cinzel',serif;font-size:13px;font-weight:700;
-  letter-spacing:1px;text-transform:uppercase;text-decoration:none;
-  cursor:pointer;transition:all 0.2s;box-shadow:0 4px 16px rgba(201,138,46,0.25);
-}
-.return-btn:hover{background:linear-gradient(135deg,var(--gold-lt) 0%,var(--gold) 100%);box-shadow:0 4px 24px rgba(201,138,46,0.4);}
-
-#form-page{display:block;}
-#thank-you-page{display:none;}
-
-@media(max-width:540px){
-  .fields-row{grid-template-columns:1fr;}
-  .form-header{padding:32px 18px 28px;}
-  .section-card{padding:22px 16px;}
-}
-
-  /* BRANDED EMAIL TIER SELECTOR */
-  .tier-grid{display:flex;flex-direction:column;gap:8px;margin:10px 0 14px;}
-  .tier-btn{
-    text-align:left;padding:12px 16px;
-    background:var(--surface);border:1.5px solid var(--border);
-    border-radius:var(--radius);cursor:pointer;
-    font-family:'Raleway',sans-serif;font-size:14px;
-    color:var(--white);transition:all .2s;width:100%;
-    display:flex;justify-content:space-between;align-items:center;
-  }
-  .tier-btn:hover{border-color:var(--gold);background:rgba(201,138,46,0.08);}
-  .tier-btn.selected{border-color:var(--gold);background:rgba(201,138,46,0.12);}
-  .tier-price{font-family:'Cinzel',serif;color:var(--gold);font-size:.85rem;font-weight:600;white-space:nowrap;margin-left:12px;}
-  .tier-detail{display:none;padding:14px 16px 16px;background:rgba(0,0,0,0.15);border-radius:0 0 var(--radius) var(--radius);border:1px solid var(--border);border-top:none;margin-top:-8px;}
-  .tier-detail.open{display:block;}
-  .tier-detail ul{margin:8px 0 12px 16px;display:flex;flex-direction:column;gap:5px;}
-  .tier-detail ul li{font-size:13px;color:var(--white);line-height:1.6;}
-  .tier-detail .pitch{font-size:13px;color:var(--muted);line-height:1.7;margin-bottom:14px;font-style:italic;}
-  .tier-detail .intake-note{font-size:12px;color:var(--muted);margin-top:8px;}
-  .intake-btn{
-    display:inline-block;margin-top:12px;
-    padding:11px 22px;
-    background:linear-gradient(135deg,var(--gold) 0%,#a87025 100%);
-    color:#333;border:none;border-radius:var(--radius);
-    font-family:'Cinzel',serif;font-size:.72rem;font-weight:700;
-    letter-spacing:1px;text-transform:uppercase;text-decoration:none;
-    cursor:pointer;transition:all .2s;
-    box-shadow:0 4px 16px rgba(201,138,46,0.25);
-  }
-  .intake-btn:hover{background:linear-gradient(135deg,var(--gold-lt) 0%,var(--gold) 100%);}
-
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>HTML | I.Q. Productionz</title>
+  <meta name="description" content="I.Q. Productionz — HTML services. Entertainment &amp; Metaphysical Health. Houston, Texas.">
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel+Decorative&display=swap" rel="stylesheet">
+  <style>
+    * { margin:0; padding:0; box-sizing:border-box; }
+    html, body { width:100%; height:100%; overflow:hidden; background:#2a2720; }
+    #wix-frame {
+      position:fixed; top:0; left:0; width:100%; height:100%; border:none;
+    }
+    #loader {
+      position:fixed; inset:0;
+      background:#2a2720 url('https://static.wixstatic.com/media/b63ec4_d6fad9165f744284a4b90915a9fbbbc5~mv2.jpg/v1/fill/w_288,h_271,al_c,q_80,usm_0.66_1.00_0.01,enc_avif,quality_auto/b63ec4_d6fad9165f744284a4b90915a9fbbbc5~mv2.jpg') center/cover;
+      display:flex; flex-direction:column; align-items:center; justify-content:center;
+      z-index:10; transition:opacity .8s ease;
+    }
+    #loader::before { content:''; position:absolute; inset:0; background:rgba(20,16,10,.78); }
+    #loader.hidden { opacity:0; pointer-events:none; }
+    #loader img {
+      position:relative; height:72px; width:auto;
+      filter:drop-shadow(0 0 16px rgba(201,138,46,.7));
+      margin-bottom:1.25rem;
+      animation:pulse 2s ease-in-out infinite;
+    }
+    @keyframes pulse {
+      0%,100% { filter:drop-shadow(0 0 10px rgba(201,138,46,.4)); }
+      50%      { filter:drop-shadow(0 0 24px rgba(201,138,46,.9)); }
+    }
+    #loader p {
+      position:relative; font-family:'Cinzel Decorative','Palatino Linotype',serif;
+      font-size:.62rem; letter-spacing:.32em; text-transform:uppercase;
+      color:rgba(201,138,46,.8);
+    }
+    .spinner {
+      position:relative; width:24px; height:24px;
+      border:2px solid rgba(201,138,46,.2); border-top-color:rgba(201,138,46,.85);
+      border-radius:50%; animation:spin 1s linear infinite; margin-top:1.1rem;
+    }
+    @keyframes spin { to { transform:rotate(360deg); } }
 </style>
 </head>
 <body>
-
-<div id="form-page">
-
-  <!-- HEADER -->
-  <div class="form-header">
-    <div class="logo-wrap">
-      <img src="https://iqproductionz.com/Content/Images/Main/IQ-noglow_Updated.avif" alt="I.Q. Productionz" onerror="this.style.display='none'">
-    </div>
-    <div class="gold-rule"></div>
-    <h1>Specialty HTML</h1>
-    <p>Tell us what you need and we'll get back to you with a quote. Deliverables begin once your 50% deposit is received. Payment accepted via Cash App <strong style='color:var(--gold);'>$IQENT</strong>.</p>
+  <div id="loader">
+    <img src="https://static.wixstatic.com/media/b63ec4_2117e26bc8e646c8ad8b0050222de71b~mv2.png/v1/fill/w_295,h_92,al_c,q_85,usm_0.66_1.00_0.01,enc_avif,quality_auto/IQ-noglow_edited_edited.png" alt="I.Q. Productionz">
+    <p>Loading</p>
+    <div class="spinner"></div>
   </div>
-
-  <div class="form-body">
-
-    <!-- CONTACT INFO -->
-    <div class="section-card">
-      <h2>Your Info</h2>
-      <div class="section-sub">Name is required. Provide at least an email or phone so we can reach you.</div>
-
-      <div class="field">
-        <label>Name <span class="req">*</span></label>
-        <input type="text" id="name" placeholder="Your full name">
-      </div>
-      <div class="field">
-        <label>Business Name</label>
-        <input type="text" id="business" placeholder="Optional">
-      </div>
-      <div class="fields-row">
-        <div class="field">
-          <label>Email</label>
-          <input type="email" id="email" placeholder="you@email.com">
-        </div>
-        <div class="field">
-          <label>Phone</label>
-          <input type="tel" id="phone" placeholder="(555) 000-0000">
-        </div>
-      </div>
-    </div>
-
-    <!-- SERVICES -->
-    <div class="section-card">
-      <h2>Select Services</h2>
-      <div class="section-sub">Check all that apply. Each selection will expand with an instructions field.</div>
-
-      <div class="services-grid">
-
-        <div class="service-item" id="svc-quiz">
-          <div class="item-header" onclick="toggleSvc('quiz')">
-            <div class="cb-box"></div>
-            <div class="service-label-wrap">
-              <div class="service-label">Interactive Quiz or Assessment</div>
-              <div class="service-price">From $150</div>
-            </div>
-          </div>
-          <div class="item-detail">
-            <div class="detail-label">Instructions / Details</div>
-            <textarea class="detail-textarea" placeholder="Topic, number of questions, scoring logic, outcome types..."></textarea>
-          </div>
-        </div>
-
-        <div class="service-item" id="svc-brand">
-          <div class="item-header" onclick="toggleSvc('brand')">
-            <div class="cb-box"></div>
-            <div class="service-label-wrap">
-              <div class="service-label">Match Your Brand to Your Email</div>
-              <div class="service-price">From $75</div>
-            </div>
-          </div>
-          <div class="item-detail" id="brand-detail">
-
-            <!-- Tier selector -->
-            <div class="detail-label">Choose your option</div>
-            <div class="tier-grid">
-
-              <!-- Add-on -->
-              <div>
-                <button class="tier-btn" id="tier-addon" onclick="selectTier('addon')">
-                  <span>Add-on — Pair with a new website</span>
-                  <span class="tier-price">$75</span>
-                </button>
-                <div class="tier-detail" id="detail-addon">
-                  <ul>
-                    <li>One custom HTML email template</li>
-                    <li>Designed to match your new website exactly</li>
-                    <li>Mobile-responsive across all email clients</li>
-                    <li>Delivered as a ready-to-use HTML file</li>
-                  </ul>
-                  <p class="pitch">Every email you send will look like it came from the same place as your website — consistent, polished, and instantly recognizable as your brand. Your clients will notice the difference before they even read a word.</p>
-                  <a class="intake-btn" href="https://iqproductionz.com/Services/HTML/BrandedEmail" target="_blank">Start Your Intake for This Service Now</a>
-                  <p class="intake-note">Deliverables begin once your 50% deposit is received. Payment via Cash App <strong>$IQENT</strong>.</p>
-                </div>
-              </div>
-
-              <!-- Standalone -->
-              <div>
-                <button class="tier-btn" id="tier-standalone" onclick="selectTier('standalone')">
-                  <span>Standalone — One custom template</span>
-                  <span class="tier-price">$125</span>
-                </button>
-                <div class="tier-detail" id="detail-standalone">
-                  <ul>
-                    <li>One fully custom branded HTML email template</li>
-                    <li>Matched to your existing brand colors, fonts, and logo</li>
-                    <li>Mobile-responsive across Gmail, Apple Mail, Outlook, and more</li>
-                    <li>Delivered as a ready-to-use HTML file</li>
-                  </ul>
-                  <p class="pitch">Stop sending plain text emails that get lost in the inbox. A custom branded template makes every message you send look intentional, professional, and worth opening — whether it's a quote, a follow-up, or a thank you.</p>
-                  <a class="intake-btn" href="https://iqproductionz.com/Services/HTML/BrandedEmail" target="_blank">Start Your Intake for This Service Now</a>
-                  <p class="intake-note">Deliverables begin once your 50% deposit is received. Payment via Cash App <strong>$IQENT</strong>.</p>
-                </div>
-              </div>
-
-              <!-- Bundle -->
-              <div>
-                <button class="tier-btn" id="tier-bundle" onclick="selectTier('bundle')">
-                  <span>Communication Bundle — 3 templates</span>
-                  <span class="tier-price">$225</span>
-                </button>
-                <div class="tier-detail" id="detail-bundle">
-                  <ul>
-                    <li>Welcome / Introduction email</li>
-                    <li>Project Proposal / Quote email</li>
-                    <li>Thank You / Review Request email</li>
-                    <li>All three matched to your brand — colors, fonts, logo</li>
-                    <li>Mobile-responsive across all major email clients</li>
-                    <li>Delivered as three ready-to-use HTML files</li>
-                  </ul>
-                  <p class="pitch">Your entire client communication journey — from first impression to closing review — presented in one cohesive, branded voice. Every touchpoint looks and feels like you, building trust at every step of the relationship.</p>
-                  <a class="intake-btn" href="https://iqproductionz.com/Services/HTML/BrandedEmail" target="_blank">Start Your Intake for This Service Now</a>
-                  <p class="intake-note">Deliverables begin once your 50% deposit is received. Payment via Cash App <strong>$IQENT</strong>.</p>
-                </div>
-              </div>
-
-            </div><!-- end tier-grid -->
-          </div>
-        </div>
-
-
-        <div class="service-item" id="svc-pdf">
-          <div class="item-header" onclick="toggleSvc('pdf')">
-            <div class="cb-box"></div>
-            <div class="service-label-wrap">
-              <div class="service-label">PDF Viewer / Embedded Document</div>
-              <div class="service-price">From $75</div>
-            </div>
-          </div>
-          <div class="item-detail">
-            <div class="detail-label">Upload Your PDF</div>
-            <div class="pdf-upload-wrap" onclick="document.getElementById('pdf-file').click()">
-              <input type="file" id="pdf-file" accept=".pdf" onchange="showPdfName(this)">
-              <div class="pdf-upload-text"><strong>Choose file</strong> or click to browse</div>
-              <div class="pdf-file-name" id="pdf-name"></div>
-            </div>
-            <div class="detail-label">Instructions / Details</div>
-            <textarea class="detail-textarea" placeholder="Full page, scrollable embed, download button?"></textarea>
-          </div>
-        </div>
-
-        <div class="service-item" id="svc-table">
-          <div class="item-header" onclick="toggleSvc('table')">
-            <div class="cb-box"></div>
-            <div class="service-label-wrap">
-              <div class="service-label">Pricing or Service Comparison Table</div>
-              <div class="service-price">From $100</div>
-            </div>
-          </div>
-          <div class="item-detail">
-            <div class="detail-label">Instructions / Details</div>
-            <textarea class="detail-textarea" placeholder="Tiers, features per tier, CTAs or links for each column..."></textarea>
-          </div>
-        </div>
-
-        <div class="service-item" id="svc-form">
-          <div class="item-header" onclick="toggleSvc('form')">
-            <div class="cb-box"></div>
-            <div class="service-label-wrap">
-              <div class="service-label">Lead Capture / Contact Form</div>
-              <div class="service-price">From $75</div>
-            </div>
-          </div>
-          <div class="item-detail">
-            <div class="detail-label">Instructions / Details</div>
-            <textarea class="detail-textarea" placeholder="Fields needed, where submissions go, any thank-you page?"></textarea>
-          </div>
-        </div>
-
-        <div class="service-item" id="svc-countdown">
-          <div class="item-header" onclick="toggleSvc('countdown')">
-            <div class="cb-box"></div>
-            <div class="service-label-wrap">
-              <div class="service-label">Countdown Timer or Launch Page</div>
-              <div class="service-price">From $75</div>
-            </div>
-          </div>
-          <div class="item-detail">
-            <div class="detail-label">Instructions / Details</div>
-            <textarea class="detail-textarea" placeholder="Target date/time, what happens at zero, email capture?"></textarea>
-          </div>
-        </div>
-
-        <div class="service-item" id="svc-gallery">
-          <div class="item-header" onclick="toggleSvc('gallery')">
-            <div class="cb-box"></div>
-            <div class="service-label-wrap">
-              <div class="service-label">Portfolio or Gallery Grid</div>
-              <div class="service-price">From $100</div>
-            </div>
-          </div>
-          <div class="item-detail">
-            <div class="detail-label">Instructions / Details</div>
-            <textarea class="detail-textarea" placeholder="Number of items, filter categories, lightbox on click?"></textarea>
-          </div>
-        </div>
-
-        <div class="service-item" id="svc-booking">
-          <div class="item-header" onclick="toggleSvc('booking')">
-            <div class="cb-box"></div>
-            <div class="service-label-wrap">
-              <div class="service-label">Booking Widget or Intake Flow</div>
-              <div class="service-price">From $150</div>
-            </div>
-          </div>
-          <div class="item-detail">
-            <div class="detail-label">Instructions / Details</div>
-            <textarea class="detail-textarea" placeholder="Info collected, availability logic, confirmation email?"></textarea>
-          </div>
-        </div>
-
-        <div class="service-item" id="svc-showcase">
-          <div class="item-header" onclick="toggleSvc('showcase')">
-            <div class="cb-box"></div>
-            <div class="service-label-wrap">
-              <div class="service-label">Animated Product Showcase</div>
-              <div class="service-price">From $125</div>
-            </div>
-          </div>
-          <div class="item-detail">
-            <div class="detail-label">Instructions / Details</div>
-            <textarea class="detail-textarea" placeholder="Products to feature, animation style, interactive elements?"></textarea>
-          </div>
-        </div>
-
-        <div class="service-item" id="svc-event">
-          <div class="item-header" onclick="toggleSvc('event')">
-            <div class="cb-box"></div>
-            <div class="service-label-wrap">
-              <div class="service-label">Event Registration Page</div>
-              <div class="service-price">From $100</div>
-            </div>
-          </div>
-          <div class="item-detail">
-            <div class="detail-label">Instructions / Details</div>
-            <textarea class="detail-textarea" placeholder="Event name, date, ticket types, payment, confirmation flow?"></textarea>
-          </div>
-        </div>
-
-        <div class="service-item" id="svc-landing">
-          <div class="item-header" onclick="toggleSvc('landing')">
-            <div class="cb-box"></div>
-            <div class="service-label-wrap">
-              <div class="service-label">Custom Campaign Landing Page</div>
-              <div class="service-price">From $125</div>
-            </div>
-          </div>
-          <div class="item-detail">
-            <div class="detail-label">Instructions / Details</div>
-            <textarea class="detail-textarea" placeholder="Campaign goal, target audience, CTA, tracking pixels?"></textarea>
-          </div>
-        </div>
-
-        <div class="service-item" id="svc-other">
-          <div class="item-header" onclick="toggleSvc('other')">
-            <div class="cb-box"></div>
-            <div class="service-label-wrap">
-              <div class="service-label">Other</div>
-              <div class="service-price">– Quote</div>
-            </div>
-          </div>
-          <div class="item-detail">
-            <div class="detail-label">Describe what you need</div>
-            <textarea class="detail-textarea" placeholder="Describe your idea in as much detail as possible..."></textarea>
-          </div>
-        </div>
-
-      </div><!-- end services-grid -->
-
-      <div class="error-msg" id="error-msg">Please fill in your name and at least an email or phone number.</div>
-      <button class="submit-btn" onclick="submitForm()" style="margin-top:24px;">Submit Request</button>
-    </div>
-
-  </div><!-- end form-body -->
-</div><!-- end form-page -->
-
-<!-- THANK YOU -->
-<div id="thank-you-page">
-  <div class="form-header">
-    <div class="logo-wrap">
-      <img src="https://iqproductionz.com/Content/Images/Main/IQ-noglow_Updated.avif" alt="I.Q. Productionz" onerror="this.style.display='none'">
-    </div>
-  </div>
-  <div class="thankyou">
-    <div class="ty-icon">✓</div>
-    <h2 id="ty-title">You're All Set!</h2>
-    <p id="ty-msg">Your request has been received. We'll review your selections and reach back out with a custom quote shortly.</p>
-    <a class="return-btn" href="https://IQProductionz.com/Services">Return to Services</a>
-  </div>
-</div>
-
-<script>
-function toggleSvc(id) {
-  document.getElementById('svc-' + id).classList.toggle('checked');
-}
-
-function showPdfName(input) {
-  const el = document.getElementById('pdf-name');
-  el.textContent = input.files.length ? '📎 ' + input.files[0].name : '';
-}
-
-function submitForm() {
-  const name  = document.getElementById('name').value.trim();
-  const email = document.getElementById('email').value.trim();
-  const phone = document.getElementById('phone').value.trim();
-  const error = document.getElementById('error-msg');
-  if (!name || (!email && !phone)) { error.classList.add('visible'); return; }
-  error.classList.remove('visible');
-
-  const business = document.getElementById('business').value.trim();
-  const pdfFile  = document.getElementById('pdf-file');
-  const pdfNote  = pdfFile.files.length ? '\nPDF file attached: ' + pdfFile.files[0].name : '';
-
-  const lines = [];
-  document.querySelectorAll('.service-item.checked').forEach(item => {
-    const label = item.querySelector('.service-label').textContent.trim();
-    const price = item.querySelector('.service-price').textContent.trim();
-    const notes = item.querySelector('.detail-textarea') ? item.querySelector('.detail-textarea').value.trim() : '';
-    lines.push('• ' + label + ' (' + price + ')' + (notes ? '\n  Notes: ' + notes : ''));
-  });
-
-  /* WHY: show thank you first — email sends in background, no navigation away */
-  document.getElementById('form-page').style.display = 'none';
-  document.getElementById('thank-you-page').style.display = 'block';
-  const first = name.split(' ')[0];
-  document.getElementById('ty-title').textContent = 'Thank You, ' + first + '!';
-
-  emailjs.send('IQProductionz', 'template_iq_contact', {
-    subject: 'Specialty HTML Requested - ' + name,
-    name,
-    message: (business ? 'Business: ' + business + '\n' : '') +
-             (email    ? 'Email: '    + email    + '\n' : '') +
-             (phone    ? 'Phone: '    + phone    + '\n' : '') +
-             pdfNote +
-             '\n\nServices:\n' + (lines.length ? lines.join('\n') : 'None selected'),
-  }).catch(err => console.error(err));
-}
-
-window.addEventListener('DOMContentLoaded', () => {
-  const pre = new URLSearchParams(window.location.search).get('service');
-  if (pre) {
-    document.querySelectorAll('.service-item').forEach(item => {
-      if (item.querySelector('.service-label').textContent.trim().toLowerCase().includes(pre.toLowerCase()))
-        item.classList.add('checked');
-    });
-  }
-});
-
-function selectTier(id) {
-  /* Close all open tier details */
-  ['addon','standalone','bundle'].forEach(function(t) {
-    document.getElementById('detail-' + t).classList.remove('open');
-    document.getElementById('tier-' + t).classList.remove('selected');
-  });
-  /* Open the chosen one */
-  document.getElementById('detail-' + id).classList.add('open');
-  document.getElementById('tier-' + id).classList.add('selected');
-}
-
+  <iframe id="wix-frame" src="https://iqproductionz.wixsite.com/iqpr/html" title="HTML | I.Q. Productionz"
+    allow="autoplay; fullscreen; payment" loading="eager"></iframe>
+  <script>
+    const frame  = document.getElementById('wix-frame');
+    const loader = document.getElementById('loader');
+    frame.addEventListener('load', () => setTimeout(() => loader.classList.add('hidden'), 300));
+    setTimeout(() => loader.classList.add('hidden'), 6000);
 </script>
 </body>
 </html>
