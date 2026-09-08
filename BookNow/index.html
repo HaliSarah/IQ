@@ -116,8 +116,9 @@ body{font-family:'Raleway',sans-serif;background:var(--bg);color:var(--white);mi
 
 <div class="hub-body">
 
-  <div class="cat-grid">
-        <a class="cat-card" href="/BookNow/Websites">
+  <div class="cat-grid" style="grid-template-columns:repeat(3,1fr);">
+    <div style="grid-column:1/-1;display:flex;gap:18px;justify-content:center;">
+        <a class="cat-card" href="/BookNow/Websites" style="flex:0 0 calc(33.333% - 9px);max-width:calc(33.333% - 9px);">
           <div class="cat-top">
             <div class="cat-name">Websites</div>
             <div class="cat-price">$350 flat</div>
@@ -126,7 +127,7 @@ body{font-family:'Raleway',sans-serif;background:var(--bg);color:var(--white);mi
           <div class="cat-cta">Book Now &rarr;</div>
         </a>
 
-        <a class="cat-card" href="/BookNow/HTML">
+        <a class="cat-card" href="/BookNow/HTML" style="flex:0 0 calc(33.333% - 9px);max-width:calc(33.333% - 9px);">
           <div class="cat-top">
             <div class="cat-name">Specialty HTML</div>
             <div class="cat-price">From $75</div>
@@ -135,6 +136,7 @@ body{font-family:'Raleway',sans-serif;background:var(--bg);color:var(--white);mi
           <div class="cat-cta">Book Now &rarr;</div>
         </a>
 
+    </div>
         <a class="cat-card" href="/BookNow/Hosting">
           <div class="cat-top">
             <div class="cat-name">Hosting</div>
