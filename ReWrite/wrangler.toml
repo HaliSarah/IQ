@@ -1,0 +1,11 @@
+name = "iq-rewrite-proxy"
+main = "worker.js"
+account_id = "7a1e21a989a593a7fce648685afe1cfc"
+compatibility_date = "2024-09-01"
+
+# This attaches the Worker to the exact path on your live domain.
+# Requires iqproductions.com to already be an active zone in this
+# Cloudflare account, which it is.
+[[routes]]
+pattern = "iqproductions.com/ReWrite"
+zone_name = "iqproductions.com"
