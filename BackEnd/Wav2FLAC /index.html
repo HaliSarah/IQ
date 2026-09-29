@@ -1,0 +1,517 @@
+<!DOCTYPE html>
+<!--
+  Title:       WAV to FLAC Converter
+  Author:      Hali Sarah Parsons
+  Date:        2026-09-24
+  Modified By: Claude
+  Description: Single-file, fully offline WAV→FLAC converter. Encodes PCM/float WAV
+               to lossless FLAC in the browser (fixed-predictor + Rice coding, stereo
+               decorrelation). No uploads, no server, no quality loss.
+               Deploy to: BackEnd/Wav2FLAC/index.html
+-->
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>WAV → FLAC | I.Q. Productionz BackEnd</title>
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700&family=Raleway:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+/* WHY custom properties: IQ dark-gold palette applied consistently */
+:root {
+  --bg:       #333333;
+  --surface:  #454545;
+  --border:   #2e2b24;
+  --gold:     #c98a2e;
+  --gold-lt:  #e0a84a;
+  --gold-dim: #7a5218;
+  --gold-pale:rgba(201,138,46,0.07);
+  --white:    #f0ece3;
+  --muted:    #a9a9a9;
+  --success:  #6abf7b;
+  --danger:   #e05c5c;
+  --radius:   8px;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+  font-family: 'Raleway', sans-serif;
+  background: var(--bg);
+  color: var(--white);
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  padding-bottom: 72px;
+}
+
+/* NAV */
+.top-nav {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 14px 28px;
+  background: var(--surface);
+  border-bottom: 1px solid var(--border);
+  position: sticky;
+  top: 0;
+  z-index: 50;
+}
+.crumbs { font-family:'Cinzel',serif; font-size:11px; letter-spacing:2px; color:var(--muted); text-transform:uppercase; }
+.crumbs a { color:var(--gold); text-decoration:none; }
+.nav-back {
+  padding: 8px 18px;
+  border: 1px solid var(--gold-dim);
+  border-radius: var(--radius);
+  background: transparent;
+  color: var(--gold-lt);
+  font-family: 'Cinzel', serif;
+  font-size: 11px;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  text-decoration: none;
+  transition: all .2s;
+}
+.nav-back:hover { background: var(--gold); color: #333; border-color: var(--gold); }
+
+/* HEADER */
+.hdr {
+  background: linear-gradient(160deg, #454545 0%, #333 60%);
+  border-bottom: 1px solid var(--border);
+  padding: 52px 32px 40px;
+  text-align: center;
+  position: relative;
+  overflow: hidden;
+}
+/* WHY ::before: radial gold glow consistent with other IQ backend pages */
+.hdr::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(ellipse at 50% 0%, rgba(201,138,46,.13) 0%, transparent 70%);
+  pointer-events: none;
+}
+.eyebrow { position:relative; font-size:10px; letter-spacing:4px; text-transform:uppercase; color:var(--gold); margin-bottom:14px; }
+.hdr h1 { position:relative; font-family:'Cinzel',serif; font-size:clamp(22px,4vw,36px); font-weight:600; color:var(--white); letter-spacing:2px; text-transform:uppercase; margin-bottom:10px; }
+.gold-rule { width:60px; height:2px; background:linear-gradient(90deg,transparent,var(--gold),transparent); margin:16px auto; }
+.hdr p { position:relative; font-size:13px; color:var(--muted); font-weight:300; max-width:460px; margin:0 auto; line-height:1.75; }
+
+/* BODY */
+/* WHY margin-top:auto on main: pushes content toward bottom for bottom-heavy layout */
+main { margin-top: auto; padding: 32px 24px 0; width: 100%; max-width: 760px; margin-inline: auto; }
+
+/* FILE CARDS */
+#list { display: flex; flex-direction: column; gap: 10px; margin-bottom: 20px; }
+.card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 14px 18px;
+  transition: border-color .2s;
+}
+.row { display: flex; justify-content: space-between; gap: 12px; align-items: center; flex-wrap: wrap; }
+.name { font-weight: 600; word-break: break-all; font-size: 14px; }
+.meta { font-size: 12px; color: var(--muted); }
+/* WHY gradient bar: visual feedback while the encoder runs frame by frame */
+.bar { height: 4px; background: rgba(255,255,255,.1); border-radius: 20px; margin-top: 10px; overflow: hidden; }
+.bar > i { display: block; height: 100%; width: 0; background: linear-gradient(90deg, var(--gold), var(--gold-lt)); transition: width .15s; border-radius: 20px; }
+.err { color: var(--danger); }
+a.dl {
+  background: linear-gradient(135deg, var(--gold), #a87025);
+  color: #333;
+  text-decoration: none;
+  font-weight: 700;
+  padding: 6px 16px;
+  border-radius: 20px;
+  font-family: 'Cinzel', serif;
+  font-size: 11px;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  box-shadow: 0 3px 10px rgba(201,138,46,.25);
+  transition: filter .2s;
+}
+a.dl:hover { filter: brightness(1.1); }
+
+/* DROP ZONE */
+#drop {
+  min-height: 36vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  border: 2px dashed var(--gold-dim);
+  border-radius: 14px;
+  background: var(--gold-pale);
+  cursor: pointer;
+  text-align: center;
+  padding: 28px;
+  transition: background .15s, border-color .15s;
+}
+#drop.over { background: rgba(201,138,46,.13); border-color: var(--gold); }
+#drop .drop-icon { font-size: 2.6rem; opacity: .75; }
+#drop .drop-label { font-family: 'Cinzel', serif; font-size: 13px; letter-spacing: 1.5px; text-transform: uppercase; color: var(--gold-lt); }
+#drop small { font-size: 12px; color: var(--muted); font-weight: 300; }
+input[type=file] { display: none; }
+
+/* FOOTER */
+.ftr {
+  text-align: center;
+  margin-top: 56px;
+  padding: 28px 16px;
+  border-top: 1px solid var(--border);
+  font-size: 11px;
+  color: var(--muted);
+  letter-spacing: 1px;
+  font-family: 'Cinzel', serif;
+}
+.ftr a { color: var(--gold-lt); text-decoration: none; }
+
+@media (max-width: 600px) { .hdr { padding: 36px 18px 28px; } main { padding: 24px 16px 0; } }
+</style>
+</head>
+<body>
+
+<nav class="top-nav">
+  <div class="crumbs"><a href="../">BackEnd</a> / WAV → FLAC</div>
+  <a class="nav-back" href="../">↩ BackEnd Home</a>
+</nav>
+
+<header class="hdr">
+  <div class="eyebrow">BackEnd Tools</div>
+  <h1>WAV &rarr; FLAC</h1>
+  <div class="gold-rule"></div>
+  <p>Lossless conversion in your browser. Nothing uploaded — everything stays on your machine.</p>
+</header>
+
+<main>
+  <div id="list"></div>
+  <label id="drop" for="file">
+    <div class="drop-icon">🎵</div>
+    <div class="drop-label">Drop WAV files here</div>
+    <span>or click to choose</span>
+    <small>PCM &middot; Float &middot; 8 / 16 / 24-bit &middot; up to 8 channels</small>
+  </label>
+  <input id="file" type="file" accept=".wav,audio/wav,audio/x-wav" multiple>
+</main>
+
+<footer class="ftr">
+  I.Q. Productionz &nbsp;·&nbsp; <a href="../">BackEnd Portal</a> &nbsp;·&nbsp; <a href="https://IQProductionz.com/">IQProductionz.com</a>
+</footer>
+
+<script>
+/* ENCODER-START */
+
+// CRC tables are precomputed once because FLAC requires a CRC-8 per frame header and a
+// CRC-16 per frame; table lookups are far faster than bitwise loops over millions of bytes.
+const CRC8 = (() => {
+  const t = new Uint8Array(256);
+  for (let i = 0; i < 256; i++) {
+    let c = i;
+    for (let j = 0; j < 8; j++) c = (c & 0x80) ? ((c << 1) ^ 0x07) & 0xFF : (c << 1) & 0xFF;
+    t[i] = c;
+  }
+  return t;
+})();
+const CRC16 = (() => {
+  const t = new Uint16Array(256);
+  for (let i = 0; i < 256; i++) {
+    let c = i << 8;
+    for (let j = 0; j < 8; j++) c = (c & 0x8000) ? ((c << 1) ^ 0x8005) & 0xFFFF : (c << 1) & 0xFFFF;
+    t[i] = c;
+  }
+  return t;
+})();
+
+// Decoders reject a frame whose checksum is wrong, so we must compute these exactly.
+function crc8(b, s, e) { let c = 0; for (let i = s; i < e; i++) c = CRC8[c ^ b[i]]; return c; }
+function crc16(b, s, e) { let c = 0; for (let i = s; i < e; i++) c = ((c << 8) & 0xFFFF) ^ CRC16[(c >> 8) ^ b[i]]; return c; }
+
+// FLAC is a bitstream, not a byte stream; this class packs arbitrary-width fields (up to 36 bits)
+// so the rest of the encoder can think in fields rather than shifting bytes by hand.
+class BitWriter {
+  constructor(cap) { this.buf = new Uint8Array(cap); this.pos = 0; this.acc = 0; this.nbits = 0; }
+  // Values wider than 16 bits are split because JS bitwise ops are 32-bit and would overflow.
+  write(v, n) {
+    if (n > 16) {
+      const hi = Math.floor(v / 65536);
+      this.write(hi, n - 16);
+      this.write(v - hi * 65536, 16);
+      return;
+    }
+    this.acc = (this.acc << n) | v;
+    this.nbits += n;
+    while (this.nbits >= 8) {
+      this.nbits -= 8;
+      this.buf[this.pos++] = (this.acc >>> this.nbits) & 0xFF;
+    }
+    this.acc &= (1 << this.nbits) - 1; // drop emitted bits so acc never grows past 23 bits
+  }
+  // Two's-complement encode negatives, since FLAC stores warm-up samples as signed fields.
+  writeSigned(v, n) { this.write(v < 0 ? v + Math.pow(2, n) : v, n); }
+  // Unary code = q zeros then a one; chunked so q may exceed the 16-bit write limit.
+  unary(q) { while (q >= 15) { this.write(0, 15); q -= 15; } this.write(1, q + 1); }
+  // Frames must end on a byte boundary before the CRC-16.
+  align() { if (this.nbits) this.write(0, 8 - this.nbits); }
+}
+
+// FLAC encodes the frame number with UTF-8-style variable length bytes.
+function utf8Number(n) {
+  if (n < 0x80) return [n];
+  if (n < 0x800) return [0xC0 | (n >> 6), 0x80 | (n & 63)];
+  if (n < 0x10000) return [0xE0 | (n >> 12), 0x80 | ((n >> 6) & 63), 0x80 | (n & 63)];
+  return [0xF0 | (n >> 18), 0x80 | ((n >> 12) & 63), 0x80 | ((n >> 6) & 63), 0x80 | (n & 63)];
+}
+
+// Fixed polynomial predictors (order 0-4) are cheap and give good compression on music
+// without the cost of LPC analysis. Returns residuals plus sum|r| as a cost proxy.
+function computeResidual(x, n, order) {
+  const r = new Int32Array(n);
+  let sum = 0;
+  for (let i = order; i < n; i++) {
+    let v;
+    switch (order) {
+      case 0: v = x[i]; break;
+      case 1: v = x[i] - x[i - 1]; break;
+      case 2: v = x[i] - 2 * x[i - 1] + x[i - 2]; break;
+      case 3: v = x[i] - 3 * x[i - 1] + 3 * x[i - 2] - x[i - 3]; break;
+      default: v = x[i] - 4 * x[i - 1] + 6 * x[i - 2] - 4 * x[i - 3] + x[i - 4];
+    }
+    r[i] = v;
+    sum += v < 0 ? -v : v;
+  }
+  return { r, sum };
+}
+
+// Pick whichever predictor order leaves the smallest residual; digital silence becomes a
+// constant subframe, which costs almost nothing.
+function analyze(x, n) {
+  let constant = true;
+  for (let i = 1; i < n; i++) if (x[i] !== x[0]) { constant = false; break; }
+  if (constant) return { kind: 'const', value: x[0], sum: 0 };
+  let best = null;
+  for (let order = 0; order <= Math.min(4, n - 1); order++) {
+    const { r, sum } = computeResidual(x, n, order);
+    if (!best || sum < best.sum) best = { kind: 'fixed', order, r, sum };
+  }
+  return best;
+}
+
+// Rice parameters are chosen per partition; searching partition orders lets the coder adapt
+// to loud/quiet passages inside a block. Zigzag maps signed residuals to unsigned for Rice.
+function planRice(res, n, order) {
+  const zz = new Int32Array(n);
+  for (let i = order; i < n; i++) zz[i] = (res[i] << 1) ^ (res[i] >> 31);
+  let best = null;
+  for (let po = 0; po <= 6; po++) {
+    const parts = 1 << po;
+    if (n % parts !== 0) break;            // partitions must divide the block evenly
+    const psize = n >> po;
+    if (psize <= order) break;             // first partition needs at least one residual
+    let total = 6, ks = [];
+    for (let p = 0; p < parts; p++) {
+      const s = p * psize + (p === 0 ? order : 0), e = (p + 1) * psize;
+      let sum = 0; for (let i = s; i < e; i++) sum += zz[i];
+      const cnt = e - s, mean = sum / cnt;
+      const k0 = mean > 1 ? Math.floor(Math.log2(mean)) : 0;
+      let bk = 0, bb = Infinity;
+      for (let k = Math.max(0, k0 - 1); k <= Math.min(30, k0 + 1); k++) {
+        let bits = cnt * (k + 1);
+        for (let i = s; i < e; i++) bits += zz[i] >>> k;
+        if (bits < bb) { bb = bits; bk = k; }
+      }
+      ks.push(bk); total += 5 + bb;
+    }
+    if (!best || total < best.bits) best = { bits: total, po, ks, zz };
+  }
+  return best;
+}
+
+// Decide constant / fixed / verbatim for one channel and return a closure that writes it.
+// Verbatim is the safety net for noise where prediction would make the data bigger.
+function makeSubframe(x, n, bps) {
+  const a = analyze(x, n);
+  if (a.kind === 'const') {
+    return { bits: 8 + bps, write(bw) { bw.write(0, 8); bw.writeSigned(a.value, bps); } };
+  }
+  const plan = planRice(a.r, n, a.order);
+  const fixedBits = 8 + a.order * bps + plan.bits;
+  if (fixedBits >= 8 + n * bps) {
+    return { bits: 8 + n * bps, write(bw) { bw.write(0x02, 8); for (let i = 0; i < n; i++) bw.writeSigned(x[i], bps); } };
+  }
+  return {
+    bits: fixedBits,
+    write(bw) {
+      bw.write(0x10 | (a.order << 1), 8); // 0 + 001xxx type + no wasted bits
+      for (let i = 0; i < a.order; i++) bw.writeSigned(x[i], bps);
+      bw.write(1, 2);                     // 5-bit Rice params: needed for 24-bit residuals
+      bw.write(plan.po, 4);
+      const psize = n >> plan.po;
+      for (let p = 0; p < plan.ks.length; p++) {
+        const k = plan.ks[p], s = p * psize + (p === 0 ? a.order : 0), e = (p + 1) * psize;
+        bw.write(k, 5);
+        const mask = k ? (Math.pow(2, k) - 1) : 0;
+        for (let i = s; i < e; i++) {
+          const u = plan.zz[i];
+          bw.unary(u >>> k);
+          if (k) bw.write(u & mask, k);
+        }
+      }
+    }
+  };
+}
+
+// Yield to the browser so the progress bar repaints and the tab does not look frozen.
+const tick = () => new Promise(r => setTimeout(r, 0));
+
+// chs: array of Int32Array (one per channel). Returns a Blob containing a valid .flac file.
+async function encodeFlac(chs, rate, bps, onProgress) {
+  const ch = chs.length, total = chs[0].length, BS = 4096;
+  const sizeCode = { 8: 1, 12: 2, 16: 4, 20: 5, 24: 6 }[bps] || 0;
+  const frames = [];
+  let minF = Infinity, maxF = 0;
+
+  for (let start = 0, fi = 0; start < total; start += BS, fi++) {
+    const n = Math.min(BS, total - start);
+    const blk = chs.map(c => c.subarray(start, start + n));
+    let assign = ch - 1, subs;
+
+    if (ch === 2) {
+      // Stereo tracks are usually highly correlated; try L/R, L/S, S/R, M/S and keep the cheapest.
+      const L = blk[0], R = blk[1], M = new Int32Array(n), S = new Int32Array(n);
+      for (let i = 0; i < n; i++) { M[i] = (L[i] + R[i]) >> 1; S[i] = L[i] - R[i]; }
+      const sL = analyze(L, n).sum, sR = analyze(R, n).sum, sM = analyze(M, n).sum, sS = analyze(S, n).sum;
+      const opts = [[0, sL + sR], [8, sL + sS], [9, sS + sR], [10, sM + sS]];
+      opts.sort((p, q) => p[1] - q[1]);
+      assign = opts[0][0];
+      const pick = { 0: [[L, bps], [R, bps]], 8: [[L, bps], [S, bps + 1]], 9: [[S, bps + 1], [R, bps]], 10: [[M, bps], [S, bps + 1]] }[assign];
+      subs = pick.map(([x, b]) => makeSubframe(x, n, b));
+    } else {
+      subs = blk.map(x => makeSubframe(x, n, bps));
+    }
+
+    const bw = new BitWriter(n * ch * 5 + 1024);
+    const bsCode = n === BS ? 12 : 7;
+    bw.write(0xFFF8, 16);                 // sync + fixed-blocksize strategy
+    bw.write(bsCode << 4, 8);             // blocksize code, sample rate from STREAMINFO
+    bw.write((assign << 4) | (sizeCode << 1), 8);
+    for (const b of utf8Number(fi)) bw.write(b, 8);
+    if (bsCode === 7) bw.write(n - 1, 16);
+    bw.write(crc8(bw.buf, 0, bw.pos), 8);
+    subs.forEach(s => s.write(bw));
+    bw.align();
+    bw.write(crc16(bw.buf, 0, bw.pos), 16);
+
+    const out = bw.buf.slice(0, bw.pos);
+    minF = Math.min(minF, out.length); maxF = Math.max(maxF, out.length);
+    frames.push(out);
+    if (fi % 16 === 0) { if (onProgress) onProgress(start / total); await tick(); }
+  }
+
+  // STREAMINFO written last because min/max frame sizes are only known after encoding.
+  const si = new BitWriter(64);
+  for (const c of 'fLaC') si.write(c.charCodeAt(0), 8);
+  si.write(0x80, 8); si.write(34, 24);   // last-metadata-block flag, STREAMINFO, 34 bytes
+  const bsz = Math.min(BS, Math.max(16, total));
+  si.write(bsz, 16); si.write(bsz, 16);
+  si.write(frames.length ? minF : 0, 24); si.write(maxF, 24);
+  si.write(rate, 20); si.write(ch - 1, 3); si.write(bps - 1, 5);
+  si.write(total, 36);
+  for (let i = 0; i < 16; i++) si.write(0, 8); // MD5 of zeros = "not computed", which decoders accept
+  if (onProgress) onProgress(1);
+  return new Blob([si.buf.slice(0, si.pos), ...frames], { type: 'audio/flac' });
+}
+
+// Parse RIFF chunks manually because WAVs often carry extra chunks (LIST, etc.) before "data".
+function parseWav(ab) {
+  const dv = new DataView(ab);
+  const tag = o => String.fromCharCode(dv.getUint8(o), dv.getUint8(o + 1), dv.getUint8(o + 2), dv.getUint8(o + 3));
+  if (ab.byteLength < 12 || tag(0) !== 'RIFF' || tag(8) !== 'WAVE') throw new Error('Not a WAV file');
+  let p = 12, fmt = null, off = -1, len = 0;
+  while (p + 8 <= ab.byteLength) {
+    const id = tag(p), size = dv.getUint32(p + 4, true), body = p + 8;
+    if (id === 'fmt ') {
+      fmt = { tag: dv.getUint16(body, true), ch: dv.getUint16(body + 2, true), rate: dv.getUint32(body + 4, true), bits: dv.getUint16(body + 14, true) };
+      // Extensible WAVs hide the real format tag in the sub-format GUID.
+      if (fmt.tag === 0xFFFE && size >= 26) fmt.tag = dv.getUint16(body + 24, true);
+    } else if (id === 'data') {
+      // Streamed WAVs may claim a bogus size, so clamp to what the file really holds.
+      off = body; len = Math.min(size, ab.byteLength - body); break;
+    }
+    p = body + size + (size & 1);
+  }
+  if (!fmt || off < 0) throw new Error('Missing fmt or data chunk');
+  const isFloat = fmt.tag === 3;
+  if (fmt.tag !== 1 && !isFloat) throw new Error('Unsupported WAV encoding (only PCM / float)');
+  if (fmt.ch < 1 || fmt.ch > 8) throw new Error('FLAC supports 1-8 channels');
+  if (!isFloat && ![8, 16, 24].includes(fmt.bits)) throw new Error(fmt.bits + '-bit PCM unsupported (use 8/16/24)');
+  if (isFloat && ![32, 64].includes(fmt.bits)) throw new Error('Unsupported float width');
+
+  const bytes = fmt.bits >> 3, count = Math.floor(len / (fmt.ch * bytes));
+  const chs = Array.from({ length: fmt.ch }, () => new Int32Array(count));
+  for (let i = 0; i < count; i++) {
+    for (let c = 0; c < fmt.ch; c++) {
+      const o = off + (i * fmt.ch + c) * bytes;
+      let v;
+      if (isFloat) {
+        const f = fmt.bits === 32 ? dv.getFloat32(o, true) : dv.getFloat64(o, true);
+        v = Math.max(-8388608, Math.min(8388607, Math.round(f * 8388608))); // clip: floats can exceed +/-1
+      } else if (fmt.bits === 8) v = dv.getUint8(o) - 128;           // 8-bit WAV is unsigned
+      else if (fmt.bits === 16) v = dv.getInt16(o, true);
+      else v = (dv.getInt8(o + 2) << 16) | (dv.getUint8(o + 1) << 8) | dv.getUint8(o);
+      chs[c][i] = v;
+    }
+  }
+  // FLAC has no float mode, so float input is stored as 24-bit integer.
+  return { chs, rate: fmt.rate, bps: isFloat ? 24 : fmt.bits, float: isFloat };
+}
+/* ENCODER-END */
+
+// ---------- UI ----------
+const list = document.getElementById('list');
+const drop = document.getElementById('drop');
+const input = document.getElementById('file');
+
+const fmtSize = b => b > 1048576 ? (b / 1048576).toFixed(1) + ' MB' : Math.max(1, Math.round(b / 1024)) + ' KB';
+
+// Files convert one at a time; whole-file Int32 copies are memory heavy, so parallel runs could crash the tab.
+let queue = Promise.resolve();
+
+function addFile(file) {
+  const card = document.createElement('div');
+  card.className = 'card';
+  card.innerHTML = '<div class="row"><span class="name"></span><span class="meta">Queued</span></div><div class="bar"><i></i></div>';
+  card.querySelector('.name').textContent = file.name;
+  list.appendChild(card);
+  const meta = card.querySelector('.meta'), bar = card.querySelector('.bar > i');
+
+  queue = queue.then(async () => {
+    // try/catch so one bad file shows an error on its own card instead of halting the whole queue.
+    try {
+      meta.textContent = 'Reading…';
+      const wav = parseWav(await file.arrayBuffer());
+      meta.textContent = 'Encoding…';
+      const blob = await encodeFlac(wav.chs, wav.rate, wav.bps, p => { bar.style.width = (p * 100).toFixed(0) + '%'; });
+      const a = document.createElement('a');
+      a.className = 'dl'; a.textContent = 'Download';
+      a.href = URL.createObjectURL(blob);
+      a.download = file.name.replace(/\.wav$/i, '') + '.flac';
+      meta.textContent = fmtSize(file.size) + ' → ' + fmtSize(blob.size) + (wav.float ? ' (float → 24-bit)' : '');
+      meta.after(a);
+      bar.style.width = '100%';
+    } catch (e) {
+      meta.textContent = e.message; meta.classList.add('err');
+      bar.style.width = '0';
+    }
+  });
+}
+
+function handle(files) {
+  for (const f of files) addFile(f);
+}
+input.addEventListener('change', () => { handle(input.files); input.value = ''; });
+// preventDefault on dragover is required, otherwise the browser refuses to fire "drop".
+['dragenter', 'dragover'].forEach(t => drop.addEventListener(t, e => { e.preventDefault(); drop.classList.add('over'); }));
+['dragleave', 'drop'].forEach(t => drop.addEventListener(t, e => { e.preventDefault(); drop.classList.remove('over'); }));
+drop.addEventListener('drop', e => handle(e.dataTransfer.files));
+
+</script>
+</body>
+</html>
