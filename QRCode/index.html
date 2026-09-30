@@ -1,0 +1,1054 @@
+<!DOCTYPE html>
+<!--
+  Title:       QR Code Platform — I.Q. Productionz
+  Author:      Hali Sarah Parsons
+  Date:        2026-09-25
+  Modified By: Claude
+  Description: Full QR code platform. Static QR codes free (no account).
+               Dynamic QR codes require account (Firebase auth + Firestore).
+               Change redirect = $25 via Stripe. View stats = $5 via Stripe.
+               Redirect handler at /r/[username] reads Firestore and 302s.
+               Deploy to: QRCode/index.html
+               Companion: QRCode/r/index.html (redirect handler)
+  SEO targets: dynamic QR code generator, QR code redirect, QR code statistics,
+               change QR code destination, pay per change QR code, Houston TX
+-->
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>QR Code Generator — Static & Dynamic | I.Q. Productionz</title>
+<meta name="description" content="Generate free static QR codes instantly — no account needed. Upgrade to dynamic QR codes: change the destination anytime and track scan statistics. No monthly fees — pay only when you change or check your code. Houston, TX.">
+<meta name="keywords" content="QR code generator, dynamic QR code, static QR code, change QR code redirect, QR code statistics, QR code tracking, free QR code, Houston Texas">
+<link rel="canonical" href="https://iqproductionz.com/QRCode/">
+<meta property="og:title" content="QR Code Generator — Static & Dynamic | I.Q. Productionz">
+<meta property="og:description" content="Free static QR codes. Dynamic QR codes with redirect control and scan tracking. No subscription — pay only when you act.">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://iqproductionz.com/QRCode/">
+<meta property="og:image" content="https://iqproductionz.com/Content/Images/Main/IQ-noglow_Updated.avif">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="QR Code Generator — Static & Dynamic | I.Q. Productionz">
+<meta name="twitter:description" content="Free static QR codes. Dynamic with redirect + stats. Pay per action.">
+<script type="application/ld+json">
+{
+  "@context":"https://schema.org",
+  "@type":"SoftwareApplication",
+  "name":"I.Q. Productionz QR Code Platform",
+  "url":"https://iqproductionz.com/QRCode/",
+  "description":"Generate free static QR codes or dynamic QR codes with redirect control and scan analytics. No subscription.",
+  "applicationCategory":"BusinessApplication",
+  "operatingSystem":"Web",
+  "offers":[
+    {"@type":"Offer","name":"Static QR Code","price":"0","priceCurrency":"USD"},
+    {"@type":"Offer","name":"Change Dynamic Redirect","price":"25","priceCurrency":"USD"},
+    {"@type":"Offer","name":"View Scan Statistics","price":"5","priceCurrency":"USD"}
+  ],
+  "provider":{"@type":"Organization","name":"I.Q. Productionz","url":"https://iqproductionz.com"}
+}
+</script>
+
+<!-- Firebase -->
+<script type="module">
+  import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js';
+  import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, onAuthStateChanged }
+    from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js';
+  import { getFirestore, doc, setDoc, getDoc, updateDoc, collection, addDoc, query, where, getDocs, orderBy, limit }
+    from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js';
+
+  const firebaseConfig = {
+    apiKey: "AIzaSyBClNCsZwvHghZLbhr3BiP3aDys0GDvJys",
+    authDomain: "qr-platform-33671.firebaseapp.com",
+    projectId: "qr-platform-33671",
+    storageBucket: "qr-platform-33671.firebasestorage.app",
+    messagingSenderId: "564631666195",
+    appId: "1:564631666195:web:515eb76f3f3f48c54c09e6",
+    measurementId: "G-65CQXRYPPY"
+  };
+
+  const app = initializeApp(firebaseConfig);
+  const auth = getAuth(app);
+  const db = getFirestore(app);
+
+  // WHY: expose to window so inline onclick handlers can reach Firebase
+  window._fb = { auth, db, createUserWithEmailAndPassword, signInWithEmailAndPassword,
+    signOut, onAuthStateChanged, doc, setDoc, getDoc, updateDoc,
+    collection, addDoc, query, where, getDocs, orderBy, limit };
+
+  // WHY: watch auth state globally so nav + views stay in sync
+  onAuthStateChanged(auth, user => {
+    window._user = user || null;
+    renderNav();
+    if (window._currentView === 'dashboard') showDashboard();
+  });
+</script>
+
+<!-- Stripe -->
+<script src="https://js.stripe.com/v3/"></script>
+
+<!-- QR code library — generates QR SVG/PNG client-side -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Space+Grotesk:wght@400;500;700&display=swap" rel="stylesheet">
+
+<style>
+/* WHY: clean SaaS palette — navy/white/electric blue — distinct from IQ's
+   usual dark gold. QR tools are utility products; users want clarity,
+   not mysticism. The brand logo anchors IQ identity. */
+:root{
+  --navy:  #0a0f1e;
+  --navy2: #111827;
+  --panel: #1e2535;
+  --line:  #2a3347;
+  --blue:  #3b82f6;
+  --blue2: #60a5fa;
+  --green: #22c55e;
+  --amber: #f59e0b;
+  --red:   #ef4444;
+  --white: #f8fafc;
+  --muted: #94a3b8;
+  --r:     10px;
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:'Inter',sans-serif;background:var(--navy);color:var(--white);min-height:100vh;}
+a{color:var(--blue2);text-decoration:none;}
+button{cursor:pointer;}
+input,select,textarea{font-family:inherit;}
+
+/* NAV */
+nav{
+  display:flex;justify-content:space-between;align-items:center;
+  padding:14px 28px;background:rgba(10,15,30,.95);
+  border-bottom:1px solid var(--line);
+  position:sticky;top:0;z-index:100;backdrop-filter:blur(8px);
+  flex-wrap:wrap;gap:10px;
+}
+.nav-brand{display:flex;align-items:center;gap:10px;text-decoration:none;}
+.nav-brand img{height:32px;width:auto;}
+.nav-brand span{font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:1rem;color:var(--white);}
+#nav-right{display:flex;gap:8px;align-items:center;flex-wrap:wrap;}
+.nav-btn{
+  padding:7px 16px;border-radius:7px;font-size:.82rem;font-weight:500;
+  border:1px solid var(--line);background:transparent;color:var(--muted);
+  transition:all .2s;
+}
+.nav-btn:hover{border-color:var(--blue);color:var(--white);}
+.nav-btn.primary{background:var(--blue);color:#fff;border-color:var(--blue);}
+.nav-btn.primary:hover{background:#2563eb;}
+
+/* VIEWS */
+.view{display:none;}
+.view.active{display:block;}
+
+/* ── HERO ── */
+#hero{
+  text-align:center;padding:80px 24px 60px;
+  background:linear-gradient(180deg,#0d1425 0%,var(--navy) 100%);
+  position:relative;overflow:hidden;
+}
+#hero::before{
+  content:'';position:absolute;inset:0;
+  background:radial-gradient(ellipse 80% 50% at 50% -10%,rgba(59,130,246,.18) 0%,transparent 70%);
+  pointer-events:none;
+}
+.hero-eyebrow{
+  display:inline-block;padding:5px 14px;border-radius:20px;
+  border:1px solid rgba(59,130,246,.4);
+  background:rgba(59,130,246,.08);
+  font-size:.75rem;font-weight:500;letter-spacing:.04em;
+  color:var(--blue2);margin-bottom:22px;
+}
+#hero h1{
+  font-family:'Space Grotesk',sans-serif;
+  font-size:clamp(2rem,5vw,3.4rem);font-weight:700;
+  line-height:1.15;max-width:720px;margin:0 auto 18px;
+  color:var(--white);
+}
+#hero h1 em{font-style:normal;color:var(--blue2);}
+#hero p{font-size:1.05rem;color:var(--muted);max-width:520px;margin:0 auto 36px;line-height:1.7;}
+
+/* TYPE CARDS */
+.type-grid{
+  display:grid;grid-template-columns:1fr 1fr;gap:18px;
+  max-width:820px;margin:0 auto 48px;text-align:left;
+}
+@media(max-width:600px){.type-grid{grid-template-columns:1fr;}}
+.type-card{
+  background:var(--panel);border:1px solid var(--line);
+  border-radius:var(--r);padding:28px;position:relative;overflow:hidden;
+  transition:border-color .2s;
+}
+.type-card:hover{border-color:var(--blue);}
+.type-card.featured{border-color:rgba(59,130,246,.5);}
+.type-card .badge{
+  display:inline-block;padding:3px 10px;border-radius:20px;
+  font-size:.68rem;font-weight:600;letter-spacing:.04em;margin-bottom:12px;
+}
+.badge-free{background:rgba(34,197,94,.15);color:var(--green);}
+.badge-dynamic{background:rgba(59,130,246,.15);color:var(--blue2);}
+.type-card h3{font-family:'Space Grotesk',sans-serif;font-size:1.2rem;font-weight:700;margin-bottom:8px;}
+.type-card p{font-size:.88rem;color:var(--muted);line-height:1.6;margin-bottom:16px;}
+.type-feats{list-style:none;display:flex;flex-direction:column;gap:6px;}
+.type-feats li{font-size:.82rem;color:var(--muted);display:flex;align-items:center;gap:8px;}
+.type-feats li::before{content:'✓';color:var(--green);font-weight:700;flex-shrink:0;}
+.type-feats li.na::before{content:'—';color:var(--line);}
+.pricing-note{
+  margin-top:20px;padding:12px 14px;background:rgba(59,130,246,.08);
+  border-radius:7px;font-size:.8rem;color:var(--blue2);line-height:1.5;
+}
+
+/* MAIN GENERATOR SECTION */
+.section{max-width:900px;margin:0 auto;padding:56px 24px 0;}
+.section-title{font-family:'Space Grotesk',sans-serif;font-size:1.5rem;font-weight:700;margin-bottom:6px;}
+.section-sub{font-size:.9rem;color:var(--muted);margin-bottom:28px;line-height:1.6;}
+
+/* TABS */
+.tab-row{display:flex;gap:2px;border-bottom:1px solid var(--line);margin-bottom:28px;}
+.tab{
+  padding:10px 18px;font-size:.85rem;font-weight:500;
+  background:none;border:none;color:var(--muted);
+  border-bottom:2px solid transparent;margin-bottom:-1px;transition:all .2s;
+}
+.tab:hover{color:var(--white);}
+.tab.active{color:var(--blue2);border-bottom-color:var(--blue);}
+
+/* GENERATOR CARD */
+.gen-card{
+  background:var(--panel);border:1px solid var(--line);
+  border-radius:var(--r);padding:28px;
+}
+.field{margin-bottom:18px;}
+.field label{display:block;font-size:.75rem;font-weight:600;letter-spacing:.04em;color:var(--muted);margin-bottom:7px;}
+.field input,.field select{
+  width:100%;padding:11px 14px;background:var(--navy2);
+  border:1px solid var(--line);border-radius:7px;
+  color:var(--white);font-size:.95rem;outline:none;transition:border-color .2s;
+}
+.field input:focus,.field select:focus{border-color:var(--blue);}
+.field input::placeholder{color:var(--line);}
+
+.size-row{display:grid;grid-template-columns:1fr 1fr;gap:14px;}
+.color-row{display:flex;gap:14px;align-items:flex-end;flex-wrap:wrap;}
+.color-row .field{flex:1;min-width:120px;}
+
+.gen-btn{
+  width:100%;padding:13px;background:var(--blue);color:#fff;
+  border:none;border-radius:8px;font-size:.9rem;font-weight:600;
+  transition:background .2s;margin-top:4px;
+}
+.gen-btn:hover{background:#2563eb;}
+
+/* QR RESULT */
+#qr-result{display:none;margin-top:24px;text-align:center;}
+#qr-canvas{display:inline-block;padding:16px;background:#fff;border-radius:10px;}
+.dl-row{display:flex;gap:10px;justify-content:center;margin-top:14px;flex-wrap:wrap;}
+.dl-btn{
+  padding:9px 20px;border-radius:7px;font-size:.82rem;font-weight:500;
+  border:1px solid var(--line);background:var(--panel);color:var(--white);
+  transition:all .2s;
+}
+.dl-btn:hover{border-color:var(--blue);background:var(--navy2);}
+.dl-btn.primary{background:var(--blue);border-color:var(--blue);}
+.dl-btn.primary:hover{background:#2563eb;}
+.qr-url-note{
+  margin-top:12px;font-size:.78rem;color:var(--muted);
+  background:var(--navy2);border-radius:6px;padding:8px 12px;
+  display:inline-block;
+}
+
+/* DASHBOARD */
+#dashboard{padding:32px 24px;max-width:900px;margin:0 auto;}
+.dash-header{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;margin-bottom:24px;}
+.dash-header h2{font-family:'Space Grotesk',sans-serif;font-size:1.4rem;font-weight:700;}
+
+.qr-item{
+  background:var(--panel);border:1px solid var(--line);
+  border-radius:var(--r);padding:20px;margin-bottom:14px;
+  display:flex;gap:20px;align-items:center;flex-wrap:wrap;
+}
+.qr-item-qr{flex-shrink:0;background:#fff;padding:8px;border-radius:6px;width:72px;height:72px;display:flex;align-items:center;justify-content:center;}
+.qr-item-body{flex:1;min-width:0;}
+.qr-item-name{font-weight:600;font-size:.95rem;margin-bottom:4px;}
+.qr-item-url{font-size:.8rem;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:400px;}
+.qr-item-type{display:inline-block;padding:2px 8px;border-radius:10px;font-size:.68rem;font-weight:600;margin-left:8px;}
+.type-static{background:rgba(34,197,94,.12);color:var(--green);}
+.type-dynamic{background:rgba(59,130,246,.12);color:var(--blue2);}
+.qr-item-actions{display:flex;gap:8px;flex-wrap:wrap;}
+.act-btn{
+  padding:7px 14px;border-radius:6px;font-size:.78rem;font-weight:500;
+  border:1px solid var(--line);background:transparent;color:var(--white);
+  transition:all .2s;
+}
+.act-btn:hover{border-color:var(--blue);background:var(--navy2);}
+.act-btn.danger{border-color:rgba(239,68,68,.4);color:var(--red);}
+.act-btn.danger:hover{background:rgba(239,68,68,.1);}
+
+/* STATS PANEL */
+.stats-panel{
+  background:var(--navy2);border:1px solid var(--line);
+  border-radius:var(--r);padding:20px;margin-top:14px;display:none;
+}
+.stats-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-bottom:18px;}
+@media(max-width:500px){.stats-grid{grid-template-columns:1fr 1fr;}}
+.stat-box{background:var(--panel);border-radius:7px;padding:14px;text-align:center;}
+.stat-num{font-family:'Space Grotesk',sans-serif;font-size:1.6rem;font-weight:700;color:var(--blue2);}
+.stat-label{font-size:.72rem;color:var(--muted);margin-top:3px;}
+
+/* AUTH MODAL */
+.modal-bg{display:none;position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:200;align-items:center;justify-content:center;padding:20px;}
+.modal-bg.open{display:flex;}
+.modal{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:32px;max-width:420px;width:100%;}
+.modal h3{font-family:'Space Grotesk',sans-serif;font-size:1.2rem;font-weight:700;margin-bottom:6px;}
+.modal p{font-size:.85rem;color:var(--muted);margin-bottom:22px;}
+.modal .field input{margin-bottom:0;}
+.modal-tabs{display:flex;gap:2px;margin-bottom:22px;}
+.modal-tab{flex:1;padding:9px;background:var(--navy2);border:1px solid var(--line);font-size:.82rem;font-weight:500;color:var(--muted);border-radius:6px;transition:all .2s;}
+.modal-tab.active{background:var(--blue);border-color:var(--blue);color:#fff;}
+.modal-err{color:var(--red);font-size:.82rem;margin-top:10px;display:none;}
+.modal-close{position:absolute;top:14px;right:14px;background:none;border:none;color:var(--muted);font-size:1.2rem;}
+
+/* CHANGE REDIRECT MODAL */
+#redirect-modal .new-url-field{margin-bottom:20px;}
+
+/* TOAST */
+#toast{
+  position:fixed;bottom:24px;right:24px;z-index:300;
+  background:var(--panel);border:1px solid var(--line);border-radius:9px;
+  padding:12px 18px;font-size:.85rem;display:none;
+  box-shadow:0 8px 28px rgba(0,0,0,.4);max-width:300px;
+}
+#toast.ok{border-color:var(--green);color:var(--green);}
+#toast.err{border-color:var(--red);color:var(--red);}
+
+/* PAYMENT CONFIRM MODAL */
+#pay-modal .charge-amount{
+  font-family:'Space Grotesk',sans-serif;font-size:2rem;font-weight:700;
+  color:var(--blue2);text-align:center;margin:16px 0;
+}
+#pay-modal .charge-desc{font-size:.85rem;color:var(--muted);text-align:center;margin-bottom:20px;}
+#card-element{background:var(--navy2);border:1px solid var(--line);border-radius:7px;padding:12px 14px;margin-bottom:10px;}
+#card-errors{color:var(--red);font-size:.8rem;min-height:18px;margin-bottom:10px;}
+
+/* FOOTER */
+footer{
+  text-align:center;padding:40px 24px;margin-top:80px;
+  border-top:1px solid var(--line);
+  font-size:.78rem;color:var(--muted);
+}
+footer a{color:var(--muted);}footer a:hover{color:var(--white);}
+.ftr-links{display:flex;gap:20px;justify-content:center;flex-wrap:wrap;margin-bottom:8px;}
+
+.empty-state{text-align:center;padding:48px 24px;color:var(--muted);}
+.empty-state p{margin-top:10px;font-size:.9rem;}
+
+/* Loading spinner */
+.spin{display:inline-block;width:16px;height:16px;border:2px solid rgba(255,255,255,.3);border-top-color:#fff;border-radius:50%;animation:spin .7s linear infinite;vertical-align:middle;margin-right:6px;}
+@keyframes spin{to{transform:rotate(360deg);}}
+
+@media(max-width:600px){
+  #hero{padding:56px 18px 40px;}
+  .section{padding:40px 18px 0;}
+  nav{padding:12px 18px;}
+}
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav>
+  <a class="nav-brand" href="https://iqproductionz.com/">
+    <img src="https://iqproductionz.com/Content/Images/Main/IQ-noglow_Updated.avif" alt="I.Q. Productionz" onerror="this.style.display='none'">
+    <span>QR Platform</span>
+  </a>
+  <div id="nav-right">
+    <button class="nav-btn" onclick="showView('home')">Generator</button>
+    <button class="nav-btn" onclick="requireAuth('dashboard')" id="nav-dash" style="display:none">My Codes</button>
+    <button class="nav-btn" onclick="openAuthModal()" id="nav-signin">Sign In</button>
+    <button class="nav-btn primary" onclick="openAuthModal('signup')" id="nav-signup">Get Started</button>
+    <button class="nav-btn" onclick="doSignOut()" id="nav-signout" style="display:none">Sign Out</button>
+  </div>
+</nav>
+
+<!-- ── HERO VIEW ── -->
+<div class="view active" id="view-home">
+
+  <section id="hero">
+    <div class="hero-eyebrow">Free Static · Dynamic with Tracking</div>
+    <h1>QR codes that work<br>as hard as <em>you</em> do</h1>
+    <p>Generate a free static QR instantly — no account. Upgrade to dynamic: change where it points anytime, track every scan.</p>
+
+    <!-- STATIC vs DYNAMIC EXPLAINER -->
+    <div class="type-grid">
+      <div class="type-card">
+        <span class="badge badge-free">Free · No Account</span>
+        <h3>Static QR Code</h3>
+        <p>The destination is baked into the pattern. Once printed, it never changes — and that's fine for most use cases.</p>
+        <ul class="type-feats">
+          <li>Instant generation</li>
+          <li>Download PNG</li>
+          <li>Never expires</li>
+          <li class="na">Can't change destination</li>
+          <li class="na">No scan tracking</li>
+          <li class="na">No statistics</li>
+        </ul>
+      </div>
+      <div class="type-card featured">
+        <span class="badge badge-dynamic">Dynamic · Account Required</span>
+        <h3>Dynamic QR Code</h3>
+        <p>The QR pattern stays fixed. The destination lives in our system — change it anytime without reprinting.</p>
+        <ul class="type-feats">
+          <li>Change redirect anytime</li>
+          <li>Scan count tracking</li>
+          <li>Device & location data</li>
+          <li>Reset scan counter</li>
+          <li>Download PNG</li>
+          <li>Your code never expires</li>
+        </ul>
+        <div class="pricing-note">
+          No monthly fee. <strong>$25</strong> to change the redirect. <strong>$5</strong> to view your scan statistics.
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- GENERATOR -->
+  <div class="section">
+    <div class="tab-row">
+      <button class="tab active" onclick="switchTab('static')" id="tab-static">Static — Free</button>
+      <button class="tab" onclick="switchTab('dynamic')" id="tab-dynamic">Dynamic — $25/change</button>
+    </div>
+
+    <!-- STATIC GENERATOR -->
+    <div id="panel-static">
+      <div class="gen-card">
+        <div class="field">
+          <label>URL or Text to Encode</label>
+          <input type="text" id="s-url" placeholder="https://yourwebsite.com or any text">
+        </div>
+        <div class="size-row">
+          <div class="field">
+            <label>Size (px)</label>
+            <select id="s-size">
+              <option value="200">200 × 200</option>
+              <option value="300" selected>300 × 300</option>
+              <option value="400">400 × 400</option>
+              <option value="600">600 × 600</option>
+            </select>
+          </div>
+          <div class="field">
+            <label>Error Correction</label>
+            <select id="s-ec">
+              <option value="L">Low (7%)</option>
+              <option value="M" selected>Medium (15%)</option>
+              <option value="Q">Quartile (25%)</option>
+              <option value="H">High (30%)</option>
+            </select>
+          </div>
+        </div>
+        <div class="color-row">
+          <div class="field">
+            <label>Foreground</label>
+            <input type="color" id="s-fg" value="#000000" style="height:40px;cursor:pointer;">
+          </div>
+          <div class="field">
+            <label>Background</label>
+            <input type="color" id="s-bg" value="#ffffff" style="height:40px;cursor:pointer;">
+          </div>
+        </div>
+        <button class="gen-btn" onclick="generateStatic()">Generate Static QR Code</button>
+
+        <div id="qr-result">
+          <div id="qr-canvas"></div>
+          <p class="qr-url-note" id="qr-url-note"></p>
+          <div class="dl-row">
+            <button class="dl-btn primary" onclick="downloadQR('png')">⬇ Download PNG</button>
+            <button class="dl-btn" onclick="downloadQR('svg')">⬇ Download SVG</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- DYNAMIC GENERATOR -->
+    <div id="panel-dynamic" style="display:none;">
+      <div class="gen-card">
+        <div class="field">
+          <label>QR Code Name (for your dashboard)</label>
+          <input type="text" id="d-name" placeholder="e.g. Restaurant Menu, Event Flyer">
+        </div>
+        <div class="field">
+          <label>Initial Destination URL</label>
+          <input type="text" id="d-url" placeholder="https://yourwebsite.com">
+        </div>
+        <p style="font-size:.8rem;color:var(--muted);margin-bottom:18px;line-height:1.5;">
+          Your QR code will always point to <strong style="color:var(--blue2);">iqproductionz.com/QRCode/Account/[yourcode]</strong> — which redirects to whatever URL you set. You can change the destination for $25 anytime.
+        </p>
+        <button class="gen-btn" onclick="createDynamic()">Create Dynamic QR Code</button>
+        <p style="font-size:.75rem;color:var(--muted);margin-top:10px;text-align:center;">Account required — we'll prompt you to sign in or sign up.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- HOW IT WORKS -->
+  <div class="section" style="padding-top:64px;padding-bottom:40px;">
+    <h2 class="section-title">How dynamic QR codes work</h2>
+    <p class="section-sub">The printed pattern never changes. Only the destination does.</p>
+    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:16px;">
+      <div class="type-card" style="text-align:center;">
+        <div style="font-size:2rem;margin-bottom:12px;">📲</div>
+        <h3 style="font-size:1rem;margin-bottom:8px;">Someone scans</h3>
+        <p style="font-size:.82rem;">Their camera reads your QR code — the same printed pattern, forever.</p>
+      </div>
+      <div class="type-card" style="text-align:center;">
+        <div style="font-size:2rem;margin-bottom:12px;">↗</div>
+        <h3 style="font-size:1rem;margin-bottom:8px;">We redirect</h3>
+        <p style="font-size:.82rem;">Our server looks up your current destination and sends them there instantly.</p>
+      </div>
+      <div class="type-card" style="text-align:center;">
+        <div style="font-size:2rem;margin-bottom:12px;">📊</div>
+        <h3 style="font-size:1rem;margin-bottom:8px;">You track</h3>
+        <p style="font-size:.82rem;">Every scan is logged. View counts, device types, and location — $5 to access your stats.</p>
+      </div>
+    </div>
+  </div>
+
+</div><!-- end view-home -->
+
+<!-- ── DASHBOARD VIEW ── -->
+<div class="view" id="view-dashboard">
+  <div id="dashboard">
+    <div class="dash-header">
+      <div>
+        <h2>My QR Codes</h2>
+        <p style="font-size:.85rem;color:var(--muted);margin-top:4px;" id="dash-email"></p>
+      </div>
+      <button class="nav-btn primary" onclick="showView('home');switchTab('dynamic')">+ New Dynamic Code</button>
+    </div>
+    <div id="qr-list"><div class="empty-state"><p>No QR codes yet. Create your first dynamic QR code above.</p></div></div>
+  </div>
+</div>
+
+<!-- ── AUTH MODAL ── -->
+<div class="modal-bg" id="auth-modal">
+  <div class="modal" style="position:relative;">
+    <button class="modal-close" onclick="closeModal('auth-modal')">✕</button>
+    <h3>Your Account</h3>
+    <p>Sign in or create a free account to manage dynamic QR codes.</p>
+    <div class="modal-tabs">
+      <button class="modal-tab active" onclick="authTab('signin')" id="atab-signin">Sign In</button>
+      <button class="modal-tab" onclick="authTab('signup')" id="atab-signup">Sign Up</button>
+    </div>
+    <div id="auth-signin">
+      <div class="field"><label>Email</label><input type="email" id="si-email" placeholder="you@email.com"></div>
+      <div class="field" style="margin-top:14px;"><label>Password</label><input type="password" id="si-pass" placeholder="Password"></div>
+      <button class="gen-btn" style="margin-top:18px;" onclick="doSignIn()">Sign In</button>
+    </div>
+    <div id="auth-signup" style="display:none;">
+      <div class="field"><label>Email</label><input type="email" id="su-email" placeholder="you@email.com"></div>
+      <div class="field" style="margin-top:14px;"><label>Password (min 6 chars)</label><input type="password" id="su-pass" placeholder="Choose a password"></div>
+      <div class="field" style="margin-top:14px;"><label>QR Code Username (letters & numbers only)</label><input type="text" id="su-username" placeholder="yourname" oninput="this.value=this.value.toLowerCase().replace(/[^a-z0-9]/g,'')"></div>
+      <p style="font-size:.75rem;color:var(--muted);margin-top:6px;">Your dynamic QR codes will redirect via <strong>iqproductionz.com/QRCode/Account/yourname-codename</strong></p>
+      <button class="gen-btn" style="margin-top:18px;" onclick="doSignUp()">Create Account</button>
+    </div>
+    <div class="modal-err" id="auth-err"></div>
+  </div>
+</div>
+
+<!-- ── CHANGE REDIRECT MODAL ── -->
+<div class="modal-bg" id="redirect-modal">
+  <div class="modal" style="position:relative;">
+    <button class="modal-close" onclick="closeModal('redirect-modal')">✕</button>
+    <h3>Update Redirect Destination</h3>
+    <p>Change where this QR code sends people. A $25 charge applies.</p>
+    <div class="field new-url-field">
+      <label>New Destination URL</label>
+      <input type="url" id="new-redirect-url" placeholder="https://…">
+    </div>
+    <button class="gen-btn" onclick="initiatePayment('redirect')">Pay $25 & Update Redirect</button>
+  </div>
+</div>
+
+<!-- ── PAYMENT MODAL ── -->
+<div class="modal-bg" id="pay-modal">
+  <div class="modal" style="position:relative;">
+    <button class="modal-close" onclick="closeModal('pay-modal')">✕</button>
+    <h3 id="pay-title">Complete Payment</h3>
+    <div class="charge-amount" id="pay-amount">$25.00</div>
+    <p class="charge-desc" id="pay-desc">Change QR redirect destination</p>
+    <div id="card-element"></div>
+    <div id="card-errors"></div>
+    <button class="gen-btn" id="pay-btn" onclick="confirmPayment()">Pay Now</button>
+  </div>
+</div>
+
+<!-- ── TOAST ── -->
+<div id="toast"></div>
+
+<footer>
+  <div class="ftr-links">
+    <a href="https://iqproductionz.com/">I.Q. Productionz</a>
+    <a href="https://iqproductionz.com/About">About</a>
+    <a href="https://iqproductionz.com/BookNow">Book a Service</a>
+    <a href="https://Haligricity.IQProductionz.com/">Haligricity</a>
+  </div>
+  <p>© 2026 I.Q. Productionz · Houston, Texas · <a href="mailto:IQProductionz@gmail.com">IQProductionz@gmail.com</a></p>
+</footer>
+
+<script>
+/*
+  WHY: all platform JS in one block — Firebase module already loaded above
+  as ES module and attached to window._fb. Stripe is loaded as UMD script.
+  QRCode lib (qrcodejs) is also loaded globally.
+*/
+
+var STRIPE_PK = 'pk_live_51KGEFWCL2m4xr1VIspOtCN2T1EVYCgfhsF5zgDOT4NkIKbQ8PqiPTYBmaoYzJwXqp9jkFdb2TNZOf5QKBaQh5RAv00IYVZw3oI';
+// WHY: Worker handles secret key and Stripe PaymentIntent creation server-side
+var WORKER_URL = 'https://lulu-order.REPLACE_WITH_YOUR_SUBDOMAIN.workers.dev';
+var BASE_REDIRECT = 'https://iqproductionz.com/QRCode/Account/';
+
+var stripe = Stripe(STRIPE_PK);
+var cardElement = null;
+var _pendingAction = null; // {type:'redirect'|'stats', qrId, qrDoc}
+var _currentQRItem = null;
+window._currentView = 'home';
+
+// ── VIEW ROUTING ──────────────────────────────────────────────────────────────
+function showView(name) {
+  document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+  document.getElementById('view-' + name).classList.add('active');
+  window._currentView = name;
+  if (name === 'dashboard') showDashboard();
+}
+
+function requireAuth(dest) {
+  if (!window._user) { openAuthModal(); return; }
+  showView(dest);
+}
+
+// ── NAV RENDER ────────────────────────────────────────────────────────────────
+function renderNav() {
+  var u = window._user;
+  document.getElementById('nav-signin').style.display  = u ? 'none' : '';
+  document.getElementById('nav-signup').style.display  = u ? 'none' : '';
+  document.getElementById('nav-signout').style.display = u ? '' : 'none';
+  document.getElementById('nav-dash').style.display    = u ? '' : 'none';
+  if (u) document.getElementById('dash-email').textContent = u.email;
+}
+
+// ── TAB SWITCHING ─────────────────────────────────────────────────────────────
+function switchTab(t) {
+  document.getElementById('panel-static').style.display  = t === 'static'  ? '' : 'none';
+  document.getElementById('panel-dynamic').style.display = t === 'dynamic' ? '' : 'none';
+  document.getElementById('tab-static').classList.toggle('active', t === 'static');
+  document.getElementById('tab-dynamic').classList.toggle('active', t === 'dynamic');
+}
+
+// ── STATIC QR GENERATOR ───────────────────────────────────────────────────────
+function generateStatic() {
+  var url   = document.getElementById('s-url').value.trim();
+  var size  = parseInt(document.getElementById('s-size').value);
+  var ec    = document.getElementById('s-ec').value;
+  var fg    = document.getElementById('s-fg').value;
+  var bg    = document.getElementById('s-bg').value;
+  if (!url) { toast('Enter a URL or text to encode.', 'err'); return; }
+
+  var container = document.getElementById('qr-canvas');
+  container.innerHTML = '';
+
+  // WHY: QRCode lib generates a canvas + img into the container
+  new QRCode(container, {
+    text: url, width: size, height: size,
+    colorDark: fg, colorLight: bg,
+    correctLevel: QRCode.CorrectLevel[ec]
+  });
+
+  document.getElementById('qr-url-note').textContent = 'Encodes: ' + url;
+  document.getElementById('qr-result').style.display = 'block';
+}
+
+function downloadQR(format) {
+  var canvas = document.querySelector('#qr-canvas canvas');
+  if (!canvas) { toast('Generate a QR code first.', 'err'); return; }
+  var a = document.createElement('a');
+  if (format === 'png') {
+    a.href = canvas.toDataURL('image/png');
+    a.download = 'qr-code.png';
+  } else {
+    // WHY: SVG export — serialize the QR library's img tag or canvas as SVG
+    // QRCode.js doesn't output SVG natively, so we embed canvas as PNG in SVG
+    var dataUrl = canvas.toDataURL('image/png');
+    var svg = '<svg xmlns="http://www.w3.org/2000/svg" width="'+canvas.width+'" height="'+canvas.height+'"><image href="'+dataUrl+'" width="'+canvas.width+'" height="'+canvas.height+'"/></svg>';
+    a.href = 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(svg);
+    a.download = 'qr-code.svg';
+  }
+  a.click();
+}
+
+// ── DYNAMIC QR CREATOR ────────────────────────────────────────────────────────
+async function createDynamic() {
+  if (!window._user) { openAuthModal(); return; }
+  var name = document.getElementById('d-name').value.trim();
+  var url  = document.getElementById('d-url').value.trim();
+  if (!name || !url) { toast('Enter a name and destination URL.', 'err'); return; }
+
+  try {
+    var fb = window._fb;
+    // Get username from user doc
+    var userDoc = await fb.getDoc(fb.doc(fb.db, 'users', window._user.uid));
+    var username = userDoc.exists() ? userDoc.data().username : window._user.uid.slice(0,8);
+    var slug = username + '-' + name.toLowerCase().replace(/[^a-z0-9]/g,'-').slice(0,20);
+
+    // Write QR doc to Firestore
+    var qrRef = fb.doc(fb.db, 'qrcodes', slug);
+    await fb.setDoc(qrRef, {
+      uid: window._user.uid, name: name, slug: slug,
+      redirectUrl: url, type: 'dynamic',
+      created: Date.now(), scanCount: 0
+    });
+
+    toast('Dynamic QR code created!', 'ok');
+    showView('dashboard');
+  } catch(e) {
+    toast('Error: ' + e.message, 'err');
+  }
+}
+
+// ── DASHBOARD ─────────────────────────────────────────────────────────────────
+async function showDashboard() {
+  if (!window._user) return;
+  var fb = window._fb;
+  var list = document.getElementById('qr-list');
+  list.innerHTML = '<div class="empty-state"><span class="spin"></span> Loading…</div>';
+
+  try {
+    var q = fb.query(fb.collection(fb.db,'qrcodes'), fb.where('uid','==',window._user.uid));
+    var snap = await fb.getDocs(q);
+    if (snap.empty) {
+      list.innerHTML = '<div class="empty-state"><p>No dynamic QR codes yet. Create your first one above.</p></div>';
+      return;
+    }
+    list.innerHTML = '';
+    snap.forEach(d => {
+      var data = d.data();
+      list.appendChild(buildQRItem(data));
+    });
+  } catch(e) {
+    list.innerHTML = '<div class="empty-state"><p>Error loading codes: ' + e.message + '</p></div>';
+  }
+}
+
+function buildQRItem(data) {
+  var div = document.createElement('div');
+  div.className = 'qr-item';
+  div.id = 'qritem-' + data.slug;
+
+  var redirectUrl = BASE_REDIRECT + data.slug;
+
+  // Mini QR
+  var qrDiv = document.createElement('div');
+  qrDiv.className = 'qr-item-qr';
+  new QRCode(qrDiv, { text: redirectUrl, width: 56, height: 56, colorDark:'#000', colorLight:'#fff' });
+  div.appendChild(qrDiv);
+
+  var body = document.createElement('div');
+  body.className = 'qr-item-body';
+  body.innerHTML =
+    '<div class="qr-item-name">' + data.name +
+      '<span class="qr-item-type type-' + data.type + '">' + data.type + '</span></div>' +
+    '<div class="qr-item-url" title="' + data.redirectUrl + '">→ ' + data.redirectUrl + '</div>' +
+    '<div style="font-size:.75rem;color:var(--muted);margin-top:4px;">Scans: ' + (data.scanCount||0) + '</div>';
+  div.appendChild(body);
+
+  var actions = document.createElement('div');
+  actions.className = 'qr-item-actions';
+
+  // Download button
+  var dlBtn = document.createElement('button');
+  dlBtn.className = 'act-btn';
+  dlBtn.textContent = '⬇ Download';
+  dlBtn.onclick = function() { downloadQRFromItem(data.slug, redirectUrl); };
+  actions.appendChild(dlBtn);
+
+  // Change redirect ($25)
+  var changeBtn = document.createElement('button');
+  changeBtn.className = 'act-btn';
+  changeBtn.textContent = 'Change Redirect — $25';
+  changeBtn.onclick = function() { openChangeRedirect(data); };
+  actions.appendChild(changeBtn);
+
+  // View stats ($5)
+  var statsBtn = document.createElement('button');
+  statsBtn.className = 'act-btn';
+  statsBtn.textContent = 'View Stats — $5';
+  statsBtn.onclick = function() { openStats(data); };
+  actions.appendChild(statsBtn);
+
+  div.appendChild(actions);
+
+  // Stats panel (hidden until paid)
+  var statsPanel = document.createElement('div');
+  statsPanel.className = 'stats-panel';
+  statsPanel.id = 'stats-' + data.slug;
+  statsPanel.innerHTML =
+    '<div class="stats-grid">' +
+      '<div class="stat-box"><div class="stat-num" id="sn-total-'+data.slug+'">—</div><div class="stat-label">Total Scans</div></div>' +
+      '<div class="stat-box"><div class="stat-num" id="sn-today-'+data.slug+'">—</div><div class="stat-label">Today</div></div>' +
+      '<div class="stat-box"><div class="stat-num" id="sn-mobile-'+data.slug+'">—</div><div class="stat-label">Mobile %</div></div>' +
+    '</div>' +
+    '<button class="act-btn" onclick="resetScans(\''+data.slug+'\')">Reset Scan Count</button>';
+  div.appendChild(statsPanel);
+
+  return div;
+}
+
+function downloadQRFromItem(slug, redirectUrl) {
+  var tmp = document.createElement('div');
+  tmp.style.cssText = 'position:absolute;left:-9999px;';
+  document.body.appendChild(tmp);
+  new QRCode(tmp, { text: redirectUrl, width: 400, height: 400, colorDark:'#000', colorLight:'#fff' });
+  setTimeout(function(){
+    var canvas = tmp.querySelector('canvas');
+    if (canvas) {
+      var a = document.createElement('a');
+      a.href = canvas.toDataURL('image/png');
+      a.download = slug + '-qr.png';
+      a.click();
+    }
+    document.body.removeChild(tmp);
+  }, 300);
+}
+
+// ── CHANGE REDIRECT ───────────────────────────────────────────────────────────
+function openChangeRedirect(data) {
+  _currentQRItem = data;
+  _pendingAction = { type: 'redirect', qrId: data.slug };
+  document.getElementById('new-redirect-url').value = '';
+  openModal('redirect-modal');
+}
+
+// ── STATS ─────────────────────────────────────────────────────────────────────
+function openStats(data) {
+  _currentQRItem = data;
+  _pendingAction = { type: 'stats', qrId: data.slug };
+  initiatePayment('stats');
+}
+
+async function loadStats(slug) {
+  var fb = window._fb;
+  var panel = document.getElementById('stats-' + slug);
+  if (!panel) return;
+  panel.style.display = 'block';
+
+  try {
+    var doc = await fb.getDoc(fb.doc(fb.db,'qrcodes',slug));
+    var data = doc.data();
+    var total = data.scanCount || 0;
+    document.getElementById('sn-total-' + slug).textContent = total;
+
+    // Get today's scans from scan log subcollection
+    var today = new Date(); today.setHours(0,0,0,0);
+    var q = fb.query(
+      fb.collection(fb.db,'qrcodes',slug,'scans'),
+      fb.where('ts','>=',today.getTime())
+    );
+    var snap = await fb.getDocs(q);
+    document.getElementById('sn-today-' + slug).textContent = snap.size;
+
+    // Mobile % from all scans
+    var allQ = fb.query(fb.collection(fb.db,'qrcodes',slug,'scans'));
+    var allSnap = await fb.getDocs(allQ);
+    var mobileCount = 0;
+    allSnap.forEach(d => { if (d.data().mobile) mobileCount++; });
+    var mPct = allSnap.size > 0 ? Math.round(mobileCount/allSnap.size*100) : 0;
+    document.getElementById('sn-mobile-' + slug).textContent = mPct + '%';
+  } catch(e) {
+    panel.innerHTML = '<p style="color:var(--red);font-size:.85rem;">Error loading stats: ' + e.message + '</p>';
+  }
+}
+
+async function resetScans(slug) {
+  if (!confirm('Reset scan count to zero for this QR code?')) return;
+  var fb = window._fb;
+  try {
+    await fb.updateDoc(fb.doc(fb.db,'qrcodes',slug), { scanCount: 0 });
+    document.getElementById('sn-total-' + slug).textContent = '0';
+    document.getElementById('sn-today-' + slug).textContent = '0';
+    toast('Scan count reset.', 'ok');
+  } catch(e) { toast('Error: ' + e.message, 'err'); }
+}
+
+// ── PAYMENT FLOW ──────────────────────────────────────────────────────────────
+/*
+  WHY: Payment uses the same Cloudflare Worker as the Lulu/Real Magic order
+  page. Endpoints: /create-payment-intent and /submit-order.
+  We reuse the Worker rather than building a separate one.
+*/
+function initiatePayment(type) {
+  closeModal('redirect-modal');
+  var amount = type === 'redirect' ? 25 : 5;
+  document.getElementById('pay-amount').textContent = '$' + amount + '.00';
+  document.getElementById('pay-desc').textContent = type === 'redirect'
+    ? 'Update QR code redirect destination'
+    : 'View QR code scan statistics';
+  document.getElementById('pay-title').textContent = type === 'redirect'
+    ? 'Pay to Update Redirect'
+    : 'Pay to View Statistics';
+
+  openModal('pay-modal');
+
+  // Mount Stripe card element
+  if (!cardElement) {
+    var elements = stripe.elements();
+    cardElement = elements.create('card', {
+      style: { base: { fontFamily:'Inter,sans-serif', fontSize:'15px', color:'#f8fafc', '::placeholder':{color:'#475569'} } }
+    });
+  }
+  var mountEl = document.getElementById('card-element');
+  mountEl.innerHTML = '';
+  try { cardElement.unmount(); } catch(e) {}
+  cardElement.mount('#card-element');
+  cardElement.on('change', function(e){
+    document.getElementById('card-errors').textContent = e.error ? e.error.message : '';
+  });
+}
+
+async function confirmPayment() {
+  var btn = document.getElementById('pay-btn');
+  var errEl = document.getElementById('card-errors');
+  btn.innerHTML = '<span class="spin"></span>Processing…';
+  btn.disabled = true;
+
+  var type = _pendingAction ? _pendingAction.type : 'redirect';
+  var amount = type === 'redirect' ? 25 : 5;
+
+  try {
+    // Get PaymentIntent from Worker
+    var res = await fetch(WORKER_URL + '/create-payment-intent', {
+      method:'POST', headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({ amount: amount, min_amount: amount * 100 })
+    });
+    var data = await res.json();
+    if (!data.ok) throw new Error(data.error);
+
+    // Confirm payment
+    var result = await stripe.confirmCardPayment(data.client_secret, {
+      payment_method: { card: cardElement }
+    });
+    if (result.error) throw new Error(result.error.message);
+
+    // Payment succeeded — perform the action
+    closeModal('pay-modal');
+    if (type === 'redirect') {
+      await performRedirectChange(_pendingAction.qrId);
+    } else {
+      await loadStats(_pendingAction.qrId);
+    }
+    toast('Payment confirmed. ' + (type === 'redirect' ? 'Redirect updated.' : 'Stats unlocked.'), 'ok');
+
+  } catch(e) {
+    errEl.textContent = e.message;
+    btn.textContent = 'Pay Now';
+    btn.disabled = false;
+  }
+}
+
+async function performRedirectChange(slug) {
+  var newUrl = document.getElementById('new-redirect-url').value.trim();
+  if (!newUrl) { toast('No URL provided.', 'err'); return; }
+  var fb = window._fb;
+  try {
+    await fb.updateDoc(fb.doc(fb.db,'qrcodes',slug), { redirectUrl: newUrl });
+    // Update displayed URL in dashboard
+    var urlEl = document.querySelector('#qritem-' + slug + ' .qr-item-url');
+    if (urlEl) urlEl.textContent = '→ ' + newUrl;
+    toast('Redirect updated to ' + newUrl, 'ok');
+  } catch(e) { toast('Update failed: ' + e.message, 'err'); }
+}
+
+// ── AUTH ──────────────────────────────────────────────────────────────────────
+function openAuthModal(tab) {
+  openModal('auth-modal');
+  if (tab === 'signup') authTab('signup');
+  else authTab('signin');
+}
+
+function authTab(t) {
+  document.getElementById('auth-signin').style.display = t==='signin'?'':'none';
+  document.getElementById('auth-signup').style.display = t==='signup'?'':'none';
+  document.getElementById('atab-signin').classList.toggle('active', t==='signin');
+  document.getElementById('atab-signup').classList.toggle('active', t==='signup');
+  document.getElementById('auth-err').style.display = 'none';
+}
+
+async function doSignIn() {
+  var fb = window._fb;
+  var email = document.getElementById('si-email').value.trim();
+  var pass  = document.getElementById('si-pass').value;
+  try {
+    await fb.signInWithEmailAndPassword(fb.auth, email, pass);
+    closeModal('auth-modal');
+    showView('dashboard');
+  } catch(e) {
+    showErr(e.message);
+  }
+}
+
+async function doSignUp() {
+  var fb = window._fb;
+  var email    = document.getElementById('su-email').value.trim();
+  var pass     = document.getElementById('su-pass').value;
+  var username = document.getElementById('su-username').value.trim();
+  if (!username) { showErr('Choose a username.'); return; }
+
+  try {
+    // WHY: check username not already taken
+    var existing = await fb.getDoc(fb.doc(fb.db,'usernames',username));
+    if (existing.exists()) { showErr('Username already taken.'); return; }
+
+    var cred = await fb.createUserWithEmailAndPassword(fb.auth, email, pass);
+    // Write user record + reserve username
+    await fb.setDoc(fb.doc(fb.db,'users',cred.user.uid), {
+      email, username, created: Date.now()
+    });
+    await fb.setDoc(fb.doc(fb.db,'usernames',username), { uid: cred.user.uid });
+
+    closeModal('auth-modal');
+    showView('dashboard');
+    toast('Welcome! Your account is ready.', 'ok');
+  } catch(e) {
+    showErr(e.message);
+  }
+}
+
+async function doSignOut() {
+  await window._fb.signOut(window._fb.auth);
+  showView('home');
+  toast('Signed out.', 'ok');
+}
+
+function showErr(msg) {
+  var el = document.getElementById('auth-err');
+  el.textContent = msg;
+  el.style.display = 'block';
+}
+
+// ── MODALS & TOAST ────────────────────────────────────────────────────────────
+function openModal(id)  { document.getElementById(id).classList.add('open'); }
+function closeModal(id) { document.getElementById(id).classList.remove('open'); }
+
+function toast(msg, type) {
+  var t = document.getElementById('toast');
+  t.textContent = msg;
+  t.className = type || '';
+  t.style.display = 'block';
+  clearTimeout(window._toastTimer);
+  window._toastTimer = setTimeout(() => { t.style.display='none'; }, 3500);
+}
+
+// Close modals on background click
+document.querySelectorAll('.modal-bg').forEach(bg => {
+  bg.addEventListener('click', function(e) {
+    if (e.target === bg) bg.classList.remove('open');
+  });
+});
+</script>
+</body>
+</html>

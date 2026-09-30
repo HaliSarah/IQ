@@ -1,0 +1,1434 @@
+%PDF-1.5%‚„œ”
+1 0 obj<</Metadata 2 0 R/OCProperties<</D<</ON[6 0 R 94 0 R]/Order 95 0 R/RBGroups[]>>/OCGs[6 0 R 94 0 R]>>/Pages 3 0 R/Type/Catalog>>endobj2 0 obj<</Length 27248/Subtype/XML/Type/Metadata>>stream
+<?xpacket begin="Ôªø" id="W5M0MpCehiHzreSzNTczkc9d"?>
+<x:xmpmeta xmlns:x="adobe:ns:meta/" x:xmptk="Adobe XMP Core 5.0-c060 61.134777, 2010/02/12-17:32:00        ">
+   <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#">
+      <rdf:Description rdf:about=""
+            xmlns:dc="http://purl.org/dc/elements/1.1/">
+         <dc:format>application/pdf</dc:format>
+         <dc:title>
+            <rdf:Alt>
+               <rdf:li xml:lang="x-default">Data Archetecture</rdf:li>
+            </rdf:Alt>
+         </dc:title>
+      </rdf:Description>
+      <rdf:Description rdf:about=""
+            xmlns:xmp="http://ns.adobe.com/xap/1.0/"
+            xmlns:xmpGImg="http://ns.adobe.com/xap/1.0/g/img/">
+         <xmp:MetadataDate>2025-11-12T11:10:57-06:00</xmp:MetadataDate>
+         <xmp:ModifyDate>2025-11-12T11:10:57-06:00</xmp:ModifyDate>
+         <xmp:CreateDate>2025-11-11T13:43:04-06:00</xmp:CreateDate>
+         <xmp:CreatorTool>Adobe Illustrator CS5.1</xmp:CreatorTool>
+         <xmp:Thumbnails>
+            <rdf:Alt>
+               <rdf:li rdf:parseType="Resource">
+                  <xmpGImg:width>256</xmpGImg:width>
+                  <xmpGImg:height>168</xmpGImg:height>
+                  <xmpGImg:format>JPEG</xmpGImg:format>
+                  <xmpGImg:image>/9j/4AAQSkZJRgABAgEASABIAAD/7QAsUGhvdG9zaG9wIDMuMAA4QklNA+0AAAAAABAASAAAAAEA&#xA;AQBIAAAAAQAB/+4ADkFkb2JlAGTAAAAAAf/bAIQABgQEBAUEBgUFBgkGBQYJCwgGBggLDAoKCwoK&#xA;DBAMDAwMDAwQDA4PEA8ODBMTFBQTExwbGxscHx8fHx8fHx8fHwEHBwcNDA0YEBAYGhURFRofHx8f&#xA;Hx8fHx8fHx8fHx8fHx8fHx8fHx8fHx8fHx8fHx8fHx8fHx8fHx8fHx8fHx8f/8AAEQgAqAEAAwER&#xA;AAIRAQMRAf/EAaIAAAAHAQEBAQEAAAAAAAAAAAQFAwIGAQAHCAkKCwEAAgIDAQEBAQEAAAAAAAAA&#xA;AQACAwQFBgcICQoLEAACAQMDAgQCBgcDBAIGAnMBAgMRBAAFIRIxQVEGE2EicYEUMpGhBxWxQiPB&#xA;UtHhMxZi8CRygvElQzRTkqKyY3PCNUQnk6OzNhdUZHTD0uIIJoMJChgZhJRFRqS0VtNVKBry4/PE&#xA;1OT0ZXWFlaW1xdXl9WZ2hpamtsbW5vY3R1dnd4eXp7fH1+f3OEhYaHiImKi4yNjo+Ck5SVlpeYmZ&#xA;qbnJ2en5KjpKWmp6ipqqusra6voRAAICAQIDBQUEBQYECAMDbQEAAhEDBCESMUEFURNhIgZxgZEy&#xA;obHwFMHR4SNCFVJicvEzJDRDghaSUyWiY7LCB3PSNeJEgxdUkwgJChgZJjZFGidkdFU38qOzwygp&#xA;0+PzhJSktMTU5PRldYWVpbXF1eX1RlZmdoaWprbG1ub2R1dnd4eXp7fH1+f3OEhYaHiImKi4yNjo&#xA;+DlJWWl5iZmpucnZ6fkqOkpaanqKmqq6ytrq+v/aAAwDAQACEQMRAD8A9U4q7FXYq7FXYq7FXYq7&#xA;FXYq7FXYq7FXYq7FXYq7FXYq7FXYq7FXYq7FXYq7FXYq7FXYq7FXYq7FXYq7FXYq7FXYq7FXYq7F&#xA;XYq7FXYq7FXYq7FWmdUHJiFUdyaDElVI3tqP92D6N8r8WPez8OXc767a/wC/B+OPix718OXcqpIj&#xA;iqMGHiDX9WTBtgQ3hVSlureJuLuA3cbk/hkJZIjmWQgTyU/0jZ/zn/gW/pkfHh3svCl3Llv7RjQS&#xA;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</xmpGImg:image>
+               </rdf:li>
+            </rdf:Alt>
+         </xmp:Thumbnails>
+      </rdf:Description>
+      <rdf:Description rdf:about=""
+            xmlns:xmpMM="http://ns.adobe.com/xap/1.0/mm/"
+            xmlns:stRef="http://ns.adobe.com/xap/1.0/sType/ResourceRef#"
+            xmlns:stEvt="http://ns.adobe.com/xap/1.0/sType/ResourceEvent#">
+         <xmpMM:InstanceID>uuid:0e43a72c-aa0f-8945-a8ab-4d8239474843</xmpMM:InstanceID>
+         <xmpMM:DocumentID>xmp.did:EE7F1174072068118A6DA70725AC7077</xmpMM:DocumentID>
+         <xmpMM:OriginalDocumentID>uuid:5D20892493BFDB11914A8590D31508C8</xmpMM:OriginalDocumentID>
+         <xmpMM:RenditionClass>proof:pdf</xmpMM:RenditionClass>
+         <xmpMM:DerivedFrom rdf:parseType="Resource">
+            <stRef:instanceID>xmp.iid:ED7F1174072068118A6DA70725AC7077</stRef:instanceID>
+            <stRef:documentID>xmp.did:ED7F1174072068118A6DA70725AC7077</stRef:documentID>
+            <stRef:originalDocumentID>uuid:5D20892493BFDB11914A8590D31508C8</stRef:originalDocumentID>
+            <stRef:renditionClass>proof:pdf</stRef:renditionClass>
+         </xmpMM:DerivedFrom>
+         <xmpMM:History>
+            <rdf:Seq>
+               <rdf:li rdf:parseType="Resource">
+                  <stEvt:action>saved</stEvt:action>
+                  <stEvt:instanceID>xmp.iid:ED7F1174072068118A6DA70725AC7077</stEvt:instanceID>
+                  <stEvt:when>2025-11-11T12:58:59-06:00</stEvt:when>
+                  <stEvt:softwareAgent>Adobe Illustrator CS5.1</stEvt:softwareAgent>
+                  <stEvt:changed>/</stEvt:changed>
+               </rdf:li>
+               <rdf:li rdf:parseType="Resource">
+                  <stEvt:action>saved</stEvt:action>
+                  <stEvt:instanceID>xmp.iid:EE7F1174072068118A6DA70725AC7077</stEvt:instanceID>
+                  <stEvt:when>2025-11-11T13:42:52-06:00</stEvt:when>
+                  <stEvt:softwareAgent>Adobe Illustrator CS5.1</stEvt:softwareAgent>
+                  <stEvt:changed>/</stEvt:changed>
+               </rdf:li>
+            </rdf:Seq>
+         </xmpMM:History>
+      </rdf:Description>
+      <rdf:Description rdf:about=""
+            xmlns:illustrator="http://ns.adobe.com/illustrator/1.0/">
+         <illustrator:StartupProfile>Print</illustrator:StartupProfile>
+      </rdf:Description>
+      <rdf:Description rdf:about=""
+            xmlns:xmpTPg="http://ns.adobe.com/xap/1.0/t/pg/"
+            xmlns:stDim="http://ns.adobe.com/xap/1.0/sType/Dimensions#"
+            xmlns:stFnt="http://ns.adobe.com/xap/1.0/sType/Font#"
+            xmlns:xmpG="http://ns.adobe.com/xap/1.0/g/">
+         <xmpTPg:HasVisibleOverprint>False</xmpTPg:HasVisibleOverprint>
+         <xmpTPg:HasVisibleTransparency>True</xmpTPg:HasVisibleTransparency>
+         <xmpTPg:NPages>1</xmpTPg:NPages>
+         <xmpTPg:MaxPageSize rdf:parseType="Resource">
+            <stDim:w>431.800000</stDim:w>
+            <stDim:h>279.400000</stDim:h>
+            <stDim:unit>Millimeters</stDim:unit>
+         </xmpTPg:MaxPageSize>
+         <xmpTPg:Fonts>
+            <rdf:Bag>
+               <rdf:li rdf:parseType="Resource">
+                  <stFnt:fontName>Silom</stFnt:fontName>
+                  <stFnt:fontFamily>Silom</stFnt:fontFamily>
+                  <stFnt:fontFace>Regular</stFnt:fontFace>
+                  <stFnt:fontType>TrueType</stFnt:fontType>
+                  <stFnt:versionString>10.10d1e1</stFnt:versionString>
+                  <stFnt:composite>False</stFnt:composite>
+                  <stFnt:fontFileName>Silom.ttf</stFnt:fontFileName>
+               </rdf:li>
+            </rdf:Bag>
+         </xmpTPg:Fonts>
+         <xmpTPg:PlateNames>
+            <rdf:Seq>
+               <rdf:li>Cyan</rdf:li>
+               <rdf:li>Magenta</rdf:li>
+               <rdf:li>Yellow</rdf:li>
+               <rdf:li>Black</rdf:li>
+            </rdf:Seq>
+         </xmpTPg:PlateNames>
+         <xmpTPg:SwatchGroups>
+            <rdf:Seq>
+               <rdf:li rdf:parseType="Resource">
+                  <xmpG:groupName>Default Swatch Group</xmpG:groupName>
+                  <xmpG:groupType>0</xmpG:groupType>
+                  <xmpG:Colorants>
+                     <rdf:Seq>
+                        <rdf:li rdf:parseType="Resource">
+                           <xmpG:swatchName>C=89 M=49 Y=0 K=0 1</xmpG:swatchName>
+                           <xmpG:mode>CMYK</xmpG:mode>
+                           <xmpG:type>PROCESS</xmpG:type>
+                           <xmpG:cyan>88.627449</xmpG:cyan>
+                           <xmpG:magenta>49.000000</xmpG:magenta>
+                           <xmpG:yellow>0.000000</xmpG:yellow>
+                           <xmpG:black>0.000000</xmpG:black>
+                        </rdf:li>
+                        <rdf:li rdf:parseType="Resource">
+                           <xmpG:swatchName>C=66 M=80 Y=0 K=0 1</xmpG:swatchName>
+                           <xmpG:mode>CMYK</xmpG:mode>
+                           <xmpG:type>PROCESS</xmpG:type>
+                           <xmpG:cyan>66.274513</xmpG:cyan>
+                           <xmpG:magenta>80.000000</xmpG:magenta>
+                           <xmpG:yellow>0.000000</xmpG:yellow>
+                           <xmpG:black>0.000000</xmpG:black>
+                        </rdf:li>
+                        <rdf:li rdf:parseType="Resource">
+                           <xmpG:swatchName>C=63 M=0 Y=100 K=0 1</xmpG:swatchName>
+                           <xmpG:mode>CMYK</xmpG:mode>
+                           <xmpG:type>PROCESS</xmpG:type>
+                           <xmpG:cyan>63.137257</xmpG:cyan>
+                           <xmpG:magenta>0.000000</xmpG:magenta>
+                           <xmpG:yellow>100.000000</xmpG:yellow>
+                           <xmpG:black>0.000000</xmpG:black>
+                        </rdf:li>
+                        <rdf:li rdf:parseType="Resource">
+                           <xmpG:swatchName>C=0 M=49 Y=82 K=0 1</xmpG:swatchName>
+                           <xmpG:mode>CMYK</xmpG:mode>
+                           <xmpG:type>PROCESS</xmpG:type>
+                           <xmpG:cyan>0.000000</xmpG:cyan>
+                           <xmpG:magenta>48.700691</xmpG:magenta>
+                           <xmpG:yellow>82.305634</xmpG:yellow>
+                           <xmpG:black>0.000000</xmpG:black>
+                        </rdf:li>
+                        <rdf:li rdf:parseType="Resource">
+                           <xmpG:swatchName>C=0 M=85 Y=13 K=0 1</xmpG:swatchName>
+                           <xmpG:mode>CMYK</xmpG:mode>
+                           <xmpG:type>PROCESS</xmpG:type>
+                           <xmpG:cyan>0.000000</xmpG:cyan>
+                           <xmpG:magenta>85.000000</xmpG:magenta>
+                           <xmpG:yellow>13.000000</xmpG:yellow>
+                           <xmpG:black>0.000000</xmpG:black>
+                        </rdf:li>
+                     </rdf:Seq>
+                  </xmpG:Colorants>
+               </rdf:li>
+            </rdf:Seq>
+         </xmpTPg:SwatchGroups>
+      </rdf:Description>
+      <rdf:Description rdf:about=""
+            xmlns:pdf="http://ns.adobe.com/pdf/1.3/">
+         <pdf:Producer>Adobe PDF library 9.90</pdf:Producer>
+      </rdf:Description>
+   </rdf:RDF>
+</x:xmpmeta>
+                                                                                                    
+                                                                                                    
+                                                                                                    
+                                                                                                    
+                                                                                                    
+                                                                                                    
+                                                                                                    
+                                                                                                    
+                                                                                                    
+                                                                                                    
+                                                                                                    
+                                                                                                    
+                                                                                                    
+                                                                                                    
+                                                                                                    
+                                                                                                    
+                                                                                                    
+                                                                                                    
+                                                                                                    
+                                                                                                    
+                           
+<?xpacket end="w"?>endstreamendobj3 0 obj<</Count 1/Kids[8 0 R]/Type/Pages>>endobj8 0 obj<</ArtBox[0.0 0.0 1224.0 792.0]/BleedBox[0.0 0.0 1224.0 792.0]/Contents 96 0 R/Group 97 0 R/MediaBox[0.0 0.0 1224.0 792.0]/Parent 3 0 R/Resources<</ExtGState<</GS0 98 0 R/GS1 99 0 R/GS2 100 0 R/GS3 101 0 R/GS4 102 0 R/GS5 103 0 R>>/Font<</TT0 93 0 R>>/ProcSet[/PDF/Text]/Properties<</MC0 94 0 R>>/XObject<</Fm0 104 0 R/Fm1 105 0 R/Fm10 106 0 R/Fm11 107 0 R/Fm12 108 0 R/Fm13 109 0 R/Fm14 110 0 R/Fm15 111 0 R/Fm16 112 0 R/Fm17 113 0 R/Fm18 114 0 R/Fm19 115 0 R/Fm2 116 0 R/Fm20 117 0 R/Fm21 118 0 R/Fm22 119 0 R/Fm23 120 0 R/Fm24 121 0 R/Fm25 122 0 R/Fm26 123 0 R/Fm27 124 0 R/Fm28 125 0 R/Fm29 126 0 R/Fm3 127 0 R/Fm30 128 0 R/Fm31 129 0 R/Fm32 130 0 R/Fm33 131 0 R/Fm4 132 0 R/Fm5 133 0 R/Fm6 134 0 R/Fm7 135 0 R/Fm8 136 0 R/Fm9 137 0 R>>>>/Thumb 138 0 R/TrimBox[0.0 0.0 1224.0 792.0]/Type/Page>>endobj96 0 obj<</Filter/FlateDecode/Length 7565>>stream
+HâÃWÀn$πº˜W‘t3ì…«’≥∞OÜa¯‡Ï=Ï¨çı˛?∞…™nñT-ieŸòãT≈bì˘äàÃ/˘∫|˘Û◊¥¸·áØÀÂóKZ“"™y©]óˇ¸„Ú˜Â_X˝Úßø•Â«_/_˛¯sZ~¯˜ÂØcM∂5ô÷t[”ì}v≤ñO÷¸d≠å5⁄óü¯Õ¯Ìºç57_sj∫‰™kÕYñßü„¸{’∂ö˜Âü-≠E b´ü∑=Oæ%ÏÂ]’+ﬁˆˇ	ﬂˇIÛwM€⁄õ‰˚≈◊≤V±ÂÍ´{¡Å◊∂fœñ{Ø\Ó_;€rÕ´Z_∞%løËö+çäﬂ.¯*x|Õã¨U≥∂&¡ïÓæ‰l´ÄõIuïZñ≤zo8µ≠Åj´‡†ﬁK¬ß∫‰µ&]˙ö™‚ÙÕä›ò
+/”⁄s¶EÖ÷ÀÍ®õ7‚ÉM©¥Á∆‹¬S◊nokóx÷ûaFqŸ∑=]`¢a¿z.48'”÷RÍæ’VV¬ƒ›nÜMêÎÉ”Z≠·YqM⁄v¿Qñ€
+<√‹áx4+ æ’©‚0≈Ò8»çÜÊ ´…ó≠$ËKÂÖ®cÏ{c,SE†Ke]H£â√sÆÿÄ´(-,j{ç\''¯äbD
+·s$)?NN†∆ZE €ˇ4÷êÍÑ(=è›ıº+£óóP{¯Œ’_ 
+Á¶$Q_µ#≠jï{LÎÚ,Ä√ö9n¢uﬂ÷¨pq3Fa•ÓQ≈ï¨∑‘	ÖåÈÖ2√–g÷ﬂ√ä:Ëº[£∫v∞tuô}}öŸ?üV∞â%qÜOùÒôg|ñ#>ÌÄOôÒ)ˇ>Â@Ò¥Ê∆(5•ˇ?Mnµ&dE‰X`≤§>Áx∆›@$ˇFUÌK◊;*_∆¨µDÁêì⁄jDÁSá∑éòiEÏÁ~8¢(ƒ°%páf÷\B!°Be+π¶Gtë\ı*RÿÅ'\T#Ø,π\óÎ±⁄»ô5êRïd#0†?L‚&e-ΩÈ°ò\èO9∏)ëí2ŒE<ÍJƒñ@=ÓÏ´YâUT`◊(´D#|*èBå∞:¨¡.xsÂıQ´.ÌÑ∞4ï∞ÆÄŸPPÈ˜,‡°$ıÉ'›"é¥ <–0™!Ê¡π§-8Ö¯7^jaò2ÆÇ⁄Ñ€Dà¯*UW!˜@jDËâ 'g®@å ãáâºï^ÿ[˘†˜ÍT®u¬o{#V’Çâ:B	⁄Õm»DL◊#`XÚW(sg)¿∂ÊŒDÄRË)\ÎÙgÙÖ‚4÷Z
+ö-ôI<ó”Ω=Q`m!ı•∑IÇ}í`ü$∏}\ÇYÕ¸\Åıﬁ	rW‡ÚJK˚ö óœ`u¸ Èw°ød8üËØ>‘ﬂr–ﬂww¡~êﬂ2ÀØ<ñ_{(øü€´+®ú o~(øü”üÕÌ1Ã¸ë#fﬁ∆œ∫è§œ÷€≥uﬂ÷˚ÉuI->¯†è>ÿ£y˚pKÑe‘∞±(ìêﬂ}fçÊA0J∆$ÌÕO„3¢fA-◊…nëÚ5˛◊©∑!5‰VU`ù≈íÚbÈ)ÿ>◊PÜ$Âb|ENMÇMDz†ÖÚ!,¬PÛ%ƒ«dm§µ—f¿›ÿ7mM&õ®ï,YP))∞¬Ë†˙ì#,≠6ÖN¶tùÆÎ√ãä⁄≠mr"Í2¨d7„>'‹6‘=âƒæú√IO%Œ˙Ì¿˝0∑û<»ìF›
+Q‰vÆë∑ƒõ X’”Jê®H<døI§˚˛4>ü&˛^èfFXwˇ˝ô∑gôo«ÃóCÊÎ1Û⁄Á‘Àß§ﬁA)sÓ©osÍÀúz;§>œ©∑9ıüôyB“Fı?õ:§Úàï=ÕåGma–ÑÏ	å⁄`∏»∑¥Û˚”EIŸ|-QædJEºåç∂m‹±8dúnq:¶ÖË<&fTˆõ—€ñ”,Ù
+›L’*V´€ngèU®FËùQ0›¢\(ÎΩèñ[!Ú%xå%T;-äêSBfÎm]—“W¢Ä¬≤Æm/ ﬁÿ£—„]‘⁄ò ÷´∏<p1Ñ˝eV≥˝ô*VGáƒ+Ÿ’’FGÕ50*öÛL¶« ‹∞UgW≥µXu@ÅÔ∞ﬁ‚X	(Ôu¸(hÙ‚≠sd`7+õ⁄øk≠úÃ†È“ŸŒµ©k,˜ﬂŒ∞¨G,˜;ñ#¬[∏ø^Û;Ò:YƒëÂ»‘l
+Óx≠ÔƒkõÒ⁄ﬁá◊\€[p}1‹(;ÚÕ:xÖ≤ıFŸ˙&eßÌA]v∏ûø©ˆèÚuv5GÓ«◊ÚÄØ˝¿◊>¿˘‹¿¥ku¶ùëÎl|ï8·±8í3*móÃŸ¡Kõ4åñJ, ÅÄÏÑﬂÅ¢·R™∆<ƒ·é9húV%zcŒ*∞∏ã‹]7ûC‰Î e;ü¿¬˙b ∆üd:’PwÊ5wŸ{n∞]ã	≤!˝UwV™r‚aCéFÈ¸å ﬁv€8]E∑≥húC· )É˘≠É™«NxìÇ•…,à∑◊&7ñO‚Ëa"Œtﬁ#€adß0B,?Kum’œ2(S˝aı=¨sÛúA}5Éè¿Éc‰	ÍY≠ÕtèA*á\
+Ö§˛J}N†|(Éıµ>Ív°‹@∏&å≠U¸<Å˚√˘Ôpd*)Òﬁ?R¢åOok±RÁJ	Fq±ıÅq@LÎﬂ[	`'„áü¯,ﬂy	0ÏLÛplñ”⁄–˝Â:_mx∏9’1sæÖhÉ⁄«»KŸ˙≈õdF\«à∆w¥|ÉÎ∫í#∂≠ èc4XnúèÁho≠/;„^¢∑¡Ài?#<ª”t∆≠;GJxÖÒô$í~0,J)ëYtÑ5”Y,˘CJ~?√'°%|§Kd!§ò
+è∞f?¥æÂójÅ-éﬁ&ı-∆N/°N]‡%ÏÕ¬ÖHrÀCq√´Í[˚ûJÙ
+ùù°Ì"yúÇlQ\Ê2J>EyYt—N£ædü¢nnPñ‹eH™´˙°¨äI¯Ò¨ıÖW ‰vú≠:&L8üuƒ^„Hcá#ç‚/+3Æu‡≥≤ùH,À%^ÿO°è—bÏÂ´b∂£∞–ÿ_m˜\Yjå˝’¢·Ël◊,$}î+Z¸49µ"Lê•âÓ4(ÑÌü∑PÎ›‚O§∑h˛*´Üπ1∆€ñóèﬁ¶ÅÜÅ%¶B‹Ö"âqäìYJ1V†eyŸ”B{âV˘ ´®OÁ√a≠uÌ‘yÊZ@yåf®.!Uy%>"=*∑@≠±^Äõ˜bT,ƒ/…öï‚FÂ‡VAÜ/u∆ÕÚù¢∆XÎ:˚ﬂ7PI≤NzX®√ı ¡	ë∫FI#ÊA5£“ÿ¢ì+Ü:Hb›î‡{ˆv‹káìlædË#™´ÎTI©m/g…¿M
+8 "T+≠†@∑ZÊ,®¥)Ò:‘œ’ØP¸ T?ı´°~u®lE∂=§∏E1ŸËÓÔ≥µØÖ•jBªB˚Œ	∂»——¶…±ÉÕlÄÚ	HÌC# D¥≤kü—Lí;º∞(,#eugª¸wπ1éÀ†⁄BÈ≤⁄'*˚ø¿BﬁÇ¢…N√á‘~cæZñ€6∂‡û_¡UJYà¡ºgñëe;ÆíSé≈T™nyS0Õ+ä–%©∏îØO˜ê–†-›l≤í@ ÉÛË”ß˚Rë†P«ÄÇÀ6Àõÿ}'@››¡	ÒEªáì9ÇÌ“MN20GèöﬁA¶¸∆7—tÇù∞˝,ê ÷:¿“øJtèÜW‡Ë™ø˛ÂHíz§ SÙë6†A©Ìà¸$a!œ#Òê5{!)!Aƒ†∞6mïW˝gMÔ$S~‰Ä"’GPîæÅ"ÖAß±≤°ÏmFÑÉ 2TPur‹πälâ"ëÍPTÇHï(R}ÂàcÍ¡(úàúÇáÌûL•‚wa§JÖA)íŒ@
+$ø´A!Ú]ô=u…E*&z ïæZ‚Iïx2=<π#<ŸûlOÓO¶á'ı#æ 4u5¥„JDe^Í—í  %Aî…à
+DïÄ“ﬂc•>úÃ∑‡ƒ¿©_Ç°á—É`rL∫DìÔ≥í4©å&-hR%ö‹i4Ÿ'†)ªçûÿ#ö‡›à¶#,%ã6jú.÷Œı§üy∆cQ#âÈDÒ`ÃT≤J‰ü°^Ü5≥+ —»'M‚ä–4ﬂñæyYÏ õÇî"öÄßÉ‘9!QYﬁHKºÊ∂É≤ÏH≤ëêLæ˚X»oCñ°≥(chÑo°QY≤SúD`5¿>p¨}`o‚@∆heÓí¿;8*Z%54äpR&Ó∫∞Ô¢VRÂº‰lê¥L∑6Ñ≈˛∑‡(¨ª»PÃ!+lÑbga=-h%ı0¢Ç†≈àÊÊ‰-!æ[˘9”=á3tE«ö(j§ªúnN*o…Än
+Y#¯Ñﬁ…è~˘-©cß·9è∫oMGÕÁ)†ﬂ•˚ rÜõ?ôlMµp™": †`(ã∏/Û⁄Ê“—y$úH-*ŒD^Ÿ·(wp•¨Åíâﬂ„´Ïb˝P√Ωët–rE_eM/Ñ'èàó]ë)FZââKZ¢ÉU32∆J'!GtCr‚ÙËu‡
+¨§å±p∆Ωÿ9„d†H∫G„Õ9»i*'.+T:õ@`c*ÄëJ¡Ù∆ô£H~uB™R kâ}g%Ó!é≥Ù$îkÃ‰"„úU*jeûÜFÿïªS0˘œ EÏLÑ≠âQôtò∑*QÅ√ å6'Ä≈†{„úd©X%‘iE#«ô5ÀÍŒãjÓn. Æ~ëØB`∂"s%q¨@w%¿y±ï,áƒƒ∞UŸ õ∫a÷BQ∞±1˘√*√,}¡!I~,g⁄WË´∆∏ZlπÀf@›GØƒQ&é¶»®s‡PÑÇJE‘R6é«F«Asr?y""Ïíå? °√Å#È¢“(£S‚6¨©V®)åÜÿë Lë Î	âÃü»Œ…f ªƒî)`ü`≈/{)˘óë÷ºñ§ò‡{ë/∏pûÀt¢ªëêﬂe9íUì«6H»#∞Ò(ÉKdº≤„:Ã06™bŒJ ≠àM£É∏¨§	§‹pÑBÍ≈|W|4‚QG¨J„eM2ÊÂY%∆ÍúI8éã™B/â7$¡Sîñd∏s'VéÂ´˙@ÚFI.˝:[≈ è7tDÆÿ–ﬁ ¸ûG#HYé<Ëú≤":YQ%W›}dÎµaîÅRbaâ≠›ßmFπ®$sÇg >†œí°˚Ü&*rä2Ç&äTòœí (¢Ç_˜Xòv£Öﬁ∆ñWïË5™Ã˝£Á‹_zwô1™ÓÁy)-2úIﬁ÷™Ké>P;ÇU}_∆aÉö¢vì„Ã§dE'M¶»XÅPé(∂≥e#+B‰ËÃ≤jè;	°ºñ üÚN1…g®ƒ>TRZ§…òÑ`mOÃ˝—ŒG?ΩæV„˘fÙ”´;†Ù≤≈çﬂF”B^‡	#OLß¸a˙Ix'ﬂÊ?¶ÍDárîß¯˛ÙntˆKªπ_lÎÂÊ«ÈGïÄUA®”õ—ŸıÏssWÛÁI ØÂ∆˚´k˛ k–MåÛ˜õm{'∑®˚“·çÀzÛ˘c[ØoÚiÏ8ª!˜~ﬂ4Î›qIﬁy≥⁄6ÎOı¨ëwΩ!cxº*ﬂZ∂˘4 »òÃªˇI¬Œ?6±ΩSLˆ√Ÿe;ªm÷„∆4«◊Õ˙œ≈¨˘#O—¥OZéÁ>ú˝¸◊√∫ˇ¸ÓMóRrÒﬁ€zUœõªfµÕ'ê4R%Àú¨÷ùp_£à„Î˚z}õ¡Cπíà˝Ó°◊m;_6„wıcwíÚO¥jÃ€v5o«ó˘ô~sm™D€ë?<iÉÈæy=˝Ù∞‹«œnâ6√‡ë”uΩ⁄|j◊wıvÒg.2¶∂h⁄À’|±j∆/ßWº˘r*Xƒ5X#†SÎfÙ«xu@®ﬁ!‘-8–®h!«<Ü
+™“|ñ’’Ì◊≈´≈Pæ—sYÅnl∞tè9·Àz[wô∆Ïãv@∫YÃõÕv—ÆûôHx~"ﬁ—Å]s"”fµi◊ØñÌó·<†‹Ä‡˜¶ìoΩΩÍÉ/÷ﬁ4Àg∆üø£$Dÿ¨pµõò_Íõ∂Ωå∂#&‘∫√&œø[∑≥f≥Y¨Ê¨ë·ÙÃ“ì3Ä¢,ƒÓD*1Ì3»C|˝∏™Ô7›∞#^.v√ıÆ˝^∏x3î®©(w±”}p¡£ª7ûñO’Â£´gt$Q2aQÇì∞0uóœ⁄u=ÿG1æ–ÿtê1A^∏X,ó]?∏,ù˙gÅFL†â«Œç“ŸAÜXÎÛÆ…3ùç≥—;>3˝§0`Zºπx¸£´Ãı««Ò≈¢Ì*REs¥rVı2≥HV†‘ç!fÆ~∂_◊À≈_M∑»™^[tf˛‹Çöú…◊P±ßn∏S7NÓW(I`y˝k¥œ®˙}”≈iV2ÁûQ´>£˛ôÜ£∏˜7‚©'¶øﬂÂDÚ–©∆FﬂﬂË∞-0UﬂJÿÁãà87x	∆Ñ˜z»P˝˜ÆõŸ√z±}_µÛ\®Œ±‰€/>7≥€˚v±⁄Êõ
+Ω¿¢◊æ¥Ÿ˙Ò~∑∞¢Ωˇ∫∆X &–«Íîu—˚f”‘ÎŸÁ¸éve7O´ΩÌ*iNNØí¨	1X.]∆n^∫°≠äåu¢5Ä∆ÓtT5ëº—=}9:{]oõ/ıc~#â‘álVπ<Å“_ÒŒÈD˜:_Ö0qŒÑ1ÃNNÖK°@áZáN†˘+M*HÏ;Og·e; ŸÑ4‡*'h¢wƒºs`yiw∞‡˘ô±L‹é¢(‹ïO˘VeyOï/6ÀÅEÜ,
+C7
+∆†4HA.á+ "÷”(‡<å/ëáÜÅŸ(?	ªß©©≈æ“¶)i=∆= [–Õhz¯63˜]ÆîNK´›üô»]¶fDX“#Ê™·¥[¢.é”Étã`ût`%„∂ñ›·wíAJ•ãQ∂1∏àâ¯<xjö6/¢CƒæE»®Ø-Ø=çí _Pweü∞≈u»◊Go@4Úlép¿ |R«	´œ'+Yîa)Ø•/å¨∫°KÄÁS&âì≈^ÆËLÈÊ#›úw´,a z·?i¿£πÌoã
+&cQ4X8K.˛ÄÈCq(4¢¡t∆I¬:L¢ßp∆â˛®.≠* ¡"¯U°ä; ÷÷M4ÕÇÁùƒB£æÕ◊	á°ø®¿Ç.TnèÖ=ÃÑY¬…¶ÏdeH…†'¶“úC ïœÓ” T«éóÚ?`
+Ãóˇ‰ª≥k≥ë#íjˇwËs»#f©˜9éò˝úlLJêûi˜7ıÂ÷#GëD·˜˛ı¥≤ë∫ú˜À#∂Y$§›–/~±`0 ÉÖΩ<Ô˘Ndıtµ©ls—¥4uVeeFƒ9q"¢ÿ]y@…’ØMñr∞ÌíÌ±lÇs,óÌÒv˚r\«-wEªÎDàåÈ$‡‚‰éõé4	~ï±‚◊Ñ…\E≈ÚN±”pc¨çß’∞Á¥WÿY(eD≥^\¬
+«b;™
+zÂ¢í◊C∞sé∑Ñµ‚À»‰q∆45TLπ°äèôjGÚÔiIiü£–ö4·28 kπg‚&¬X]îè‘d`"˝à
+WAYS5)°£Püì)‚ò¬vp•&MTnı^¸YpáêÜ`ïBoDæô!w‰õ
+O÷Ü\F´Äº¬≠‰q~ko:;)Æ/âf°Nì°‘`ﬁX'Ÿ/9êÁ4êú9zÅä˙È4{"ÌÏ·XI⁄ÊFi;Ó’RVQ_Ó0“˘2ä®x˘59(á—õ-Á≤eºÌ	 ı¶rí÷˘NÿîV∫K[ª∞]ˇØO,]Hô'w˙±∆Dçê¿µ∞éƒÏ•Mäπ86+ƒ!â?(%£RK¡L±Ysoäó4Ù´≥ä!åìâ¿◊íI‡–◊=]AÏ
+nÏñÙ l+ç^¬†#
+O/HgÛÈ≠<:I)D¯÷Ùøõﬁ!Ì ¶™∆âM›aUıÓúW…úlv™`ıπ¶ho3q¡ÛRÕ‰&5°≈©’"QÈæ†g[ó<<8:†æ,êXa∏VEâzÅñG·>]ŒÔ¡/'ÏÛ-ˆ˘à}˘@ËIjL¨=ÙÂüÖ>S~kÎ˛ö°/é.©Ö˙¢—˚ªd}:áæ¸…¨okËÀ
+˙t˙ª1tÛ&Ù˝2ÙıNË„]–ß–ß3Ë€ËﬂùÆΩÃÒw°ëf®√`ıüéV‰≥ü}˘øˇNˇöæx¸ÒìgÔúÁúïO∑L•Î:SËeC,∫ÑZÓ⁄öö’H"Jñ&jpl—
+‡hL\(î~„AsJcµ⁄c•ÜªOõ≠–7´—„,+üÉ≈Æ¿ÇænÛñÍY◊’s{P*Æ”ıd˘U€∫µ“îgM@Õ ˝ﬁ¨°Ãm´M°ä∆åyLUG¸lçüÊ´6¶√`®–O›rπC˘j≥
+1ps´{öp9¬Ry‚›vwX∏≤{¬∑ÂB∂Èß;çúbg4VK0uL√|å“x Û‚2NõÜ≤H∫¢˜ñQô®Î=—dò¡ózLπ[À«ËÊÁ4∆”d≥â/gS◊Ö÷Ö÷ëùd:™2b]OhÔ◊îägî oQ™ﬁRJÌx=Q*ﬁn^Q*ûS _†Tî kJmä:°ë~Ñ∞Üx}åJöF[∂\»!ø'£ ﬂÕ®ìÂﬁ´ E†-ùò∫–.íàqgE¢íŒIT öD∂:ëhŸ|"—r÷í®º3âº´‡ËTm:ıØˆtç‚ª“®|ãÚ≤ãœi”Ö˜¶†Q~_a∫PÌV¥ämFü¬ı”*⁄ñ;Î›Ωß’Ü˜íVçi“Ò˘º t°='ıº UMΩ´WÃ´-Ó#Øƒ©fÆáxôXÙÃÎ~≠¥ÚKæfZm∏pOiE8`ƒeR•¬â.ß´ßU »ÆéΩ^Zmπpiı3∆Ωÿ=˙ÙÀ0Ωx≥{ÙÔôüæ⁄|.Ωà„≈Áª«á›£√Aq8|ªÛyÈÿÏHâ£å_-ò	áwû>ˇˇÛáávÇu†¶√7ª_=}Û›´_ﬁ‹Ë•0‘‹fG-ø≥Œ¨9O%	øÿÏ∏g>}ıÍ≈K˚
+ÿ≤8r<ÚÒ˜/>ˇÂÊıØœÍÌ'sÉêËÓ◊7ªØ¶üÓ»≤‹ëıõr$ÿ≠¨⁄h¥;`ä_4¢ÆgYJZR≥fOÙ178%§\¨0Á6ÿé ÂéSpà¸8 îÎ:oA1ÿ&&º:˜"ŒV^êx]gä—•∞åzÁ	L–ñ‘€&EK™$Q‰v2gVıîìbêLÃM9îÊí¢evÓë‡kÎ∫D´H◊πYª´Èék[≤¥ŸcvÑÀ_∆‚ﬂ»–—€ÇÂ~qdÒJÏ.Nj·úî™ÚüOÎvæï§˛å| ëﬁ¿üıˇ…2õ∞π0ΩdÕeØÉK4ª|T^Â$‚ëK4y†b˘%óSQ"µjé´G»82ÃTp§òît(QêpÄì¢ê+[÷÷2ÓKA⁄W:»EJExIÍ,gˆ™)ª9¬Ìi¨ãó»%‰êÌ°HwºOí%"B∞å°ΩàjL‚∫$ßßwëØn([K8ÈÉ_˛À°¬3ÇÈåKIÑ‰£mÊ:;_Ñ∫¶í3ç‚™n‚#2U1áUA·ëÍ«`wB#›#ëÅ"ï7
+ûmMg≈ı—T9
+Üìï°Ÿ´6xc¬¶Æ√DÛ¿Ë≤ˆ RxìëßYäªÈ¯kß„´tV^Z¡.”¯·VóÂî÷òËÏW™s≤'%…ıHƒ≤≤«ôx;´†Môñ?z{°Ë›ÓJ#iZ÷cè}F]”)vlX[z&‰aT› pãπOUr^@H∫˚‰˘õõ…KWùı{x∫<z|¯hY≈ÌMi˚q^§˙ìˇ<ôvø	0 u}Êéendstreamendobj97 0 obj<</CS/DeviceCMYK/I false/K false/S/Transparency>>endobj138 0 obj<</BitsPerComponent 8/ColorSpace 139 0 R/Filter[/ASCII85Decode/FlateDecode]/Height 68/Length 1489/Width 105>>stream
+8;Z\7]oq)7%/(W*`=pV_BkY#.$6CFU7SW$DY,079a?X7_5^aB$Y<"a6euoahp;af2
++7.1s,am,Qi-*\[oNBTi;:k:-/jCpY7q*LK,-*M-SbcS:,D]s8.Tppf:*r'HhV)Q8
+7pI9R-#;0#jYU$bYZ;T'@^@(bLTJO]p!N4C`Hu@gXR*C$L(0j!Wfk%HeZmutfJb;Q
+?7W-!<Y*IS\E.c]c1M[C;*n:Cj)23XL56mO+'3%bqL$KLp(XOK0u>DmZH=(-FVH<&
+MYAGe8OQ!:AK=X28&f0I@g#GT5n'f.i-$&b0Ll.!*=83XY@UjO`V@$kc@`4GL,P2R
+83+FBX\%JZI,3+>;\-c+Pp2YLpM(k1BFlqt3K!_p5rrc90HD%&3(eWl?%qXSQsrFY
+UV9;TOE46&C8roIL;ds`B:WRI)e1qai]9D;C+`r,q(t'?BGVPt4l8eT!=T#B<e(t?
+h3Y"eD%nfN->VE_D?mkr0qTTZ&N^3P0SUJ79]qU>a$Es%QX&Xjn#\cq1n]"4'dF9\
+Ju/FGOfc\koKM0,Ha[W/I4i5LXM]k.0cI+6N4(!B1`)o.`,fbZD2?IbY;IOkaE_?U
+.(^>1k%K/<i9I7td)8+fjQOB>@m-BZ!aF=ip!iCj@TJ#+bg:[=\MM]Yc"D&ccM^A9
+X/!=58#'X`mQoW4bf:mdC=?sO+ir*F(n-;TW/bE".+>/(N",C:i;Lf&"OjL9Me%pE
+DYbD%aUI+n-q>4&.u.d3hjaHSq)Yf&,52kU+TS(hMi]Ps'^g.H:;O/p`%j6,l3,T'
++GSa)kieG[ere(!)^@hZ#WVI"0UOtsEUdLMK.Q"CIq5l\&3i<a1O-S#T9?`[ZFs40
+BcXKiCP>LmgSJP'^;%6*O7kYP=*J!rrJ$igkT^ek7>$Ei:Doq\CSf^37XNdWrG1q,
+N%ibo)pa`AaY>0:p)`.\#mQEW8&TRW8Z@&k@Km7._<7?V8@;QGH3Dgb?='1_Q:+Di
+*$J-@fCm2i@Wi-HJM*:cmR:O\&c&B<'\]]2=[hF]2INm&d!.sM3N.*a2#\9fSW`]#
+Gh+!:TI5IeVXi54pWOGcPAg'G-!5.O&To-b<J5q!\+4&P8.,C3rpE2X>[t&j+tsZt
+E6/a(gLVOq"G;26",Pb)X=U*-l)aO$BZ8R>a#V^GldoL"aPp&L7OK>J9IBmU-Z![D
+2<qa/^R7!SA4FA!l$<El]X7$;pH%"qdmHr%[P")D2;5SNf3O,q7HBuuD''rR=`5=c
+h=[6:=M#P!B?;;HLZb?VX$XFsAFbI[Fl&a4+B*o`2F>u:HgXNjGJ]cA>OG2<NQ3e/
+\SNERICn92(GJ_O2:Phj0d=%<e5<7g22M*<gs9jeU6$6`f8rZ8%ZuSZ3)33H*'Mi7
+0HI\$7mA`\kAklu192q=\\<=V<d@K/7@,@mL$LB5;4K/9S"/1.9Qcm(;PC_9q]@Y*
+f^:sj"FnG<qR`$MNp+_P_qsMDOWOZ*G/^3$~>endstreamendobj139 0 obj[/Indexed/DeviceRGB 255 140 0 R]endobj140 0 obj<</Filter[/ASCII85Decode/FlateDecode]/Length 428>>stream
+8;X]O>EqN@%''O_@%e@?J;%+8(9e>X=MR6S?i^YgA3=].HDXF.R$lIL@"pJ+EP(%0
+b]6ajmNZn*!='OQZeQ^Y*,=]?C.B+\Ulg9dhD*"iC[;*=3`oP1[!S^)?1)IZ4dup`
+E1r!/,*0[*9.aFIR2&b-C#s<Xl5FH@[<=!#6V)uDBXnIr.F>oRZ7Dl%MLY\.?d>Mn
+6%Q2oYfNRF$$+ON<+]RUJmC0I<jlL.oXisZ;SYU[/7#<&37rclQKqeJe#,UF7Rgb1
+VNWFKf>nDZ4OTs0S!saG>GGKUlQ*Q?45:CI&4J'_2j<etJICj7e7nPMb=O6S7UOH<
+PO7r\I.Hu&e0d&E<.')fERr/l+*W,)q^D*ai5<uuLX.7g/>$XKrcYp0n+Xl_nU*O(
+l[$6Nn+Z_Nq0]s7hs]`XX1nZ8&94a\~>endstreamendobj104 0 obj<</BBox[982.703 393.928 1099.45 322.553]/Group 141 0 R/Length 636/Matrix[1.0 0.0 0.0 1.0 0.0 0.0]/Resources<</ExtGState<</GS0 101 0 R>>>>/Subtype/Form>>stream
+q
+982.703 322.553 116.747 71.375 re
+W n
+0 0 1 0 k
+/GS0 gs
+q 1 0 0 1 1098.9541 333.7949 cm
+0 0 m
+0 -5.934 -4.042 -10.742 -9.028 -10.742 c
+-106.723 -10.742 l
+-111.708 -10.742 -115.751 -5.934 -115.751 0 c
+-115.751 48.891 l
+-115.751 54.824 -111.708 59.633 -106.723 59.633 c
+-9.028 59.633 l
+-4.042 59.633 0 54.824 0 48.891 c
+h
+f
+Q
+0 0 0 1 K
+1 w 10 M 0 j 0 J []0 d 
+q 1 0 0 1 1098.9541 333.7949 cm
+0 0 m
+0 -5.934 -4.042 -10.742 -9.028 -10.742 c
+-106.723 -10.742 l
+-111.708 -10.742 -115.751 -5.934 -115.751 0 c
+-115.751 48.891 l
+-115.751 54.824 -111.708 59.633 -106.723 59.633 c
+-9.028 59.633 l
+-4.042 59.633 0 54.824 0 48.891 c
+0 0 l
+h
+S
+Q
+Q
+endstreamendobj105 0 obj<</BBox[466.019 548.035 608.761 483.958]/Group 142 0 R/Length 1250/Matrix[1.0 0.0 0.0 1.0 0.0 0.0]/Resources<</ExtGState<</GS0 101 0 R>>>>/Subtype/Form>>stream
+q
+466.019 483.958 142.742 64.076 re
+W n
+0.5 0 1 0 k
+/GS0 gs
+q 1 0 0 1 593.4409 484.6885 cm
+0 0 m
+3.23 0.072 9.653 -0.88 12.119 1.811 c
+15.427 5.42 14.918 17.72 14.554 22.299 c
+14.088 28.152 12.896 32.301 7.341 35.307 c
+3.275 37.506 -2.141 38.109 -5.783 34.671 c
+-6.633 45.38 -8.12 52.405 -19.562 56.436 c
+-24.696 58.247 -36.045 59.248 -40.369 55.165 c
+-43.522 66.325 -75.397 65.169 -77.459 52.708 c
+-84.502 56.158 -101.297 57.531 -106.709 50.914 c
+-111.083 45.567 -109.166 37.876 -107.162 32.029 c
+-118.764 33.184 -121.921 32.273 -124.915 20.663 c
+-126.715 13.679 -127.977 6.883 -125.676 0.486 c
+-113.717 -0.577 -8.741 -0.197 0 0 c
+f
+Q
+0 0 0 1 K
+1 w 10 M 0 j 0 J []0 d 
+q 1 0 0 1 593.4409 484.6885 cm
+0 0 m
+3.23 0.072 9.653 -0.88 12.119 1.811 c
+15.427 5.42 14.918 17.72 14.554 22.299 c
+14.088 28.152 12.896 32.301 7.341 35.307 c
+3.275 37.506 -2.141 38.109 -5.783 34.671 c
+-6.633 45.38 -8.12 52.405 -19.562 56.436 c
+-24.696 58.247 -36.045 59.248 -40.369 55.165 c
+-43.522 66.325 -75.397 65.169 -77.459 52.708 c
+-84.502 56.158 -101.297 57.531 -106.709 50.914 c
+-111.083 45.567 -109.166 37.876 -107.162 32.029 c
+-118.764 33.184 -121.921 32.273 -124.915 20.663 c
+-126.715 13.679 -127.977 6.883 -125.676 0.486 c
+-113.717 -0.577 -8.741 -0.197 0 0 c
+h
+S
+Q
+Q
+endstreamendobj106 0 obj<</BBox[112.623 202.687 238.634 133.857]/Group 143 0 R/Length 624/Matrix[1.0 0.0 0.0 1.0 0.0 0.0]/Resources<</ExtGState<</GS0 101 0 R>>>>/Subtype/Form>>stream
+q
+112.623 133.858 126.011 68.828 re
+W n
+0 0.5 1 0 k
+/GS0 gs
+q 1 0 0 1 238.1338 144.7109 cm
+0 0 m
+0 -5.718 -4.365 -10.354 -9.75 -10.354 c
+-115.26 -10.354 l
+-120.645 -10.354 -125.011 -5.718 -125.011 0 c
+-125.011 47.122 l
+-125.011 52.84 -120.645 57.477 -115.26 57.477 c
+-9.75 57.477 l
+-4.365 57.477 0 52.84 0 47.122 c
+h
+f
+Q
+0 0 0 1 K
+1 w 10 M 0 j 0 J []0 d 
+q 1 0 0 1 238.1338 144.7109 cm
+0 0 m
+0 -5.718 -4.365 -10.354 -9.75 -10.354 c
+-115.26 -10.354 l
+-120.645 -10.354 -125.011 -5.718 -125.011 0 c
+-125.011 47.122 l
+-125.011 52.84 -120.645 57.477 -115.26 57.477 c
+-9.75 57.477 l
+-4.365 57.477 0 52.84 0 47.122 c
+0 0 l
+h
+S
+Q
+Q
+endstreamendobj107 0 obj<</BBox[300.75 303.776 385.091 228.696]/Group 144 0 R/Length 610/Matrix[1.0 0.0 0.0 1.0 0.0 0.0]/Resources<</ExtGState<</GS0 101 0 R>>>>/Subtype/Form>>stream
+q
+300.75 228.696 84.341 75.08 re
+W n
+0.75 1 0 0 k
+/GS0 gs
+q 1 0 0 1 384.5913 238.2256 cm
+0 0 m
+0 -4.986 -4.042 -9.029 -9.028 -9.029 c
+-74.312 -9.029 l
+-79.298 -9.029 -83.341 -4.986 -83.341 0 c
+-83.341 56.022 l
+-83.341 61.009 -79.298 65.051 -74.312 65.051 c
+-9.028 65.051 l
+-4.042 65.051 0 61.009 0 56.022 c
+h
+f
+Q
+0 0 0 1 K
+1 w 10 M 0 j 0 J []0 d 
+q 1 0 0 1 384.5913 238.2256 cm
+0 0 m
+0 -4.986 -4.042 -9.029 -9.028 -9.029 c
+-74.312 -9.029 l
+-79.298 -9.029 -83.341 -4.986 -83.341 0 c
+-83.341 56.022 l
+-83.341 61.009 -79.298 65.051 -74.312 65.051 c
+-9.028 65.051 l
+-4.042 65.051 0 61.009 0 56.022 c
+0 0 l
+h
+S
+Q
+Q
+endstreamendobj108 0 obj<</BBox[275.285 429.917 410.556 341.583]/Group 145 0 R/Length 517/Matrix[1.0 0.0 0.0 1.0 0.0 0.0]/Resources<</ExtGState<</GS0 101 0 R>>>>/Subtype/Form>>stream
+q
+275.285 341.583 135.271 88.334 re
+W n
+0.75 1 0 0 k
+/GS0 gs
+q 1 0 0 1 410.0562 385.75 cm
+0 0 m
+0 -24.117 -30.058 -43.667 -67.136 -43.667 c
+-104.213 -43.667 -134.271 -24.117 -134.271 0 c
+-134.271 24.116 -104.213 43.667 -67.136 43.667 c
+-30.058 43.667 0 24.116 0 0 c
+f
+Q
+0 0 0 1 K
+1 w 10 M 0 j 0 J []0 d 
+q 1 0 0 1 410.0562 385.75 cm
+0 0 m
+0 -24.117 -30.058 -43.667 -67.136 -43.667 c
+-104.213 -43.667 -134.271 -24.117 -134.271 0 c
+-134.271 24.116 -104.213 43.667 -67.136 43.667 c
+-30.058 43.667 0 24.116 0 0 c
+h
+S
+Q
+Q
+endstreamendobj109 0 obj<</BBox[645.148 398.566 780.419 310.232]/Group 146 0 R/Length 517/Matrix[1.0 0.0 0.0 1.0 0.0 0.0]/Resources<</ExtGState<</GS0 101 0 R>>>>/Subtype/Form>>stream
+q
+645.149 310.232 135.27 88.333 re
+W n
+1 0 0 0 k
+/GS0 gs
+q 1 0 0 1 779.9189 354.3984 cm
+0 0 m
+0 -24.115 -30.057 -43.666 -67.135 -43.666 c
+-104.213 -43.666 -134.271 -24.115 -134.271 0 c
+-134.271 24.117 -104.213 43.668 -67.135 43.668 c
+-30.057 43.668 0 24.117 0 0 c
+f
+Q
+0 0 0 1 K
+1 w 10 M 0 j 0 J []0 d 
+q 1 0 0 1 779.9189 354.3984 cm
+0 0 m
+0 -24.115 -30.057 -43.666 -67.135 -43.666 c
+-104.213 -43.666 -134.271 -24.115 -134.271 0 c
+-134.271 24.117 -104.213 43.668 -67.135 43.668 c
+-30.057 43.668 0 24.117 0 0 c
+h
+S
+Q
+Q
+endstreamendobj110 0 obj<</BBox[274.996 546.117 410.845 469.3]/Group 147 0 R/Length 623/Matrix[1.0 0.0 0.0 1.0 0.0 0.0]/Resources<</ExtGState<</GS0 101 0 R>>>>/Subtype/Form>>stream
+q
+274.996 469.3 135.849 76.817 re
+W n
+0.75 1 0 0 k
+/GS0 gs
+q 1 0 0 1 410.3452 478.8286 cm
+0 0 m
+0 -4.986 -4.042 -9.028 -9.028 -9.028 c
+-125.821 -9.028 l
+-130.807 -9.028 -134.849 -4.986 -134.849 0 c
+-134.849 57.76 l
+-134.849 62.746 -130.807 66.788 -125.821 66.788 c
+-9.028 66.788 l
+-4.042 66.788 0 62.746 0 57.76 c
+h
+f
+Q
+0 0 0 1 K
+1 w 10 M 0 j 0 J []0 d 
+q 1 0 0 1 410.3452 478.8286 cm
+0 0 m
+0 -4.986 -4.042 -9.028 -9.028 -9.028 c
+-125.821 -9.028 l
+-130.807 -9.028 -134.849 -4.986 -134.849 0 c
+-134.849 57.76 l
+-134.849 62.746 -130.807 66.788 -125.821 66.788 c
+-9.028 66.788 l
+-4.042 66.788 0 62.746 0 57.76 c
+0 0 l
+h
+S
+Q
+Q
+endstreamendobj111 0 obj<</BBox[484.224 231.114 590.557 144.959]/Group 148 0 R/Length 358/Matrix[1.0 0.0 0.0 1.0 0.0 0.0]/Resources<</ExtGState<</GS0 101 0 R>>>>/Subtype/Form>>stream
+q
+484.224 144.959 106.332 86.155 re
+W n
+0.5 0 1 0 k
+0 0 0 1 K
+1 w 10 M 0 j 0 J []0 d 
+/GS0 gs
+q 1 0 0 1 590.0376 147.1934 cm
+0 0 m
+0 -0.423 -0.192 -0.837 -0.546 -1.243 c
+-0.405 -1.405 -0.297 -1.569 -0.209 -1.734 c
+0.019 -1.734 l
+0.019 83.921 l
+0.019 79.127 -23.561 75.24 -52.648 75.24 c
+-81.735 75.24 -105.314 79.127 -105.314 83.921 c
+-105.314 0.119 l
+B
+Q
+Q
+endstreamendobj112 0 obj<</BBox[809.271 493.867 952.012 433.544]/Group 149 0 R/Length 639/Matrix[1.0 0.0 0.0 1.0 0.0 0.0]/Resources<</ExtGState<</GS0 101 0 R>>>>/Subtype/Form>>stream
+q
+809.271 433.544 142.74 60.323 re
+W n
+0 0.5 1 0 k
+/GS0 gs
+q 1 0 0 1 951.5117 447.4561 cm
+0 0 m
+0 -7.407 -4.877 -13.412 -10.893 -13.412 c
+-130.849 -13.412 l
+-136.865 -13.412 -141.741 -7.407 -141.741 0 c
+-141.741 32.499 l
+-141.741 39.905 -136.865 45.911 -130.849 45.911 c
+-10.893 45.911 l
+-4.877 45.911 0 39.905 0 32.499 c
+h
+f
+Q
+0 0 0 1 K
+1 w 10 M 0 j 0 J []0 d 
+q 1 0 0 1 951.5117 447.4561 cm
+0 0 m
+0 -7.407 -4.877 -13.412 -10.893 -13.412 c
+-130.849 -13.412 l
+-136.865 -13.412 -141.741 -7.407 -141.741 0 c
+-141.741 32.499 l
+-141.741 39.905 -136.865 45.911 -130.849 45.911 c
+-10.893 45.911 l
+-4.877 45.911 0 39.905 0 32.499 c
+0 0 l
+h
+S
+Q
+Q
+endstreamendobj113 0 obj<</BBox[828.934 713.249 932.35 652.926]/Group 150 0 R/Length 624/Matrix[1.0 0.0 0.0 1.0 0.0 0.0]/Resources<</ExtGState<</GS0 101 0 R>>>>/Subtype/Form>>stream
+q
+828.934 652.926 103.416 60.323 re
+W n
+0 0.5 1 0 k
+/GS0 gs
+q 1 0 0 1 931.8496 666.8379 cm
+0 0 m
+0 -7.407 -3.524 -13.412 -7.87 -13.412 c
+-94.546 -13.412 l
+-98.893 -13.412 -102.416 -7.407 -102.416 0 c
+-102.416 32.499 l
+-102.416 39.905 -98.893 45.911 -94.546 45.911 c
+-7.87 45.911 l
+-3.524 45.911 0 39.905 0 32.499 c
+h
+f
+Q
+0 0 0 1 K
+1 w 10 M 0 j 0 J []0 d 
+q 1 0 0 1 931.8496 666.8379 cm
+0 0 m
+0 -7.407 -3.524 -13.412 -7.87 -13.412 c
+-94.546 -13.412 l
+-98.893 -13.412 -102.416 -7.407 -102.416 0 c
+-102.416 32.499 l
+-102.416 39.905 -98.893 45.911 -94.546 45.911 c
+-7.87 45.911 l
+-3.524 45.911 0 39.905 0 32.499 c
+0 0 l
+h
+S
+Q
+Q
+endstreamendobj114 0 obj<</BBox[809.271 600.888 952.012 540.564]/Group 151 0 R/Length 639/Matrix[1.0 0.0 0.0 1.0 0.0 0.0]/Resources<</ExtGState<</GS0 101 0 R>>>>/Subtype/Form>>stream
+q
+809.271 540.564 142.74 60.324 re
+W n
+0 0.5 1 0 k
+/GS0 gs
+q 1 0 0 1 951.5117 554.4766 cm
+0 0 m
+0 -7.407 -4.877 -13.412 -10.893 -13.412 c
+-130.849 -13.412 l
+-136.865 -13.412 -141.741 -7.407 -141.741 0 c
+-141.741 32.499 l
+-141.741 39.905 -136.865 45.911 -130.849 45.911 c
+-10.893 45.911 l
+-4.877 45.911 0 39.905 0 32.499 c
+h
+f
+Q
+0 0 0 1 K
+1 w 10 M 0 j 0 J []0 d 
+q 1 0 0 1 951.5117 554.4766 cm
+0 0 m
+0 -7.407 -4.877 -13.412 -10.893 -13.412 c
+-130.849 -13.412 l
+-136.865 -13.412 -141.741 -7.407 -141.741 0 c
+-141.741 32.499 l
+-141.741 39.905 -136.865 45.911 -130.849 45.911 c
+-10.893 45.911 l
+-4.877 45.911 0 39.905 0 32.499 c
+0 0 l
+h
+S
+Q
+Q
+endstreamendobj115 0 obj<</BBox[283.552 702.928 402.29 642.605]/Group 152 0 R/Length 636/Matrix[1.0 0.0 0.0 1.0 0.0 0.0]/Resources<</ExtGState<</GS0 101 0 R>>>>/Subtype/Form>>stream
+q
+283.552 642.605 118.738 60.323 re
+W n
+0 0.5 1 0 k
+/GS0 gs
+q 1 0 0 1 401.7896 656.5171 cm
+0 0 m
+0 -7.407 -4.051 -13.412 -9.048 -13.412 c
+-108.689 -13.412 l
+-113.688 -13.412 -117.737 -7.407 -117.737 0 c
+-117.737 32.499 l
+-117.737 39.905 -113.688 45.911 -108.689 45.911 c
+-9.048 45.911 l
+-4.051 45.911 0 39.905 0 32.499 c
+h
+f
+Q
+0 0 0 1 K
+1 w 10 M 0 j 0 J []0 d 
+q 1 0 0 1 401.7896 656.5171 cm
+0 0 m
+0 -7.407 -4.051 -13.412 -9.048 -13.412 c
+-108.689 -13.412 l
+-113.688 -13.412 -117.737 -7.407 -117.737 0 c
+-117.737 32.499 l
+-117.737 39.905 -113.688 45.911 -108.689 45.911 c
+-9.048 45.911 l
+-4.051 45.911 0 39.905 0 32.499 c
+0 0 l
+h
+S
+Q
+Q
+endstreamendobj116 0 obj<</BBox[479.079 147.089 480.77 144.959]/Group 153 0 R/Length 370/Matrix[1.0 0.0 0.0 1.0 0.0 0.0]/Resources<</ExtGState<</GS0 101 0 R>>>>/Subtype/Form>>stream
+q
+479.079 144.959 1.691 2.13 re
+W n
+0.5 0 1 0 k
+/GS0 gs
+q 1 0 0 1 479.5791 147.0303 cm
+0 0 m
+0 -1.571 l
+0.191 -1.571 l
+0.279 -1.406 0.387 -1.242 0.528 -1.08 c
+0.22 -0.726 0.043 -0.366 0 0 c
+f
+Q
+0 0 0 1 K
+1 w 10 M 0 j 0 J []0 d 
+q 1 0 0 1 479.5791 147.0303 cm
+0 0 m
+0 -1.571 l
+0.191 -1.571 l
+0.279 -1.406 0.387 -1.242 0.528 -1.08 c
+0.22 -0.726 0.043 -0.366 0 0 c
+h
+S
+Q
+Q
+endstreamendobj117 0 obj<</BBox[830.323 268.36 930.959 208.037]/Group 154 0 R/Length 608/Matrix[1.0 0.0 0.0 1.0 0.0 0.0]/Resources<</ExtGState<</GS0 101 0 R>>>>/Subtype/Form>>stream
+q
+830.323 208.037 100.636 60.323 re
+W n
+0 0 1 0 k
+/GS0 gs
+q 1 0 0 1 930.459 221.9492 cm
+0 0 m
+0 -7.406 -3.428 -13.412 -7.656 -13.412 c
+-91.979 -13.412 l
+-96.209 -13.412 -99.636 -7.406 -99.636 0 c
+-99.636 32.5 l
+-99.636 39.906 -96.209 45.911 -91.979 45.911 c
+-7.656 45.911 l
+-3.428 45.911 0 39.906 0 32.5 c
+h
+f
+Q
+0 0 0 1 K
+1 w 10 M 0 j 0 J []0 d 
+q 1 0 0 1 930.459 221.9492 cm
+0 0 m
+0 -7.406 -3.428 -13.412 -7.656 -13.412 c
+-91.979 -13.412 l
+-96.209 -13.412 -99.636 -7.406 -99.636 0 c
+-99.636 32.5 l
+-99.636 39.906 -96.209 45.911 -91.979 45.911 c
+-7.656 45.911 l
+-3.428 45.911 0 39.906 0 32.5 c
+0 0 l
+h
+S
+Q
+Q
+endstreamendobj118 0 obj<</BBox[662.467 594.788 763.104 534.464]/Group 155 0 R/Length 612/Matrix[1.0 0.0 0.0 1.0 0.0 0.0]/Resources<</ExtGState<</GS0 101 0 R>>>>/Subtype/Form>>stream
+q
+662.467 534.464 100.637 60.324 re
+W n
+0 0.5 1 0 k
+/GS0 gs
+q 1 0 0 1 762.6025 548.3765 cm
+0 0 m
+0 -7.406 -3.428 -13.412 -7.656 -13.412 c
+-91.979 -13.412 l
+-96.209 -13.412 -99.636 -7.406 -99.636 0 c
+-99.636 32.5 l
+-99.636 39.906 -96.209 45.911 -91.979 45.911 c
+-7.656 45.911 l
+-3.428 45.911 0 39.906 0 32.5 c
+h
+f
+Q
+0 0 0 1 K
+1 w 10 M 0 j 0 J []0 d 
+q 1 0 0 1 762.6025 548.3765 cm
+0 0 m
+0 -7.406 -3.428 -13.412 -7.656 -13.412 c
+-91.979 -13.412 l
+-96.209 -13.412 -99.636 -7.406 -99.636 0 c
+-99.636 32.5 l
+-99.636 39.906 -96.209 45.911 -91.979 45.911 c
+-7.656 45.911 l
+-3.428 45.911 0 39.906 0 32.5 c
+0 0 l
+h
+S
+Q
+Q
+endstreamendobj119 0 obj<</BBox[662.467 493.867 763.104 433.544]/Group 156 0 R/Length 612/Matrix[1.0 0.0 0.0 1.0 0.0 0.0]/Resources<</ExtGState<</GS0 101 0 R>>>>/Subtype/Form>>stream
+q
+662.467 433.544 100.637 60.323 re
+W n
+0 0.5 1 0 k
+/GS0 gs
+q 1 0 0 1 762.6025 447.4561 cm
+0 0 m
+0 -7.406 -3.428 -13.412 -7.656 -13.412 c
+-91.979 -13.412 l
+-96.209 -13.412 -99.636 -7.406 -99.636 0 c
+-99.636 32.5 l
+-99.636 39.906 -96.209 45.911 -91.979 45.911 c
+-7.656 45.911 l
+-3.428 45.911 0 39.906 0 32.5 c
+h
+f
+Q
+0 0 0 1 K
+1 w 10 M 0 j 0 J []0 d 
+q 1 0 0 1 762.6025 447.4561 cm
+0 0 m
+0 -7.406 -3.428 -13.412 -7.656 -13.412 c
+-91.979 -13.412 l
+-96.209 -13.412 -99.636 -7.406 -99.636 0 c
+-99.636 32.5 l
+-99.636 39.906 -96.209 45.911 -91.979 45.911 c
+-7.656 45.911 l
+-3.428 45.911 0 39.906 0 32.5 c
+0 0 l
+h
+S
+Q
+Q
+endstreamendobj120 0 obj<</BBox[827.564 68.9219 829.255 66.793]/Group 157 0 R/Length 366/Matrix[1.0 0.0 0.0 1.0 0.0 0.0]/Resources<</ExtGState<</GS0 101 0 R>>>>/Subtype/Form>>stream
+q
+827.564 66.793 1.689 2.129 re
+W n
+0.5 0 1 0 k
+/GS0 gs
+q 1 0 0 1 828.0645 68.8633 cm
+0 0 m
+0 -1.57 l
+0.191 -1.57 l
+0.279 -1.406 0.387 -1.242 0.527 -1.08 c
+0.219 -0.727 0.043 -0.367 0 0 c
+f
+Q
+0 0 0 1 K
+1 w 10 M 0 j 0 J []0 d 
+q 1 0 0 1 828.0645 68.8633 cm
+0 0 m
+0 -1.57 l
+0.191 -1.57 l
+0.279 -1.406 0.387 -1.242 0.527 -1.08 c
+0.219 -0.727 0.043 -0.367 0 0 c
+h
+S
+Q
+Q
+endstreamendobj121 0 obj<</BBox[827.474 69.5254 933.809 57.3594]/Group 158 0 R/Length 568/Matrix[1.0 0.0 0.0 1.0 0.0 0.0]/Resources<</ExtGState<</GS0 101 0 R>>>>/Subtype/Form>>stream
+q
+827.475 57.359 106.334 12.166 re
+W n
+0 0 1 0 k
+0 0 0 1 K
+1 w 10 M 0 j 0 J []0 d 
+/GS0 gs
+q 1 0 0 1 827.9941 69.1465 cm
+0 0 m
+-0.004 -0.041 -0.021 -0.08 -0.021 -0.121 c
+-0.021 -0.176 -0.008 -0.229 0 -0.283 c
+0.043 -0.65 0.219 -1.01 0.527 -1.363 c
+0.387 -1.525 0.279 -1.689 0.191 -1.854 c
+0.059 -2.104 -0.021 -2.354 -0.021 -2.607 c
+-0.021 -7.4 23.561 -11.287 52.646 -11.287 c
+81.734 -11.287 105.313 -7.4 105.313 -2.607 c
+105.313 -2.354 105.236 -2.104 105.104 -1.854 c
+105.016 -1.689 104.908 -1.525 104.768 -1.363 c
+105.121 -0.957 105.313 -0.543 105.313 -0.121 c
+B
+Q
+Q
+endstreamendobj122 0 obj<</BBox[827.476 162.129 933.808 143.766]/Group 159 0 R/Length 482/Matrix[1.0 0.0 0.0 1.0 0.0 0.0]/Resources<</ExtGState<</GS0 101 0 R>>>>/Subtype/Form>>stream
+q
+827.476 143.766 106.332 18.363 re
+W n
+0 0 1 0 k
+/GS0 gs
+q 1 0 0 1 880.6416 144.2656 cm
+0 0 m
+29.088 0 52.666 3.887 52.666 8.682 c
+52.666 13.477 29.088 17.363 0 17.363 c
+-29.086 17.363 -52.666 13.477 -52.666 8.682 c
+-52.666 3.887 -29.086 0 0 0 c
+f
+Q
+0 0 0 1 K
+1 w 10 M 0 j 0 J []0 d 
+q 1 0 0 1 880.6416 144.2656 cm
+0 0 m
+29.088 0 52.666 3.887 52.666 8.682 c
+52.666 13.477 29.088 17.363 0 17.363 c
+-29.086 17.363 -52.666 13.477 -52.666 8.682 c
+-52.666 3.887 -29.086 0 0 0 c
+h
+S
+Q
+Q
+endstreamendobj123 0 obj<</BBox[827.476 152.947 933.808 66.793]/Group 160 0 R/Length 352/Matrix[1.0 0.0 0.0 1.0 0.0 0.0]/Resources<</ExtGState<</GS0 101 0 R>>>>/Subtype/Form>>stream
+q
+827.476 66.793 106.332 86.154 re
+W n
+0 0 1 0 k
+0 0 0 1 K
+1 w 10 M 0 j 0 J []0 d 
+/GS0 gs
+q 1 0 0 1 933.29 69.0254 cm
+0 0 m
+0 -0.422 -0.193 -0.836 -0.547 -1.242 c
+-0.406 -1.404 -0.297 -1.568 -0.209 -1.732 c
+0.018 -1.732 l
+0.018 83.922 l
+0.018 79.127 -23.562 75.24 -52.648 75.24 c
+-81.734 75.24 -105.314 79.127 -105.314 83.922 c
+-105.314 0.121 l
+B
+Q
+Q
+endstreamendobj124 0 obj<</BBox[659.617 632.548 765.951 620.381]/Group 161 0 R/Length 567/Matrix[1.0 0.0 0.0 1.0 0.0 0.0]/Resources<</ExtGState<</GS0 101 0 R>>>>/Subtype/Form>>stream
+q
+659.617 620.381 106.334 12.167 re
+W n
+0 0.5 1 0 k
+0 0 0 1 K
+1 w 10 M 0 j 0 J []0 d 
+/GS0 gs
+q 1 0 0 1 660.1367 632.1685 cm
+0 0 m
+-0.004 -0.041 -0.02 -0.079 -0.02 -0.12 c
+-0.02 -0.175 -0.008 -0.229 0 -0.283 c
+0.043 -0.649 0.219 -1.009 0.527 -1.363 c
+0.387 -1.525 0.279 -1.689 0.191 -1.854 c
+0.059 -2.103 -0.02 -2.353 -0.02 -2.607 c
+-0.02 -7.4 23.561 -11.287 52.646 -11.287 c
+81.734 -11.287 105.314 -7.4 105.314 -2.607 c
+105.314 -2.353 105.236 -2.103 105.104 -1.854 c
+105.016 -1.689 104.908 -1.525 104.768 -1.363 c
+105.121 -0.957 105.314 -0.542 105.314 -0.12 c
+B
+Q
+Q
+endstreamendobj125 0 obj<</BBox[659.618 725.152 765.95 706.789]/Group 162 0 R/Length 484/Matrix[1.0 0.0 0.0 1.0 0.0 0.0]/Resources<</ExtGState<</GS0 101 0 R>>>>/Subtype/Form>>stream
+q
+659.618 706.789 106.332 18.363 re
+W n
+0 0.5 1 0 k
+/GS0 gs
+q 1 0 0 1 712.7842 707.2886 cm
+0 0 m
+29.088 0 52.666 3.887 52.666 8.681 c
+52.666 13.476 29.088 17.363 0 17.363 c
+-29.086 17.363 -52.666 13.476 -52.666 8.681 c
+-52.666 3.887 -29.086 0 0 0 c
+f
+Q
+0 0 0 1 K
+1 w 10 M 0 j 0 J []0 d 
+q 1 0 0 1 712.7842 707.2886 cm
+0 0 m
+29.088 0 52.666 3.887 52.666 8.681 c
+52.666 13.476 29.088 17.363 0 17.363 c
+-29.086 17.363 -52.666 13.476 -52.666 8.681 c
+-52.666 3.887 -29.086 0 0 0 c
+h
+S
+Q
+Q
+endstreamendobj126 0 obj<</BBox[659.618 715.969 765.95 629.815]/Group 163 0 R/Length 357/Matrix[1.0 0.0 0.0 1.0 0.0 0.0]/Resources<</ExtGState<</GS0 101 0 R>>>>/Subtype/Form>>stream
+q
+659.618 629.815 106.332 86.154 re
+W n
+0 0.5 1 0 k
+0 0 0 1 K
+1 w 10 M 0 j 0 J []0 d 
+/GS0 gs
+q 1 0 0 1 765.4326 632.0483 cm
+0 0 m
+0 -0.422 -0.193 -0.837 -0.547 -1.243 c
+-0.406 -1.405 -0.297 -1.569 -0.209 -1.733 c
+0.018 -1.733 l
+0.018 83.921 l
+0.018 79.127 -23.562 75.24 -52.648 75.24 c
+-81.734 75.24 -105.314 79.127 -105.314 83.921 c
+-105.314 0.12 l
+B
+Q
+Q
+endstreamendobj127 0 obj<</BBox[484.223 147.693 590.556 135.525]/Group 164 0 R/Length 573/Matrix[1.0 0.0 0.0 1.0 0.0 0.0]/Resources<</ExtGState<</GS0 101 0 R>>>>/Subtype/Form>>stream
+q
+484.224 135.525 106.332 12.168 re
+W n
+0.5 0 1 0 k
+0 0 0 1 K
+1 w 10 M 0 j 0 J []0 d 
+/GS0 gs
+q 1 0 0 1 484.7422 147.3125 cm
+0 0 m
+-0.003 -0.04 -0.019 -0.079 -0.019 -0.119 c
+-0.019 -0.174 -0.006 -0.229 0 -0.282 c
+0.043 -0.648 0.22 -1.008 0.528 -1.362 c
+0.387 -1.524 0.279 -1.688 0.191 -1.854 c
+0.059 -2.102 -0.019 -2.353 -0.019 -2.606 c
+-0.019 -7.4 23.561 -11.287 52.647 -11.287 c
+81.735 -11.287 105.314 -7.4 105.314 -2.606 c
+105.314 -2.353 105.237 -2.102 105.104 -1.854 c
+105.017 -1.688 104.909 -1.524 104.768 -1.362 c
+105.122 -0.956 105.314 -0.542 105.314 -0.119 c
+B
+Q
+Q
+endstreamendobj128 0 obj<</BBox[1011.4 271.439 1070.75 211.291]/Group 165 0 R/Length 609/Matrix[1.0 0.0 0.0 1.0 0.0 0.0]/Resources<</ExtGState<</GS0 101 0 R>>>>/Subtype/Form>>stream
+q
+1011.4 211.291 59.35 60.148 re
+W n
+0 0.5 1 0 k
+/GS0 gs
+q 1 0 0 1 1070.252 220.8184 cm
+0 0 m
+0 -4.984 -2.037 -9.027 -4.551 -9.027 c
+-53.797 -9.027 l
+-56.311 -9.027 -58.348 -4.984 -58.348 0 c
+-58.348 41.092 l
+-58.348 46.078 -56.311 50.121 -53.797 50.121 c
+-4.551 50.121 l
+-2.037 50.121 0 46.078 0 41.092 c
+h
+f
+Q
+0 0 0 1 K
+1 w 10 M 0 j 0 J []0 d 
+q 1 0 0 1 1070.252 220.8184 cm
+0 0 m
+0 -4.984 -2.037 -9.027 -4.551 -9.027 c
+-53.797 -9.027 l
+-56.311 -9.027 -58.348 -4.984 -58.348 0 c
+-58.348 41.092 l
+-58.348 46.078 -56.311 50.121 -53.797 50.121 c
+-4.551 50.121 l
+-2.037 50.121 0 46.078 0 41.092 c
+0 0 l
+h
+S
+Q
+Q
+endstreamendobj129 0 obj<</BBox[484.222 630.367 590.557 618.2]/Group 166 0 R/Length 565/Matrix[1.0 0.0 0.0 1.0 0.0 0.0]/Resources<</ExtGState<</GS0 101 0 R>>>>/Subtype/Form>>stream
+q
+484.223 618.2 106.334 12.167 re
+W n
+0 0.5 1 0 k
+0 0 0 1 K
+1 w 10 M 0 j 0 J []0 d 
+/GS0 gs
+q 1 0 0 1 484.7422 629.9873 cm
+0 0 m
+-0.004 -0.041 -0.02 -0.079 -0.02 -0.12 c
+-0.02 -0.175 -0.008 -0.229 0 -0.283 c
+0.043 -0.649 0.219 -1.009 0.527 -1.363 c
+0.387 -1.525 0.279 -1.689 0.191 -1.854 c
+0.059 -2.103 -0.02 -2.353 -0.02 -2.607 c
+-0.02 -7.4 23.561 -11.287 52.646 -11.287 c
+81.734 -11.287 105.314 -7.4 105.314 -2.607 c
+105.314 -2.353 105.236 -2.103 105.104 -1.854 c
+105.016 -1.689 104.908 -1.525 104.768 -1.363 c
+105.121 -0.957 105.314 -0.542 105.314 -0.12 c
+B
+Q
+Q
+endstreamendobj130 0 obj<</BBox[484.224 722.971 590.556 704.607]/Group 167 0 R/Length 484/Matrix[1.0 0.0 0.0 1.0 0.0 0.0]/Resources<</ExtGState<</GS0 101 0 R>>>>/Subtype/Form>>stream
+q
+484.224 704.607 106.332 18.364 re
+W n
+0 0.5 1 0 k
+/GS0 gs
+q 1 0 0 1 537.3896 705.1074 cm
+0 0 m
+29.088 0 52.666 3.887 52.666 8.681 c
+52.666 13.476 29.088 17.363 0 17.363 c
+-29.086 17.363 -52.666 13.476 -52.666 8.681 c
+-52.666 3.887 -29.086 0 0 0 c
+f
+Q
+0 0 0 1 K
+1 w 10 M 0 j 0 J []0 d 
+q 1 0 0 1 537.3896 705.1074 cm
+0 0 m
+29.088 0 52.666 3.887 52.666 8.681 c
+52.666 13.476 29.088 17.363 0 17.363 c
+-29.086 17.363 -52.666 13.476 -52.666 8.681 c
+-52.666 3.887 -29.086 0 0 0 c
+h
+S
+Q
+Q
+endstreamendobj131 0 obj<</BBox[484.224 713.788 590.556 627.634]/Group 168 0 R/Length 357/Matrix[1.0 0.0 0.0 1.0 0.0 0.0]/Resources<</ExtGState<</GS0 101 0 R>>>>/Subtype/Form>>stream
+q
+484.224 627.634 106.332 86.154 re
+W n
+0 0.5 1 0 k
+0 0 0 1 K
+1 w 10 M 0 j 0 J []0 d 
+/GS0 gs
+q 1 0 0 1 590.0381 629.8672 cm
+0 0 m
+0 -0.422 -0.193 -0.837 -0.547 -1.243 c
+-0.406 -1.405 -0.297 -1.569 -0.209 -1.733 c
+0.018 -1.733 l
+0.018 83.921 l
+0.018 79.127 -23.561 75.24 -52.648 75.24 c
+-81.734 75.24 -105.314 79.127 -105.314 83.921 c
+-105.314 0.12 l
+B
+Q
+Q
+endstreamendobj132 0 obj<</BBox[484.224 240.296 590.557 221.934]/Group 169 0 R/Length 484/Matrix[1.0 0.0 0.0 1.0 0.0 0.0]/Resources<</ExtGState<</GS0 101 0 R>>>>/Subtype/Form>>stream
+q
+484.224 221.934 106.332 18.362 re
+W n
+0.5 0 1 0 k
+/GS0 gs
+q 1 0 0 1 537.3896 222.4336 cm
+0 0 m
+29.087 0 52.667 3.887 52.667 8.681 c
+52.667 13.476 29.087 17.362 0 17.362 c
+-29.087 17.362 -52.666 13.476 -52.666 8.681 c
+-52.666 3.887 -29.087 0 0 0 c
+f
+Q
+0 0 0 1 K
+1 w 10 M 0 j 0 J []0 d 
+q 1 0 0 1 537.3896 222.4336 cm
+0 0 m
+29.087 0 52.667 3.887 52.667 8.681 c
+52.667 13.476 29.087 17.362 0 17.362 c
+-29.087 17.362 -52.666 13.476 -52.666 8.681 c
+-52.666 3.887 -29.087 0 0 0 c
+h
+S
+Q
+Q
+endstreamendobj133 0 obj<</BBox[478.146 437.593 596.633 396.658]/Group 170 0 R/Length 628/Matrix[1.0 0.0 0.0 1.0 0.0 0.0]/Resources<</ExtGState<</GS0 101 0 R>>>>/Subtype/Form>>stream
+q
+478.146 396.658 118.487 40.935 re
+W n
+0.5 0 1 0 k
+/GS0 gs
+q 1 0 0 1 596.1333 406.1875 cm
+0 0 m
+0 -4.986 -4.042 -9.029 -9.029 -9.029 c
+-108.459 -9.029 l
+-113.445 -9.029 -117.487 -4.986 -117.487 0 c
+-117.487 21.876 l
+-117.487 26.863 -113.445 30.905 -108.459 30.905 c
+-9.029 30.905 l
+-4.042 30.905 0 26.863 0 21.876 c
+h
+f
+Q
+0 0 0 1 K
+1 w 10 M 0 j 0 J []0 d 
+q 1 0 0 1 596.1333 406.1875 cm
+0 0 m
+0 -4.986 -4.042 -9.029 -9.029 -9.029 c
+-108.459 -9.029 l
+-113.445 -9.029 -117.487 -4.986 -117.487 0 c
+-117.487 21.876 l
+-117.487 26.863 -113.445 30.905 -108.459 30.905 c
+-9.029 30.905 l
+-4.042 30.905 0 26.863 0 21.876 c
+0 0 l
+h
+S
+Q
+Q
+endstreamendobj134 0 obj<</BBox[466.019 351.07 608.761 290.747]/Group 171 0 R/Length 640/Matrix[1.0 0.0 0.0 1.0 0.0 0.0]/Resources<</ExtGState<</GS0 101 0 R>>>>/Subtype/Form>>stream
+q
+466.019 290.747 142.742 60.323 re
+W n
+0.5 0 1 0 k
+/GS0 gs
+q 1 0 0 1 608.2607 304.6592 cm
+0 0 m
+0 -7.407 -4.877 -13.412 -10.893 -13.412 c
+-130.849 -13.412 l
+-136.866 -13.412 -141.742 -7.407 -141.742 0 c
+-141.742 32.499 l
+-141.742 39.905 -136.866 45.911 -130.849 45.911 c
+-10.893 45.911 l
+-4.877 45.911 0 39.905 0 32.499 c
+h
+f
+Q
+0 0 0 1 K
+1 w 10 M 0 j 0 J []0 d 
+q 1 0 0 1 608.2607 304.6592 cm
+0 0 m
+0 -7.407 -4.877 -13.412 -10.893 -13.412 c
+-130.849 -13.412 l
+-136.866 -13.412 -141.742 -7.407 -141.742 0 c
+-141.742 32.499 l
+-141.742 39.905 -136.866 45.911 -130.849 45.911 c
+-10.893 45.911 l
+-4.877 45.911 0 39.905 0 32.499 c
+0 0 l
+h
+S
+Q
+Q
+endstreamendobj135 0 obj<</BBox[284.545 193.757 401.296 133.608]/Group 172 0 R/Length 613/Matrix[1.0 0.0 0.0 1.0 0.0 0.0]/Resources<</ExtGState<</GS0 101 0 R>>>>/Subtype/Form>>stream
+q
+284.545 133.608 116.751 60.148 re
+W n
+0.75 1 0 0 k
+/GS0 gs
+q 1 0 0 1 400.7959 143.1367 cm
+0 0 m
+0 -4.986 -4.042 -9.028 -9.028 -9.028 c
+-106.722 -9.028 l
+-111.708 -9.028 -115.75 -4.986 -115.75 0 c
+-115.75 41.092 l
+-115.75 46.077 -111.708 50.12 -106.722 50.12 c
+-9.028 50.12 l
+-4.042 50.12 0 46.077 0 41.092 c
+h
+f
+Q
+0 0 0 1 K
+1 w 10 M 0 j 0 J []0 d 
+q 1 0 0 1 400.7959 143.1367 cm
+0 0 m
+0 -4.986 -4.042 -9.028 -9.028 -9.028 c
+-106.722 -9.028 l
+-111.708 -9.028 -115.75 -4.986 -115.75 0 c
+-115.75 41.092 l
+-115.75 46.077 -111.708 50.12 -106.722 50.12 c
+-9.028 50.12 l
+-4.042 50.12 0 46.077 0 41.092 c
+0 0 l
+h
+S
+Q
+Q
+endstreamendobj136 0 obj<</BBox[822.266 385.159 939.017 325.011]/Group 173 0 R/Length 618/Matrix[1.0 0.0 0.0 1.0 0.0 0.0]/Resources<</ExtGState<</GS0 101 0 R>>>>/Subtype/Form>>stream
+q
+822.266 325.011 116.751 60.148 re
+W n
+1 0 0 0 k
+/GS0 gs
+q 1 0 0 1 938.5166 334.5391 cm
+0 0 m
+0 -4.986 -4.042 -9.028 -9.028 -9.028 c
+-106.723 -9.028 l
+-111.708 -9.028 -115.751 -4.986 -115.751 0 c
+-115.751 41.092 l
+-115.751 46.077 -111.708 50.12 -106.723 50.12 c
+-9.028 50.12 l
+-4.042 50.12 0 46.077 0 41.092 c
+h
+f
+Q
+0 0 0 1 K
+1 w 10 M 0 j 0 J []0 d 
+q 1 0 0 1 938.5166 334.5391 cm
+0 0 m
+0 -4.986 -4.042 -9.028 -9.028 -9.028 c
+-106.723 -9.028 l
+-111.708 -9.028 -115.751 -4.986 -115.751 0 c
+-115.751 41.092 l
+-115.751 46.077 -111.708 50.12 -106.723 50.12 c
+-9.028 50.12 l
+-4.042 50.12 0 46.077 0 41.092 c
+0 0 l
+h
+S
+Q
+Q
+endstreamendobj137 0 obj<</BBox[117.137 303.449 233.888 243.301]/Group 174 0 R/Length 620/Matrix[1.0 0.0 0.0 1.0 0.0 0.0]/Resources<</ExtGState<</GS0 101 0 R>>>>/Subtype/Form>>stream
+q
+117.137 243.301 116.751 60.148 re
+W n
+0 0.5 1 0 k
+/GS0 gs
+q 1 0 0 1 233.3882 252.8291 cm
+0 0 m
+0 -4.987 -4.042 -9.028 -9.028 -9.028 c
+-106.722 -9.028 l
+-111.708 -9.028 -115.751 -4.987 -115.751 0 c
+-115.751 41.091 l
+-115.751 46.077 -111.708 50.12 -106.722 50.12 c
+-9.028 50.12 l
+-4.042 50.12 0 46.077 0 41.091 c
+h
+f
+Q
+0 0 0 1 K
+1 w 10 M 0 j 0 J []0 d 
+q 1 0 0 1 233.3882 252.8291 cm
+0 0 m
+0 -4.987 -4.042 -9.028 -9.028 -9.028 c
+-106.722 -9.028 l
+-111.708 -9.028 -115.751 -4.987 -115.751 0 c
+-115.751 41.091 l
+-115.751 46.077 -111.708 50.12 -106.722 50.12 c
+-9.028 50.12 l
+-4.042 50.12 0 46.077 0 41.091 c
+0 0 l
+h
+S
+Q
+Q
+endstreamendobj174 0 obj<</I false/K false/S/Transparency/Type/Group>>endobj101 0 obj<</AIS false/BM/Normal/CA 1.0/OP false/OPM 1/SA true/SMask/None/Type/ExtGState/ca 1.0/op false>>endobj173 0 obj<</I false/K false/S/Transparency/Type/Group>>endobj172 0 obj<</I false/K false/S/Transparency/Type/Group>>endobj171 0 obj<</I false/K false/S/Transparency/Type/Group>>endobj170 0 obj<</I false/K false/S/Transparency/Type/Group>>endobj169 0 obj<</I false/K false/S/Transparency/Type/Group>>endobj168 0 obj<</I false/K false/S/Transparency/Type/Group>>endobj167 0 obj<</I false/K false/S/Transparency/Type/Group>>endobj166 0 obj<</I false/K false/S/Transparency/Type/Group>>endobj165 0 obj<</I false/K false/S/Transparency/Type/Group>>endobj164 0 obj<</I false/K false/S/Transparency/Type/Group>>endobj163 0 obj<</I false/K false/S/Transparency/Type/Group>>endobj162 0 obj<</I false/K false/S/Transparency/Type/Group>>endobj161 0 obj<</I false/K false/S/Transparency/Type/Group>>endobj160 0 obj<</I false/K false/S/Transparency/Type/Group>>endobj159 0 obj<</I false/K false/S/Transparency/Type/Group>>endobj158 0 obj<</I false/K false/S/Transparency/Type/Group>>endobj157 0 obj<</I false/K false/S/Transparency/Type/Group>>endobj156 0 obj<</I false/K false/S/Transparency/Type/Group>>endobj155 0 obj<</I false/K false/S/Transparency/Type/Group>>endobj154 0 obj<</I false/K false/S/Transparency/Type/Group>>endobj153 0 obj<</I false/K false/S/Transparency/Type/Group>>endobj152 0 obj<</I false/K false/S/Transparency/Type/Group>>endobj151 0 obj<</I false/K false/S/Transparency/Type/Group>>endobj150 0 obj<</I false/K false/S/Transparency/Type/Group>>endobj149 0 obj<</I false/K false/S/Transparency/Type/Group>>endobj148 0 obj<</I false/K false/S/Transparency/Type/Group>>endobj147 0 obj<</I false/K false/S/Transparency/Type/Group>>endobj146 0 obj<</I false/K false/S/Transparency/Type/Group>>endobj145 0 obj<</I false/K false/S/Transparency/Type/Group>>endobj144 0 obj<</I false/K false/S/Transparency/Type/Group>>endobj143 0 obj<</I false/K false/S/Transparency/Type/Group>>endobj142 0 obj<</I false/K false/S/Transparency/Type/Group>>endobj141 0 obj<</I false/K false/S/Transparency/Type/Group>>endobj94 0 obj<</Intent 175 0 R/Name(Layer 1)/Type/OCG/Usage 176 0 R>>endobj175 0 obj[/View/Design]endobj176 0 obj<</CreatorInfo<</Creator(Adobe Illustrator 15.1)/Subtype/Artwork>>>>endobj93 0 obj<</BaseFont/Silom/Encoding 177 0 R/FirstChar 32/FontDescriptor 178 0 R/LastChar 255/Subtype/TrueType/Type/Font/Widths[250 500 583 833 583 917 833 250 417 417 583 583 333 583 333 583 667 667 667 667 667 667 667 667 667 667 333 333 500 667 500 667 917 667 667 667 667 583 583 667 667 500 583 750 583 1000 750 667 667 667 667 583 500 667 667 1000 667 667 667 417 583 417 667 667 500 667 667 583 667 667 500 667 667 333 500 667 333 1000 667 667 667 667 500 583 500 667 667 1000 667 667 667 417 417 417 667 0 667 667 667 583 750 667 667 667 667 667 667 667 667 583 667 667 667 667 333 333 333 333 667 667 667 667 667 667 667 667 667 667 417 500 583 750 583 583 750 667 833 833 917 500 500 0 917 667 0 583 0 0 667 833 0 0 0 0 0 583 583 0 1000 667 667 500 583 0 500 0 0 750 750 1167 0 667 667 667 917 1000 500 833 583 583 333 333 583 0 667 667 250 667 500 500 833 833 417 333 333 583 1250 667 583 667 583 583 500 500 500 500 667 667 0 667 667 667 667 333 500 667 500 500 500 500 500 500 500 500]>>endobj177 0 obj<</BaseEncoding/MacRomanEncoding/Differences[219/Euro]/Type/Encoding>>endobj178 0 obj<</Ascent 1351/CapHeight 1536/Descent -496/Flags 32/FontBBox[-585 -496 1250 1351]/FontFamily(Silom)/FontName/Silom/FontStretch/Normal/FontWeight 400/ItalicAngle 0/StemV 168/Type/FontDescriptor/XHeight 583>>endobj98 0 obj<</AIS false/BM/Normal/CA 0.210007/OP false/OPM 1/SA true/SMask/None/Type/ExtGState/ca 0.210007/op false>>endobj99 0 obj<</AIS false/BM/Normal/CA 0.380005/OP false/OPM 1/SA true/SMask/None/Type/ExtGState/ca 0.380005/op false>>endobj100 0 obj<</AIS false/BM/Normal/CA 0.279999/OP false/OPM 1/SA true/SMask/None/Type/ExtGState/ca 0.279999/op false>>endobj102 0 obj<</AIS false/BM/Normal/CA 0.320007/OP false/OPM 1/SA true/SMask/None/Type/ExtGState/ca 0.320007/op false>>endobj103 0 obj<</AIS false/BM/Normal/CA 0.339996/OP false/OPM 1/SA true/SMask/None/Type/ExtGState/ca 0.339996/op false>>endobj6 0 obj<</Intent 88 0 R/Name(Layer 1)/Type/OCG/Usage 89 0 R>>endobj88 0 obj[/View/Design]endobj89 0 obj<</CreatorInfo<</Creator(Adobe Illustrator 15.1)/Subtype/Artwork>>>>endobj95 0 obj[94 0 R]endobj179 0 obj<</CreationDate(D:20251111134304-06'00')/Creator(Adobe Illustrator CS5.1)/ModDate(D:20251112111057-06'00')/Producer(Adobe PDF library 9.90)/Title(Data Archetecture)>>endobjxref0 1800000000004 65535 f
+0000000016 00000 n
+0000000159 00000 n
+0000027484 00000 n
+0000000000 00000 f
+0000000000 00000 f
+0000068286 00000 n
+0000000000 00000 f
+0000027535 00000 n
+0000000000 00000 f
+0000000000 00000 f
+0000000000 00000 f
+0000000000 00000 f
+0000000000 00000 f
+0000000000 00000 f
+0000000000 00000 f
+0000000000 00000 f
+0000000000 00000 f
+0000000000 00000 f
+0000000000 00000 f
+0000000000 00000 f
+0000000000 00000 f
+0000000000 00000 f
+0000000000 00000 f
+0000000000 00000 f
+0000000000 00000 f
+0000000000 00000 f
+0000000000 00000 f
+0000000000 00000 f
+0000000000 00000 f
+0000000000 00000 f
+0000000000 00000 f
+0000000000 00000 f
+0000000000 00000 f
+0000000000 00000 f
+0000000000 00000 f
+0000000000 00000 f
+0000000000 00000 f
+0000000000 00000 f
+0000000000 00000 f
+0000000000 00000 f
+0000000000 00000 f
+0000000000 00000 f
+0000000000 00000 f
+0000000000 00000 f
+0000000000 00000 f
+0000000000 00000 f
+0000000000 00000 f
+0000000000 00000 f
+0000000000 00000 f
+0000000000 00000 f
+0000000000 00000 f
+0000000000 00000 f
+0000000000 00000 f
+0000000000 00000 f
+0000000000 00000 f
+0000000000 00000 f
+0000000000 00000 f
+0000000000 00000 f
+0000000000 00000 f
+0000000000 00000 f
+0000000000 00000 f
+0000000000 00000 f
+0000000000 00000 f
+0000000000 00000 f
+0000000000 00000 f
+0000000000 00000 f
+0000000000 00000 f
+0000000000 00000 f
+0000000000 00000 f
+0000000000 00000 f
+0000000000 00000 f
+0000000000 00000 f
+0000000000 00000 f
+0000000000 00000 f
+0000000000 00000 f
+0000000000 00000 f
+0000000000 00000 f
+0000000000 00000 f
+0000000000 00000 f
+0000000000 00000 f
+0000000000 00000 f
+0000000000 00000 f
+0000000000 00000 f
+0000000000 00000 f
+0000000000 00000 f
+0000000000 00000 f
+0000000000 00000 f
+0000068356 00000 n
+0000068387 00000 n
+0000000000 00000 f
+0000000000 00000 f
+0000000000 00000 f
+0000066349 00000 n
+0000066158 00000 n
+0000068472 00000 n
+0000028349 00000 n
+0000035984 00000 n
+0000067668 00000 n
+0000067791 00000 n
+0000067914 00000 n
+0000063932 00000 n
+0000068038 00000 n
+0000068162 00000 n
+0000038248 00000 n
+0000039072 00000 n
+0000040511 00000 n
+0000041323 00000 n
+0000042120 00000 n
+0000042825 00000 n
+0000043530 00000 n
+0000044339 00000 n
+0000044885 00000 n
+0000045712 00000 n
+0000046523 00000 n
+0000047350 00000 n
+0000048173 00000 n
+0000048730 00000 n
+0000049525 00000 n
+0000050325 00000 n
+0000051125 00000 n
+0000051678 00000 n
+0000052434 00000 n
+0000053104 00000 n
+0000053643 00000 n
+0000054398 00000 n
+0000055069 00000 n
+0000055613 00000 n
+0000056374 00000 n
+0000057170 00000 n
+0000057921 00000 n
+0000058593 00000 n
+0000059138 00000 n
+0000059810 00000 n
+0000060626 00000 n
+0000061453 00000 n
+0000062254 00000 n
+0000063060 00000 n
+0000036050 00000 n
+0000037684 00000 n
+0000037734 00000 n
+0000066094 00000 n
+0000066030 00000 n
+0000065966 00000 n
+0000065902 00000 n
+0000065838 00000 n
+0000065774 00000 n
+0000065710 00000 n
+0000065646 00000 n
+0000065582 00000 n
+0000065518 00000 n
+0000065454 00000 n
+0000065390 00000 n
+0000065326 00000 n
+0000065262 00000 n
+0000065198 00000 n
+0000065134 00000 n
+0000065070 00000 n
+0000065006 00000 n
+0000064942 00000 n
+0000064878 00000 n
+0000064814 00000 n
+0000064750 00000 n
+0000064686 00000 n
+0000064622 00000 n
+0000064558 00000 n
+0000064494 00000 n
+0000064430 00000 n
+0000064366 00000 n
+0000064302 00000 n
+0000064238 00000 n
+0000064174 00000 n
+0000064110 00000 n
+0000064046 00000 n
+0000063868 00000 n
+0000066231 00000 n
+0000066263 00000 n
+0000067356 00000 n
+0000067444 00000 n
+0000068497 00000 n
+trailer<</Size 180/Root 1 0 R/Info 179 0 R/ID[<7B9C0CBD9C424B23AE934CE7E111A14D><4356F7C44F8A4228A43FD0AE58C4F2D3>]>>startxref68681%%EOF
