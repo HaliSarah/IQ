@@ -137,7 +137,7 @@ nav{display:flex;justify-content:space-between;align-items:center;padding:14px 2
 .field input::placeholder{color:#555;}
 
 /* SHAPE PICKER */
-.shape-grid{display:block;margin-top:2px;max-height:280px;overflow-y:auto;padding-right:4px;}
+.shape-grid{display:block;margin-top:2px;max-height:320px;overflow-y:auto;padding-right:4px;} .shape-grid > div[style*="flex"]{display:flex!important;flex-wrap:wrap;gap:5px;}
 .shape-opt{width:44px;height:44px;border-radius:7px;border:1px solid var(--line);background:var(--navy);display:flex;align-items:center;justify-content:center;cursor:pointer;transition:all .2s;font-size:1.1rem;}
 .shape-opt:hover{border-color:var(--gold);}
 .shape-opt.selected{border-color:var(--gold);background:rgba(201,138,46,.15);}
@@ -215,6 +215,7 @@ nav{display:flex;justify-content:space-between;align-items:center;padding:14px 2
 
 /* HOW IT WORKS */
 .how-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;}
+#how-grid .type-card{cursor:default;pointer-events:none;}
 @media(max-width:560px){.how-grid{grid-template-columns:1fr;}}
 
 .empty-state{text-align:center;padding:48px 24px;color:var(--muted);}
@@ -239,6 +240,7 @@ nav{display:flex;justify-content:space-between;align-items:center;padding:14px 2
 .spin{display:inline-block;width:16px;height:16px;border:2px solid rgba(255,255,255,.3);border-top-color:#fff;border-radius:50%;animation:spin .7s linear infinite;vertical-align:middle;margin-right:6px;}
 @keyframes spin{to{transform:rotate(360deg);}}
 
+#how-grid .type-card{cursor:default!important;border-color:var(--line)!important;transform:none!important;}
 footer{text-align:center;padding:40px 24px;margin-top:80px;border-top:1px solid var(--line);font-size:.76rem;color:var(--muted);}
 .ftr-links{display:flex;gap:20px;justify-content:center;flex-wrap:wrap;margin-bottom:8px;}
 footer a{color:var(--muted);}footer a:hover{color:var(--white);}
@@ -285,7 +287,7 @@ footer a{color:var(--muted);}footer a:hover{color:var(--white);}
           <li>Instant generation</li>
           <li>Custom shapes, colors &amp; gradients</li>
           <li>Logo in center</li>
-          <li>Download PNG <strong style="color:var(--gold2);">or SVG</strong> — print-ready, infinitely scalable</li>
+          <li>Download PNG or <strong>SVG</strong> — print-ready, infinitely scalable</li>
           <li>Never expires</li>
           <li class="na">Cannot change destination</li>
           <li class="na">No scan tracking</li>
@@ -293,7 +295,7 @@ footer a{color:var(--muted);}footer a:hover{color:var(--white);}
         </ul>
         <div class="select-hint">Click to select →</div>
       </div>
-      <div class="type-card dynamic-card" id="card-dynamic" onclick="selectType('dynamic')">
+      <div class="type-card dynamic-card selected" id="card-dynamic" onclick="selectType('dynamic')">
         <span class="badge badge-dynamic">Dynamic · Account Required</span>
         <h3>Dynamic QR Code</h3>
         <p>The QR pattern stays fixed. The destination lives in our system — change it anytime without reprinting.</p>
@@ -302,7 +304,7 @@ footer a{color:var(--muted);}footer a:hover{color:var(--white);}
           <li>Scan count tracking</li>
           <li>Device &amp; location data</li>
           <li>Reset scan counter</li>
-          <li>Download PNG</li>
+          <li>Download PNG or <strong>SVG</strong> — print-ready, infinitely scalable</li>
           <li>Your code never expires</li>
         </ul>
         <div class="pricing-note">No monthly fee. <strong>$25</strong> to change the redirect. <strong>$5</strong> to view scan statistics.</div>
@@ -314,12 +316,12 @@ footer a{color:var(--muted);}footer a:hover{color:var(--white);}
   <!-- GENERATOR -->
   <div class="section">
     <div class="tab-row">
-      <button class="tab active" id="tab-static" onclick="switchTab('static')">Static — Free Forever</button>
-      <button class="tab" id="tab-dynamic" onclick="switchTab('dynamic')">Dynamic — Free to Start</button>
+      <button class="tab" id="tab-static" onclick="switchTab('static')">Static — Free Forever</button>
+      <button class="tab active" id="tab-dynamic" onclick="switchTab('dynamic')">Dynamic — Free to Start</button>
     </div>
 
     <!-- STATIC -->
-    <div id="panel-static">
+    <div id="panel-static" style="display:none;">
       <div class="gen-card">
         <div class="field">
           <label>URL or Text to Encode</label>
@@ -344,9 +346,6 @@ footer a{color:var(--muted);}footer a:hover{color:var(--white);}
                   <option value="6000">6000 × 6000 — Billboard / Vehicle Wrap</option>
                 </select>
               </div>
-              <div style="font-size:.7rem;color:var(--gold2);background:rgba(201,138,46,.06);border:1px solid rgba(201,138,46,.2);border-radius:6px;padding:7px 10px;margin-bottom:14px;line-height:1.6;">
-                💡 <strong>Print tip:</strong> For car decals use 3000px+. For billboards or vehicle wraps use 6000px. Always download SVG for the sharpest print result — SVG scales to any size without losing quality.
-              </div>
               <div class="field">
                 <label>Error Correction</label>
                 <select id="s-ec">
@@ -357,17 +356,14 @@ footer a{color:var(--muted);}footer a:hover{color:var(--white);}
                 </select>
               </div>
             </div>
-
-            <!-- DOT SHAPE -->
-            <div class="field">
-              <label>Dot Shape</label>
-              <div class="shape-grid" id="shape-grid"></div>
+            <div style="font-size:.7rem;color:var(--gold2);background:rgba(201,138,46,.06);border:1px solid rgba(201,138,46,.2);border-radius:6px;padding:8px 12px;margin-bottom:16px;line-height:1.6;">
+              💡 <strong>Print tip:</strong> For car decals use 3000px+. For billboards or vehicle wraps use 6000px. Always <strong>download SVG</strong> for the sharpest print result — SVG scales to any size without losing quality.
             </div>
 
-            <!-- CUSTOM CHARACTER PICKER (shown when custom char shape selected) -->
-            <div class="field" id="s-char-picker-field" style="display:none;">
-              <label>Choose Your Character(s)</label>
-                            <div class="char-picker-wrap">
+            <!-- LETTERS NUMBERS KEYBOARD — above shape grid, always visible -->
+            <div class="field">
+              <label>Characters as Dots — render in your chosen color</label>
+              <div class="char-picker-wrap">
                 <div class="char-accordion" id="s-acc-letters">
                   <div class="char-acc-header" onclick="toggleCharAcc('s-acc-letters')">
                     <span class="char-acc-title">🔤 Letters A–Z <span id="s-letters-count" style="color:var(--gold2);font-size:.6rem;"></span></span>
@@ -407,113 +403,62 @@ footer a{color:var(--muted);}footer a:hover{color:var(--white);}
                     <div class="char-options" id="s-keyboard"></div>
                   </div>
                 </div>
-                <div class="char-accordion" id="s-acc-shapes">
-                  <div class="char-acc-header" onclick="toggleCharAcc('s-acc-shapes')">
-                    <span class="char-acc-title">◆ Shapes <span id="s-shapes-count" style="color:var(--gold2);font-size:.6rem;"></span></span>
-                    <span class="char-acc-arrow">▾</span>
-                  </div>
-                  <div class="char-acc-body">
-                    <div class="char-acc-actions">
-                      <button class="char-acc-btn" onclick="selectAllChars('s','shapes')">Select All</button>
-                      <button class="char-acc-btn" onclick="clearChars('s','shapes')">Clear</button>
-                    </div>
-                    <div class="char-options" id="s-shapes"></div>
-                  </div>
-                </div>
-                <div class="char-accordion" id="s-acc-nature">
-                  <div class="char-acc-header" onclick="toggleCharAcc('s-acc-nature')">
-                    <span class="char-acc-title">🌿 Nature <span id="s-nature-count" style="color:var(--gold2);font-size:.6rem;"></span></span>
-                    <span class="char-acc-arrow">▾</span>
-                  </div>
-                  <div class="char-acc-body">
-                    <div class="char-acc-actions">
-                      <button class="char-acc-btn" onclick="selectAllChars('s','nature')">Select All</button>
-                      <button class="char-acc-btn" onclick="clearChars('s','nature')">Clear</button>
-                    </div>
-                    <div class="char-options" id="s-nature"></div>
-                  </div>
-                </div>
-                <div class="char-accordion" id="s-acc-animals">
-                  <div class="char-acc-header" onclick="toggleCharAcc('s-acc-animals')">
-                    <span class="char-acc-title">🐶 Animals <span id="s-animals-count" style="color:var(--gold2);font-size:.6rem;"></span></span>
-                    <span class="char-acc-arrow">▾</span>
-                  </div>
-                  <div class="char-acc-body">
-                    <div class="char-acc-actions">
-                      <button class="char-acc-btn" onclick="selectAllChars('s','animals')">Select All</button>
-                      <button class="char-acc-btn" onclick="clearChars('s','animals')">Clear</button>
-                    </div>
-                    <div class="char-options" id="s-animals"></div>
-                  </div>
-                </div>
-                <div class="char-accordion" id="s-acc-emojis">
-                  <div class="char-acc-header" onclick="toggleCharAcc('s-acc-emojis')">
-                    <span class="char-acc-title">😊 Emojis <span id="s-emojis-count" style="color:var(--gold2);font-size:.6rem;"></span></span>
-                    <span class="char-acc-arrow">▾</span>
-                  </div>
-                  <div class="char-acc-body">
-                    <div class="char-acc-actions">
-                      <button class="char-acc-btn" onclick="selectAllChars('s','emojis')">Select All</button>
-                      <button class="char-acc-btn" onclick="clearChars('s','emojis')">Clear</button>
-                    </div>
-                    <div class="char-options" id="s-emojis"></div>
-                  </div>
-                </div>
-                <div class="char-accordion" id="s-acc-food">
-                  <div class="char-acc-header" onclick="toggleCharAcc('s-acc-food')">
-                    <span class="char-acc-title">🍎 Food <span id="s-food-count" style="color:var(--gold2);font-size:.6rem;"></span></span>
-                    <span class="char-acc-arrow">▾</span>
-                  </div>
-                  <div class="char-acc-body">
-                    <div class="char-acc-actions">
-                      <button class="char-acc-btn" onclick="selectAllChars('s','food')">Select All</button>
-                      <button class="char-acc-btn" onclick="clearChars('s','food')">Clear</button>
-                    </div>
-                    <div class="char-options" id="s-food"></div>
-                  </div>
-                </div>
-                <div class="char-accordion" id="s-acc-holidays">
-                  <div class="char-acc-header" onclick="toggleCharAcc('s-acc-holidays')">
-                    <span class="char-acc-title">🎃 Holidays <span id="s-holidays-count" style="color:var(--gold2);font-size:.6rem;"></span></span>
-                    <span class="char-acc-arrow">▾</span>
-                  </div>
-                  <div class="char-acc-body">
-                    <div class="char-acc-actions">
-                      <button class="char-acc-btn" onclick="selectAllChars('s','holidays')">Select All</button>
-                      <button class="char-acc-btn" onclick="clearChars('s','holidays')">Clear</button>
-                    </div>
-                    <div class="char-options" id="s-holidays"></div>
-                  </div>
-                </div>
-                <div class="char-accordion" id="s-acc-cleaning">
-                  <div class="char-acc-header" onclick="toggleCharAcc('s-acc-cleaning')">
-                    <span class="char-acc-title">🧹 Cleaning <span id="s-cleaning-count" style="color:var(--gold2);font-size:.6rem;"></span></span>
-                    <span class="char-acc-arrow">▾</span>
-                  </div>
-                  <div class="char-acc-body">
-                    <div class="char-acc-actions">
-                      <button class="char-acc-btn" onclick="selectAllChars('s','cleaning')">Select All</button>
-                      <button class="char-acc-btn" onclick="clearChars('s','cleaning')">Clear</button>
-                    </div>
-                    <div class="char-options" id="s-cleaning"></div>
-                  </div>
-                </div>
-                <div class="char-accordion" id="s-acc-symbols">
-                  <div class="char-acc-header" onclick="toggleCharAcc('s-acc-symbols')">
-                    <span class="char-acc-title">♥ Symbols <span id="s-symbols-count" style="color:var(--gold2);font-size:.6rem;"></span></span>
-                    <span class="char-acc-arrow">▾</span>
-                  </div>
-                  <div class="char-acc-body">
-                    <div class="char-acc-actions">
-                      <button class="char-acc-btn" onclick="selectAllChars('s','symbols')">Select All</button>
-                      <button class="char-acc-btn" onclick="clearChars('s','symbols')">Clear</button>
-                    </div>
-                    <div class="char-options" id="s-symbols"></div>
-                  </div>
-                </div>
-                <div class="char-preview-note" id="s-char-note">Select characters to use as QR dots — then pick the ✎ Custom Char shape above.</div>
+                <div class="char-preview-note" id="s-char-note">Select characters above — they will be randomly placed as QR dots in your chosen color.</div>
               </div>
             </div>
+            <!-- LETTERS NUMBERS KEYBOARD — above shape grid, always visible -->
+            <div class="field">
+              <label>Characters as Dots — render in your chosen color</label>
+              <div class="char-picker-wrap">
+                <div class="char-accordion" id="d-acc-letters">
+                  <div class="char-acc-header" onclick="toggleCharAcc('d-acc-letters')">
+                    <span class="char-acc-title">🔤 Letters A–Z <span id="d-letters-count" style="color:var(--gold2);font-size:.6rem;"></span></span>
+                    <span class="char-acc-arrow">▾</span>
+                  </div>
+                  <div class="char-acc-body">
+                    <div class="char-acc-actions">
+                      <button class="char-acc-btn" onclick="selectAllChars('d','letters')">Select All</button>
+                      <button class="char-acc-btn" onclick="clearChars('d','letters')">Clear</button>
+                    </div>
+                    <div class="char-options" id="d-letters"></div>
+                  </div>
+                </div>
+                <div class="char-accordion" id="d-acc-numbers">
+                  <div class="char-acc-header" onclick="toggleCharAcc('d-acc-numbers')">
+                    <span class="char-acc-title">🔢 Numbers 0–9 <span id="d-numbers-count" style="color:var(--gold2);font-size:.6rem;"></span></span>
+                    <span class="char-acc-arrow">▾</span>
+                  </div>
+                  <div class="char-acc-body">
+                    <div class="char-acc-actions">
+                      <button class="char-acc-btn" onclick="selectAllChars('d','numbers')">Select All</button>
+                      <button class="char-acc-btn" onclick="clearChars('d','numbers')">Clear</button>
+                    </div>
+                    <div class="char-options" id="d-numbers"></div>
+                  </div>
+                </div>
+                <div class="char-accordion" id="d-acc-keyboard">
+                  <div class="char-acc-header" onclick="toggleCharAcc('d-acc-keyboard')">
+                    <span class="char-acc-title">⌨️ Keyboard Symbols <span id="d-keyboard-count" style="color:var(--gold2);font-size:.6rem;"></span></span>
+                    <span class="char-acc-arrow">▾</span>
+                  </div>
+                  <div class="char-acc-body">
+                    <div class="char-acc-actions">
+                      <button class="char-acc-btn" onclick="selectAllChars('d','keyboard')">Select All</button>
+                      <button class="char-acc-btn" onclick="clearChars('d','keyboard')">Clear</button>
+                    </div>
+                    <div class="char-options" id="d-keyboard"></div>
+                  </div>
+                </div>
+                <div class="char-preview-note" id="d-char-note">Select characters above — they will be randomly placed as QR dots in your chosen color.</div>
+              </div>
+            </div>
+            <!-- DOT SHAPE -->
+            <div class="field">
+              <label>Choose Dot Type — vector shapes below respond to your chosen color</label>
+              <div class="shape-grid" id="shape-grid"></div>
+            </div>
+
+            
 
             <!-- LOGO UPLOAD -->
             <div class="field">
@@ -595,7 +540,7 @@ footer a{color:var(--muted);}footer a:hover{color:var(--white);}
     </div><!-- end panel-static -->
 
     <!-- DYNAMIC -->
-    <div id="panel-dynamic" style="display:none;">
+    <div id="panel-dynamic">
       <div class="gen-card">
         <div class="field">
           <label>QR Code Name (for your dashboard)</label>
@@ -627,9 +572,6 @@ footer a{color:var(--muted);}footer a:hover{color:var(--white);}
                   <option value="6000">6000 × 6000 — Billboard / Vehicle Wrap</option>
                 </select>
               </div>
-              <div style="font-size:.7rem;color:var(--gold2);background:rgba(201,138,46,.06);border:1px solid rgba(201,138,46,.2);border-radius:6px;padding:7px 10px;margin-bottom:14px;line-height:1.6;">
-                💡 <strong>Print tip:</strong> For car decals use 3000px+. For billboards or vehicle wraps use 6000px. Always download SVG for the sharpest print result — SVG scales to any size without losing quality.
-              </div>
               <div class="field">
                 <label>Error Correction</label>
                 <select id="d-ec">
@@ -640,163 +582,18 @@ footer a{color:var(--muted);}footer a:hover{color:var(--white);}
                 </select>
               </div>
             </div>
+            <div style="font-size:.7rem;color:var(--gold2);background:rgba(201,138,46,.06);border:1px solid rgba(201,138,46,.2);border-radius:6px;padding:8px 12px;margin-bottom:16px;line-height:1.6;">
+              💡 <strong>Print tip:</strong> For car decals use 3000px+. For billboards or vehicle wraps use 6000px. Always <strong>download SVG</strong> for the sharpest print result — SVG scales to any size without losing quality.
+            </div>
 
             <!-- DOT SHAPE + CUSTOM CHAR PICKER -->
             <div class="field">
-              <label>Dot Shape</label>
+              <label>Choose Dot Type — vector shapes below respond to your chosen color</label>
               <div class="shape-grid" id="d-shape-grid"></div>
             </div>
 
             <!-- CUSTOM CHARACTER PICKER -->
-            <div class="field" id="d-char-picker-field" style="display:none;">
-              <label>Choose Your Character(s)</label>
-                            <div class="char-picker-wrap">
-                <div class="char-accordion" id="d-acc-letters">
-                  <div class="char-acc-header" onclick="toggleCharAcc('d-acc-letters')">
-                    <span class="char-acc-title">🔤 Letters A–Z <span id="d-letters-count" style="color:var(--gold2);font-size:.6rem;"></span></span>
-                    <span class="char-acc-arrow">▾</span>
-                  </div>
-                  <div class="char-acc-body">
-                    <div class="char-acc-actions">
-                      <button class="char-acc-btn" onclick="selectAllChars('d','letters')">Select All</button>
-                      <button class="char-acc-btn" onclick="clearChars('d','letters')">Clear</button>
-                    </div>
-                    <div class="char-options" id="d-letters"></div>
-                  </div>
-                </div>
-                <div class="char-accordion" id="d-acc-numbers">
-                  <div class="char-acc-header" onclick="toggleCharAcc('d-acc-numbers')">
-                    <span class="char-acc-title">🔢 Numbers 0–9 <span id="d-numbers-count" style="color:var(--gold2);font-size:.6rem;"></span></span>
-                    <span class="char-acc-arrow">▾</span>
-                  </div>
-                  <div class="char-acc-body">
-                    <div class="char-acc-actions">
-                      <button class="char-acc-btn" onclick="selectAllChars('d','numbers')">Select All</button>
-                      <button class="char-acc-btn" onclick="clearChars('d','numbers')">Clear</button>
-                    </div>
-                    <div class="char-options" id="d-numbers"></div>
-                  </div>
-                </div>
-                <div class="char-accordion" id="d-acc-keyboard">
-                  <div class="char-acc-header" onclick="toggleCharAcc('d-acc-keyboard')">
-                    <span class="char-acc-title">⌨️ Keyboard Symbols <span id="d-keyboard-count" style="color:var(--gold2);font-size:.6rem;"></span></span>
-                    <span class="char-acc-arrow">▾</span>
-                  </div>
-                  <div class="char-acc-body">
-                    <div class="char-acc-actions">
-                      <button class="char-acc-btn" onclick="selectAllChars('d','keyboard')">Select All</button>
-                      <button class="char-acc-btn" onclick="clearChars('d','keyboard')">Clear</button>
-                    </div>
-                    <div class="char-options" id="d-keyboard"></div>
-                  </div>
-                </div>
-                <div class="char-accordion" id="d-acc-shapes">
-                  <div class="char-acc-header" onclick="toggleCharAcc('d-acc-shapes')">
-                    <span class="char-acc-title">◆ Shapes <span id="d-shapes-count" style="color:var(--gold2);font-size:.6rem;"></span></span>
-                    <span class="char-acc-arrow">▾</span>
-                  </div>
-                  <div class="char-acc-body">
-                    <div class="char-acc-actions">
-                      <button class="char-acc-btn" onclick="selectAllChars('d','shapes')">Select All</button>
-                      <button class="char-acc-btn" onclick="clearChars('d','shapes')">Clear</button>
-                    </div>
-                    <div class="char-options" id="d-shapes"></div>
-                  </div>
-                </div>
-                <div class="char-accordion" id="d-acc-nature">
-                  <div class="char-acc-header" onclick="toggleCharAcc('d-acc-nature')">
-                    <span class="char-acc-title">🌿 Nature <span id="d-nature-count" style="color:var(--gold2);font-size:.6rem;"></span></span>
-                    <span class="char-acc-arrow">▾</span>
-                  </div>
-                  <div class="char-acc-body">
-                    <div class="char-acc-actions">
-                      <button class="char-acc-btn" onclick="selectAllChars('d','nature')">Select All</button>
-                      <button class="char-acc-btn" onclick="clearChars('d','nature')">Clear</button>
-                    </div>
-                    <div class="char-options" id="d-nature"></div>
-                  </div>
-                </div>
-                <div class="char-accordion" id="d-acc-animals">
-                  <div class="char-acc-header" onclick="toggleCharAcc('d-acc-animals')">
-                    <span class="char-acc-title">🐶 Animals <span id="d-animals-count" style="color:var(--gold2);font-size:.6rem;"></span></span>
-                    <span class="char-acc-arrow">▾</span>
-                  </div>
-                  <div class="char-acc-body">
-                    <div class="char-acc-actions">
-                      <button class="char-acc-btn" onclick="selectAllChars('d','animals')">Select All</button>
-                      <button class="char-acc-btn" onclick="clearChars('d','animals')">Clear</button>
-                    </div>
-                    <div class="char-options" id="d-animals"></div>
-                  </div>
-                </div>
-                <div class="char-accordion" id="d-acc-emojis">
-                  <div class="char-acc-header" onclick="toggleCharAcc('d-acc-emojis')">
-                    <span class="char-acc-title">😊 Emojis <span id="d-emojis-count" style="color:var(--gold2);font-size:.6rem;"></span></span>
-                    <span class="char-acc-arrow">▾</span>
-                  </div>
-                  <div class="char-acc-body">
-                    <div class="char-acc-actions">
-                      <button class="char-acc-btn" onclick="selectAllChars('d','emojis')">Select All</button>
-                      <button class="char-acc-btn" onclick="clearChars('d','emojis')">Clear</button>
-                    </div>
-                    <div class="char-options" id="d-emojis"></div>
-                  </div>
-                </div>
-                <div class="char-accordion" id="d-acc-food">
-                  <div class="char-acc-header" onclick="toggleCharAcc('d-acc-food')">
-                    <span class="char-acc-title">🍎 Food <span id="d-food-count" style="color:var(--gold2);font-size:.6rem;"></span></span>
-                    <span class="char-acc-arrow">▾</span>
-                  </div>
-                  <div class="char-acc-body">
-                    <div class="char-acc-actions">
-                      <button class="char-acc-btn" onclick="selectAllChars('d','food')">Select All</button>
-                      <button class="char-acc-btn" onclick="clearChars('d','food')">Clear</button>
-                    </div>
-                    <div class="char-options" id="d-food"></div>
-                  </div>
-                </div>
-                <div class="char-accordion" id="d-acc-holidays">
-                  <div class="char-acc-header" onclick="toggleCharAcc('d-acc-holidays')">
-                    <span class="char-acc-title">🎃 Holidays <span id="d-holidays-count" style="color:var(--gold2);font-size:.6rem;"></span></span>
-                    <span class="char-acc-arrow">▾</span>
-                  </div>
-                  <div class="char-acc-body">
-                    <div class="char-acc-actions">
-                      <button class="char-acc-btn" onclick="selectAllChars('d','holidays')">Select All</button>
-                      <button class="char-acc-btn" onclick="clearChars('d','holidays')">Clear</button>
-                    </div>
-                    <div class="char-options" id="d-holidays"></div>
-                  </div>
-                </div>
-                <div class="char-accordion" id="d-acc-cleaning">
-                  <div class="char-acc-header" onclick="toggleCharAcc('d-acc-cleaning')">
-                    <span class="char-acc-title">🧹 Cleaning <span id="d-cleaning-count" style="color:var(--gold2);font-size:.6rem;"></span></span>
-                    <span class="char-acc-arrow">▾</span>
-                  </div>
-                  <div class="char-acc-body">
-                    <div class="char-acc-actions">
-                      <button class="char-acc-btn" onclick="selectAllChars('d','cleaning')">Select All</button>
-                      <button class="char-acc-btn" onclick="clearChars('d','cleaning')">Clear</button>
-                    </div>
-                    <div class="char-options" id="d-cleaning"></div>
-                  </div>
-                </div>
-                <div class="char-accordion" id="d-acc-symbols">
-                  <div class="char-acc-header" onclick="toggleCharAcc('d-acc-symbols')">
-                    <span class="char-acc-title">♥ Symbols <span id="d-symbols-count" style="color:var(--gold2);font-size:.6rem;"></span></span>
-                    <span class="char-acc-arrow">▾</span>
-                  </div>
-                  <div class="char-acc-body">
-                    <div class="char-acc-actions">
-                      <button class="char-acc-btn" onclick="selectAllChars('d','symbols')">Select All</button>
-                      <button class="char-acc-btn" onclick="clearChars('d','symbols')">Clear</button>
-                    </div>
-                    <div class="char-options" id="d-symbols"></div>
-                  </div>
-                </div>
-                <div class="char-preview-note" id="d-char-note">Select characters to use as QR dots — then pick the ✎ Custom Char shape above.</div>
-              </div>
-            </div>
+            
 
             <div class="field">
               <label>Center Logo (optional)</label>
@@ -857,7 +654,7 @@ footer a{color:var(--muted);}footer a:hover{color:var(--white);}
         </div><!-- end design-grid -->
 
         <button class="gen-btn" onclick="createDynamic()">Create Dynamic QR Code — Free to Start</button>
-        <p style="font-size:.74rem;color:var(--muted);margin-top:10px;text-align:center;">Account required — we'll prompt you to sign in or sign up.</p>
+        <p style="font-size:.74rem;color:var(--muted);margin-top:10px;text-align:center;">Account required &#8212; sign in or sign up to continue.</p>
       </div>
     </div>
   </div>
@@ -866,7 +663,742 @@ footer a{color:var(--muted);}footer a:hover{color:var(--white);}
   <div class="section" style="padding-top:64px;padding-bottom:40px;">
     <h2 class="section-title">How dynamic QR codes work</h2>
     <p class="section-sub">The printed pattern never changes. Only the destination does.</p>
-    <div class="how-grid">
+    <div class="how-grid" id="how-grid">
+      <div class="type-card" style="text-align:center;cursor:default;">
+        <div style="font-size:2rem;margin-bottom:12px;">📲</div>
+        <h3 style="font-size:.95rem;margin-bottom:8px;">Someone scans</h3>
+        <p style="font-size:.82rem;">Their camera reads your QR code — the same printed pattern, forever.</p>
+      </div>
+      <div class="type-card" style="text-align:center;cursor:default;">
+        <div style="font-size:2rem;margin-bottom:12px;">↗</div>
+        <h3 style="font-size:.95rem;margin-bottom:8px;">We redirect</h3>
+        <p style="font-size:.82rem;">Our server looks up your current destination and sends them there instantly.</p>
+      </div>
+      <div class="type-card" style="text-align:center;cursor:default;">
+        <div style="font-size:2rem;margin-bottom:12px;">📊</div>
+        <h3 style="font-size:.95rem;margin-bottom:8px;">You track</h3>
+        <p style="font-size:.82rem;">Every scan is logged — total counts, device types, location. $5 to access your stats.</p>
+      </div>
+    </div>
+  </div>
+</div><!-- end view-home -->
+
+<!-- DASHBOARD VIEW -->
+<div class="view" id="view-dashboard">
+  <div id="dashboard">
+    <div class="dash-header">
+      <div>
+        <h2>My QR Codes</h2>
+        <p style="font-size:.82rem;color:var(--muted);margin-top:4px;" id="dash-email"></p>
+      </div>
+      <button class="nav-btn primary" onclick="showView('home');switchTab('dynamic')">+ New Dynamic Code</button>
+    </div>
+    <div id="qr-list"><div class="empty-state"><p>No QR codes yet.</p></div></div>
+  </div>
+</div>
+
+<!-- AUTH MODAL -->
+<div class="modal-bg" id="auth-modal">
+  <div class="modal">
+    <button class="modal-close" onclick="closeModal('auth-modal')">✕</button>
+    <h3 id="auth-modal-title">Sign In</h3>
+    <p id="auth-modal-sub">Welcome back — enter your username and password.</p>
+
+    <div id="auth-signin">
+      <div class="field"><label>Username</label><input type="text" id="si-username" placeholder="yourname" oninput="this.value=this.value.toLowerCase().replace(/[^a-z0-9]/g,'')"></div>
+      <div class="field" style="margin-top:14px;"><label>Password</label><input type="password" id="si-pass" placeholder="Password"></div>
+      <button class="gen-btn" style="margin-top:18px;" onclick="doSignIn()">Sign In</button>
+    </div>
+    <div id="auth-signup" style="display:none;">
+      <div class="field"><label>Email</label><input type="email" id="su-email" placeholder="you@email.com"></div>
+      <div class="field" style="margin-top:14px;"><label>Password (min 6 chars)</label><input type="password" id="su-pass" placeholder="Password"></div>
+      <div class="field" style="margin-top:14px;"><label>Username (letters & numbers only)</label><input type="text" id="su-username" placeholder="yourname" oninput="this.value=this.value.toLowerCase().replace(/[^a-z0-9]/g,'')"></div>
+      <button class="gen-btn" style="margin-top:18px;" onclick="doSignUp()">Create Account</button>
+    </div>
+    <div class="modal-err" id="auth-err"></div>
+    <div class="forgot-link" id="forgot-link">
+      <a onclick="sendPasswordReset()">Forgot your password? Send reset email</a>
+    </div>
+  </div>
+</div>
+
+<!-- CHANGE REDIRECT MODAL -->
+<div class="modal-bg" id="redirect-modal">
+  <div class="modal">
+    <button class="modal-close" onclick="closeModal('redirect-modal')">✕</button>
+    <h3>Update Redirect Destination</h3>
+    <p>Change where this QR code sends people. A $25 charge applies.</p>
+    <div class="field">
+      <label>New Destination URL</label>
+      <input type="url" id="new-redirect-url" placeholder="https://…">
+    </div>
+    <button class="gen-btn" onclick="initiatePayment('redirect')">Pay $25 & Update Redirect</button>
+  </div>
+</div>
+
+<!-- PAYMENT MODAL -->
+<div class="modal-bg" id="pay-modal">
+  <div class="modal">
+    <button class="modal-close" onclick="closeModal('pay-modal')">✕</button>
+    <h3 id="pay-title">Complete Payment</h3>
+    <div class="charge-amount" id="pay-amount">$25.00</div>
+    <p class="charge-desc" id="pay-desc"></p>
+    <div id="card-element"></div>
+    <div id="card-errors"></div>
+    <button class="gen-btn" id="pay-btn" onclick="confirmPayment()">Pay Now</button>
+  </div>
+</div>
+
+<div id="toast"></div>
+
+<footer>
+  <div class="ftr-links">
+    <a href="https://iqproductionz.com/">I.Q. Productionz</a>
+    <a href="https://iqproductionz.com/About">About</a>
+    <a href="https://iqproductionz.com/BookNow">Book a Service</a>
+    <a href="https://Haligricity.IQProductionz.com/">Haligricity</a>
+  </div>
+  <p>© 2026 I.Q. Productionz · Houston, Texas · <a href="mailto:IQProductionz@gmail.com">IQProductionz@gmail.com</a></p>
+</footer>
+
+rebase -->
+<script type="module">
+  import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js';
+  import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js';
+  import { getFirestore, doc, setDoc, getDoc, updateDoc, collection, addDoc, query, where, getDocs, increment } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js';
+  const cfg={apiKey:"AIzaSyBClNCsZwvHghZLbhr3BiP3aDys0GDvJys",authDomain:"qr-platform-33671.firebaseapp.com",projectId:"qr-platform-33671",storageBucket:"qr-platform-33671.firebasestorage.app",messagingSenderId:"564631666195",appId:"1:564631666195:web:515eb76f3f3f48c54c09e6"};
+  const app=initializeApp(cfg); const auth=getAuth(app); const db=getFirestore(app);
+  window._fb={auth,db,createUserWithEmailAndPassword,signInWithEmailAndPassword,signOut,onAuthStateChanged,doc,setDoc,getDoc,updateDoc,collection,addDoc,query,where,getDocs,increment};
+  onAuthStateChanged(auth,user=>{window._user=user||null;renderNav();if(window._cv==='dashboard')showDashboard();});
+</script>
+<script src="https://js.stripe.com/v3/"></script>
+<!-- WHY: qrcodejs generates the base QR matrix; we use a custom canvas renderer
+     on top of it for shape/gradient/logo customization -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700&family=Raleway:wght@300;400;500;600&display=swap" rel="stylesheet">
+
+<style>
+:root{
+  --bg:#2a2a2a;
+  --navy:#333333;
+  --panel:#454545;
+  --line:#2e2b24;
+  --gold:#c98a2e;
+  --gold2:#e0a84a;
+  --gold-dim:#7a5218;
+  --green:#6abf7b;
+  --red:#e05c5c;
+  --white:#f0ece3;
+  --muted:#A9A9A9;
+  --r:10px;
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:'Raleway',sans-serif;background:var(--bg);color:var(--white);min-height:100vh;}
+a{color:var(--gold2);text-decoration:none;}
+button{cursor:pointer;}
+input,select,textarea{font-family:inherit;}
+h1,h2,h3{text-transform:none;}
+
+/* NAV */
+nav{display:flex;justify-content:space-between;align-items:center;padding:14px 28px;background:#222;border-bottom:1px solid var(--line);position:sticky;top:0;z-index:100;backdrop-filter:blur(8px);flex-wrap:wrap;gap:10px;}
+.nav-brand{display:flex;align-items:center;gap:10px;text-decoration:none;}
+.nav-brand img{height:32px;width:auto;filter:drop-shadow(0 0 8px rgba(201,138,46,.4));}
+.nav-brand span{font-family:'Cinzel',serif;font-weight:700;font-size:1rem;color:var(--white);letter-spacing:1px;}
+#nav-right{display:flex;gap:8px;align-items:center;flex-wrap:wrap;}
+.nav-btn{padding:7px 16px;border-radius:7px;font-size:.82rem;font-weight:500;border:1px solid var(--line);background:transparent;color:var(--muted);transition:all .2s;font-family:'Raleway',sans-serif;}
+.nav-btn:hover{border-color:var(--gold);color:var(--white);}
+.nav-btn.primary{background:linear-gradient(135deg,var(--gold),#a87025);color:#222;border-color:var(--gold);font-weight:700;}
+.nav-btn.primary:hover{filter:brightness(1.1);}
+
+.view{display:none;} .view.active{display:block;}
+
+/* HERO */
+#hero{text-align:center;padding:72px 24px 56px;background:linear-gradient(160deg,#3a3a3a 0%,#2a2a2a 60%);position:relative;overflow:hidden;border-bottom:1px solid var(--line);}
+#hero::before{content:'';position:absolute;inset:0;background:radial-gradient(ellipse 80% 50% at 50% -10%,rgba(201,138,46,.18) 0%,transparent 70%);pointer-events:none;}
+.hero-eyebrow{display:inline-block;padding:5px 16px;border-radius:20px;border:1px solid rgba(201,138,46,.4);background:rgba(201,138,46,.08);font-size:.72rem;font-weight:600;letter-spacing:.08em;color:var(--gold2);margin-bottom:22px;font-family:'Cinzel',serif;text-transform:uppercase;}
+#hero h1{font-family:'Cinzel',serif;font-size:clamp(1.8rem,4.5vw,3rem);font-weight:600;line-height:1.2;max-width:680px;margin:0 auto 18px;color:var(--white);text-transform:none;}
+#hero h1 em{font-style:normal;color:var(--gold2);}
+#hero p{font-size:1rem;color:var(--muted);max-width:500px;margin:0 auto 36px;line-height:1.75;}
+
+/* TYPE CARDS — clickable */
+.type-grid{display:grid;grid-template-columns:1fr 1fr;gap:18px;max-width:820px;margin:0 auto 0;text-align:left;}
+@media(max-width:600px){.type-grid{grid-template-columns:1fr;}}
+.type-card{background:var(--panel);border:1px solid var(--line);border-radius:var(--r);padding:28px;position:relative;overflow:hidden;transition:border-color .2s,transform .2s;cursor:pointer;}
+.type-card:hover{border-color:var(--gold);transform:translateY(-2px);}
+.type-card.selected{border-color:var(--gold);box-shadow:0 0 0 2px rgba(201,138,46,.3);}
+.type-card .badge{display:inline-block;padding:3px 12px;border-radius:20px;font-size:.65rem;font-weight:700;letter-spacing:.06em;margin-bottom:14px;font-family:'Cinzel',serif;}
+.badge-free{background:rgba(201,138,46,.15);color:var(--gold2);}
+.badge-dynamic{background:rgba(106,191,123,.15);color:var(--green);}
+.type-card h3{font-family:'Cinzel',serif;font-size:1.15rem;font-weight:600;margin-bottom:8px;text-transform:none;}
+.type-card p{font-size:.86rem;color:var(--muted);line-height:1.65;margin-bottom:18px;}
+.type-feats{list-style:none;display:flex;flex-direction:column;gap:7px;}
+.type-feats li{font-size:.82rem;color:var(--muted);display:flex;align-items:center;gap:10px;}
+/* WHY: gold checkmark for included, red × for not included */
+.type-feats li::before{content:'✓';color:var(--gold2);font-weight:700;flex-shrink:0;font-size:.9rem;}
+.type-feats li.na{color:#666;}
+.type-feats li.na::before{content:'✕';color:var(--red);font-weight:700;}
+.dynamic-card .type-feats li::before{color:var(--green);}
+.dynamic-card h3{color:var(--white);}
+.dynamic-card .pricing-note{background:rgba(106,191,123,.08);border-color:rgba(106,191,123,.25);color:var(--green);}
+.dynamic-card .pricing-note strong{color:var(--green);}
+.dynamic-card.selected{border-color:var(--green);box-shadow:0 0 0 2px rgba(106,191,123,.3);}
+.dynamic-card .select-hint{color:var(--green);}
+#tab-dynamic.active{color:var(--green);border-bottom-color:var(--green);}
+.pricing-note{margin-top:20px;padding:12px 14px;background:rgba(201,138,46,.08);border-radius:7px;font-size:.8rem;color:var(--gold2);line-height:1.55;border:1px solid rgba(201,138,46,.2);}
+.select-hint{margin-top:16px;font-family:'Cinzel',serif;font-size:.65rem;letter-spacing:.08em;text-transform:uppercase;color:var(--gold);opacity:.7;text-align:center;}
+
+/* SECTION */
+.section{max-width:900px;margin:0 auto;padding:48px 24px 0;}
+.section-title{font-family:'Cinzel',serif;font-size:1.4rem;font-weight:600;margin-bottom:6px;text-transform:none;}
+.section-sub{font-size:.88rem;color:var(--muted);margin-bottom:28px;line-height:1.65;}
+
+/* TABS */
+.tab-row{display:flex;gap:2px;border-bottom:1px solid var(--line);margin-bottom:28px;}
+.tab{padding:10px 18px;font-size:.82rem;font-weight:500;background:none;border:none;color:var(--muted);border-bottom:2px solid transparent;margin-bottom:-1px;transition:all .2s;font-family:'Raleway',sans-serif;}
+.tab:hover{color:var(--white);}
+.tab.active{color:var(--gold2);border-bottom-color:var(--gold);}
+
+/* GEN CARD */
+.gen-card{background:var(--panel);border:1px solid var(--line);border-radius:var(--r);padding:28px;}
+
+/* DESIGN OPTIONS GRID */
+.design-grid{display:grid;grid-template-columns:1fr 1fr;gap:18px;}
+@media(max-width:560px){.design-grid{grid-template-columns:1fr;}}
+
+.field{margin-bottom:18px;}
+.field label{display:block;font-size:.72rem;font-weight:600;letter-spacing:.05em;color:var(--muted);margin-bottom:7px;font-family:'Cinzel',serif;}
+.field input,.field select{width:100%;padding:10px 14px;background:var(--navy);border:1px solid var(--line);border-radius:7px;color:var(--white);font-size:.92rem;outline:none;transition:border-color .2s;}
+.field input:focus,.field select:focus{border-color:var(--gold);}
+.field input::placeholder{color:#555;}
+
+/* SHAPE PICKER */
+.shape-grid{display:block;margin-top:2px;max-height:320px;overflow-y:auto;padding-right:4px;} .shape-grid > div[style*="flex"]{display:flex!important;flex-wrap:wrap;gap:5px;}
+.shape-opt{width:44px;height:44px;border-radius:7px;border:1px solid var(--line);background:var(--navy);display:flex;align-items:center;justify-content:center;cursor:pointer;transition:all .2s;font-size:1.1rem;}
+.shape-opt:hover{border-color:var(--gold);}
+.shape-opt.selected{border-color:var(--gold);background:rgba(201,138,46,.15);}
+.shape-opt canvas{width:28px;height:28px;}
+
+/* GRADIENT ROW */
+.grad-row{display:flex;gap:10px;flex-wrap:wrap;align-items:flex-end;}
+.grad-stop{display:flex;flex-direction:column;align-items:center;gap:4px;font-size:.65rem;color:var(--muted);}
+.grad-stop input[type=color]{width:40px;height:36px;border:1px solid var(--line);border-radius:6px;cursor:pointer;background:none;padding:2px;}
+.grad-toggle{display:flex;gap:6px;margin-bottom:12px;}
+.grad-toggle button{padding:5px 12px;border-radius:6px;border:1px solid var(--line);background:transparent;color:var(--muted);font-size:.72rem;font-family:'Raleway',sans-serif;transition:all .2s;}
+.grad-toggle button.active{background:var(--gold);border-color:var(--gold);color:#222;font-weight:600;}
+
+/* LOGO UPLOAD */
+.logo-drop{border:2px dashed var(--line);border-radius:8px;padding:16px;text-align:center;cursor:pointer;transition:border-color .2s;font-size:.8rem;color:var(--muted);}
+.logo-drop:hover{border-color:var(--gold);}
+.logo-drop input{display:none;}
+
+/* SIZE ROW */
+.two-col{display:grid;grid-template-columns:1fr 1fr;gap:14px;}
+
+.gen-btn{width:100%;padding:13px;background:linear-gradient(135deg,var(--gold),#a87025);color:#222;border:none;border-radius:8px;font-size:.9rem;font-weight:700;transition:filter .2s;margin-top:4px;font-family:'Cinzel',serif;letter-spacing:.06em;}
+.gen-btn:hover{filter:brightness(1.1);}
+
+/* QR RESULT */
+#qr-result{display:none;margin-top:24px;text-align:center;}
+#qr-canvas-wrap{display:inline-block;padding:16px;background:#fff;border-radius:10px;}
+.dl-row{display:flex;gap:10px;justify-content:center;margin-top:14px;flex-wrap:wrap;}
+.dl-btn{padding:9px 20px;border-radius:7px;font-size:.8rem;font-weight:500;border:1px solid var(--line);background:var(--panel);color:var(--white);transition:all .2s;}
+.dl-btn:hover{border-color:var(--gold);}
+.dl-btn.primary{background:linear-gradient(135deg,var(--gold),#a87025);border-color:var(--gold);color:#222;font-weight:700;}
+.qr-url-note{margin-top:10px;font-size:.75rem;color:var(--muted);display:inline-block;background:var(--navy);padding:6px 12px;border-radius:6px;}
+
+/* DASHBOARD */
+#dashboard{padding:32px 24px;max-width:900px;margin:0 auto;}
+.dash-header{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;margin-bottom:24px;}
+.dash-header h2{font-family:'Cinzel',serif;font-size:1.3rem;font-weight:600;}
+.qr-item{background:var(--panel);border:1px solid var(--line);border-radius:var(--r);padding:20px;margin-bottom:14px;display:flex;gap:20px;align-items:center;flex-wrap:wrap;}
+.qr-item-qr{flex-shrink:0;background:#fff;padding:8px;border-radius:6px;width:72px;height:72px;display:flex;align-items:center;justify-content:center;}
+.qr-item-body{flex:1;min-width:0;}
+.qr-item-name{font-weight:600;font-size:.92rem;margin-bottom:4px;}
+.qr-item-url{font-size:.78rem;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:400px;}
+.qr-item-type{display:inline-block;padding:2px 8px;border-radius:10px;font-size:.65rem;font-weight:700;margin-left:8px;font-family:'Cinzel',serif;}
+.type-static{background:rgba(201,138,46,.12);color:var(--gold2);}
+.type-dynamic{background:rgba(106,191,123,.12);color:var(--green);}
+.qr-item-actions{display:flex;gap:8px;flex-wrap:wrap;}
+.act-btn{padding:7px 14px;border-radius:6px;font-size:.76rem;font-weight:500;border:1px solid var(--line);background:transparent;color:var(--white);transition:all .2s;}
+.act-btn:hover{border-color:var(--gold);background:var(--navy);}
+.stats-panel{background:var(--navy);border:1px solid var(--line);border-radius:var(--r);padding:20px;margin-top:14px;display:none;}
+.stats-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-bottom:18px;}
+.stat-box{background:var(--panel);border-radius:7px;padding:14px;text-align:center;}
+.stat-num{font-family:'Cinzel',serif;font-size:1.5rem;font-weight:700;color:var(--gold2);}
+.stat-label{font-size:.7rem;color:var(--muted);margin-top:3px;}
+
+/* MODALS */
+.modal-bg{display:none;position:fixed;inset:0;background:rgba(0,0,0,.75);z-index:200;align-items:center;justify-content:center;padding:20px;}
+.modal-bg.open{display:flex;}
+.modal{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:32px;max-width:420px;width:100%;position:relative;}
+.modal h3{font-family:'Cinzel',serif;font-size:1.1rem;font-weight:600;margin-bottom:6px;text-transform:none;}
+.modal p{font-size:.84rem;color:var(--muted);margin-bottom:20px;}
+
+.modal-err{color:var(--red);font-size:.8rem;margin-top:10px;display:none;}
+.forgot-link{display:none;text-align:center;margin-top:10px;font-size:.78rem;}
+.forgot-link a{color:var(--gold2);cursor:pointer;text-decoration:underline;}
+.modal-close{position:absolute;top:14px;right:14px;background:none;border:none;color:var(--muted);font-size:1.2rem;}
+#card-element{background:var(--navy);border:1px solid var(--line);border-radius:7px;padding:12px 14px;margin-bottom:10px;}
+#card-errors{color:var(--red);font-size:.8rem;min-height:18px;margin-bottom:10px;}
+.charge-amount{font-family:'Cinzel',serif;font-size:2rem;font-weight:700;color:var(--gold2);text-align:center;margin:14px 0;}
+.charge-desc{font-size:.83rem;color:var(--muted);text-align:center;margin-bottom:20px;}
+
+/* TOAST */
+#toast{position:fixed;bottom:24px;right:24px;z-index:300;background:var(--panel);border:1px solid var(--line);border-radius:9px;padding:12px 18px;font-size:.84rem;display:none;box-shadow:0 8px 28px rgba(0,0,0,.4);max-width:300px;}
+#toast.ok{border-color:var(--green);color:var(--green);}
+#toast.err{border-color:var(--red);color:var(--red);}
+
+/* HOW IT WORKS */
+.how-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;}
+#how-grid .type-card{cursor:default;pointer-events:none;}
+@media(max-width:560px){.how-grid{grid-template-columns:1fr;}}
+
+.empty-state{text-align:center;padding:48px 24px;color:var(--muted);}
+.char-picker-wrap{background:var(--navy);border:1px solid var(--line);border-radius:8px;margin-top:8px;overflow:hidden;}
+.char-accordion{border-bottom:1px solid var(--line);}
+.char-accordion:last-child{border-bottom:none;}
+.char-acc-header{display:flex;justify-content:space-between;align-items:center;padding:10px 14px;cursor:pointer;transition:background .2s;}
+.char-acc-header:hover{background:rgba(201,138,46,.06);}
+.char-acc-title{font-size:.68rem;font-family:'Cinzel',serif;letter-spacing:.08em;color:var(--muted);display:flex;align-items:center;gap:8px;}
+.char-acc-arrow{font-size:.7rem;color:var(--muted);transition:transform .2s;}
+.char-accordion.open .char-acc-arrow{transform:rotate(180deg);}
+.char-acc-body{display:none;padding:10px 14px 14px;}
+.char-accordion.open .char-acc-body{display:block;}
+.char-acc-actions{display:flex;gap:6px;margin-bottom:8px;}
+.char-acc-btn{font-size:.62rem;padding:3px 10px;border:1px solid var(--line);border-radius:4px;background:transparent;color:var(--muted);cursor:pointer;font-family:'Raleway',sans-serif;transition:all .2s;}
+.char-acc-btn:hover{border-color:var(--gold);color:var(--gold);}
+.char-options{display:flex;flex-wrap:wrap;gap:5px;}
+.char-opt{width:36px;height:36px;border-radius:6px;border:1px solid var(--line);background:var(--panel);display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:.95rem;transition:all .2s;user-select:none;}
+.char-opt:hover{border-color:var(--gold);}
+.char-opt.selected{border-color:var(--gold);background:rgba(201,138,46,.18);color:var(--gold);}
+.char-preview-note{font-size:.72rem;color:var(--gold2);padding:8px 14px 10px;font-style:italic;border-top:1px solid var(--line);}
+.spin{display:inline-block;width:16px;height:16px;border:2px solid rgba(255,255,255,.3);border-top-color:#fff;border-radius:50%;animation:spin .7s linear infinite;vertical-align:middle;margin-right:6px;}
+@keyframes spin{to{transform:rotate(360deg);}}
+
+#how-grid .type-card{cursor:default!important;border-color:var(--line)!important;transform:none!important;}
+footer{text-align:center;padding:40px 24px;margin-top:80px;border-top:1px solid var(--line);font-size:.76rem;color:var(--muted);}
+.ftr-links{display:flex;gap:20px;justify-content:center;flex-wrap:wrap;margin-bottom:8px;}
+footer a{color:var(--muted);}footer a:hover{color:var(--white);}
+
+@media(max-width:600px){
+  #hero{padding:52px 18px 40px;}
+  .section{padding:36px 18px 0;}
+  nav{padding:12px 18px;}
+  .two-col{grid-template-columns:1fr;}
+  .design-grid{grid-template-columns:1fr;}
+}
+</style>
+</head>
+<body>
+
+<nav>
+  <a class="nav-brand" href="https://iqproductionz.com/">
+    <img src="https://static.wixstatic.com/media/b63ec4_2117e26bc8e646c8ad8b0050222de71b~mv2.png/v1/fill/w_295,h_92,al_c,q_85,usm_0.66_1.00_0.01,enc_avif,quality_auto/IQ-noglow_edited_edited.png" alt="I.Q. Productionz" onerror="this.style.display='none'">
+    <span>QR Platform</span>
+  </a>
+  <div id="nav-right">
+    <button class="nav-btn" onclick="showView('home');setTimeout(()=>document.querySelector('.tab-row').scrollIntoView({behavior:'smooth',block:'start'}),100)">Generator</button>
+    <button class="nav-btn" id="nav-dash" style="display:none" onclick="requireAuth('dashboard')">My Codes</button>
+    <button class="nav-btn" id="nav-signin" onclick="openAuthModal('signin')">Sign In</button>
+    <button class="nav-btn primary" id="nav-signup" onclick="openAuthModal('signup')">Get Started — Free</button>
+    <button class="nav-btn" id="nav-signout" style="display:none" onclick="doSignOut()">Sign Out</button>
+  </div>
+</nav>
+
+<!-- HOME VIEW -->
+<div class="view active" id="view-home">
+
+  <section id="hero">
+    <div class="hero-eyebrow">Free SVG Download · Print-Ready · Car Decals · Dynamic with Tracking</div>
+    <h1>QR codes as <em>unique</em><br>as your brand</h1>
+    <p>Custom shapes, gradients, emoji dots, logo overlays — free SVG download for print, decals, and wraps. Dynamic codes with redirect control and scan tracking.</p>
+
+    <div class="type-grid">
+      <div class="type-card" id="card-static" onclick="selectType('static')">
+        <span class="badge badge-free">Free · No Account</span>
+        <h3>Static QR Code</h3>
+        <p>The destination is baked into the pattern. Once printed, it never changes.</p>
+        <ul class="type-feats">
+          <li>Instant generation</li>
+          <li>Custom shapes, colors &amp; gradients</li>
+          <li>Logo in center</li>
+          <li>Download PNG or <strong>SVG</strong> — print-ready, infinitely scalable</li>
+          <li>Never expires</li>
+          <li class="na">Cannot change destination</li>
+          <li class="na">No scan tracking</li>
+          <li class="na">No statistics</li>
+        </ul>
+        <div class="select-hint">Click to select →</div>
+      </div>
+      <div class="type-card dynamic-card selected" id="card-dynamic" onclick="selectType('dynamic')">
+        <span class="badge badge-dynamic">Dynamic · Account Required</span>
+        <h3>Dynamic QR Code</h3>
+        <p>The QR pattern stays fixed. The destination lives in our system — change it anytime without reprinting.</p>
+        <ul class="type-feats">
+          <li>Change redirect anytime</li>
+          <li>Scan count tracking</li>
+          <li>Device &amp; location data</li>
+          <li>Reset scan counter</li>
+          <li>Download PNG or <strong>SVG</strong> — print-ready, infinitely scalable</li>
+          <li>Your code never expires</li>
+        </ul>
+        <div class="pricing-note">No monthly fee. <strong>$25</strong> to change the redirect. <strong>$5</strong> to view scan statistics.</div>
+        <div class="select-hint">Click to select →</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- GENERATOR -->
+  <div class="section">
+    <div class="tab-row">
+      <button class="tab" id="tab-static" onclick="switchTab('static')">Static — Free Forever</button>
+      <button class="tab active" id="tab-dynamic" onclick="switchTab('dynamic')">Dynamic — Free to Start</button>
+    </div>
+
+    <!-- STATIC -->
+    <div id="panel-static" style="display:none;">
+      <div class="gen-card">
+        <div class="field">
+          <label>URL or Text to Encode</label>
+          <input type="text" id="s-url" placeholder="https://yourwebsite.com or any text">
+        </div>
+
+        <div class="design-grid">
+          <!-- LEFT COL -->
+          <div>
+            <div class="two-col">
+              <div class="field">
+                <label>Size (px)</label>
+                <select id="s-size">
+                  <option value="200">200 × 200 — Web / Social</option>
+                  <option value="300" selected>300 × 300 — Web / Email</option>
+                  <option value="500">500 × 500 — Business Card</option>
+                  <option value="800">800 × 800 — Flyer / Poster</option>
+                  <option value="1200">1200 × 1200 — Large Print</option>
+                  <option value="2000">2000 × 2000 — Banner / Sign</option>
+                  <option value="3000">3000 × 3000 — Car Decal (10")</option>
+                  <option value="4000">4000 × 4000 — Car Decal (13")</option>
+                  <option value="6000">6000 × 6000 — Billboard / Vehicle Wrap</option>
+                </select>
+              </div>
+              <div class="field">
+                <label>Error Correction</label>
+                <select id="s-ec">
+                  <option value="L">Low (7%)</option>
+                  <option value="M" selected>Medium (15%)</option>
+                  <option value="Q">Quartile (25%)</option>
+                  <option value="H">High (30%) — use with logo</option>
+                </select>
+              </div>
+            </div>
+            <div style="font-size:.7rem;color:var(--gold2);background:rgba(201,138,46,.06);border:1px solid rgba(201,138,46,.2);border-radius:6px;padding:8px 12px;margin-bottom:16px;line-height:1.6;">
+              💡 <strong>Print tip:</strong> For car decals use 3000px+. For billboards or vehicle wraps use 6000px. Always <strong>download SVG</strong> for the sharpest print result — SVG scales to any size without losing quality.
+            </div>
+
+            <!-- LETTERS NUMBERS KEYBOARD — above shape grid, always visible -->
+            <div class="field">
+              <label>Characters as Dots — render in your chosen color</label>
+              <div class="char-picker-wrap">
+                <div class="char-accordion" id="s-acc-letters">
+                  <div class="char-acc-header" onclick="toggleCharAcc('s-acc-letters')">
+                    <span class="char-acc-title">🔤 Letters A–Z <span id="s-letters-count" style="color:var(--gold2);font-size:.6rem;"></span></span>
+                    <span class="char-acc-arrow">▾</span>
+                  </div>
+                  <div class="char-acc-body">
+                    <div class="char-acc-actions">
+                      <button class="char-acc-btn" onclick="selectAllChars('s','letters')">Select All</button>
+                      <button class="char-acc-btn" onclick="clearChars('s','letters')">Clear</button>
+                    </div>
+                    <div class="char-options" id="s-letters"></div>
+                  </div>
+                </div>
+                <div class="char-accordion" id="s-acc-numbers">
+                  <div class="char-acc-header" onclick="toggleCharAcc('s-acc-numbers')">
+                    <span class="char-acc-title">🔢 Numbers 0–9 <span id="s-numbers-count" style="color:var(--gold2);font-size:.6rem;"></span></span>
+                    <span class="char-acc-arrow">▾</span>
+                  </div>
+                  <div class="char-acc-body">
+                    <div class="char-acc-actions">
+                      <button class="char-acc-btn" onclick="selectAllChars('s','numbers')">Select All</button>
+                      <button class="char-acc-btn" onclick="clearChars('s','numbers')">Clear</button>
+                    </div>
+                    <div class="char-options" id="s-numbers"></div>
+                  </div>
+                </div>
+                <div class="char-accordion" id="s-acc-keyboard">
+                  <div class="char-acc-header" onclick="toggleCharAcc('s-acc-keyboard')">
+                    <span class="char-acc-title">⌨️ Keyboard Symbols <span id="s-keyboard-count" style="color:var(--gold2);font-size:.6rem;"></span></span>
+                    <span class="char-acc-arrow">▾</span>
+                  </div>
+                  <div class="char-acc-body">
+                    <div class="char-acc-actions">
+                      <button class="char-acc-btn" onclick="selectAllChars('s','keyboard')">Select All</button>
+                      <button class="char-acc-btn" onclick="clearChars('s','keyboard')">Clear</button>
+                    </div>
+                    <div class="char-options" id="s-keyboard"></div>
+                  </div>
+                </div>
+                <div class="char-preview-note" id="s-char-note">Select characters above — they will be randomly placed as QR dots in your chosen color.</div>
+              </div>
+            </div>
+            <!-- LETTERS NUMBERS KEYBOARD — above shape grid, always visible -->
+            <div class="field">
+              <label>Characters as Dots — render in your chosen color</label>
+              <div class="char-picker-wrap">
+                <div class="char-accordion" id="d-acc-letters">
+                  <div class="char-acc-header" onclick="toggleCharAcc('d-acc-letters')">
+                    <span class="char-acc-title">🔤 Letters A–Z <span id="d-letters-count" style="color:var(--gold2);font-size:.6rem;"></span></span>
+                    <span class="char-acc-arrow">▾</span>
+                  </div>
+                  <div class="char-acc-body">
+                    <div class="char-acc-actions">
+                      <button class="char-acc-btn" onclick="selectAllChars('d','letters')">Select All</button>
+                      <button class="char-acc-btn" onclick="clearChars('d','letters')">Clear</button>
+                    </div>
+                    <div class="char-options" id="d-letters"></div>
+                  </div>
+                </div>
+                <div class="char-accordion" id="d-acc-numbers">
+                  <div class="char-acc-header" onclick="toggleCharAcc('d-acc-numbers')">
+                    <span class="char-acc-title">🔢 Numbers 0–9 <span id="d-numbers-count" style="color:var(--gold2);font-size:.6rem;"></span></span>
+                    <span class="char-acc-arrow">▾</span>
+                  </div>
+                  <div class="char-acc-body">
+                    <div class="char-acc-actions">
+                      <button class="char-acc-btn" onclick="selectAllChars('d','numbers')">Select All</button>
+                      <button class="char-acc-btn" onclick="clearChars('d','numbers')">Clear</button>
+                    </div>
+                    <div class="char-options" id="d-numbers"></div>
+                  </div>
+                </div>
+                <div class="char-accordion" id="d-acc-keyboard">
+                  <div class="char-acc-header" onclick="toggleCharAcc('d-acc-keyboard')">
+                    <span class="char-acc-title">⌨️ Keyboard Symbols <span id="d-keyboard-count" style="color:var(--gold2);font-size:.6rem;"></span></span>
+                    <span class="char-acc-arrow">▾</span>
+                  </div>
+                  <div class="char-acc-body">
+                    <div class="char-acc-actions">
+                      <button class="char-acc-btn" onclick="selectAllChars('d','keyboard')">Select All</button>
+                      <button class="char-acc-btn" onclick="clearChars('d','keyboard')">Clear</button>
+                    </div>
+                    <div class="char-options" id="d-keyboard"></div>
+                  </div>
+                </div>
+                <div class="char-preview-note" id="d-char-note">Select characters above — they will be randomly placed as QR dots in your chosen color.</div>
+              </div>
+            </div>
+            <!-- DOT SHAPE -->
+            <div class="field">
+              <label>Choose Dot Type — vector shapes below respond to your chosen color</label>
+              <div class="shape-grid" id="shape-grid"></div>
+            </div>
+
+            
+
+            <!-- LOGO UPLOAD -->
+            <div class="field">
+              <label>Center Logo (optional)</label>
+              <div class="logo-drop" id="logo-drop" onclick="document.getElementById('logo-file').click()">
+                <input type="file" id="logo-file" accept="image/*" onchange="handleLogo(this)">
+                <span id="logo-label">Click to upload a PNG, JPG, or SVG logo</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- RIGHT COL -->
+          <div>
+            <!-- COLOR / GRADIENT -->
+            <div class="field">
+              <label>Color Mode</label>
+              <div class="grad-toggle">
+                <button id="mode-solid" class="active" onclick="setColorMode('solid')">Solid</button>
+                <button id="mode-grad2" onclick="setColorMode('grad2')">2-color gradient</button>
+                <button id="mode-grad4" onclick="setColorMode('grad4')">4-color gradient</button>
+              </div>
+
+              <div id="color-solid">
+                <div style="display:flex;gap:14px;">
+                  <div class="grad-stop"><input type="color" id="c-fg" value="#000000"><span>Foreground</span></div>
+                  <div class="grad-stop"><input type="color" id="c-bg" value="#ffffff"><span>Background</span></div>
+                </div>
+              </div>
+
+              <div id="color-grad2" style="display:none;">
+                <div class="grad-row">
+                  <div class="grad-stop"><input type="color" id="g2-1" value="#c98a2e"><span>Color 1</span></div>
+                  <div class="grad-stop"><input type="color" id="g2-2" value="#4A1060"><span>Color 2</span></div>
+                  <div class="grad-stop"><input type="color" id="g2-bg" value="#ffffff"><span>Background</span></div>
+                  <div class="field" style="flex:1;min-width:100px;margin-bottom:0;">
+                    <select id="g2-dir">
+                      <option value="horizontal">Horizontal →</option>
+                      <option value="vertical">Vertical ↓</option>
+                      <option value="diagonal">Diagonal ↘</option>
+                      <option value="radial">Radial ◎</option>
+                    </select>
+                  </div>
+                </div>
+              </div>
+
+              <div id="color-grad4" style="display:none;">
+                <div class="grad-row">
+                  <div class="grad-stop"><input type="color" id="g4-1" value="#c98a2e"><span>Top-L</span></div>
+                  <div class="grad-stop"><input type="color" id="g4-2" value="#e0a84a"><span>Top-R</span></div>
+                  <div class="grad-stop"><input type="color" id="g4-3" value="#4A1060"><span>Bot-L</span></div>
+                  <div class="grad-stop"><input type="color" id="g4-4" value="#6B2D8E"><span>Bot-R</span></div>
+                  <div class="grad-stop"><input type="color" id="g4-bg" value="#ffffff"><span>Background</span></div>
+                </div>
+              </div>
+            </div>
+
+            <!-- FINDER COLORS -->
+            <div class="field">
+              <label>Finder Square Color (corners)</label>
+              <div style="display:flex;gap:14px;">
+                <div class="grad-stop"><input type="color" id="c-finder-outer" value="#000000"><span>Outer</span></div>
+                <div class="grad-stop"><input type="color" id="c-finder-inner" value="#000000"><span>Inner</span></div>
+              </div>
+            </div>
+          </div>
+        </div><!-- end design-grid -->
+
+        <button class="gen-btn" onclick="generateCustomQR()">Generate QR Code</button>
+
+        <div id="qr-result">
+          <div id="qr-canvas-wrap"><canvas id="qr-output"></canvas></div>
+          <p class="qr-url-note" id="qr-url-note"></p>
+          <div class="dl-row">
+            <button class="dl-btn primary" onclick="downloadCustomQR('png')">⬇ Download PNG</button>
+            <button class="dl-btn" onclick="downloadCustomQR('svg')">⬇ Download SVG</button>
+          </div>
+        </div>
+      </div>
+    </div><!-- end panel-static -->
+
+    <!-- DYNAMIC -->
+    <div id="panel-dynamic">
+      <div class="gen-card">
+        <div class="field">
+          <label>QR Code Name (for your dashboard)</label>
+          <input type="text" id="d-name" placeholder="e.g. Restaurant Menu, Event Flyer">
+        </div>
+        <div class="field">
+          <label>Initial Destination URL</label>
+          <input type="text" id="d-url" placeholder="https://yourwebsite.com">
+        </div>
+        <p style="font-size:.8rem;color:var(--muted);margin-bottom:18px;line-height:1.55;">
+          Your QR code always points to <strong style="color:var(--gold2);">iqproductionz.com/QRCode/Account/[yourcode]</strong> — redirects wherever you set. Change anytime for $25.
+        </p>
+
+        <!-- DESIGN OPTIONS (same as static) -->
+        <div class="design-grid" style="margin-bottom:20px;">
+          <div>
+            <div class="two-col">
+              <div class="field">
+                <label>Size (px)</label>
+                <select id="d-size">
+                  <option value="200">200 × 200 — Web / Social</option>
+                  <option value="300" selected>300 × 300 — Web / Email</option>
+                  <option value="500">500 × 500 — Business Card</option>
+                  <option value="800">800 × 800 — Flyer / Poster</option>
+                  <option value="1200">1200 × 1200 — Large Print</option>
+                  <option value="2000">2000 × 2000 — Banner / Sign</option>
+                  <option value="3000">3000 × 3000 — Car Decal (10")</option>
+                  <option value="4000">4000 × 4000 — Car Decal (13")</option>
+                  <option value="6000">6000 × 6000 — Billboard / Vehicle Wrap</option>
+                </select>
+              </div>
+              <div class="field">
+                <label>Error Correction</label>
+                <select id="d-ec">
+                  <option value="L">Low (7%)</option>
+                  <option value="M" selected>Medium (15%)</option>
+                  <option value="Q">Quartile (25%)</option>
+                  <option value="H">High (30%) — use with logo</option>
+                </select>
+              </div>
+            </div>
+            <div style="font-size:.7rem;color:var(--gold2);background:rgba(201,138,46,.06);border:1px solid rgba(201,138,46,.2);border-radius:6px;padding:8px 12px;margin-bottom:16px;line-height:1.6;">
+              💡 <strong>Print tip:</strong> For car decals use 3000px+. For billboards or vehicle wraps use 6000px. Always <strong>download SVG</strong> for the sharpest print result — SVG scales to any size without losing quality.
+            </div>
+
+            <!-- DOT SHAPE + CUSTOM CHAR PICKER -->
+            <div class="field">
+              <label>Choose Dot Type — vector shapes below respond to your chosen color</label>
+              <div class="shape-grid" id="d-shape-grid"></div>
+            </div>
+
+            <!-- CUSTOM CHARACTER PICKER -->
+            
+
+            <div class="field">
+              <label>Center Logo (optional)</label>
+              <div class="logo-drop" id="d-logo-drop" onclick="document.getElementById('d-logo-file').click()">
+                <input type="file" id="d-logo-file" accept="image/*" onchange="handleLogo(this,'d')">
+                <span id="d-logo-label">Click to upload a PNG, JPG, or SVG logo</span>
+              </div>
+            </div>
+          </div>
+
+          <div>
+            <div class="field">
+              <label>Color Mode</label>
+              <div class="grad-toggle">
+                <button id="d-mode-solid" class="active" onclick="setColorMode('solid','d')">Solid</button>
+                <button id="d-mode-grad2" onclick="setColorMode('grad2','d')">2-color</button>
+                <button id="d-mode-grad4" onclick="setColorMode('grad4','d')">4-color</button>
+              </div>
+              <div id="d-color-solid">
+                <div style="display:flex;gap:14px;">
+                  <div class="grad-stop"><input type="color" id="d-c-fg" value="#000000"><span>Foreground</span></div>
+                  <div class="grad-stop"><input type="color" id="d-c-bg" value="#ffffff"><span>Background</span></div>
+                </div>
+              </div>
+              <div id="d-color-grad2" style="display:none;">
+                <div class="grad-row">
+                  <div class="grad-stop"><input type="color" id="d-g2-1" value="#c98a2e"><span>Color 1</span></div>
+                  <div class="grad-stop"><input type="color" id="d-g2-2" value="#4A1060"><span>Color 2</span></div>
+                  <div class="grad-stop"><input type="color" id="d-g2-bg" value="#ffffff"><span>Background</span></div>
+                  <div class="field" style="flex:1;min-width:100px;margin-bottom:0;">
+                    <select id="d-g2-dir">
+                      <option value="horizontal">Horizontal →</option>
+                      <option value="vertical">Vertical ↓</option>
+                      <option value="diagonal">Diagonal ↘</option>
+                      <option value="radial">Radial ◎</option>
+                    </select>
+                  </div>
+                </div>
+              </div>
+              <div id="d-color-grad4" style="display:none;">
+                <div class="grad-row">
+                  <div class="grad-stop"><input type="color" id="d-g4-1" value="#c98a2e"><span>Top-L</span></div>
+                  <div class="grad-stop"><input type="color" id="d-g4-2" value="#e0a84a"><span>Top-R</span></div>
+                  <div class="grad-stop"><input type="color" id="d-g4-3" value="#4A1060"><span>Bot-L</span></div>
+                  <div class="grad-stop"><input type="color" id="d-g4-4" value="#6B2D8E"><span>Bot-R</span></div>
+                  <div class="grad-stop"><input type="color" id="d-g4-bg" value="#ffffff"><span>Background</span></div>
+                </div>
+              </div>
+            </div>
+            <div class="field">
+              <label>Finder Square Color (corners)</label>
+              <div style="display:flex;gap:14px;">
+                <div class="grad-stop"><input type="color" id="d-c-finder-outer" value="#000000"><span>Outer</span></div>
+                <div class="grad-stop"><input type="color" id="d-c-finder-inner" value="#000000"><span>Inner</span></div>
+              </div>
+            </div>
+          </div>
+        </div><!-- end design-grid -->
+
+        <button class="gen-btn" onclick="createDynamic()">Create Dynamic QR Code — Free to Start</button>
+        <p style="font-size:.74rem;color:var(--muted);margin-top:10px;text-align:center;">Account required &#8212; sign in or sign up to continue.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- HOW IT WORKS -->
+  <div class="section" style="padding-top:64px;padding-bottom:40px;">
+    <h2 class="section-title">How dynamic QR codes work</h2>
+    <p class="section-sub">The printed pattern never changes. Only the destination does.</p>
+    <div class="how-grid" id="how-grid">
       <div class="type-card" style="text-align:center;cursor:default;">
         <div style="font-size:2rem;margin-bottom:12px;">📲</div>
         <h3 style="font-size:.95rem;margin-bottom:8px;">Someone scans</h3>
@@ -988,74 +1520,81 @@ window._cv = 'home';
   s = cell size and x,y = top-left corner of the module cell.
 */
 var SHAPE_GROUPS = {
-  'Basic': {
-    square:   { label:'■', draw:(c,x,y,s)=>{ c.fillRect(x,y,s,s); } },
-    rounded:  { label:'▢', draw:(c,x,y,s)=>{ var r=s*.35,p=s*.05; roundRect(c,x+p,y+p,s-p*2,s-p*2,r); c.fill(); } },
-    dot:      { label:'●', draw:(c,x,y,s)=>{ c.beginPath(); c.arc(x+s/2,y+s/2,s*.44,0,Math.PI*2); c.fill(); } },
-    ring:     { label:'○', draw:(c,x,y,s)=>{ c.beginPath(); c.arc(x+s/2,y+s/2,s*.44,0,Math.PI*2); c.fill(); c.save(); c.globalCompositeOperation='destination-out'; c.beginPath(); c.arc(x+s/2,y+s/2,s*.25,0,Math.PI*2); c.fill(); c.restore(); } },
-    diamond:  { label:'◆', draw:(c,x,y,s)=>{ var cx=x+s/2,cy=y+s/2,h=s*.48; c.beginPath(); c.moveTo(cx,cy-h); c.lineTo(cx+h,cy); c.lineTo(cx,cy+h); c.lineTo(cx-h,cy); c.closePath(); c.fill(); } },
-    triangle: { label:'▲', draw:(c,x,y,s)=>{ c.beginPath(); c.moveTo(x+s/2,y+s*.08); c.lineTo(x+s*.92,y+s*.9); c.lineTo(x+s*.08,y+s*.9); c.closePath(); c.fill(); } },
-    tri_down: { label:'▼', draw:(c,x,y,s)=>{ c.beginPath(); c.moveTo(x+s/2,y+s*.92); c.lineTo(x+s*.92,y+s*.1); c.lineTo(x+s*.08,y+s*.1); c.closePath(); c.fill(); } },
-    cross:    { label:'✚', draw:(c,x,y,s)=>{ var t=s*.3,g=s*.2; c.fillRect(x+g,y,t,s); c.fillRect(x,y+g,s,t); } },
-    x_shape:  { label:'✖', draw:(c,x,y,s)=>{ var t=s*.28,p=s*.1; c.save(); c.translate(x+s/2,y+s/2); c.rotate(Math.PI/4); c.fillRect(-t/2,-s/2+p,t,s-p*2); c.fillRect(-s/2+p,-t/2,s-p*2,t); c.restore(); } },
-    hexagon:  { label:'⬡', draw:(c,x,y,s)=>{ var cx=x+s/2,cy=y+s/2,r=s*.47; c.beginPath(); for(var i=0;i<6;i++){var a=Math.PI/3*i-Math.PI/6; c.lineTo(cx+r*Math.cos(a),cy+r*Math.sin(a));} c.closePath(); c.fill(); } },
-    pentagon: { label:'⬠', draw:(c,x,y,s)=>{ var cx=x+s/2,cy=y+s/2,r=s*.46; c.beginPath(); for(var i=0;i<5;i++){var a=Math.PI*2/5*i-Math.PI/2; c.lineTo(cx+r*Math.cos(a),cy+r*Math.sin(a));} c.closePath(); c.fill(); } },
-    octagon:  { label:'⬡', draw:(c,x,y,s)=>{ var cx=x+s/2,cy=y+s/2,r=s*.46; c.beginPath(); for(var i=0;i<8;i++){var a=Math.PI/4*i; c.lineTo(cx+r*Math.cos(a),cy+r*Math.sin(a));} c.closePath(); c.fill(); } },
+  /* WHY: every shape must:
+     1. Fill ~85-95% of the cell so it registers at tiny QR module sizes
+     2. Be fully solid (no thin lines, no hollow rings) 
+     3. Hit close to all four corners of the cell
+     Thin/complex shapes at 3-4px cell size become noise and break scanning. */
+
+  "Basic": {
+    square:    { label:"■", draw:function(c,x,y,s){ c.fillRect(x+s*.04,y+s*.04,s*.92,s*.92); } },
+    rounded:   { label:"▢", draw:function(c,x,y,s){ var r=s*.22; roundRect(c,x+s*.04,y+s*.04,s*.92,s*.92,r); c.fill(); } },
+    dot:       { label:"●", draw:function(c,x,y,s){ c.beginPath(); c.arc(x+s/2,y+s/2,s*.46,0,Math.PI*2); c.fill(); } },
+    diamond:   { label:"◆", draw:function(c,x,y,s){ var cx=x+s/2,cy=y+s/2,h=s*.48; c.beginPath(); c.moveTo(cx,cy-h); c.lineTo(cx+h,cy); c.lineTo(cx,cy+h); c.lineTo(cx-h,cy); c.closePath(); c.fill(); } },
+    tri_up:    { label:"▲", draw:function(c,x,y,s){ c.beginPath(); c.moveTo(x+s/2,y+s*.04); c.lineTo(x+s*.96,y+s*.96); c.lineTo(x+s*.04,y+s*.96); c.closePath(); c.fill(); } },
+    tri_down:  { label:"▼", draw:function(c,x,y,s){ c.beginPath(); c.moveTo(x+s/2,y+s*.96); c.lineTo(x+s*.96,y+s*.04); c.lineTo(x+s*.04,y+s*.04); c.closePath(); c.fill(); } },
+    hexagon:   { label:"⬡", draw:function(c,x,y,s){ var cx=x+s/2,cy=y+s/2,r=s*.48; c.beginPath(); for(var i=0;i<6;i++){var a=Math.PI/3*i-Math.PI/6; i===0?c.moveTo(cx+r*Math.cos(a),cy+r*Math.sin(a)):c.lineTo(cx+r*Math.cos(a),cy+r*Math.sin(a));} c.closePath(); c.fill(); } },
+    pentagon:  { label:"⬠", draw:function(c,x,y,s){ var cx=x+s/2,cy=y+s*.52,r=s*.48; c.beginPath(); for(var i=0;i<5;i++){var a=Math.PI*2/5*i-Math.PI/2; i===0?c.moveTo(cx+r*Math.cos(a),cy+r*Math.sin(a)):c.lineTo(cx+r*Math.cos(a),cy+r*Math.sin(a));} c.closePath(); c.fill(); } },
+    octagon:   { label:"⬡", draw:function(c,x,y,s){ var cx=x+s/2,cy=y+s/2,r=s*.48; c.beginPath(); for(var i=0;i<8;i++){var a=Math.PI/4*i; i===0?c.moveTo(cx+r*Math.cos(a),cy+r*Math.sin(a)):c.lineTo(cx+r*Math.cos(a),cy+r*Math.sin(a));} c.closePath(); c.fill(); } },
+    parallelogram:{ label:"▱", draw:function(c,x,y,s){ c.beginPath(); c.moveTo(x+s*.2,y+s*.04); c.lineTo(x+s*.96,y+s*.04); c.lineTo(x+s*.8,y+s*.96); c.lineTo(x+s*.04,y+s*.96); c.closePath(); c.fill(); } },
+    cross:     { label:"✚", draw:function(c,x,y,s){ var t=s*.36,g=s*.32; c.fillRect(x+g,y+s*.04,t,s*.92); c.fillRect(x+s*.04,y+g,s*.92,t); } },
+    x_mark:    { label:"✖", draw:function(c,x,y,s){ c.save(); c.translate(x+s/2,y+s/2); c.rotate(Math.PI/4); var t=s*.36,l=s*.48; c.fillRect(-t/2,-l,t,l*2); c.fillRect(-l,-t/2,l*2,t); c.restore(); } },
   },
-  'Stars & Flowers': {
-    star5:    { label:'★', draw:(c,x,y,s)=>{ drawStar(c,x+s/2,y+s/2,5,s*.46,s*.2); } },
-    star6:    { label:'✶', draw:(c,x,y,s)=>{ drawStar(c,x+s/2,y+s/2,6,s*.46,s*.2); } },
-    star8:    { label:'✸', draw:(c,x,y,s)=>{ drawStar(c,x+s/2,y+s/2,8,s*.46,s*.18); } },
-    star12:   { label:'✺', draw:(c,x,y,s)=>{ drawStar(c,x+s/2,y+s/2,12,s*.46,s*.28); } },
-    flower4:  { label:'✿', draw:(c,x,y,s)=>{ for(var i=0;i<4;i++){c.save();c.translate(x+s/2,y+s/2);c.rotate(Math.PI/2*i);c.beginPath();c.ellipse(0,-s*.28,s*.18,s*.28,0,0,Math.PI*2);c.fill();c.restore();} c.beginPath();c.arc(x+s/2,y+s/2,s*.16,0,Math.PI*2);c.fill(); } },
-    flower6:  { label:'❋', draw:(c,x,y,s)=>{ for(var i=0;i<6;i++){c.save();c.translate(x+s/2,y+s/2);c.rotate(Math.PI/3*i);c.beginPath();c.ellipse(0,-s*.26,s*.14,s*.26,0,0,Math.PI*2);c.fill();c.restore();} c.beginPath();c.arc(x+s/2,y+s/2,s*.14,0,Math.PI*2);c.fill(); } },
-    snowflake:{ label:'❄', draw:(c,x,y,s)=>{ for(var i=0;i<6;i++){c.save();c.translate(x+s/2,y+s/2);c.rotate(Math.PI/3*i);c.fillRect(-s*.06,-s*.44,s*.12,s*.88);c.restore();} } },
-    spiral:   { label:'🌀', draw:(c,x,y,s)=>{ c.beginPath();c.arc(x+s/2,y+s/2,s*.44,0,Math.PI*2);c.fill();c.save();c.globalCompositeOperation='destination-out';c.beginPath();c.arc(x+s/2+s*.1,y+s/2,s*.24,0,Math.PI*2);c.fill();c.restore(); } },
+  "Stars & Flowers": {
+    star5:     { label:"★", draw:function(c,x,y,s){ drawStar(c,x+s/2,y+s/2,5,s*.48,s*.2); } },
+    star6:     { label:"✶", draw:function(c,x,y,s){ drawStar(c,x+s/2,y+s/2,6,s*.48,s*.2); } },
+    star8:     { label:"✸", draw:function(c,x,y,s){ drawStar(c,x+s/2,y+s/2,8,s*.48,s*.2); } },
+    star12:    { label:"✺", draw:function(c,x,y,s){ drawStar(c,x+s/2,y+s/2,12,s*.48,s*.28); } },
+    flower4:   { label:"✿", draw:function(c,x,y,s){ for(var i=0;i<4;i++){c.save();c.translate(x+s/2,y+s/2);c.rotate(Math.PI/2*i);c.beginPath();c.ellipse(0,-s*.28,s*.22,s*.32,0,0,Math.PI*2);c.fill();c.restore();} c.beginPath();c.arc(x+s/2,y+s/2,s*.18,0,Math.PI*2);c.fill(); } },
+    flower6:   { label:"❋", draw:function(c,x,y,s){ for(var i=0;i<6;i++){c.save();c.translate(x+s/2,y+s/2);c.rotate(Math.PI/3*i);c.beginPath();c.ellipse(0,-s*.27,s*.17,s*.3,0,0,Math.PI*2);c.fill();c.restore();} c.beginPath();c.arc(x+s/2,y+s/2,s*.16,0,Math.PI*2);c.fill(); } },
+    snowflake: { label:"❄", draw:function(c,x,y,s){ for(var i=0;i<6;i++){c.save();c.translate(x+s/2,y+s/2);c.rotate(Math.PI/3*i);c.fillRect(-s*.1,-s*.46,s*.2,s*.92);c.restore();} } },
   },
-  'Nature & Weather': {
-    moon:     { label:'🌙', draw:(c,x,y,s)=>{ c.beginPath();c.arc(x+s/2,y+s/2,s*.42,0,Math.PI*2);c.fill();c.save();c.globalCompositeOperation='destination-out';c.beginPath();c.arc(x+s*.62,y+s*.38,s*.32,0,Math.PI*2);c.fill();c.restore(); } },
-    sun:      { label:'☀', draw:(c,x,y,s)=>{ c.beginPath();c.arc(x+s/2,y+s/2,s*.28,0,Math.PI*2);c.fill();for(var i=0;i<8;i++){c.save();c.translate(x+s/2,y+s/2);c.rotate(Math.PI/4*i);c.fillRect(-s*.06,s*.3,s*.12,s*.16);c.restore();} } },
-    lightning:{ label:'⚡', draw:(c,x,y,s)=>{ c.beginPath();c.moveTo(x+s*.62,y+s*.06);c.lineTo(x+s*.28,y+s*.52);c.lineTo(x+s*.52,y+s*.52);c.lineTo(x+s*.38,y+s*.94);c.lineTo(x+s*.72,y+s*.48);c.lineTo(x+s*.48,y+s*.48);c.closePath();c.fill(); } },
-    leaf:     { label:'🍃', draw:(c,x,y,s)=>{ c.beginPath();c.moveTo(x+s/2,y+s*.9);c.bezierCurveTo(x+s*.1,y+s*.6,x+s*.1,y+s*.1,x+s/2,y+s*.1);c.bezierCurveTo(x+s*.9,y+s*.1,x+s*.9,y+s*.6,x+s/2,y+s*.9);c.fill();c.beginPath();c.moveTo(x+s/2,y+s*.9);c.lineTo(x+s/2,y+s*.1);c.strokeStyle=c.fillStyle;c.lineWidth=s*.06;c.stroke(); } },
-    wave:     { label:'🌊', draw:(c,x,y,s)=>{ c.beginPath();c.moveTo(x,y+s*.6);for(var i=0;i<=10;i++){c.lineTo(x+s/10*i,y+s*.6+Math.sin(i/10*Math.PI*2)*s*.2);}c.lineTo(x+s,y+s);c.lineTo(x,y+s);c.closePath();c.fill(); } },
-    drop:     { label:'💧', draw:(c,x,y,s)=>{ c.beginPath();c.moveTo(x+s/2,y+s*.9);c.bezierCurveTo(x+s*.1,y+s*.6,x+s*.1,y+s*.35,x+s/2,y+s*.1);c.bezierCurveTo(x+s*.9,y+s*.35,x+s*.9,y+s*.6,x+s/2,y+s*.9);c.closePath();c.fill(); } },
-    cloud:    { label:'☁', draw:(c,x,y,s)=>{ c.beginPath();c.arc(x+s*.3,y+s*.55,s*.22,0,Math.PI*2);c.arc(x+s*.5,y+s*.45,s*.28,0,Math.PI*2);c.arc(x+s*.7,y+s*.55,s*.2,0,Math.PI*2);c.fillRect(x+s*.1,y+s*.55,s*.8,s*.25);c.fill(); } },
-    mushroom: { label:'🍄', draw:(c,x,y,s)=>{ c.beginPath();c.arc(x+s/2,y+s*.45,s*.4,Math.PI,0);c.fill();c.fillRect(x+s*.36,y+s*.45,s*.28,s*.44); } },
+  "Nature & Weather": {
+    moon:      { label:"☽", draw:function(c,x,y,s){ c.beginPath();c.arc(x+s/2,y+s/2,s*.46,0,Math.PI*2);c.fill();c.save();c.globalCompositeOperation="destination-out";c.beginPath();c.arc(x+s*.64,y+s*.36,s*.36,0,Math.PI*2);c.fill();c.restore(); } },
+    sun:       { label:"☀", draw:function(c,x,y,s){ c.beginPath();c.arc(x+s/2,y+s/2,s*.3,0,Math.PI*2);c.fill();for(var i=0;i<8;i++){c.save();c.translate(x+s/2,y+s/2);c.rotate(Math.PI/4*i);c.fillRect(-s*.09,s*.32,s*.18,s*.16);c.restore();} } },
+    lightning: { label:"↯", draw:function(c,x,y,s){ c.beginPath();c.moveTo(x+s*.62,y+s*.04);c.lineTo(x+s*.22,y+s*.54);c.lineTo(x+s*.54,y+s*.52);c.lineTo(x+s*.36,y+s*.96);c.lineTo(x+s*.78,y+s*.46);c.lineTo(x+s*.46,y+s*.48);c.closePath();c.fill(); } },
+    leaf:      { label:"🌿", draw:function(c,x,y,s){ c.beginPath();c.moveTo(x+s/2,y+s*.96);c.bezierCurveTo(x+s*.04,y+s*.68,x+s*.04,y+s*.08,x+s/2,y+s*.04);c.bezierCurveTo(x+s*.96,y+s*.08,x+s*.96,y+s*.68,x+s/2,y+s*.96);c.fill(); } },
+    drop:      { label:"◈", draw:function(c,x,y,s){ c.beginPath();c.moveTo(x+s/2,y+s*.96);c.bezierCurveTo(x+s*.06,y+s*.64,x+s*.06,y+s*.32,x+s/2,y+s*.04);c.bezierCurveTo(x+s*.94,y+s*.32,x+s*.94,y+s*.64,x+s/2,y+s*.96);c.closePath();c.fill(); } },
+    cloud:     { label:"☁", draw:function(c,x,y,s){ c.beginPath();c.arc(x+s*.26,y+s*.5,s*.24,0,Math.PI*2);c.fill();c.beginPath();c.arc(x+s*.5,y+s*.38,s*.3,0,Math.PI*2);c.fill();c.beginPath();c.arc(x+s*.74,y+s*.5,s*.22,0,Math.PI*2);c.fill();c.fillRect(x+s*.06,y+s*.5,s*.88,s*.3); } },
+    apple:     { label:"⎔", draw:function(c,x,y,s){ c.beginPath();c.moveTo(x+s/2,y+s*.26);c.bezierCurveTo(x+s*.26,y+s*.2,x+s*.06,y+s*.38,x+s*.08,y+s*.64);c.bezierCurveTo(x+s*.1,y+s*.9,x+s*.34,y+s*.96,x+s/2,y+s*.96);c.bezierCurveTo(x+s*.66,y+s*.96,x+s*.9,y+s*.9,x+s*.92,y+s*.64);c.bezierCurveTo(x+s*.94,y+s*.38,x+s*.74,y+s*.2,x+s/2,y+s*.26);c.closePath();c.fill();c.fillRect(x+s*.46,y+s*.04,s*.12,s*.22); } },
   },
-  'Symbols & Signs': {
-    heart:    { label:'♥', draw:(c,x,y,s)=>{ var cx=x+s/2,cy=y+s/2,w=s*.42; c.beginPath();c.moveTo(cx,cy+w*.65);c.bezierCurveTo(cx-w*1.1,cy,cx-w*1.3,cy-w*.8,cx,cy-w*.45);c.bezierCurveTo(cx+w*1.3,cy-w*.8,cx+w*1.1,cy,cx,cy+w*.65);c.closePath();c.fill(); } },
-    spade:    { label:'♠', draw:(c,x,y,s)=>{ var cx=x+s/2,cy=y+s/2,w=s*.42; c.beginPath();c.moveTo(cx,cy-w*.6);c.bezierCurveTo(cx+w*1.1,cy-.1*w,cx+w*1.3,cy+w*.8,cx,cy+w*.4);c.bezierCurveTo(cx-w*1.3,cy+w*.8,cx-w*1.1,cy-.1*w,cx,cy-w*.6);c.closePath();c.fill();c.fillRect(cx-w*.4,cy+w*.4,w*.8,w*.5); } },
-    club:     { label:'♣', draw:(c,x,y,s)=>{ var cx=x+s/2,cy=y+s*.45,r=s*.2; c.beginPath();c.arc(cx,cy-r*.6,r,0,Math.PI*2);c.arc(cx-r*.8,cy+r*.4,r,0,Math.PI*2);c.arc(cx+r*.8,cy+r*.4,r,0,Math.PI*2);c.fill();c.fillRect(cx-r*.5,cy+r*.5,r,r*1.2); } },
-    dollar:   { label:'$', draw:(c,x,y,s)=>{ c.save();c.font='bold '+(s*.82)+'px Georgia,serif';c.textAlign='center';c.textBaseline='middle';c.fillText('$',x+s/2,y+s*.52);c.restore(); } },
-    peace:    { label:'☮', draw:(c,x,y,s)=>{ var cx=x+s/2,cy=y+s/2,r=s*.42,t=s*.08; c.beginPath();c.arc(cx,cy,r,0,Math.PI*2);c.arc(cx,cy,r-t,0,Math.PI*2,true);c.fill();c.fillRect(cx-t/2,cy,t,r);c.save();c.translate(cx,cy);c.rotate(Math.PI/4);c.fillRect(-t/2,-r,t,r);c.rotate(-Math.PI/2);c.fillRect(-t/2,-r,t,r);c.restore(); } },
-    yin_yang: { label:'☯', draw:(c,x,y,s)=>{ var cx=x+s/2,cy=y+s/2,r=s*.44; c.beginPath();c.arc(cx,cy,r,Math.PI*1.5,Math.PI*.5);c.arc(cx,cy-r/2,r/2,Math.PI*.5,Math.PI*1.5,true);c.arc(cx,cy+r/2,r/2,Math.PI*1.5,Math.PI*.5);c.fill();c.beginPath();c.arc(cx,cy-r/2,r*.12,0,Math.PI*2);c.fill();c.save();c.fillStyle=c.strokeStyle||'#fff';c.beginPath();c.arc(cx,cy+r/2,r*.12,0,Math.PI*2);c.fill();c.restore(); } },
-    infinity: { label:'∞', draw:(c,x,y,s)=>{ c.save();c.font='bold '+(s*.9)+'px Georgia,serif';c.textAlign='center';c.textBaseline='middle';c.fillText('∞',x+s/2,y+s*.52);c.restore(); } },
-    arrow_r:  { label:'➤', draw:(c,x,y,s)=>{ c.beginPath();c.moveTo(x+s*.9,y+s/2);c.lineTo(x+s*.4,y+s*.15);c.lineTo(x+s*.4,y+s*.38);c.lineTo(x+s*.1,y+s*.38);c.lineTo(x+s*.1,y+s*.62);c.lineTo(x+s*.4,y+s*.62);c.lineTo(x+s*.4,y+s*.85);c.closePath();c.fill(); } },
+  "Symbols": {
+    heart:     { label:"♥", draw:function(c,x,y,s){ var cx=x+s/2,cy=y+s*.54,w=s*.46; c.beginPath();c.moveTo(cx,cy+w*.64);c.bezierCurveTo(cx-w*1.14,cy,cx-w*1.32,cy-w*.8,cx,cy-w*.46);c.bezierCurveTo(cx+w*1.32,cy-w*.8,cx+w*1.14,cy,cx,cy+w*.64);c.closePath();c.fill(); } },
+    spade:     { label:"♠", draw:function(c,x,y,s){ var cx=x+s/2,cy=y+s*.44,w=s*.46; c.beginPath();c.moveTo(cx,cy-w*.64);c.bezierCurveTo(cx+w*1.14,cy+w*.1,cx+w*1.32,cy+w*.8,cx,cy+w*.46);c.bezierCurveTo(cx-w*1.32,cy+w*.8,cx-w*1.14,cy+w*.1,cx,cy-w*.64);c.closePath();c.fill();c.fillRect(cx-w*.4,cy+w*.46,w*.8,w*.5); } },
+    club:      { label:"♣", draw:function(c,x,y,s){ var cx=x+s/2,cy=y+s*.44,r=s*.22; c.beginPath();c.arc(cx,cy-r*.56,r,0,Math.PI*2);c.fill();c.beginPath();c.arc(cx-r*.84,cy+r*.4,r,0,Math.PI*2);c.fill();c.beginPath();c.arc(cx+r*.84,cy+r*.4,r,0,Math.PI*2);c.fill();c.fillRect(cx-r*.46,cy+r*.56,r*.92,r*1.1); } },
+    dollar:    { label:"$", draw:function(c,x,y,s){ c.save();c.font="900 "+(s*.88)+"px Arial,sans-serif";c.textAlign="center";c.textBaseline="middle";c.fillText("$",x+s/2,y+s*.52);c.restore(); } },
+    peace:     { label:"☮", draw:function(c,x,y,s){ var cx=x+s/2,cy=y+s/2,r=s*.44,t=s*.14; c.beginPath();c.arc(cx,cy,r,0,Math.PI*2);c.arc(cx,cy,r-t,0,Math.PI*2,true);c.fill();c.fillRect(cx-t/2,cy,t,r);c.save();c.translate(cx,cy);c.rotate(Math.PI/4);c.fillRect(-t/2,-r,t,r);c.rotate(-Math.PI/2);c.fillRect(-t/2,-r,t,r);c.restore(); } },
+    infinity:  { label:"∞", draw:function(c,x,y,s){ c.save();c.font="900 "+(s*.9)+"px Arial,sans-serif";c.textAlign="center";c.textBaseline="middle";c.fillText("∞",x+s/2,y+s*.52);c.restore(); } },
+    arrow:     { label:"➤", draw:function(c,x,y,s){ c.beginPath();c.moveTo(x+s*.96,y+s/2);c.lineTo(x+s*.42,y+s*.08);c.lineTo(x+s*.42,y+s*.36);c.lineTo(x+s*.04,y+s*.36);c.lineTo(x+s*.04,y+s*.64);c.lineTo(x+s*.42,y+s*.64);c.lineTo(x+s*.42,y+s*.92);c.closePath();c.fill(); } },
+    crown:     { label:"♛", draw:function(c,x,y,s){ c.beginPath();c.moveTo(x+s*.04,y+s*.8);c.lineTo(x+s*.04,y+s*.32);c.lineTo(x+s*.28,y+s*.56);c.lineTo(x+s/2,y+s*.16);c.lineTo(x+s*.72,y+s*.56);c.lineTo(x+s*.96,y+s*.32);c.lineTo(x+s*.96,y+s*.8);c.closePath();c.fill(); } },
+    shield:    { label:"⛨", draw:function(c,x,y,s){ c.beginPath();c.moveTo(x+s/2,y+s*.96);c.bezierCurveTo(x+s*.06,y+s*.74,x+s*.06,y+s*.28,x+s*.06,y+s*.08);c.lineTo(x+s*.94,y+s*.08);c.bezierCurveTo(x+s*.94,y+s*.28,x+s*.94,y+s*.74,x+s/2,y+s*.96);c.closePath();c.fill(); } },
   },
-  'Faces & People': {
-    smiley:   { label:'😊', draw:(c,x,y,s)=>{ c.beginPath();c.arc(x+s/2,y+s/2,s*.44,0,Math.PI*2);c.fill();c.save();c.globalCompositeOperation='destination-out';c.beginPath();c.arc(x+s*.35,y+s*.38,s*.07,0,Math.PI*2);c.arc(x+s*.65,y+s*.38,s*.07,0,Math.PI*2);c.fill();c.beginPath();c.arc(x+s/2,y+s*.52,s*.22,0,Math.PI);c.lineWidth=s*.08;c.stroke();c.restore(); } },
-    wink:     { label:'😉', draw:(c,x,y,s)=>{ c.beginPath();c.arc(x+s/2,y+s/2,s*.44,0,Math.PI*2);c.fill();c.save();c.globalCompositeOperation='destination-out';c.fillRect(x+s*.28,y+s*.34,s*.14,s*.08);c.beginPath();c.arc(x+s*.65,y+s*.38,s*.07,0,Math.PI*2);c.fill();c.beginPath();c.arc(x+s/2,y+s*.52,s*.22,0,Math.PI);c.lineWidth=s*.08;c.stroke();c.restore(); } },
-    santa:    { label:'🎅', draw:(c,x,y,s)=>{ c.beginPath();c.arc(x+s/2,y+s*.5,s*.36,0,Math.PI*2);c.fill();c.fillRect(x+s*.14,y+s*.14,s*.72,s*.4);c.beginPath();c.arc(x+s*.75,y+s*.18,s*.14,0,Math.PI*2);c.fill(); } },
-    ghost:    { label:'👻', draw:(c,x,y,s)=>{ c.beginPath();c.arc(x+s/2,y+s*.4,s*.38,Math.PI,0);c.lineTo(x+s*.88,y+s*.9);c.lineTo(x+s*.72,y+s*.76);c.lineTo(x+s*.56,y+s*.9);c.lineTo(x+s*.4,y+s*.76);c.lineTo(x+s*.24,y+s*.9);c.lineTo(x+s*.12,y+s*.4);c.fill(); } },
+  "Animals": {
+    paw:       { label:"⊛", draw:function(c,x,y,s){ c.beginPath();c.ellipse(x+s/2,y+s*.64,s*.24,s*.3,0,0,Math.PI*2);c.fill();[[-.22,-.28],[0,-.36],[.22,-.28]].forEach(function(p){c.beginPath();c.ellipse(x+s/2+p[0]*s,y+s/2+p[1]*s,s*.12,s*.15,0,0,Math.PI*2);c.fill();}); } },
+    butterfly: { label:"⋈", draw:function(c,x,y,s){ [-1,1].forEach(function(side){ c.save();c.translate(x+s/2,y+s/2); c.beginPath();c.moveTo(0,-s*.06); c.bezierCurveTo(side*s*.1,-s*.46,side*s*.48,-s*.46,side*s*.44,-s*.1); c.bezierCurveTo(side*s*.4,s*.04,side*s*.06,s*.04,0,-s*.06); c.closePath();c.fill(); c.beginPath();c.moveTo(0,s*.06); c.bezierCurveTo(side*s*.08,s*.06,side*s*.46,s*.1,side*s*.4,s*.38); c.bezierCurveTo(side*s*.34,s*.48,side*s*.06,s*.38,0,s*.06); c.closePath();c.fill(); c.restore();}); c.beginPath();c.ellipse(x+s/2,y+s/2,s*.07,s*.42,0,0,Math.PI*2);c.fill(); } },
+    bird:      { label:"⌁", draw:function(c,x,y,s){ c.beginPath();c.ellipse(x+s*.46,y+s*.56,s*.34,s*.22,-.2,0,Math.PI*2);c.fill();c.beginPath();c.arc(x+s*.68,y+s*.32,s*.18,0,Math.PI*2);c.fill();c.beginPath();c.moveTo(x+s*.84,y+s*.32);c.lineTo(x+s*.96,y+s*.26);c.lineTo(x+s*.96,y+s*.38);c.closePath();c.fill(); } },
+    fish:      { label:"⋗", draw:function(c,x,y,s){ c.beginPath();c.ellipse(x+s*.42,y+s/2,s*.36,s*.22,0,0,Math.PI*2);c.fill();c.beginPath();c.moveTo(x+s*.76,y+s*.26);c.lineTo(x+s*.96,y+s*.1);c.lineTo(x+s*.96,y+s*.9);c.lineTo(x+s*.76,y+s*.74);c.closePath();c.fill(); } },
+    bee:       { label:"⊕", draw:function(c,x,y,s){ c.beginPath();c.ellipse(x+s/2,y+s*.56,s*.22,s*.32,0,0,Math.PI*2);c.fill();c.beginPath();c.ellipse(x+s*.32,y+s*.32,s*.22,s*.11,-Math.PI/5,0,Math.PI*2);c.fill();c.beginPath();c.ellipse(x+s*.68,y+s*.32,s*.22,s*.11,Math.PI/5,0,Math.PI*2);c.fill();c.beginPath();c.arc(x+s/2,y+s*.26,s*.18,0,Math.PI*2);c.fill(); } },
+    cat:       { label:"⊗", draw:function(c,x,y,s){ c.beginPath();c.arc(x+s/2,y+s*.54,s*.36,0,Math.PI*2);c.fill();c.beginPath();c.moveTo(x+s*.16,y+s*.28);c.lineTo(x+s*.08,y+s*.04);c.lineTo(x+s*.38,y+s*.22);c.closePath();c.fill();c.beginPath();c.moveTo(x+s*.84,y+s*.28);c.lineTo(x+s*.92,y+s*.04);c.lineTo(x+s*.62,y+s*.22);c.closePath();c.fill(); } },
+    dog:       { label:"⊙", draw:function(c,x,y,s){ c.beginPath();c.arc(x+s/2,y+s*.46,s*.36,0,Math.PI*2);c.fill();c.beginPath();c.ellipse(x+s*.2,y+s*.48,s*.12,s*.22,Math.PI/7,0,Math.PI*2);c.fill();c.beginPath();c.ellipse(x+s*.8,y+s*.48,s*.12,s*.22,-Math.PI/7,0,Math.PI*2);c.fill(); } },
   },
-  'Animals': {
-    paw:      { label:'🐾', draw:(c,x,y,s)=>{ c.beginPath();c.arc(x+s/2,y+s*.62,s*.22,0,Math.PI*2);c.fill();c.beginPath();c.arc(x+s*.28,y+s*.38,s*.12,0,Math.PI*2);c.arc(x+s*.5,y+s*.28,s*.1,0,Math.PI*2);c.arc(x+s*.72,y+s*.38,s*.12,0,Math.PI*2);c.fill(); } },
-    bird:     { label:'🐦', draw:(c,x,y,s)=>{ c.beginPath();c.ellipse(x+s*.5,y+s*.55,s*.32,s*.2,0,0,Math.PI*2);c.fill();c.beginPath();c.arc(x+s*.68,y+s*.35,s*.16,0,Math.PI*2);c.fill();c.beginPath();c.moveTo(x+s*.82,y+s*.35);c.lineTo(x+s*.96,y+s*.3);c.lineTo(x+s*.82,y+s*.42);c.fill(); } },
-    fish:     { label:'🐟', draw:(c,x,y,s)=>{ c.beginPath();c.ellipse(x+s*.45,y+s/2,s*.35,s*.2,0,0,Math.PI*2);c.fill();c.beginPath();c.moveTo(x+s*.78,y+s*.3);c.lineTo(x+s*.96,y+s*.18);c.lineTo(x+s*.96,y+s*.82);c.lineTo(x+s*.78,y+s*.7);c.closePath();c.fill(); } },
-    butterfly:{ label:'🦋', draw:(c,x,y,s)=>{ for(var side=0;side<2;side++){var flip=side?1:-1;c.beginPath();c.ellipse(x+s*(0.5+flip*0.22),y+s*.38,s*.22,s*.3,flip*Math.PI/4,0,Math.PI*2);c.fill();c.beginPath();c.ellipse(x+s*(0.5+flip*0.2),y+s*.65,s*.18,s*.22,flip*Math.PI/5,0,Math.PI*2);c.fill();} c.fillRect(x+s*.47,y+s*.1,s*.06,s*.8); } },
-    bee:      { label:'🐝', draw:(c,x,y,s)=>{ c.beginPath();c.ellipse(x+s/2,y+s*.55,s*.22,s*.32,0,0,Math.PI*2);c.fill();c.beginPath();c.ellipse(x+s*.35,y+s*.35,s*.2,s*.12,-Math.PI/4,0,Math.PI*2);c.ellipse(x+s*.65,y+s*.35,s*.2,s*.12,Math.PI/4,0,Math.PI*2);c.fill();c.beginPath();c.arc(x+s/2,y+s*.3,s*.16,0,Math.PI*2);c.fill(); } },
-    cat:      { label:'🐱', draw:(c,x,y,s)=>{ c.beginPath();c.arc(x+s/2,y+s*.52,s*.36,0,Math.PI*2);c.fill();c.beginPath();c.moveTo(x+s*.22,y+s*.28);c.lineTo(x+s*.14,y+s*.08);c.lineTo(x+s*.38,y+s*.24);c.moveTo(x+s*.78,y+s*.28);c.lineTo(x+s*.86,y+s*.08);c.lineTo(x+s*.62,y+s*.24);c.fill(); } },
-    dog:      { label:'🐶', draw:(c,x,y,s)=>{ c.beginPath();c.arc(x+s/2,y+s*.48,s*.34,0,Math.PI*2);c.fill();c.beginPath();c.ellipse(x+s*.25,y+s*.42,s*.1,s*.2,Math.PI/8,0,Math.PI*2);c.ellipse(x+s*.75,y+s*.42,s*.1,s*.2,-Math.PI/8,0,Math.PI*2);c.fill(); } },
+  "Holiday & Seasonal": {
+    pumpkin:   { label:"◍", draw:function(c,x,y,s){ [-s*.22,0,s*.22].forEach(function(ox){ c.beginPath();c.ellipse(x+s/2+ox,y+s*.58,s*.2,s*.3,ox===0?0:ox>0?-.2:.2,0,Math.PI*2);c.fill();});c.fillRect(x+s*.46,y+s*.14,s*.08,s*.16); } },
+    xmas_tree: { label:"◬", draw:function(c,x,y,s){ c.beginPath();c.moveTo(x+s/2,y+s*.04);c.lineTo(x+s*.9,y+s*.56);c.lineTo(x+s*.64,y+s*.56);c.lineTo(x+s*.86,y+s*.84);c.lineTo(x+s*.14,y+s*.84);c.lineTo(x+s*.36,y+s*.56);c.lineTo(x+s*.1,y+s*.56);c.closePath();c.fill();c.fillRect(x+s*.42,y+s*.84,s*.16,s*.12); } },
+    snowman:   { label:"☃", draw:function(c,x,y,s){ c.beginPath();c.arc(x+s/2,y+s*.68,s*.26,0,Math.PI*2);c.fill();c.beginPath();c.arc(x+s/2,y+s*.34,s*.2,0,Math.PI*2);c.fill(); } },
+    broom:     { label:"⟋", draw:function(c,x,y,s){ c.save();c.translate(x+s/2,y+s/2);c.rotate(-Math.PI/4);c.fillRect(-s*.08,-s*.46,s*.16,s*.64);c.beginPath();c.moveTo(-s*.28,s*.18);c.lineTo(s*.28,s*.18);c.lineTo(s*.22,s*.46);c.lineTo(-s*.22,s*.46);c.closePath();c.fill();c.restore(); } },
+    witch_hat: { label:"⬡", draw:function(c,x,y,s){ c.beginPath();c.moveTo(x+s/2,y+s*.04);c.lineTo(x+s*.74,y+s*.68);c.lineTo(x+s*.26,y+s*.68);c.closePath();c.fill();c.fillRect(x+s*.12,y+s*.68,s*.76,s*.2);c.beginPath();c.ellipse(x+s/2,y+s*.78,s*.4,s*.12,0,0,Math.PI*2);c.fill(); } },
+    bell:      { label:"⌖", draw:function(c,x,y,s){ c.beginPath();c.arc(x+s/2,y+s*.42,s*.34,Math.PI,0);c.lineTo(x+s*.88,y+s*.74);c.arc(x+s/2,y+s*.74,s*.38,0,Math.PI);c.closePath();c.fill();c.beginPath();c.arc(x+s/2,y+s*.84,s*.1,0,Math.PI*2);c.fill(); } },
+    lantern:   { label:"⌑", draw:function(c,x,y,s){ c.beginPath();c.ellipse(x+s/2,y+s*.54,s*.34,s*.38,0,0,Math.PI*2);c.fill();c.fillRect(x+s*.44,y+s*.06,s*.12,s*.18);c.fillRect(x+s*.44,y+s*.78,s*.12,s*.16); } },
+    candy:     { label:"⌀", draw:function(c,x,y,s){ c.beginPath();c.arc(x+s*.44,y+s*.48,s*.36,0,Math.PI*2);c.fill();c.fillRect(x+s*.72,y+s*.18,s*.18,s*.52); } },
+    santa:     { label:"⛊", draw:function(c,x,y,s){ c.beginPath();c.arc(x+s/2,y+s*.54,s*.36,0,Math.PI*2);c.fill();c.beginPath();c.moveTo(x+s*.12,y+s*.3);c.lineTo(x+s*.88,y+s*.3);c.lineTo(x+s*.76,y+s*.06);c.lineTo(x+s/2,y+s*.16);c.closePath();c.fill();c.beginPath();c.arc(x+s*.76,y+s*.06,s*.1,0,Math.PI*2);c.fill();c.fillRect(x+s*.12,y+s*.28,s*.76,s*.08); } },
+    ghost:     { label:"⚇", draw:function(c,x,y,s){ c.beginPath();c.arc(x+s/2,y+s*.36,s*.38,Math.PI,0);c.lineTo(x+s*.88,y+s*.9);c.lineTo(x+s*.72,y+s*.74);c.lineTo(x+s*.56,y+s*.9);c.lineTo(x+s*.4,y+s*.74);c.lineTo(x+s*.24,y+s*.9);c.lineTo(x+s*.12,y+s*.36);c.closePath();c.fill(); } },
   },
-  'Holiday & Seasonal': {
-    pumpkin:  { label:'🎃', draw:(c,x,y,s)=>{ for(var i=-1;i<=1;i++){c.beginPath();c.ellipse(x+s/2+i*s*.22,y+s*.56,s*.18,s*.3,i*Math.PI/6,0,Math.PI*2);c.fill();} c.fillRect(x+s*.46,y+s*.12,s*.08,s*.16); } },
-    xmas_tree:{ label:'🎄', draw:(c,x,y,s)=>{ c.beginPath();c.moveTo(x+s/2,y+s*.06);c.lineTo(x+s*.86,y+s*.58);c.lineTo(x+s*.62,y+s*.58);c.lineTo(x+s*.82,y+s*.82);c.lineTo(x+s*.18,y+s*.82);c.lineTo(x+s*.38,y+s*.58);c.lineTo(x+s*.14,y+s*.58);c.closePath();c.fill();c.fillRect(x+s*.42,y+s*.82,s*.16,s*.12); } },
-    snowman:  { label:'⛄', draw:(c,x,y,s)=>{ c.beginPath();c.arc(x+s/2,y+s*.72,s*.24,0,Math.PI*2);c.fill();c.beginPath();c.arc(x+s/2,y+s*.36,s*.18,0,Math.PI*2);c.fill(); } },
-    broom:    { label:'🧹', draw:(c,x,y,s)=>{ c.save();c.translate(x+s/2,y+s/2);c.rotate(-Math.PI/4);c.fillRect(-s*.06,-s*.44,s*.12,s*.7);c.beginPath();c.moveTo(-s*.24,s*.26);c.lineTo(s*.24,s*.26);c.lineTo(s*.18,s*.44);c.lineTo(-s*.18,s*.44);c.closePath();c.fill();c.restore(); } },
-    candy:    { label:'🍬', draw:(c,x,y,s)=>{ c.beginPath();c.arc(x+s/2,y+s/2,s*.36,0,Math.PI*2);c.fill();c.fillRect(x+s*.72,y+s*.24,s*.18,s*.5); } },
-    bell:     { label:'🔔', draw:(c,x,y,s)=>{ c.beginPath();c.arc(x+s/2,y+s*.44,s*.34,Math.PI,0);c.lineTo(x+s*.86,y+s*.74);c.arc(x+s/2,y+s*.74,s*.36,0,Math.PI);c.closePath();c.fill();c.beginPath();c.arc(x+s/2,y+s*.82,s*.1,0,Math.PI*2);c.fill(); } },
-    star_david:{ label:'✡', draw:(c,x,y,s)=>{ drawStar(c,x+s/2,y+s/2,6,s*.46,s*.2);} },
-    lantern:  { label:'🏮', draw:(c,x,y,s)=>{ c.beginPath();c.ellipse(x+s/2,y+s*.54,s*.3,s*.38,0,0,Math.PI*2);c.fill();c.fillRect(x+s*.44,y+s*.06,s*.12,s*.16);c.fillRect(x+s*.44,y+s*.78,s*.12,s*.16); } },
+  "Objects": {
+    music:     { label:"♫", draw:function(c,x,y,s){ c.fillRect(x+s*.28,y+s*.16,s*.5,s*.1);c.fillRect(x+s*.28,y+s*.3,s*.5,s*.1);c.fillRect(x+s*.62,y+s*.16,s*.1,s*.52);c.beginPath();c.ellipse(x+s*.48,y+s*.74,s*.18,s*.13,-.3,0,Math.PI*2);c.fill();c.fillRect(x+s*.28,y+s*.3,s*.1,s*.44);c.beginPath();c.ellipse(x+s*.32,y+s*.78,s*.18,s*.13,-.3,0,Math.PI*2);c.fill(); } },
+    phone:     { label:"☏", draw:function(c,x,y,s){ roundRect(c,x+s*.22,y+s*.06,s*.56,s*.88,s*.12);c.fill(); } },
+    smiley:    { label:"☺", draw:function(c,x,y,s){ c.beginPath();c.arc(x+s/2,y+s/2,s*.46,0,Math.PI*2);c.fill();c.save();c.globalCompositeOperation="destination-out";c.beginPath();c.arc(x+s*.34,y+s*.38,s*.09,0,Math.PI*2);c.fill();c.beginPath();c.arc(x+s*.66,y+s*.38,s*.09,0,Math.PI*2);c.fill();c.beginPath();c.arc(x+s/2,y+s*.5,s*.24,0,Math.PI);c.lineWidth=s*.12;c.strokeStyle="rgba(0,0,0,1)";c.stroke();c.restore(); } },
+    ghost2:    { label:"⚈", draw:function(c,x,y,s){ c.beginPath();c.arc(x+s/2,y+s*.34,s*.4,Math.PI,0);c.lineTo(x+s*.9,y+s*.92);c.lineTo(x+s*.7,y+s*.72);c.lineTo(x+s*.5,y+s*.92);c.lineTo(x+s*.3,y+s*.72);c.lineTo(x+s*.1,y+s*.92);c.closePath();c.fill(); } },
   },
 };
 
@@ -1099,11 +1638,13 @@ function drawStar(ctx,cx,cy,points,R,r){
 }
 
 function drawChar(ctx,x,y,s,ch){
+  // WHY: 900 weight + 95% cell size ensures characters fill the module
+  // and remain scannable even at 3-4px QR module sizes
   ctx.save();
-  ctx.font='bold '+(s*.88)+'px sans-serif';
+  ctx.font='900 '+(s*.94)+'px Arial Black,Arial,sans-serif';
   ctx.textAlign='center';
   ctx.textBaseline='middle';
-  ctx.fillText(ch,x+s/2,y+s*.52);
+  ctx.fillText(ch,x+s/2,y+s*.54);
   ctx.restore();
 }
 
@@ -1111,16 +1652,10 @@ function drawChar(ctx,x,y,s,ch){
 var CHAR_LETTERS = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.split('');
 var CHAR_NUMBERS = '0123456789'.split('');
 var CHAR_KEYBOARD = '!@#$%^&*()-_=+[]{}|;:,.<>?/~`'.split('');
-var CHAR_CATEGORIES = {
-  'Shapes':    ['■','▲','●','◆','★','❖','⬡','◎','⬟','▼','◀','▶','⬤','⭐','✦','✧','✸','✺','✻','✼','❋','❄','❅','❆','⊕','⊗','⊙','⊛'],
-  'Nature':    ['🌙','☀️','⚡','❄','🌊','🌿','🍃','🌸','🌺','🌻','🌹','🌷','🍄','🌴','🌵','🌾','🍀','☘️','🌈','⛅','🌊','🔥','💧','🌱','🌲','🌳','🍂','🍁','🌎','⭐'],
-  'Animals':   ['🐶','🐱','🦋','🐝','🐞','🦊','🐺','🦁','🐯','🐻','🐼','🐨','🦄','🐸','🐧','🦅','🦆','🐠','🐙','🦑','🐬','🦈','🐢','🦎','🐍','🦋','🐌','🐛','🐜','🐝'],
-  'Emojis':   ['😊','😎','🥰','😂','🤩','😍','🙌','👏','✌️','🤙','💪','🫶','❤️','💛','💚','💙','💜','🖤','🤍','💖','💫','✨','🌟','💥','🎉','🎊','🎈','🎯','🏆','💎'],
-  'Food':      ['🍎','🍊','🍋','🍇','🍓','🫐','🍉','🍑','🍒','🥭','🍍','🥥','🍌','🍕','🍔','🌮','🍜','🍣','🍩','🍰','🎂','🧁','🍫','🍬','🍭','☕','🧃','🍺','🥂','🍾'],
-  'Holidays':  ['🎃','🎅','🎄','❄️','🎆','🎇','🧨','🎑','🎋','🎍','🎎','🎏','🥚','🐰','🦃','🎁','🎀','🕎','☪️','✝️','🕌','⛪','🕍','🪔','🏮','🎐','🪁','🎠','🎡','🎢'],
-  'Cleaning':  ['🧹','🪣','🧺','🧻','🧼','🪥','🧽','🫧','🚿','🛁','🧴','🪒','🧷','🧯','🗑️','🪤','🧲','🔧','🪛','🔨','⚙️','🛠️','🪚','🔩','🪝','🧰','🪜','🪞','🛒','🧳'],
-  'Symbols':   ['♠','♣','♥','♦','⚜','☯','☮','✝','☪','✡','☸','⚛','♾','⚕','⚖','⚗','⚙','⚡','❤','💔','✔','✖','➕','➖','➗','✖','💲','💱','©','®','™'],
-};
+// WHY: CHAR_CATEGORIES removed — emojis belong in the emoji note only,
+// not in the color-controlled character picker. The picker is for
+// characters that render in the user's chosen color.
+var CHAR_CATEGORIES = {};
 
 // WHY: track selected chars per panel (s=static, d=dynamic)
 var _selectedChars = {s:[], d:[]};
@@ -1147,22 +1682,18 @@ function makeCharSection(prefix, containerId, chars) {
 }
 
 function buildCharPicker(prefix) {
+  // WHY: only letters/numbers/keyboard respond to color — emojis do not
+  // and are handled separately via the emoji note
   makeCharSection(prefix, 'letters', CHAR_LETTERS);
   makeCharSection(prefix, 'numbers', CHAR_NUMBERS);
   makeCharSection(prefix, 'keyboard', CHAR_KEYBOARD);
-  Object.keys(CHAR_CATEGORIES).forEach(function(cat) {
-    var safeCat = cat.toLowerCase().replace(/[^a-z]/g,'');
-    makeCharSection(prefix, safeCat, CHAR_CATEGORIES[cat]);
-  });
 }
 
 function getCharsForSection(section) {
   if (section==='letters') return CHAR_LETTERS;
   if (section==='numbers') return CHAR_NUMBERS;
   if (section==='keyboard') return CHAR_KEYBOARD;
-  // Check categories
-  var catKey = Object.keys(CHAR_CATEGORIES).find(k=>k.toLowerCase().replace(/[^a-z]/g,'')=== section);
-  return catKey ? CHAR_CATEGORIES[catKey] : [];
+  return [];
 }
 
 function selectAllChars(prefix, section) {
@@ -1202,7 +1733,7 @@ function updateCharNote(prefix) {
   if (!note) return;
   var sel = _selectedChars[prefix];
   // Update per-section counts
-  ['letters','numbers','keyboard','shapes','nature','animals','emojis','food','holidays','cleaning','symbols'].forEach(function(sec){
+  ['letters','numbers','keyboard'].forEach(function(sec){
     var chars = getCharsForSection(sec);
     var count = chars.filter(ch=>sel.includes(ch)).length;
     var el = document.getElementById(prefix+'-'+sec+'-count');
@@ -1237,9 +1768,6 @@ function buildShapePickerFor(gridId, pickerFieldId, prefix, onSelect) {
         grid.querySelectorAll('.shape-opt').forEach(b=>b.classList.remove('selected'));
         btn.classList.add('selected');
         onSelect(key);
-        // Show char picker only for custom_char
-        var pickerField = document.getElementById(pickerFieldId);
-        if (pickerField) pickerField.style.display = key==='custom_char'?'':'none';
       };
       row.appendChild(btn);
     });
@@ -1259,32 +1787,88 @@ function buildShapePickerFor(gridId, pickerFieldId, prefix, onSelect) {
     grid.querySelectorAll('.shape-opt').forEach(b=>b.classList.remove('selected'));
     btn.classList.add('selected');
     onSelect('custom_char');
-    var pickerField = document.getElementById(pickerFieldId);
-    if (pickerField) pickerField.style.display = '';
   };
   grid.appendChild(btn);
 
-  // WHY: request button lets users pay $5 to request a new shape that
-  // isn't in the library yet. Fires email to Hali and logs to Firestore.
-  var reqWrap = document.createElement('div');
-  reqWrap.style.cssText='width:100%;margin-top:12px;padding-top:10px;border-top:1px solid var(--line);';
-  reqWrap.innerHTML=
-    '<div style="font-size:.72rem;color:var(--muted);margin-bottom:8px;line-height:1.5;">'+
-    'Don't see your shape? Request it — <strong style="color:var(--gold2);">$5</strong> and we'll add it within 7 business days.</div>'+
-    '<div style="display:flex;gap:8px;">'+
-      '<input type="text" id="'+prefix+'-shape-request" placeholder="Describe the shape you want…" '+
-        'style="flex:1;padding:8px 12px;background:var(--navy);border:1px solid var(--line);border-radius:6px;color:var(--white);font-family:Raleway,sans-serif;font-size:.82rem;outline:none;">'+
-      '<button class="act-btn" onclick="requestShape(''+prefix+'')" style="white-space:nowrap;border-color:var(--gold);color:var(--gold2);">Request — $5</button>'+
-    '</div>';
-  grid.appendChild(reqWrap);
+  // Custom Character section
+  var customTitle = document.createElement('div');
+  customTitle.style.cssText='width:100%;margin-top:14px;padding-top:10px;border-top:1px solid var(--line);font-family:Cinzel,serif;font-size:.68rem;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);margin-bottom:8px;';
+  customTitle.textContent='Custom Character';
+  grid.appendChild(customTitle);
 
-  buildCharPicker(prefix);
+  // Generic $5 request — published to all users
+  var reqDesc1=document.createElement('div');
+  reqDesc1.style.cssText='font-size:.7rem;color:var(--muted);margin-bottom:6px;line-height:1.5;';
+  reqDesc1.innerHTML='<strong style="color:var(--gold2);">$5</strong> &#8212; Published to everyone. Added within 7 business days.';
+  grid.appendChild(reqDesc1);
+  var reqRow1=document.createElement('div');
+  reqRow1.style.cssText='display:flex;gap:8px;margin-bottom:10px;';
+  var reqInp1=document.createElement('input');
+  reqInp1.type='text'; reqInp1.id=prefix+'-shape-request';
+  reqInp1.placeholder='Describe a shape to add to the public library';
+  reqInp1.style.cssText='flex:1;padding:7px 10px;background:var(--navy);border:1px solid var(--line);border-radius:6px;color:var(--white);font-family:Raleway,sans-serif;font-size:.8rem;outline:none;';
+  var reqB1=document.createElement('button');
+  reqB1.className='act-btn';
+  reqB1.style.cssText='white-space:nowrap;border-color:var(--gold);color:var(--gold2);font-size:.75rem;';
+  reqB1.innerHTML='Request &#8212; $5';
+  reqB1.onclick=function(){requestShape(prefix,'generic');};
+  reqRow1.appendChild(reqInp1); reqRow1.appendChild(reqB1);
+  grid.appendChild(reqRow1);
+
+  // Custom $50 request — private, not published to other users
+  var reqDesc2=document.createElement('div');
+  reqDesc2.style.cssText='font-size:.7rem;color:var(--muted);margin-bottom:6px;line-height:1.5;';
+  reqDesc2.innerHTML='<strong style="color:var(--green);">$50</strong> &#8212; Custom private design, yours only. Not published to others.';
+  grid.appendChild(reqDesc2);
+  var reqRow2=document.createElement('div');
+  reqRow2.style.cssText='display:flex;gap:8px;margin-bottom:12px;';
+  var reqInp2=document.createElement('input');
+  reqInp2.type='text'; reqInp2.id=prefix+'-shape-request-custom';
+  reqInp2.placeholder='Describe your exclusive custom shape design';
+  reqInp2.style.cssText='flex:1;padding:7px 10px;background:var(--navy);border:1px solid var(--line);border-radius:6px;color:var(--white);font-family:Raleway,sans-serif;font-size:.8rem;outline:none;';
+  var reqB2=document.createElement('button');
+  reqB2.className='act-btn';
+  reqB2.style.cssText='white-space:nowrap;border-color:var(--green);color:var(--green);font-size:.75rem;';
+  reqB2.innerHTML='Request &#8212; $50';
+  reqB2.onclick=function(){requestShape(prefix,'custom');};
+  reqRow2.appendChild(reqInp2); reqRow2.appendChild(reqB2);
+  grid.appendChild(reqRow2);
+
+  // Add emojis accordion
+  var eAcc=document.createElement('div');
+  eAcc.className='char-accordion'; eAcc.id=prefix+'-acc-emoji';
+  var eHdr=document.createElement('div');
+  eHdr.className='char-acc-header';
+  eHdr.onclick=function(){toggleCharAcc(prefix+'-acc-emoji');};
+  eHdr.innerHTML='<span class="char-acc-title">Add emojis to your design</span><span class="char-acc-arrow">▾</span>';
+  var eBdy=document.createElement('div');
+  eBdy.className='char-acc-body';
+  eBdy.innerHTML='<div style="font-size:.72rem;color:var(--gold2);line-height:1.7;margin-bottom:8px;">'
+    +'<strong>Note:</strong> Emojis render in their <strong>full original color</strong> and cannot be recolored. '
+    +'They are randomly placed as QR dots. Use letters and numbers above for full color control.</div>'
+    +'<div style="font-size:.88rem;line-height:2.2;">'
+    +'🌙 ☀️ ⚡ ❄ 🌊 🌿 🍃 🌸 🌺 🌻 🌹 🌷 🍄 🌴 🌵 🍀 ☘️ 🌈 🔥 💧 🌱 🌲 🌳 🍂 🍁<br>'
+    +'🐶 🐱 🦋 🐝 🐞 🦊 🐺 🦁 🐯 🐻 🐼 🦄 🐸 🐧 🦅 🐠 🐬 🦈 🐢 🐌 🐛 🐜<br>'
+    +'😊 😎 🥰 😂 🤩 😍 🙌 👏 ✌️ 💪 ❤️ 💛 💚 💙 💜 💖 💫 ✨ 🌟 💥 🎉 🎊 🎈 🏆 💎<br>'
+    +'🍎 🍊 🍋 🍇 🍓 🫐 🍉 🍑 🍒 🍍 🥥 🍌 🍕 🍔 🌮 🍜 🍣 🍩 🍰 🎂 🧁 🍫 ☕<br>'
+    +'🎃 🎅 🎄 🎆 🎇 🥚 🐰 🦃 🎁 🎀 🕎 ☪️ ✝️ 🪔 🏮 🧹 🪣 🧺 🧻 🧼 🧽 🫧</div>';
+  eAcc.appendChild(eHdr); eAcc.appendChild(eBdy);
+  grid.appendChild(eAcc);
 }
 
-buildShapePickerFor('shape-grid', 's-char-picker-field', 's', function(key){ _selectedShape=key; });
-buildShapePickerFor('d-shape-grid', 'd-char-picker-field', 'd', function(key){ _selectedShapeD=key; });
-// WHY: initialize dynamic color mode display on load so correct panel shows
-setColorMode('solid','d');
+document.addEventListener('DOMContentLoaded', function() {
+  // WHY: DOM must be ready before getElementById calls can find elements
+  buildShapePickerFor('shape-grid', null, 's', function(key){ _selectedShape=key; });
+  buildShapePickerFor('d-shape-grid', null, 'd', function(key){ _selectedShapeD=key; });
+  buildCharPicker('s');
+  buildCharPicker('d');
+  // WHY: build char pickers separately — their containers are above shape grid
+  // and must be populated independently of the shape picker
+  buildCharPicker('s');
+  buildCharPicker('d');
+  setColorMode('solid','d');
+  switchTab('dynamic');
+});
 
 // ── COLOR MODE ────────────────────────────────────────────────────────────────
 var _colorModeD = 'solid';
@@ -1499,9 +2083,9 @@ function downloadCustomQR(fmt) {
 function selectType(type) {
   document.getElementById('card-static').classList.toggle('selected', type==='static');
   document.getElementById('card-dynamic').classList.toggle('selected', type==='dynamic');
-  // Scroll to generator and switch tab
-  document.querySelector('.tab-row').scrollIntoView({behavior:'smooth',block:'start'});
-  setTimeout(()=>switchTab(type), 300);
+  // WHY: scroll first then switch tab so the tab highlight is visible on arrival
+  document.querySelector('.section').scrollIntoView({behavior:'smooth',block:'start'});
+  setTimeout(function(){ switchTab(type); }, 350);
 }
 
 // ── VIEW / TAB ────────────────────────────────────────────────────────────────
@@ -1771,11 +2355,14 @@ function exportCSV(rows, filename) {
 // ── SHAPE REQUEST ────────────────────────────────────────────────────────────
 var _pendingShapeRequest = null;
 
-async function requestShape(prefix) {
-  var input = document.getElementById(prefix+'-shape-request');
+async function requestShape(prefix, tier) {
+  // WHY: two tiers — $5 generic (published to all users), $50 custom (private, unpublished)
+  tier = tier || 'generic';
+  var inputId = tier === 'custom' ? prefix+'-shape-request-custom' : prefix+'-shape-request';
+  var input = document.getElementById(inputId);
   var description = input ? input.value.trim() : '';
   if (!description) { toast('Describe the shape you want first.','err'); return; }
-  _pendingShapeRequest = { description, prefix };
+  _pendingShapeRequest = { description, prefix, tier };
   _pendingAction = { type: 'shape_request' };
   // Open payment modal for $5
   document.getElementById('pay-amount').textContent = '$5.00';
@@ -1873,7 +2460,7 @@ async function fulfillShapeRequest(paymentIntentId) {
     ].join('\n')
   });
 
-  toast('Shape requested! You'll see it in the library within 7 business days.', 'ok');
+  toast('Shape requested! You&#39;ll see it in the library within 7 business days.', 'ok');
   if (_pendingShapeRequest && _pendingShapeRequest.prefix) {
     var input = document.getElementById(_pendingShapeRequest.prefix+'-shape-request');
     if (input) input.value = '';
