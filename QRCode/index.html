@@ -760,742 +760,6 @@ footer a{color:var(--muted);}footer a:hover{color:var(--white);}
   </div>
   <p>© 2026 I.Q. Productionz · Houston, Texas · <a href="mailto:IQProductionz@gmail.com">IQProductionz@gmail.com</a></p>
 </footer>
-
-rebase -->
-<script type="module">
-  import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js';
-  import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js';
-  import { getFirestore, doc, setDoc, getDoc, updateDoc, collection, addDoc, query, where, getDocs, increment } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js';
-  const cfg={apiKey:"AIzaSyBClNCsZwvHghZLbhr3BiP3aDys0GDvJys",authDomain:"qr-platform-33671.firebaseapp.com",projectId:"qr-platform-33671",storageBucket:"qr-platform-33671.firebasestorage.app",messagingSenderId:"564631666195",appId:"1:564631666195:web:515eb76f3f3f48c54c09e6"};
-  const app=initializeApp(cfg); const auth=getAuth(app); const db=getFirestore(app);
-  window._fb={auth,db,createUserWithEmailAndPassword,signInWithEmailAndPassword,signOut,onAuthStateChanged,doc,setDoc,getDoc,updateDoc,collection,addDoc,query,where,getDocs,increment};
-  onAuthStateChanged(auth,user=>{window._user=user||null;renderNav();if(window._cv==='dashboard')showDashboard();});
-</script>
-<script src="https://js.stripe.com/v3/"></script>
-<!-- WHY: qrcodejs generates the base QR matrix; we use a custom canvas renderer
-     on top of it for shape/gradient/logo customization -->
-<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
-<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700&family=Raleway:wght@300;400;500;600&display=swap" rel="stylesheet">
-
-<style>
-:root{
-  --bg:#2a2a2a;
-  --navy:#333333;
-  --panel:#454545;
-  --line:#2e2b24;
-  --gold:#c98a2e;
-  --gold2:#e0a84a;
-  --gold-dim:#7a5218;
-  --green:#6abf7b;
-  --red:#e05c5c;
-  --white:#f0ece3;
-  --muted:#A9A9A9;
-  --r:10px;
-}
-*{box-sizing:border-box;margin:0;padding:0;}
-body{font-family:'Raleway',sans-serif;background:var(--bg);color:var(--white);min-height:100vh;}
-a{color:var(--gold2);text-decoration:none;}
-button{cursor:pointer;}
-input,select,textarea{font-family:inherit;}
-h1,h2,h3{text-transform:none;}
-
-/* NAV */
-nav{display:flex;justify-content:space-between;align-items:center;padding:14px 28px;background:#222;border-bottom:1px solid var(--line);position:sticky;top:0;z-index:100;backdrop-filter:blur(8px);flex-wrap:wrap;gap:10px;}
-.nav-brand{display:flex;align-items:center;gap:10px;text-decoration:none;}
-.nav-brand img{height:32px;width:auto;filter:drop-shadow(0 0 8px rgba(201,138,46,.4));}
-.nav-brand span{font-family:'Cinzel',serif;font-weight:700;font-size:1rem;color:var(--white);letter-spacing:1px;}
-#nav-right{display:flex;gap:8px;align-items:center;flex-wrap:wrap;}
-.nav-btn{padding:7px 16px;border-radius:7px;font-size:.82rem;font-weight:500;border:1px solid var(--line);background:transparent;color:var(--muted);transition:all .2s;font-family:'Raleway',sans-serif;}
-.nav-btn:hover{border-color:var(--gold);color:var(--white);}
-.nav-btn.primary{background:linear-gradient(135deg,var(--gold),#a87025);color:#222;border-color:var(--gold);font-weight:700;}
-.nav-btn.primary:hover{filter:brightness(1.1);}
-
-.view{display:none;} .view.active{display:block;}
-
-/* HERO */
-#hero{text-align:center;padding:72px 24px 56px;background:linear-gradient(160deg,#3a3a3a 0%,#2a2a2a 60%);position:relative;overflow:hidden;border-bottom:1px solid var(--line);}
-#hero::before{content:'';position:absolute;inset:0;background:radial-gradient(ellipse 80% 50% at 50% -10%,rgba(201,138,46,.18) 0%,transparent 70%);pointer-events:none;}
-.hero-eyebrow{display:inline-block;padding:5px 16px;border-radius:20px;border:1px solid rgba(201,138,46,.4);background:rgba(201,138,46,.08);font-size:.72rem;font-weight:600;letter-spacing:.08em;color:var(--gold2);margin-bottom:22px;font-family:'Cinzel',serif;text-transform:uppercase;}
-#hero h1{font-family:'Cinzel',serif;font-size:clamp(1.8rem,4.5vw,3rem);font-weight:600;line-height:1.2;max-width:680px;margin:0 auto 18px;color:var(--white);text-transform:none;}
-#hero h1 em{font-style:normal;color:var(--gold2);}
-#hero p{font-size:1rem;color:var(--muted);max-width:500px;margin:0 auto 36px;line-height:1.75;}
-
-/* TYPE CARDS — clickable */
-.type-grid{display:grid;grid-template-columns:1fr 1fr;gap:18px;max-width:820px;margin:0 auto 0;text-align:left;}
-@media(max-width:600px){.type-grid{grid-template-columns:1fr;}}
-.type-card{background:var(--panel);border:1px solid var(--line);border-radius:var(--r);padding:28px;position:relative;overflow:hidden;transition:border-color .2s,transform .2s;cursor:pointer;}
-.type-card:hover{border-color:var(--gold);transform:translateY(-2px);}
-.type-card.selected{border-color:var(--gold);box-shadow:0 0 0 2px rgba(201,138,46,.3);}
-.type-card .badge{display:inline-block;padding:3px 12px;border-radius:20px;font-size:.65rem;font-weight:700;letter-spacing:.06em;margin-bottom:14px;font-family:'Cinzel',serif;}
-.badge-free{background:rgba(201,138,46,.15);color:var(--gold2);}
-.badge-dynamic{background:rgba(106,191,123,.15);color:var(--green);}
-.type-card h3{font-family:'Cinzel',serif;font-size:1.15rem;font-weight:600;margin-bottom:8px;text-transform:none;}
-.type-card p{font-size:.86rem;color:var(--muted);line-height:1.65;margin-bottom:18px;}
-.type-feats{list-style:none;display:flex;flex-direction:column;gap:7px;}
-.type-feats li{font-size:.82rem;color:var(--muted);display:flex;align-items:center;gap:10px;}
-/* WHY: gold checkmark for included, red × for not included */
-.type-feats li::before{content:'✓';color:var(--gold2);font-weight:700;flex-shrink:0;font-size:.9rem;}
-.type-feats li.na{color:#666;}
-.type-feats li.na::before{content:'✕';color:var(--red);font-weight:700;}
-.dynamic-card .type-feats li::before{color:var(--green);}
-.dynamic-card h3{color:var(--white);}
-.dynamic-card .pricing-note{background:rgba(106,191,123,.08);border-color:rgba(106,191,123,.25);color:var(--green);}
-.dynamic-card .pricing-note strong{color:var(--green);}
-.dynamic-card.selected{border-color:var(--green);box-shadow:0 0 0 2px rgba(106,191,123,.3);}
-.dynamic-card .select-hint{color:var(--green);}
-#tab-dynamic.active{color:var(--green);border-bottom-color:var(--green);}
-.pricing-note{margin-top:20px;padding:12px 14px;background:rgba(201,138,46,.08);border-radius:7px;font-size:.8rem;color:var(--gold2);line-height:1.55;border:1px solid rgba(201,138,46,.2);}
-.select-hint{margin-top:16px;font-family:'Cinzel',serif;font-size:.65rem;letter-spacing:.08em;text-transform:uppercase;color:var(--gold);opacity:.7;text-align:center;}
-
-/* SECTION */
-.section{max-width:900px;margin:0 auto;padding:48px 24px 0;}
-.section-title{font-family:'Cinzel',serif;font-size:1.4rem;font-weight:600;margin-bottom:6px;text-transform:none;}
-.section-sub{font-size:.88rem;color:var(--muted);margin-bottom:28px;line-height:1.65;}
-
-/* TABS */
-.tab-row{display:flex;gap:2px;border-bottom:1px solid var(--line);margin-bottom:28px;}
-.tab{padding:10px 18px;font-size:.82rem;font-weight:500;background:none;border:none;color:var(--muted);border-bottom:2px solid transparent;margin-bottom:-1px;transition:all .2s;font-family:'Raleway',sans-serif;}
-.tab:hover{color:var(--white);}
-.tab.active{color:var(--gold2);border-bottom-color:var(--gold);}
-
-/* GEN CARD */
-.gen-card{background:var(--panel);border:1px solid var(--line);border-radius:var(--r);padding:28px;}
-
-/* DESIGN OPTIONS GRID */
-.design-grid{display:grid;grid-template-columns:1fr 1fr;gap:18px;}
-@media(max-width:560px){.design-grid{grid-template-columns:1fr;}}
-
-.field{margin-bottom:18px;}
-.field label{display:block;font-size:.72rem;font-weight:600;letter-spacing:.05em;color:var(--muted);margin-bottom:7px;font-family:'Cinzel',serif;}
-.field input,.field select{width:100%;padding:10px 14px;background:var(--navy);border:1px solid var(--line);border-radius:7px;color:var(--white);font-size:.92rem;outline:none;transition:border-color .2s;}
-.field input:focus,.field select:focus{border-color:var(--gold);}
-.field input::placeholder{color:#555;}
-
-/* SHAPE PICKER */
-.shape-grid{display:block;margin-top:2px;max-height:320px;overflow-y:auto;padding-right:4px;} .shape-grid > div[style*="flex"]{display:flex!important;flex-wrap:wrap;gap:5px;}
-.shape-opt{width:44px;height:44px;border-radius:7px;border:1px solid var(--line);background:var(--navy);display:flex;align-items:center;justify-content:center;cursor:pointer;transition:all .2s;font-size:1.1rem;}
-.shape-opt:hover{border-color:var(--gold);}
-.shape-opt.selected{border-color:var(--gold);background:rgba(201,138,46,.15);}
-.shape-opt canvas{width:28px;height:28px;}
-
-/* GRADIENT ROW */
-.grad-row{display:flex;gap:10px;flex-wrap:wrap;align-items:flex-end;}
-.grad-stop{display:flex;flex-direction:column;align-items:center;gap:4px;font-size:.65rem;color:var(--muted);}
-.grad-stop input[type=color]{width:40px;height:36px;border:1px solid var(--line);border-radius:6px;cursor:pointer;background:none;padding:2px;}
-.grad-toggle{display:flex;gap:6px;margin-bottom:12px;}
-.grad-toggle button{padding:5px 12px;border-radius:6px;border:1px solid var(--line);background:transparent;color:var(--muted);font-size:.72rem;font-family:'Raleway',sans-serif;transition:all .2s;}
-.grad-toggle button.active{background:var(--gold);border-color:var(--gold);color:#222;font-weight:600;}
-
-/* LOGO UPLOAD */
-.logo-drop{border:2px dashed var(--line);border-radius:8px;padding:16px;text-align:center;cursor:pointer;transition:border-color .2s;font-size:.8rem;color:var(--muted);}
-.logo-drop:hover{border-color:var(--gold);}
-.logo-drop input{display:none;}
-
-/* SIZE ROW */
-.two-col{display:grid;grid-template-columns:1fr 1fr;gap:14px;}
-
-.gen-btn{width:100%;padding:13px;background:linear-gradient(135deg,var(--gold),#a87025);color:#222;border:none;border-radius:8px;font-size:.9rem;font-weight:700;transition:filter .2s;margin-top:4px;font-family:'Cinzel',serif;letter-spacing:.06em;}
-.gen-btn:hover{filter:brightness(1.1);}
-
-/* QR RESULT */
-#qr-result{display:none;margin-top:24px;text-align:center;}
-#qr-canvas-wrap{display:inline-block;padding:16px;background:#fff;border-radius:10px;}
-.dl-row{display:flex;gap:10px;justify-content:center;margin-top:14px;flex-wrap:wrap;}
-.dl-btn{padding:9px 20px;border-radius:7px;font-size:.8rem;font-weight:500;border:1px solid var(--line);background:var(--panel);color:var(--white);transition:all .2s;}
-.dl-btn:hover{border-color:var(--gold);}
-.dl-btn.primary{background:linear-gradient(135deg,var(--gold),#a87025);border-color:var(--gold);color:#222;font-weight:700;}
-.qr-url-note{margin-top:10px;font-size:.75rem;color:var(--muted);display:inline-block;background:var(--navy);padding:6px 12px;border-radius:6px;}
-
-/* DASHBOARD */
-#dashboard{padding:32px 24px;max-width:900px;margin:0 auto;}
-.dash-header{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;margin-bottom:24px;}
-.dash-header h2{font-family:'Cinzel',serif;font-size:1.3rem;font-weight:600;}
-.qr-item{background:var(--panel);border:1px solid var(--line);border-radius:var(--r);padding:20px;margin-bottom:14px;display:flex;gap:20px;align-items:center;flex-wrap:wrap;}
-.qr-item-qr{flex-shrink:0;background:#fff;padding:8px;border-radius:6px;width:72px;height:72px;display:flex;align-items:center;justify-content:center;}
-.qr-item-body{flex:1;min-width:0;}
-.qr-item-name{font-weight:600;font-size:.92rem;margin-bottom:4px;}
-.qr-item-url{font-size:.78rem;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:400px;}
-.qr-item-type{display:inline-block;padding:2px 8px;border-radius:10px;font-size:.65rem;font-weight:700;margin-left:8px;font-family:'Cinzel',serif;}
-.type-static{background:rgba(201,138,46,.12);color:var(--gold2);}
-.type-dynamic{background:rgba(106,191,123,.12);color:var(--green);}
-.qr-item-actions{display:flex;gap:8px;flex-wrap:wrap;}
-.act-btn{padding:7px 14px;border-radius:6px;font-size:.76rem;font-weight:500;border:1px solid var(--line);background:transparent;color:var(--white);transition:all .2s;}
-.act-btn:hover{border-color:var(--gold);background:var(--navy);}
-.stats-panel{background:var(--navy);border:1px solid var(--line);border-radius:var(--r);padding:20px;margin-top:14px;display:none;}
-.stats-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-bottom:18px;}
-.stat-box{background:var(--panel);border-radius:7px;padding:14px;text-align:center;}
-.stat-num{font-family:'Cinzel',serif;font-size:1.5rem;font-weight:700;color:var(--gold2);}
-.stat-label{font-size:.7rem;color:var(--muted);margin-top:3px;}
-
-/* MODALS */
-.modal-bg{display:none;position:fixed;inset:0;background:rgba(0,0,0,.75);z-index:200;align-items:center;justify-content:center;padding:20px;}
-.modal-bg.open{display:flex;}
-.modal{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:32px;max-width:420px;width:100%;position:relative;}
-.modal h3{font-family:'Cinzel',serif;font-size:1.1rem;font-weight:600;margin-bottom:6px;text-transform:none;}
-.modal p{font-size:.84rem;color:var(--muted);margin-bottom:20px;}
-
-.modal-err{color:var(--red);font-size:.8rem;margin-top:10px;display:none;}
-.forgot-link{display:none;text-align:center;margin-top:10px;font-size:.78rem;}
-.forgot-link a{color:var(--gold2);cursor:pointer;text-decoration:underline;}
-.modal-close{position:absolute;top:14px;right:14px;background:none;border:none;color:var(--muted);font-size:1.2rem;}
-#card-element{background:var(--navy);border:1px solid var(--line);border-radius:7px;padding:12px 14px;margin-bottom:10px;}
-#card-errors{color:var(--red);font-size:.8rem;min-height:18px;margin-bottom:10px;}
-.charge-amount{font-family:'Cinzel',serif;font-size:2rem;font-weight:700;color:var(--gold2);text-align:center;margin:14px 0;}
-.charge-desc{font-size:.83rem;color:var(--muted);text-align:center;margin-bottom:20px;}
-
-/* TOAST */
-#toast{position:fixed;bottom:24px;right:24px;z-index:300;background:var(--panel);border:1px solid var(--line);border-radius:9px;padding:12px 18px;font-size:.84rem;display:none;box-shadow:0 8px 28px rgba(0,0,0,.4);max-width:300px;}
-#toast.ok{border-color:var(--green);color:var(--green);}
-#toast.err{border-color:var(--red);color:var(--red);}
-
-/* HOW IT WORKS */
-.how-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;}
-#how-grid .type-card{cursor:default;pointer-events:none;}
-@media(max-width:560px){.how-grid{grid-template-columns:1fr;}}
-
-.empty-state{text-align:center;padding:48px 24px;color:var(--muted);}
-.char-picker-wrap{background:var(--navy);border:1px solid var(--line);border-radius:8px;margin-top:8px;overflow:hidden;}
-.char-accordion{border-bottom:1px solid var(--line);}
-.char-accordion:last-child{border-bottom:none;}
-.char-acc-header{display:flex;justify-content:space-between;align-items:center;padding:10px 14px;cursor:pointer;transition:background .2s;}
-.char-acc-header:hover{background:rgba(201,138,46,.06);}
-.char-acc-title{font-size:.68rem;font-family:'Cinzel',serif;letter-spacing:.08em;color:var(--muted);display:flex;align-items:center;gap:8px;}
-.char-acc-arrow{font-size:.7rem;color:var(--muted);transition:transform .2s;}
-.char-accordion.open .char-acc-arrow{transform:rotate(180deg);}
-.char-acc-body{display:none;padding:10px 14px 14px;}
-.char-accordion.open .char-acc-body{display:block;}
-.char-acc-actions{display:flex;gap:6px;margin-bottom:8px;}
-.char-acc-btn{font-size:.62rem;padding:3px 10px;border:1px solid var(--line);border-radius:4px;background:transparent;color:var(--muted);cursor:pointer;font-family:'Raleway',sans-serif;transition:all .2s;}
-.char-acc-btn:hover{border-color:var(--gold);color:var(--gold);}
-.char-options{display:flex;flex-wrap:wrap;gap:5px;}
-.char-opt{width:36px;height:36px;border-radius:6px;border:1px solid var(--line);background:var(--panel);display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:.95rem;transition:all .2s;user-select:none;}
-.char-opt:hover{border-color:var(--gold);}
-.char-opt.selected{border-color:var(--gold);background:rgba(201,138,46,.18);color:var(--gold);}
-.char-preview-note{font-size:.72rem;color:var(--gold2);padding:8px 14px 10px;font-style:italic;border-top:1px solid var(--line);}
-.spin{display:inline-block;width:16px;height:16px;border:2px solid rgba(255,255,255,.3);border-top-color:#fff;border-radius:50%;animation:spin .7s linear infinite;vertical-align:middle;margin-right:6px;}
-@keyframes spin{to{transform:rotate(360deg);}}
-
-#how-grid .type-card{cursor:default!important;border-color:var(--line)!important;transform:none!important;}
-footer{text-align:center;padding:40px 24px;margin-top:80px;border-top:1px solid var(--line);font-size:.76rem;color:var(--muted);}
-.ftr-links{display:flex;gap:20px;justify-content:center;flex-wrap:wrap;margin-bottom:8px;}
-footer a{color:var(--muted);}footer a:hover{color:var(--white);}
-
-@media(max-width:600px){
-  #hero{padding:52px 18px 40px;}
-  .section{padding:36px 18px 0;}
-  nav{padding:12px 18px;}
-  .two-col{grid-template-columns:1fr;}
-  .design-grid{grid-template-columns:1fr;}
-}
-</style>
-</head>
-<body>
-
-<nav>
-  <a class="nav-brand" href="https://iqproductionz.com/">
-    <img src="https://static.wixstatic.com/media/b63ec4_2117e26bc8e646c8ad8b0050222de71b~mv2.png/v1/fill/w_295,h_92,al_c,q_85,usm_0.66_1.00_0.01,enc_avif,quality_auto/IQ-noglow_edited_edited.png" alt="I.Q. Productionz" onerror="this.style.display='none'">
-    <span>QR Platform</span>
-  </a>
-  <div id="nav-right">
-    <button class="nav-btn" onclick="showView('home');setTimeout(()=>document.querySelector('.tab-row').scrollIntoView({behavior:'smooth',block:'start'}),100)">Generator</button>
-    <button class="nav-btn" id="nav-dash" style="display:none" onclick="requireAuth('dashboard')">My Codes</button>
-    <button class="nav-btn" id="nav-signin" onclick="openAuthModal('signin')">Sign In</button>
-    <button class="nav-btn primary" id="nav-signup" onclick="openAuthModal('signup')">Get Started — Free</button>
-    <button class="nav-btn" id="nav-signout" style="display:none" onclick="doSignOut()">Sign Out</button>
-  </div>
-</nav>
-
-<!-- HOME VIEW -->
-<div class="view active" id="view-home">
-
-  <section id="hero">
-    <div class="hero-eyebrow">Free SVG Download · Print-Ready · Car Decals · Dynamic with Tracking</div>
-    <h1>QR codes as <em>unique</em><br>as your brand</h1>
-    <p>Custom shapes, gradients, emoji dots, logo overlays — free SVG download for print, decals, and wraps. Dynamic codes with redirect control and scan tracking.</p>
-
-    <div class="type-grid">
-      <div class="type-card" id="card-static" onclick="selectType('static')">
-        <span class="badge badge-free">Free · No Account</span>
-        <h3>Static QR Code</h3>
-        <p>The destination is baked into the pattern. Once printed, it never changes.</p>
-        <ul class="type-feats">
-          <li>Instant generation</li>
-          <li>Custom shapes, colors &amp; gradients</li>
-          <li>Logo in center</li>
-          <li>Download PNG or <strong>SVG</strong> — print-ready, infinitely scalable</li>
-          <li>Never expires</li>
-          <li class="na">Cannot change destination</li>
-          <li class="na">No scan tracking</li>
-          <li class="na">No statistics</li>
-        </ul>
-        <div class="select-hint">Click to select →</div>
-      </div>
-      <div class="type-card dynamic-card selected" id="card-dynamic" onclick="selectType('dynamic')">
-        <span class="badge badge-dynamic">Dynamic · Account Required</span>
-        <h3>Dynamic QR Code</h3>
-        <p>The QR pattern stays fixed. The destination lives in our system — change it anytime without reprinting.</p>
-        <ul class="type-feats">
-          <li>Change redirect anytime</li>
-          <li>Scan count tracking</li>
-          <li>Device &amp; location data</li>
-          <li>Reset scan counter</li>
-          <li>Download PNG or <strong>SVG</strong> — print-ready, infinitely scalable</li>
-          <li>Your code never expires</li>
-        </ul>
-        <div class="pricing-note">No monthly fee. <strong>$25</strong> to change the redirect. <strong>$5</strong> to view scan statistics.</div>
-        <div class="select-hint">Click to select →</div>
-      </div>
-    </div>
-  </section>
-
-  <!-- GENERATOR -->
-  <div class="section">
-    <div class="tab-row">
-      <button class="tab" id="tab-static" onclick="switchTab('static')">Static — Free Forever</button>
-      <button class="tab active" id="tab-dynamic" onclick="switchTab('dynamic')">Dynamic — Free to Start</button>
-    </div>
-
-    <!-- STATIC -->
-    <div id="panel-static" style="display:none;">
-      <div class="gen-card">
-        <div class="field">
-          <label>URL or Text to Encode</label>
-          <input type="text" id="s-url" placeholder="https://yourwebsite.com or any text">
-        </div>
-
-        <div class="design-grid">
-          <!-- LEFT COL -->
-          <div>
-            <div class="two-col">
-              <div class="field">
-                <label>Size (px)</label>
-                <select id="s-size">
-                  <option value="200">200 × 200 — Web / Social</option>
-                  <option value="300" selected>300 × 300 — Web / Email</option>
-                  <option value="500">500 × 500 — Business Card</option>
-                  <option value="800">800 × 800 — Flyer / Poster</option>
-                  <option value="1200">1200 × 1200 — Large Print</option>
-                  <option value="2000">2000 × 2000 — Banner / Sign</option>
-                  <option value="3000">3000 × 3000 — Car Decal (10")</option>
-                  <option value="4000">4000 × 4000 — Car Decal (13")</option>
-                  <option value="6000">6000 × 6000 — Billboard / Vehicle Wrap</option>
-                </select>
-              </div>
-              <div class="field">
-                <label>Error Correction</label>
-                <select id="s-ec">
-                  <option value="L">Low (7%)</option>
-                  <option value="M" selected>Medium (15%)</option>
-                  <option value="Q">Quartile (25%)</option>
-                  <option value="H">High (30%) — use with logo</option>
-                </select>
-              </div>
-            </div>
-            <div style="font-size:.7rem;color:var(--gold2);background:rgba(201,138,46,.06);border:1px solid rgba(201,138,46,.2);border-radius:6px;padding:8px 12px;margin-bottom:16px;line-height:1.6;">
-              💡 <strong>Print tip:</strong> For car decals use 3000px+. For billboards or vehicle wraps use 6000px. Always <strong>download SVG</strong> for the sharpest print result — SVG scales to any size without losing quality.
-            </div>
-
-            <!-- LETTERS NUMBERS KEYBOARD — above shape grid, always visible -->
-            <div class="field">
-              <label>Characters as Dots — render in your chosen color</label>
-              <div class="char-picker-wrap">
-                <div class="char-accordion" id="s-acc-letters">
-                  <div class="char-acc-header" onclick="toggleCharAcc('s-acc-letters')">
-                    <span class="char-acc-title">🔤 Letters A–Z <span id="s-letters-count" style="color:var(--gold2);font-size:.6rem;"></span></span>
-                    <span class="char-acc-arrow">▾</span>
-                  </div>
-                  <div class="char-acc-body">
-                    <div class="char-acc-actions">
-                      <button class="char-acc-btn" onclick="selectAllChars('s','letters')">Select All</button>
-                      <button class="char-acc-btn" onclick="clearChars('s','letters')">Clear</button>
-                    </div>
-                    <div class="char-options" id="s-letters"></div>
-                  </div>
-                </div>
-                <div class="char-accordion" id="s-acc-numbers">
-                  <div class="char-acc-header" onclick="toggleCharAcc('s-acc-numbers')">
-                    <span class="char-acc-title">🔢 Numbers 0–9 <span id="s-numbers-count" style="color:var(--gold2);font-size:.6rem;"></span></span>
-                    <span class="char-acc-arrow">▾</span>
-                  </div>
-                  <div class="char-acc-body">
-                    <div class="char-acc-actions">
-                      <button class="char-acc-btn" onclick="selectAllChars('s','numbers')">Select All</button>
-                      <button class="char-acc-btn" onclick="clearChars('s','numbers')">Clear</button>
-                    </div>
-                    <div class="char-options" id="s-numbers"></div>
-                  </div>
-                </div>
-                <div class="char-accordion" id="s-acc-keyboard">
-                  <div class="char-acc-header" onclick="toggleCharAcc('s-acc-keyboard')">
-                    <span class="char-acc-title">⌨️ Keyboard Symbols <span id="s-keyboard-count" style="color:var(--gold2);font-size:.6rem;"></span></span>
-                    <span class="char-acc-arrow">▾</span>
-                  </div>
-                  <div class="char-acc-body">
-                    <div class="char-acc-actions">
-                      <button class="char-acc-btn" onclick="selectAllChars('s','keyboard')">Select All</button>
-                      <button class="char-acc-btn" onclick="clearChars('s','keyboard')">Clear</button>
-                    </div>
-                    <div class="char-options" id="s-keyboard"></div>
-                  </div>
-                </div>
-                <div class="char-preview-note" id="s-char-note">Select characters above — they will be randomly placed as QR dots in your chosen color.</div>
-              </div>
-            </div>
-            <!-- LETTERS NUMBERS KEYBOARD — above shape grid, always visible -->
-            <div class="field">
-              <label>Characters as Dots — render in your chosen color</label>
-              <div class="char-picker-wrap">
-                <div class="char-accordion" id="d-acc-letters">
-                  <div class="char-acc-header" onclick="toggleCharAcc('d-acc-letters')">
-                    <span class="char-acc-title">🔤 Letters A–Z <span id="d-letters-count" style="color:var(--gold2);font-size:.6rem;"></span></span>
-                    <span class="char-acc-arrow">▾</span>
-                  </div>
-                  <div class="char-acc-body">
-                    <div class="char-acc-actions">
-                      <button class="char-acc-btn" onclick="selectAllChars('d','letters')">Select All</button>
-                      <button class="char-acc-btn" onclick="clearChars('d','letters')">Clear</button>
-                    </div>
-                    <div class="char-options" id="d-letters"></div>
-                  </div>
-                </div>
-                <div class="char-accordion" id="d-acc-numbers">
-                  <div class="char-acc-header" onclick="toggleCharAcc('d-acc-numbers')">
-                    <span class="char-acc-title">🔢 Numbers 0–9 <span id="d-numbers-count" style="color:var(--gold2);font-size:.6rem;"></span></span>
-                    <span class="char-acc-arrow">▾</span>
-                  </div>
-                  <div class="char-acc-body">
-                    <div class="char-acc-actions">
-                      <button class="char-acc-btn" onclick="selectAllChars('d','numbers')">Select All</button>
-                      <button class="char-acc-btn" onclick="clearChars('d','numbers')">Clear</button>
-                    </div>
-                    <div class="char-options" id="d-numbers"></div>
-                  </div>
-                </div>
-                <div class="char-accordion" id="d-acc-keyboard">
-                  <div class="char-acc-header" onclick="toggleCharAcc('d-acc-keyboard')">
-                    <span class="char-acc-title">⌨️ Keyboard Symbols <span id="d-keyboard-count" style="color:var(--gold2);font-size:.6rem;"></span></span>
-                    <span class="char-acc-arrow">▾</span>
-                  </div>
-                  <div class="char-acc-body">
-                    <div class="char-acc-actions">
-                      <button class="char-acc-btn" onclick="selectAllChars('d','keyboard')">Select All</button>
-                      <button class="char-acc-btn" onclick="clearChars('d','keyboard')">Clear</button>
-                    </div>
-                    <div class="char-options" id="d-keyboard"></div>
-                  </div>
-                </div>
-                <div class="char-preview-note" id="d-char-note">Select characters above — they will be randomly placed as QR dots in your chosen color.</div>
-              </div>
-            </div>
-            <!-- DOT SHAPE -->
-            <div class="field">
-              <label>Choose Dot Type — vector shapes below respond to your chosen color</label>
-              <div class="shape-grid" id="shape-grid"></div>
-            </div>
-
-            
-
-            <!-- LOGO UPLOAD -->
-            <div class="field">
-              <label>Center Logo (optional)</label>
-              <div class="logo-drop" id="logo-drop" onclick="document.getElementById('logo-file').click()">
-                <input type="file" id="logo-file" accept="image/*" onchange="handleLogo(this)">
-                <span id="logo-label">Click to upload a PNG, JPG, or SVG logo</span>
-              </div>
-            </div>
-          </div>
-
-          <!-- RIGHT COL -->
-          <div>
-            <!-- COLOR / GRADIENT -->
-            <div class="field">
-              <label>Color Mode</label>
-              <div class="grad-toggle">
-                <button id="mode-solid" class="active" onclick="setColorMode('solid')">Solid</button>
-                <button id="mode-grad2" onclick="setColorMode('grad2')">2-color gradient</button>
-                <button id="mode-grad4" onclick="setColorMode('grad4')">4-color gradient</button>
-              </div>
-
-              <div id="color-solid">
-                <div style="display:flex;gap:14px;">
-                  <div class="grad-stop"><input type="color" id="c-fg" value="#000000"><span>Foreground</span></div>
-                  <div class="grad-stop"><input type="color" id="c-bg" value="#ffffff"><span>Background</span></div>
-                </div>
-              </div>
-
-              <div id="color-grad2" style="display:none;">
-                <div class="grad-row">
-                  <div class="grad-stop"><input type="color" id="g2-1" value="#c98a2e"><span>Color 1</span></div>
-                  <div class="grad-stop"><input type="color" id="g2-2" value="#4A1060"><span>Color 2</span></div>
-                  <div class="grad-stop"><input type="color" id="g2-bg" value="#ffffff"><span>Background</span></div>
-                  <div class="field" style="flex:1;min-width:100px;margin-bottom:0;">
-                    <select id="g2-dir">
-                      <option value="horizontal">Horizontal →</option>
-                      <option value="vertical">Vertical ↓</option>
-                      <option value="diagonal">Diagonal ↘</option>
-                      <option value="radial">Radial ◎</option>
-                    </select>
-                  </div>
-                </div>
-              </div>
-
-              <div id="color-grad4" style="display:none;">
-                <div class="grad-row">
-                  <div class="grad-stop"><input type="color" id="g4-1" value="#c98a2e"><span>Top-L</span></div>
-                  <div class="grad-stop"><input type="color" id="g4-2" value="#e0a84a"><span>Top-R</span></div>
-                  <div class="grad-stop"><input type="color" id="g4-3" value="#4A1060"><span>Bot-L</span></div>
-                  <div class="grad-stop"><input type="color" id="g4-4" value="#6B2D8E"><span>Bot-R</span></div>
-                  <div class="grad-stop"><input type="color" id="g4-bg" value="#ffffff"><span>Background</span></div>
-                </div>
-              </div>
-            </div>
-
-            <!-- FINDER COLORS -->
-            <div class="field">
-              <label>Finder Square Color (corners)</label>
-              <div style="display:flex;gap:14px;">
-                <div class="grad-stop"><input type="color" id="c-finder-outer" value="#000000"><span>Outer</span></div>
-                <div class="grad-stop"><input type="color" id="c-finder-inner" value="#000000"><span>Inner</span></div>
-              </div>
-            </div>
-          </div>
-        </div><!-- end design-grid -->
-
-        <button class="gen-btn" onclick="generateCustomQR()">Generate QR Code</button>
-
-        <div id="qr-result">
-          <div id="qr-canvas-wrap"><canvas id="qr-output"></canvas></div>
-          <p class="qr-url-note" id="qr-url-note"></p>
-          <div class="dl-row">
-            <button class="dl-btn primary" onclick="downloadCustomQR('png')">⬇ Download PNG</button>
-            <button class="dl-btn" onclick="downloadCustomQR('svg')">⬇ Download SVG</button>
-          </div>
-        </div>
-      </div>
-    </div><!-- end panel-static -->
-
-    <!-- DYNAMIC -->
-    <div id="panel-dynamic">
-      <div class="gen-card">
-        <div class="field">
-          <label>QR Code Name (for your dashboard)</label>
-          <input type="text" id="d-name" placeholder="e.g. Restaurant Menu, Event Flyer">
-        </div>
-        <div class="field">
-          <label>Initial Destination URL</label>
-          <input type="text" id="d-url" placeholder="https://yourwebsite.com">
-        </div>
-        <p style="font-size:.8rem;color:var(--muted);margin-bottom:18px;line-height:1.55;">
-          Your QR code always points to <strong style="color:var(--gold2);">iqproductionz.com/QRCode/Account/[yourcode]</strong> — redirects wherever you set. Change anytime for $25.
-        </p>
-
-        <!-- DESIGN OPTIONS (same as static) -->
-        <div class="design-grid" style="margin-bottom:20px;">
-          <div>
-            <div class="two-col">
-              <div class="field">
-                <label>Size (px)</label>
-                <select id="d-size">
-                  <option value="200">200 × 200 — Web / Social</option>
-                  <option value="300" selected>300 × 300 — Web / Email</option>
-                  <option value="500">500 × 500 — Business Card</option>
-                  <option value="800">800 × 800 — Flyer / Poster</option>
-                  <option value="1200">1200 × 1200 — Large Print</option>
-                  <option value="2000">2000 × 2000 — Banner / Sign</option>
-                  <option value="3000">3000 × 3000 — Car Decal (10")</option>
-                  <option value="4000">4000 × 4000 — Car Decal (13")</option>
-                  <option value="6000">6000 × 6000 — Billboard / Vehicle Wrap</option>
-                </select>
-              </div>
-              <div class="field">
-                <label>Error Correction</label>
-                <select id="d-ec">
-                  <option value="L">Low (7%)</option>
-                  <option value="M" selected>Medium (15%)</option>
-                  <option value="Q">Quartile (25%)</option>
-                  <option value="H">High (30%) — use with logo</option>
-                </select>
-              </div>
-            </div>
-            <div style="font-size:.7rem;color:var(--gold2);background:rgba(201,138,46,.06);border:1px solid rgba(201,138,46,.2);border-radius:6px;padding:8px 12px;margin-bottom:16px;line-height:1.6;">
-              💡 <strong>Print tip:</strong> For car decals use 3000px+. For billboards or vehicle wraps use 6000px. Always <strong>download SVG</strong> for the sharpest print result — SVG scales to any size without losing quality.
-            </div>
-
-            <!-- DOT SHAPE + CUSTOM CHAR PICKER -->
-            <div class="field">
-              <label>Choose Dot Type — vector shapes below respond to your chosen color</label>
-              <div class="shape-grid" id="d-shape-grid"></div>
-            </div>
-
-            <!-- CUSTOM CHARACTER PICKER -->
-            
-
-            <div class="field">
-              <label>Center Logo (optional)</label>
-              <div class="logo-drop" id="d-logo-drop" onclick="document.getElementById('d-logo-file').click()">
-                <input type="file" id="d-logo-file" accept="image/*" onchange="handleLogo(this,'d')">
-                <span id="d-logo-label">Click to upload a PNG, JPG, or SVG logo</span>
-              </div>
-            </div>
-          </div>
-
-          <div>
-            <div class="field">
-              <label>Color Mode</label>
-              <div class="grad-toggle">
-                <button id="d-mode-solid" class="active" onclick="setColorMode('solid','d')">Solid</button>
-                <button id="d-mode-grad2" onclick="setColorMode('grad2','d')">2-color</button>
-                <button id="d-mode-grad4" onclick="setColorMode('grad4','d')">4-color</button>
-              </div>
-              <div id="d-color-solid">
-                <div style="display:flex;gap:14px;">
-                  <div class="grad-stop"><input type="color" id="d-c-fg" value="#000000"><span>Foreground</span></div>
-                  <div class="grad-stop"><input type="color" id="d-c-bg" value="#ffffff"><span>Background</span></div>
-                </div>
-              </div>
-              <div id="d-color-grad2" style="display:none;">
-                <div class="grad-row">
-                  <div class="grad-stop"><input type="color" id="d-g2-1" value="#c98a2e"><span>Color 1</span></div>
-                  <div class="grad-stop"><input type="color" id="d-g2-2" value="#4A1060"><span>Color 2</span></div>
-                  <div class="grad-stop"><input type="color" id="d-g2-bg" value="#ffffff"><span>Background</span></div>
-                  <div class="field" style="flex:1;min-width:100px;margin-bottom:0;">
-                    <select id="d-g2-dir">
-                      <option value="horizontal">Horizontal →</option>
-                      <option value="vertical">Vertical ↓</option>
-                      <option value="diagonal">Diagonal ↘</option>
-                      <option value="radial">Radial ◎</option>
-                    </select>
-                  </div>
-                </div>
-              </div>
-              <div id="d-color-grad4" style="display:none;">
-                <div class="grad-row">
-                  <div class="grad-stop"><input type="color" id="d-g4-1" value="#c98a2e"><span>Top-L</span></div>
-                  <div class="grad-stop"><input type="color" id="d-g4-2" value="#e0a84a"><span>Top-R</span></div>
-                  <div class="grad-stop"><input type="color" id="d-g4-3" value="#4A1060"><span>Bot-L</span></div>
-                  <div class="grad-stop"><input type="color" id="d-g4-4" value="#6B2D8E"><span>Bot-R</span></div>
-                  <div class="grad-stop"><input type="color" id="d-g4-bg" value="#ffffff"><span>Background</span></div>
-                </div>
-              </div>
-            </div>
-            <div class="field">
-              <label>Finder Square Color (corners)</label>
-              <div style="display:flex;gap:14px;">
-                <div class="grad-stop"><input type="color" id="d-c-finder-outer" value="#000000"><span>Outer</span></div>
-                <div class="grad-stop"><input type="color" id="d-c-finder-inner" value="#000000"><span>Inner</span></div>
-              </div>
-            </div>
-          </div>
-        </div><!-- end design-grid -->
-
-        <button class="gen-btn" onclick="createDynamic()">Create Dynamic QR Code — Free to Start</button>
-        <p style="font-size:.74rem;color:var(--muted);margin-top:10px;text-align:center;">Account required &#8212; sign in or sign up to continue.</p>
-      </div>
-    </div>
-  </div>
-
-  <!-- HOW IT WORKS -->
-  <div class="section" style="padding-top:64px;padding-bottom:40px;">
-    <h2 class="section-title">How dynamic QR codes work</h2>
-    <p class="section-sub">The printed pattern never changes. Only the destination does.</p>
-    <div class="how-grid" id="how-grid">
-      <div class="type-card" style="text-align:center;cursor:default;">
-        <div style="font-size:2rem;margin-bottom:12px;">📲</div>
-        <h3 style="font-size:.95rem;margin-bottom:8px;">Someone scans</h3>
-        <p style="font-size:.82rem;">Their camera reads your QR code — the same printed pattern, forever.</p>
-      </div>
-      <div class="type-card" style="text-align:center;cursor:default;">
-        <div style="font-size:2rem;margin-bottom:12px;">↗</div>
-        <h3 style="font-size:.95rem;margin-bottom:8px;">We redirect</h3>
-        <p style="font-size:.82rem;">Our server looks up your current destination and sends them there instantly.</p>
-      </div>
-      <div class="type-card" style="text-align:center;cursor:default;">
-        <div style="font-size:2rem;margin-bottom:12px;">📊</div>
-        <h3 style="font-size:.95rem;margin-bottom:8px;">You track</h3>
-        <p style="font-size:.82rem;">Every scan is logged — total counts, device types, location. $5 to access your stats.</p>
-      </div>
-    </div>
-  </div>
-</div><!-- end view-home -->
-
-<!-- DASHBOARD VIEW -->
-<div class="view" id="view-dashboard">
-  <div id="dashboard">
-    <div class="dash-header">
-      <div>
-        <h2>My QR Codes</h2>
-        <p style="font-size:.82rem;color:var(--muted);margin-top:4px;" id="dash-email"></p>
-      </div>
-      <button class="nav-btn primary" onclick="showView('home');switchTab('dynamic')">+ New Dynamic Code</button>
-    </div>
-    <div id="qr-list"><div class="empty-state"><p>No QR codes yet.</p></div></div>
-  </div>
-</div>
-
-<!-- AUTH MODAL -->
-<div class="modal-bg" id="auth-modal">
-  <div class="modal">
-    <button class="modal-close" onclick="closeModal('auth-modal')">✕</button>
-    <h3 id="auth-modal-title">Sign In</h3>
-    <p id="auth-modal-sub">Welcome back — enter your username and password.</p>
-
-    <div id="auth-signin">
-      <div class="field"><label>Username</label><input type="text" id="si-username" placeholder="yourname" oninput="this.value=this.value.toLowerCase().replace(/[^a-z0-9]/g,'')"></div>
-      <div class="field" style="margin-top:14px;"><label>Password</label><input type="password" id="si-pass" placeholder="Password"></div>
-      <button class="gen-btn" style="margin-top:18px;" onclick="doSignIn()">Sign In</button>
-    </div>
-    <div id="auth-signup" style="display:none;">
-      <div class="field"><label>Email</label><input type="email" id="su-email" placeholder="you@email.com"></div>
-      <div class="field" style="margin-top:14px;"><label>Password (min 6 chars)</label><input type="password" id="su-pass" placeholder="Password"></div>
-      <div class="field" style="margin-top:14px;"><label>Username (letters & numbers only)</label><input type="text" id="su-username" placeholder="yourname" oninput="this.value=this.value.toLowerCase().replace(/[^a-z0-9]/g,'')"></div>
-      <button class="gen-btn" style="margin-top:18px;" onclick="doSignUp()">Create Account</button>
-    </div>
-    <div class="modal-err" id="auth-err"></div>
-    <div class="forgot-link" id="forgot-link">
-      <a onclick="sendPasswordReset()">Forgot your password? Send reset email</a>
-    </div>
-  </div>
-</div>
-
-<!-- CHANGE REDIRECT MODAL -->
-<div class="modal-bg" id="redirect-modal">
-  <div class="modal">
-    <button class="modal-close" onclick="closeModal('redirect-modal')">✕</button>
-    <h3>Update Redirect Destination</h3>
-    <p>Change where this QR code sends people. A $25 charge applies.</p>
-    <div class="field">
-      <label>New Destination URL</label>
-      <input type="url" id="new-redirect-url" placeholder="https://…">
-    </div>
-    <button class="gen-btn" onclick="initiatePayment('redirect')">Pay $25 & Update Redirect</button>
-  </div>
-</div>
-
-<!-- PAYMENT MODAL -->
-<div class="modal-bg" id="pay-modal">
-  <div class="modal">
-    <button class="modal-close" onclick="closeModal('pay-modal')">✕</button>
-    <h3 id="pay-title">Complete Payment</h3>
-    <div class="charge-amount" id="pay-amount">$25.00</div>
-    <p class="charge-desc" id="pay-desc"></p>
-    <div id="card-element"></div>
-    <div id="card-errors"></div>
-    <button class="gen-btn" id="pay-btn" onclick="confirmPayment()">Pay Now</button>
-  </div>
-</div>
-
-<div id="toast"></div>
-
-<footer>
-  <div class="ftr-links">
-    <a href="https://iqproductionz.com/">I.Q. Productionz</a>
-    <a href="https://iqproductionz.com/About">About</a>
-    <a href="https://iqproductionz.com/BookNow">Book a Service</a>
-    <a href="https://Haligricity.IQProductionz.com/">Haligricity</a>
-  </div>
-  <p>© 2026 I.Q. Productionz · Houston, Texas · <a href="mailto:IQProductionz@gmail.com">IQProductionz@gmail.com</a></p>
-</footer>
-
 <script>
 var STRIPE_PK = 'pk_live_51KGEFWCL2m4xr1VIspOtCN2T1EVYCgfhsF5zgDOT4NkIKbQ8PqiPTYBmaoYzJwXqp9jkFdb2TNZOf5QKBaQh5RAv00IYVZw3oI';
 var WORKER_URL = 'https://lulu-order.REPLACE_WITH_YOUR_SUBDOMAIN.workers.dev';
@@ -1510,6 +774,7 @@ var _currentQRItem = null;
 var _logoImg = null;
 var _colorMode = 'solid';
 var _selectedShape = 'square';
+var _qrModuleRenderMode = false; // true only while drawing actual QR modules; see drawSVGLayered
 window._cv = 'home';
 
 // ── SHAPE DEFINITIONS ─────────────────────────────────────────────────────────
@@ -1520,81 +785,91 @@ window._cv = 'home';
   s = cell size and x,y = top-left corner of the module cell.
 */
 var SHAPE_GROUPS = {
-  /* WHY: every shape must:
-     1. Fill ~85-95% of the cell so it registers at tiny QR module sizes
-     2. Be fully solid (no thin lines, no hollow rings) 
-     3. Hit close to all four corners of the cell
-     Thin/complex shapes at 3-4px cell size become noise and break scanning. */
-
   "Basic": {
-    square:    { label:"■", draw:function(c,x,y,s){ c.fillRect(x+s*.04,y+s*.04,s*.92,s*.92); } },
-    rounded:   { label:"▢", draw:function(c,x,y,s){ var r=s*.22; roundRect(c,x+s*.04,y+s*.04,s*.92,s*.92,r); c.fill(); } },
-    dot:       { label:"●", draw:function(c,x,y,s){ c.beginPath(); c.arc(x+s/2,y+s/2,s*.46,0,Math.PI*2); c.fill(); } },
-    diamond:   { label:"◆", draw:function(c,x,y,s){ var cx=x+s/2,cy=y+s/2,h=s*.48; c.beginPath(); c.moveTo(cx,cy-h); c.lineTo(cx+h,cy); c.lineTo(cx,cy+h); c.lineTo(cx-h,cy); c.closePath(); c.fill(); } },
-    tri_up:    { label:"▲", draw:function(c,x,y,s){ c.beginPath(); c.moveTo(x+s/2,y+s*.04); c.lineTo(x+s*.96,y+s*.96); c.lineTo(x+s*.04,y+s*.96); c.closePath(); c.fill(); } },
-    tri_down:  { label:"▼", draw:function(c,x,y,s){ c.beginPath(); c.moveTo(x+s/2,y+s*.96); c.lineTo(x+s*.96,y+s*.04); c.lineTo(x+s*.04,y+s*.04); c.closePath(); c.fill(); } },
-    hexagon:   { label:"⬡", draw:function(c,x,y,s){ var cx=x+s/2,cy=y+s/2,r=s*.48; c.beginPath(); for(var i=0;i<6;i++){var a=Math.PI/3*i-Math.PI/6; i===0?c.moveTo(cx+r*Math.cos(a),cy+r*Math.sin(a)):c.lineTo(cx+r*Math.cos(a),cy+r*Math.sin(a));} c.closePath(); c.fill(); } },
-    pentagon:  { label:"⬠", draw:function(c,x,y,s){ var cx=x+s/2,cy=y+s*.52,r=s*.48; c.beginPath(); for(var i=0;i<5;i++){var a=Math.PI*2/5*i-Math.PI/2; i===0?c.moveTo(cx+r*Math.cos(a),cy+r*Math.sin(a)):c.lineTo(cx+r*Math.cos(a),cy+r*Math.sin(a));} c.closePath(); c.fill(); } },
-    octagon:   { label:"⬡", draw:function(c,x,y,s){ var cx=x+s/2,cy=y+s/2,r=s*.48; c.beginPath(); for(var i=0;i<8;i++){var a=Math.PI/4*i; i===0?c.moveTo(cx+r*Math.cos(a),cy+r*Math.sin(a)):c.lineTo(cx+r*Math.cos(a),cy+r*Math.sin(a));} c.closePath(); c.fill(); } },
-    parallelogram:{ label:"▱", draw:function(c,x,y,s){ c.beginPath(); c.moveTo(x+s*.2,y+s*.04); c.lineTo(x+s*.96,y+s*.04); c.lineTo(x+s*.8,y+s*.96); c.lineTo(x+s*.04,y+s*.96); c.closePath(); c.fill(); } },
-    cross:     { label:"✚", draw:function(c,x,y,s){ var t=s*.36,g=s*.32; c.fillRect(x+g,y+s*.04,t,s*.92); c.fillRect(x+s*.04,y+g,s*.92,t); } },
-    x_mark:    { label:"✖", draw:function(c,x,y,s){ c.save(); c.translate(x+s/2,y+s/2); c.rotate(Math.PI/4); var t=s*.36,l=s*.48; c.fillRect(-t/2,-l,t,l*2); c.fillRect(-l,-t/2,l*2,t); c.restore(); } },
+    square:        { label:"■", draw:function(c,x,y,s){ c.fillRect(x+s*.01,y+s*.01,s*.98,s*.98); }},
+    dot:           { label:"●", draw:function(c,x,y,s){ c.beginPath();c.arc(x+s/2,y+s/2,s*.5,0,Math.PI*2);c.fill(); }},
+    diamond:       { label:"◆", draw:function(c,x,y,s){ c.beginPath();c.moveTo(x+s*.5,y);c.lineTo(x,y+s*.5);c.lineTo(x+s*.5,y+s);c.lineTo(x+s,y+s*.5);c.closePath();c.fill(); }},
+    tri_up:        { label:"▲", draw:function(c,x,y,s){ c.beginPath();c.moveTo(x+s*.5,y);c.lineTo(x+s,y+s);c.lineTo(x,y+s);c.closePath();c.fill(); }},
+    tri_down:      { label:"▼", draw:function(c,x,y,s){ c.beginPath();c.moveTo(x+s*.5,y+s);c.lineTo(x+s,y);c.lineTo(x,y);c.closePath();c.fill(); }},
+    hexagon:       { label:"⬣", draw:function(c,x,y,s){ var r=s*.577,cx=x+s*.5,cy=y+s*.5;c.beginPath();for(var i=0;i<6;i++){var a=Math.PI/3*i-Math.PI/6;i?c.lineTo(cx+r*Math.cos(a),cy+r*Math.sin(a)):c.moveTo(cx+r*Math.cos(a),cy+r*Math.sin(a));}c.closePath();c.fill(); }},
+    pentagon:      { label:"⬟", draw:function(c,x,y,s){ var r=s*.62,cx=x+s*.5,cy=y+s*.52;c.beginPath();for(var i=0;i<5;i++){var a=Math.PI*2/5*i-Math.PI/2;i?c.lineTo(cx+r*Math.cos(a),cy+r*Math.sin(a)):c.moveTo(cx+r*Math.cos(a),cy+r*Math.sin(a));}c.closePath();c.fill(); }},
+    octagon:       { label:"⬢", draw:function(c,x,y,s){ var r=s*.541,cx=x+s*.5,cy=y+s*.5;c.beginPath();for(var i=0;i<8;i++){var a=Math.PI/4*i;i?c.lineTo(cx+r*Math.cos(a),cy+r*Math.sin(a)):c.moveTo(cx+r*Math.cos(a),cy+r*Math.sin(a));}c.closePath();c.fill(); }},
+    parallelogram: { label:"▱", draw:function(c,x,y,s){ c.beginPath();c.moveTo(x+s*.14,y);c.lineTo(x+s,y);c.lineTo(x+s*.86,y+s);c.lineTo(x,y+s);c.closePath();c.fill(); }},
+    cross:         { label:"✚", draw:function(c,x,y,s){ var t=s*.46,g=(s-t)/2;c.fillRect(x+g,y,t,s);c.fillRect(x,y+g,s,t); }},
+    x_mark:        { label:"✖", draw:function(c,x,y,s){ c.save();c.translate(x+s/2,y+s/2);c.rotate(Math.PI/4);var t=s*.46,l=s*.52;c.fillRect(-t/2,-l,t,l*2);c.fillRect(-l,-t/2,l*2,t);c.restore(); }},
   },
   "Stars & Flowers": {
-    star5:     { label:"★", draw:function(c,x,y,s){ drawStar(c,x+s/2,y+s/2,5,s*.48,s*.2); } },
-    star6:     { label:"✶", draw:function(c,x,y,s){ drawStar(c,x+s/2,y+s/2,6,s*.48,s*.2); } },
-    star8:     { label:"✸", draw:function(c,x,y,s){ drawStar(c,x+s/2,y+s/2,8,s*.48,s*.2); } },
-    star12:    { label:"✺", draw:function(c,x,y,s){ drawStar(c,x+s/2,y+s/2,12,s*.48,s*.28); } },
-    flower4:   { label:"✿", draw:function(c,x,y,s){ for(var i=0;i<4;i++){c.save();c.translate(x+s/2,y+s/2);c.rotate(Math.PI/2*i);c.beginPath();c.ellipse(0,-s*.28,s*.22,s*.32,0,0,Math.PI*2);c.fill();c.restore();} c.beginPath();c.arc(x+s/2,y+s/2,s*.18,0,Math.PI*2);c.fill(); } },
-    flower6:   { label:"❋", draw:function(c,x,y,s){ for(var i=0;i<6;i++){c.save();c.translate(x+s/2,y+s/2);c.rotate(Math.PI/3*i);c.beginPath();c.ellipse(0,-s*.27,s*.17,s*.3,0,0,Math.PI*2);c.fill();c.restore();} c.beginPath();c.arc(x+s/2,y+s/2,s*.16,0,Math.PI*2);c.fill(); } },
-    snowflake: { label:"❄", draw:function(c,x,y,s){ for(var i=0;i<6;i++){c.save();c.translate(x+s/2,y+s/2);c.rotate(Math.PI/3*i);c.fillRect(-s*.1,-s*.46,s*.2,s*.92);c.restore();} } },
+    star5: { label:"★", draw:function(c,x,y,s){ var pts=[[36.057,2.634],[47.164,25.139],[72,28.748],[54.028,46.266],[58.271,71],[36.057,59.322],[13.843,71],[18.086,46.266],[0.115,28.748],[24.95,25.139]];c.beginPath();pts.forEach(function(p,i){var px=x+p[0]/72*s,py=y+p[1]/72*s;i?c.lineTo(px,py):c.moveTo(px,py);});c.closePath();c.fill(); }},
+    star6: { label:"✶", draw:function(c,x,y,s){ drawStar(c,x+s/2,y+s/2,6,s*.58,s*.32); }},
+    star8: { label:"✸", draw:function(c,x,y,s){ drawStar(c,x+s/2,y+s/2,8,s*.58,s*.3); }},
+    star12: { label:"✺", draw:function(c,x,y,s){ drawStar(c,x+s/2,y+s/2,12,s*.58,s*.38); }},
+    flower6: { label:"❆", draw:function(c,x,y,s){ for(var i=0;i<6;i++){c.save();c.translate(x+s/2,y+s/2);c.rotate(Math.PI/3*i);c.beginPath();c.ellipse(0,-s*.31,s*.17,s*.42,0,0,Math.PI*2);c.fill();c.restore();}c.beginPath();c.arc(x+s/2,y+s/2,s*.15,0,Math.PI*2);c.fill(); }},
+    snowflake: { label:"❄", draw:function(c,x,y,s){ for(var i=0;i<6;i++){c.save();c.translate(x+s/2,y+s/2);c.rotate(Math.PI/3*i);c.fillRect(-s*.09,-s*.5,s*.18,s*1);c.restore();} }},
+    hflower: { label:"❀", draw:function(c,x,y,s){drawSVG(c,x,y,s,'M40,1c10.277,3.991,6.339,29.602-3,28c0.309-3.643-0.159-6.508-1-9 c-2.561,1.105-1.964,5.37-2,9c-8.868,1.356-13.326-23.095-3-27C34.148,0.997,35.879,3.683,40,1z M30,32c-2.95,2.884-7.213-1.404-12,0c1.572,3.428,6.603,3.397,10,5 c-6.454,8.146-25.246,5.507-28-4c-0.071-4.071,3.263-4.737,2-10C12.607,15.249,26.285,23.622,30,32z M69,23c8.947,17.447-14.764,23.688-26,15c1.951-2.715,7.227-2.106,9-5 c-1.851-2.427-7.357-0.091-9,1C40.547,23.571,59.256,15.264,69,23z M29,42c-0.502,4.165-3.498,5.835-4,10c5.248-0.085,3.908-6.759,9-7 c1.459,14.459-3.983,22.017-14,25C1.914,65.44,12.324,40.442,29,42z M42,42c11.622,2.044,20.539,6.795,19,22c-2.882,1.785-6.248,3.085-8,6 c-11.578-1.755-17.038-9.629-16-24c4.024-2.229,4.837,6.162,9,7C46.313,47.687,42.552,46.448,42,42z',0.0,0.0,72.0,72.0);} },
+    lotus: { label:"⚘", draw:function(c,x,y,s){drawSVG(c,x,y,s,'M45.52,16.396c-1.856,5.63-7.307,7.149-9.686,12.182 c-2.644-4.359-6.971-6.795-9.685-11.074c0.657-7.37,5.643-9.789,7.748-15.503C40.577,3.59,43.004,10.043,45.52,16.396z M20.338,19.718c-2.708,16.703,1.983,28.742,7.748,38.758 C12.176,54.52,4.369,41.3,2.905,20.826C7.012,16.309,14.75,17.678,20.338,19.718z M68.764,20.826c-0.888,21.133-9.355,33.599-25.182,37.651 c5.76-8.946,10.922-21.863,7.748-37.651C55.448,16.898,64.834,16.52,68.764,20.826z M47.456,24.148c2.647,14.714-2.755,29.155-11.622,34.329 C26.9,53.225,21.468,39.189,24.212,24.148c5.959,1.307,8.392,6.646,10.654,12.181C39.728,33.752,42.23,22.624,47.456,24.148z M30.992,64.014C25.978,74.929,3.889,71.221,0,61.799 c-0.34-6.663,4.14-7.816,5.811-12.181C14.208,54.412,19.315,62.97,30.992,64.014z M40.677,64.014c6.062-0.473,16.407-6.017,21.307-11.073 c2.537-2.618,10.681-1.641,9.686,7.751C70.544,71.305,47.896,75.202,40.677,64.014z',0.0,0.0,72.0,72.0);} },
+    rose: { label:"✽", draw:function(c,x,y,s){drawSVG(c,x,y,s,'M47.055,9.27c-4.344-7.562-15.399-4.413-19.307,1.388 C20.499-3.308,50.46-3.427,47.055,9.27z M25.75,3.025c-3.903,9.365,6.89,14.244,15.312,15.265 C28.938,27.415,8.073,7.989,25.75,3.025z M49.051,3.719c6.57,0.784,6.808,8.171,6.657,15.959 c-2.884,0.463-4.506,2.242-6.657,3.47c-2.742-2.229-4.103-5.9-7.988-6.939C44.723,13.336,51.291,10.505,49.051,3.719z M45.057,9.963c-2.186,5.744-11.488,7.163-15.312,2.082 C30.913,7.025,42.194,4.935,45.057,9.963z M17.762,14.821c5.06,2.615,4.221,6.379,9.986,7.632 c7.349,1.598,15.494-4.664,19.307,1.388c-4.917,5.052-10.407,9.508-13.981,15.959c-4.146-6.318-8.679-12.233-15.312-15.959 C17.762,20.834,17.762,17.828,17.762,14.821z M71.021,16.903c-2.049,5.251-6.953,9.754-7.988,16.653 c-0.646,4.3,0.454,8.468,0,12.49C61.5,59.604,52.4,74.915,34.405,71.72C19.233,60.155,34.52,34.166,49.051,24.536 c6.676-4.425,14.913-5.323,19.972-7.633C69.689,16.903,70.354,16.903,71.021,16.903z M0.453,23.147c16.359-2.708,25.643,7.967,31.29,18.735 c-5.424,6.34-8.769,25.404,0.667,29.837c-5.103,0.05-10.836-1.799-13.981-4.163C5.945,58.169,11.465,33.782,0.453,23.147z',0.0,0.0,72.0,72.0);} },
+    tulip: { label:"✾", draw:function(c,x,y,s){drawSVG(c,x,y,s,'M37,42c-11.079-9.483-12.294-29.463-1-40C49.314,10.355,46.646,32.104,37,42z M12,5c7.12-0.786,10.123,2.544,14,5c-0.724,4.276-1.909,8.091-3,12 C17.07,22.42,9.343,16.454,12,5z M61,5c2.687,9.103-3.156,14.524-9,18c-3.64-2.361-3.688-8.312-5-13 C50.877,7.544,53.881,4.214,61,5z M2,19c23.658,3.308,35.925,22.328,32,50C7.77,67.897,8.967,39.366,2,19z M70,19c3.276,3.837-1.702,6.646-3,11c-5.052,16.95-4.688,38.199-27,39 C34.871,41.18,47.649,22.668,70,19z',0.0,0.0,72.0,72.0);} },
   },
   "Nature & Weather": {
-    moon:      { label:"☽", draw:function(c,x,y,s){ c.beginPath();c.arc(x+s/2,y+s/2,s*.46,0,Math.PI*2);c.fill();c.save();c.globalCompositeOperation="destination-out";c.beginPath();c.arc(x+s*.64,y+s*.36,s*.36,0,Math.PI*2);c.fill();c.restore(); } },
-    sun:       { label:"☀", draw:function(c,x,y,s){ c.beginPath();c.arc(x+s/2,y+s/2,s*.3,0,Math.PI*2);c.fill();for(var i=0;i<8;i++){c.save();c.translate(x+s/2,y+s/2);c.rotate(Math.PI/4*i);c.fillRect(-s*.09,s*.32,s*.18,s*.16);c.restore();} } },
-    lightning: { label:"↯", draw:function(c,x,y,s){ c.beginPath();c.moveTo(x+s*.62,y+s*.04);c.lineTo(x+s*.22,y+s*.54);c.lineTo(x+s*.54,y+s*.52);c.lineTo(x+s*.36,y+s*.96);c.lineTo(x+s*.78,y+s*.46);c.lineTo(x+s*.46,y+s*.48);c.closePath();c.fill(); } },
-    leaf:      { label:"🌿", draw:function(c,x,y,s){ c.beginPath();c.moveTo(x+s/2,y+s*.96);c.bezierCurveTo(x+s*.04,y+s*.68,x+s*.04,y+s*.08,x+s/2,y+s*.04);c.bezierCurveTo(x+s*.96,y+s*.08,x+s*.96,y+s*.68,x+s/2,y+s*.96);c.fill(); } },
-    drop:      { label:"◈", draw:function(c,x,y,s){ c.beginPath();c.moveTo(x+s/2,y+s*.96);c.bezierCurveTo(x+s*.06,y+s*.64,x+s*.06,y+s*.32,x+s/2,y+s*.04);c.bezierCurveTo(x+s*.94,y+s*.32,x+s*.94,y+s*.64,x+s/2,y+s*.96);c.closePath();c.fill(); } },
-    cloud:     { label:"☁", draw:function(c,x,y,s){ c.beginPath();c.arc(x+s*.26,y+s*.5,s*.24,0,Math.PI*2);c.fill();c.beginPath();c.arc(x+s*.5,y+s*.38,s*.3,0,Math.PI*2);c.fill();c.beginPath();c.arc(x+s*.74,y+s*.5,s*.22,0,Math.PI*2);c.fill();c.fillRect(x+s*.06,y+s*.5,s*.88,s*.3); } },
-    apple:     { label:"⎔", draw:function(c,x,y,s){ c.beginPath();c.moveTo(x+s/2,y+s*.26);c.bezierCurveTo(x+s*.26,y+s*.2,x+s*.06,y+s*.38,x+s*.08,y+s*.64);c.bezierCurveTo(x+s*.1,y+s*.9,x+s*.34,y+s*.96,x+s/2,y+s*.96);c.bezierCurveTo(x+s*.66,y+s*.96,x+s*.9,y+s*.9,x+s*.92,y+s*.64);c.bezierCurveTo(x+s*.94,y+s*.38,x+s*.74,y+s*.2,x+s/2,y+s*.26);c.closePath();c.fill();c.fillRect(x+s*.46,y+s*.04,s*.12,s*.22); } },
+    sun: { label:"☀", draw:function(c,x,y,s){
+      // WHY thickened rays: the original thin rays (width .28, gaps between
+      // them) failed OpenCV QR-scan testing — too much white per module.
+      // Wider, shorter-gapped rays keep the sun silhouette but scan reliably.
+      c.beginPath();c.arc(x+s/2,y+s/2,s*.37,0,Math.PI*2);c.fill();for(var i=0;i<8;i++){c.save();c.translate(x+s/2,y+s/2);c.rotate(Math.PI/4*i);c.fillRect(-s*.155,s*.38,s*.31,s*.26);c.restore();} }},
+    drop: { label:"◈", draw:function(c,x,y,s){ c.beginPath();c.moveTo(x+s/2,y+s);c.bezierCurveTo(x,y+s*.6,x,y+s*.26,x+s/2,y);c.bezierCurveTo(x+s,y+s*.26,x+s,y+s*.6,x+s/2,y+s);c.closePath();c.fill(); }},
+    cloud: { label:"☁", draw:function(c,x,y,s){ c.beginPath();c.arc(x+s*.18,y+s*.58,s*.26,0,Math.PI*2);c.fill();c.beginPath();c.arc(x+s*.48,y+s*.32,s*.3,0,Math.PI*2);c.fill();c.beginPath();c.arc(x+s*.78,y+s*.56,s*.25,0,Math.PI*2);c.fill();c.fillRect(x+s*.04,y+s*.56,s*.92,s*.32); }},
+    leaf: { label:"⬖", draw:function(c,x,y,s){ c.beginPath();c.moveTo(x+s/2,y+s*.98);c.bezierCurveTo(x+s*.02,y+s*.68,x+s*.02,y+s*.06,x+s/2,y+s*.02);c.bezierCurveTo(x+s*.98,y+s*.06,x+s*.98,y+s*.68,x+s/2,y+s*.98);c.fill(); }},
+    apple: { label:"🍎", draw:function(c,x,y,s){drawSVG(c,x,y,s,'M35.69,17.287c0.886-2.038,2.054-5.391,3.493-7.735 c1.194-1.946,3.365-6.216,5.739-2.495c-1.006,1.868-2.985,2.512-4.242,4.242c-1.945,2.678-3.175,6.058-3.493,10.479 c4.889-0.494,7.415-2.613,12.975-1.996c9.531,1.059,14.204,9.783,14.222,19.461c0.024,13.391-8.009,28.807-17.715,31.688 c-3.587,1.064-6.829-1.188-10.229-1.248c-4.405-0.078-8.074,2.765-12.725,0.499c-8.06-3.926-15.446-18.485-15.469-30.938 c-0.026-14.5,11.761-24.107,26.947-17.216c0.687-1.602,0.885-4.058-0.998-4.74c-0.962-0.349-2.893,0.292-3.743,0.25 C22.316,17.132,16.212,9.849,15.979,0.57c0.183-0.233,0.454-0.378,0.749-0.499c9.5-0.435,16.526,3.913,18.214,11.228 C35.372,13.167,34.369,15.577,35.69,17.287z',0.0,0.0,72.0,72.0);} },
+    crescent: { label:"🌙", draw:function(c,x,y,s){drawSVG(c,x,y,s,'M39.683,0.414c-0.517,2.011-2.921,2.838-4.292,4.292 c-2.95,3.129-5,7.151-5.365,12.16c-0.856,11.763,8.291,22.5,21.996,21.459c6.098-0.463,11.403-4.264,14.307-8.405 c1.029-1.468,1.449-3.394,2.861-4.649c1.42,1.337,1.762,3.906,1.967,6.438c0.694,8.58-1.225,15.79-4.113,21.101 C60.174,65.44,43.636,74.825,26.271,69.978C10.729,65.639-1.465,51.812,0.162,31.708c0.426-5.262,2.304-10.092,4.292-13.591 C8.346,11.266,14.698,5.508,22.515,2.381c3.818-1.528,8.216-2.504,13.77-2.504C37.502-0.123,38.984-0.443,39.683,0.414z',0.0,0.0,72.0,72.0);} },
   },
   "Symbols": {
-    heart:     { label:"♥", draw:function(c,x,y,s){ var cx=x+s/2,cy=y+s*.54,w=s*.46; c.beginPath();c.moveTo(cx,cy+w*.64);c.bezierCurveTo(cx-w*1.14,cy,cx-w*1.32,cy-w*.8,cx,cy-w*.46);c.bezierCurveTo(cx+w*1.32,cy-w*.8,cx+w*1.14,cy,cx,cy+w*.64);c.closePath();c.fill(); } },
-    spade:     { label:"♠", draw:function(c,x,y,s){ var cx=x+s/2,cy=y+s*.44,w=s*.46; c.beginPath();c.moveTo(cx,cy-w*.64);c.bezierCurveTo(cx+w*1.14,cy+w*.1,cx+w*1.32,cy+w*.8,cx,cy+w*.46);c.bezierCurveTo(cx-w*1.32,cy+w*.8,cx-w*1.14,cy+w*.1,cx,cy-w*.64);c.closePath();c.fill();c.fillRect(cx-w*.4,cy+w*.46,w*.8,w*.5); } },
-    club:      { label:"♣", draw:function(c,x,y,s){ var cx=x+s/2,cy=y+s*.44,r=s*.22; c.beginPath();c.arc(cx,cy-r*.56,r,0,Math.PI*2);c.fill();c.beginPath();c.arc(cx-r*.84,cy+r*.4,r,0,Math.PI*2);c.fill();c.beginPath();c.arc(cx+r*.84,cy+r*.4,r,0,Math.PI*2);c.fill();c.fillRect(cx-r*.46,cy+r*.56,r*.92,r*1.1); } },
-    dollar:    { label:"$", draw:function(c,x,y,s){ c.save();c.font="900 "+(s*.88)+"px Arial,sans-serif";c.textAlign="center";c.textBaseline="middle";c.fillText("$",x+s/2,y+s*.52);c.restore(); } },
-    peace:     { label:"☮", draw:function(c,x,y,s){ var cx=x+s/2,cy=y+s/2,r=s*.44,t=s*.14; c.beginPath();c.arc(cx,cy,r,0,Math.PI*2);c.arc(cx,cy,r-t,0,Math.PI*2,true);c.fill();c.fillRect(cx-t/2,cy,t,r);c.save();c.translate(cx,cy);c.rotate(Math.PI/4);c.fillRect(-t/2,-r,t,r);c.rotate(-Math.PI/2);c.fillRect(-t/2,-r,t,r);c.restore(); } },
-    infinity:  { label:"∞", draw:function(c,x,y,s){ c.save();c.font="900 "+(s*.9)+"px Arial,sans-serif";c.textAlign="center";c.textBaseline="middle";c.fillText("∞",x+s/2,y+s*.52);c.restore(); } },
-    arrow:     { label:"➤", draw:function(c,x,y,s){ c.beginPath();c.moveTo(x+s*.96,y+s/2);c.lineTo(x+s*.42,y+s*.08);c.lineTo(x+s*.42,y+s*.36);c.lineTo(x+s*.04,y+s*.36);c.lineTo(x+s*.04,y+s*.64);c.lineTo(x+s*.42,y+s*.64);c.lineTo(x+s*.42,y+s*.92);c.closePath();c.fill(); } },
-    crown:     { label:"♛", draw:function(c,x,y,s){ c.beginPath();c.moveTo(x+s*.04,y+s*.8);c.lineTo(x+s*.04,y+s*.32);c.lineTo(x+s*.28,y+s*.56);c.lineTo(x+s/2,y+s*.16);c.lineTo(x+s*.72,y+s*.56);c.lineTo(x+s*.96,y+s*.32);c.lineTo(x+s*.96,y+s*.8);c.closePath();c.fill(); } },
-    shield:    { label:"⛨", draw:function(c,x,y,s){ c.beginPath();c.moveTo(x+s/2,y+s*.96);c.bezierCurveTo(x+s*.06,y+s*.74,x+s*.06,y+s*.28,x+s*.06,y+s*.08);c.lineTo(x+s*.94,y+s*.08);c.bezierCurveTo(x+s*.94,y+s*.28,x+s*.94,y+s*.74,x+s/2,y+s*.96);c.closePath();c.fill(); } },
-  },
-  "Animals": {
-    paw:       { label:"⊛", draw:function(c,x,y,s){ c.beginPath();c.ellipse(x+s/2,y+s*.64,s*.24,s*.3,0,0,Math.PI*2);c.fill();[[-.22,-.28],[0,-.36],[.22,-.28]].forEach(function(p){c.beginPath();c.ellipse(x+s/2+p[0]*s,y+s/2+p[1]*s,s*.12,s*.15,0,0,Math.PI*2);c.fill();}); } },
-    butterfly: { label:"⋈", draw:function(c,x,y,s){ [-1,1].forEach(function(side){ c.save();c.translate(x+s/2,y+s/2); c.beginPath();c.moveTo(0,-s*.06); c.bezierCurveTo(side*s*.1,-s*.46,side*s*.48,-s*.46,side*s*.44,-s*.1); c.bezierCurveTo(side*s*.4,s*.04,side*s*.06,s*.04,0,-s*.06); c.closePath();c.fill(); c.beginPath();c.moveTo(0,s*.06); c.bezierCurveTo(side*s*.08,s*.06,side*s*.46,s*.1,side*s*.4,s*.38); c.bezierCurveTo(side*s*.34,s*.48,side*s*.06,s*.38,0,s*.06); c.closePath();c.fill(); c.restore();}); c.beginPath();c.ellipse(x+s/2,y+s/2,s*.07,s*.42,0,0,Math.PI*2);c.fill(); } },
-    bird:      { label:"⌁", draw:function(c,x,y,s){ c.beginPath();c.ellipse(x+s*.46,y+s*.56,s*.34,s*.22,-.2,0,Math.PI*2);c.fill();c.beginPath();c.arc(x+s*.68,y+s*.32,s*.18,0,Math.PI*2);c.fill();c.beginPath();c.moveTo(x+s*.84,y+s*.32);c.lineTo(x+s*.96,y+s*.26);c.lineTo(x+s*.96,y+s*.38);c.closePath();c.fill(); } },
-    fish:      { label:"⋗", draw:function(c,x,y,s){ c.beginPath();c.ellipse(x+s*.42,y+s/2,s*.36,s*.22,0,0,Math.PI*2);c.fill();c.beginPath();c.moveTo(x+s*.76,y+s*.26);c.lineTo(x+s*.96,y+s*.1);c.lineTo(x+s*.96,y+s*.9);c.lineTo(x+s*.76,y+s*.74);c.closePath();c.fill(); } },
-    bee:       { label:"⊕", draw:function(c,x,y,s){ c.beginPath();c.ellipse(x+s/2,y+s*.56,s*.22,s*.32,0,0,Math.PI*2);c.fill();c.beginPath();c.ellipse(x+s*.32,y+s*.32,s*.22,s*.11,-Math.PI/5,0,Math.PI*2);c.fill();c.beginPath();c.ellipse(x+s*.68,y+s*.32,s*.22,s*.11,Math.PI/5,0,Math.PI*2);c.fill();c.beginPath();c.arc(x+s/2,y+s*.26,s*.18,0,Math.PI*2);c.fill(); } },
-    cat:       { label:"⊗", draw:function(c,x,y,s){ c.beginPath();c.arc(x+s/2,y+s*.54,s*.36,0,Math.PI*2);c.fill();c.beginPath();c.moveTo(x+s*.16,y+s*.28);c.lineTo(x+s*.08,y+s*.04);c.lineTo(x+s*.38,y+s*.22);c.closePath();c.fill();c.beginPath();c.moveTo(x+s*.84,y+s*.28);c.lineTo(x+s*.92,y+s*.04);c.lineTo(x+s*.62,y+s*.22);c.closePath();c.fill(); } },
-    dog:       { label:"⊙", draw:function(c,x,y,s){ c.beginPath();c.arc(x+s/2,y+s*.46,s*.36,0,Math.PI*2);c.fill();c.beginPath();c.ellipse(x+s*.2,y+s*.48,s*.12,s*.22,Math.PI/7,0,Math.PI*2);c.fill();c.beginPath();c.ellipse(x+s*.8,y+s*.48,s*.12,s*.22,-Math.PI/7,0,Math.PI*2);c.fill(); } },
+    heart: { label:"♥", draw:function(c,x,y,s){ var cx=x+s/2,w=s*.54;c.beginPath();c.moveTo(cx,y+s*.98);c.bezierCurveTo(cx-w*1.2,y+s*.52,cx-w*1.4,y+s*.02,cx,y+s*.24);c.bezierCurveTo(cx+w*1.4,y+s*.02,cx+w*1.2,y+s*.52,cx,y+s*.98);c.closePath();c.fill(); }},
+    spade: { label:"♠", draw:function(c,x,y,s){ var cx=x+s/2,w=s*.5;c.beginPath();c.moveTo(cx,y+s*.04);c.bezierCurveTo(cx+w*1.38,y+s*.46,cx+w*1.2,y+s*.94,cx,y+s*.72);c.bezierCurveTo(cx-w*1.2,y+s*.94,cx-w*1.38,y+s*.46,cx,y+s*.04);c.closePath();c.fill();c.fillRect(cx-w*.44,y+s*.72,w*.88,w*.54); }},
+    club: { label:"♣", draw:function(c,x,y,s){ var cx=x+s/2,r=s*.24;c.beginPath();c.arc(cx,y+s*.3,r,0,Math.PI*2);c.fill();c.beginPath();c.arc(cx-r*.9,y+s*.56,r,0,Math.PI*2);c.fill();c.beginPath();c.arc(cx+r*.9,y+s*.56,r,0,Math.PI*2);c.fill();c.fillRect(cx-r*.5,y+s*.56,r,r*1.2); }},
+    dollar: { label:"$", draw:function(c,x,y,s){ c.save();c.font="900 "+(s*1.0)+"px Arial Black,Arial,sans-serif";c.textAlign="center";c.textBaseline="middle";c.lineWidth=s*.05;c.strokeStyle=c.fillStyle;c.strokeText("$",x+s/2,y+s*.54);c.fillText("$",x+s/2,y+s*.54);c.restore(); }},
+    peace: { label:"☮", draw:function(c,x,y,s){
+      // WHY the flip: the old version drew the single vertical spoke only
+      // downward and both diagonals pointing UP — the mirror image of the
+      // real peace symbol (full vertical line top-to-bottom, diagonals
+      // pointing down-left/down-right). That's why it read as upside down.
+      var cx=x+s/2,cy=y+s/2,r=s*.49,t=s*.22;
+      c.beginPath();c.arc(cx,cy,r,0,Math.PI*2);c.fill();
+      c.save();c.globalCompositeOperation="destination-out";c.beginPath();c.arc(cx,cy,r-t,0,Math.PI*2);c.fill();c.restore();
+      c.fillRect(cx-t/2,cy-r,t,r*2);
+      c.save();c.translate(cx,cy);c.rotate(Math.PI/4);c.fillRect(-t/2,0,t,r);c.rotate(-Math.PI/2);c.fillRect(-t/2,0,t,r);c.restore();
+    }},
   },
   "Holiday & Seasonal": {
-    pumpkin:   { label:"◍", draw:function(c,x,y,s){ [-s*.22,0,s*.22].forEach(function(ox){ c.beginPath();c.ellipse(x+s/2+ox,y+s*.58,s*.2,s*.3,ox===0?0:ox>0?-.2:.2,0,Math.PI*2);c.fill();});c.fillRect(x+s*.46,y+s*.14,s*.08,s*.16); } },
-    xmas_tree: { label:"◬", draw:function(c,x,y,s){ c.beginPath();c.moveTo(x+s/2,y+s*.04);c.lineTo(x+s*.9,y+s*.56);c.lineTo(x+s*.64,y+s*.56);c.lineTo(x+s*.86,y+s*.84);c.lineTo(x+s*.14,y+s*.84);c.lineTo(x+s*.36,y+s*.56);c.lineTo(x+s*.1,y+s*.56);c.closePath();c.fill();c.fillRect(x+s*.42,y+s*.84,s*.16,s*.12); } },
-    snowman:   { label:"☃", draw:function(c,x,y,s){ c.beginPath();c.arc(x+s/2,y+s*.68,s*.26,0,Math.PI*2);c.fill();c.beginPath();c.arc(x+s/2,y+s*.34,s*.2,0,Math.PI*2);c.fill(); } },
-    broom:     { label:"⟋", draw:function(c,x,y,s){ c.save();c.translate(x+s/2,y+s/2);c.rotate(-Math.PI/4);c.fillRect(-s*.08,-s*.46,s*.16,s*.64);c.beginPath();c.moveTo(-s*.28,s*.18);c.lineTo(s*.28,s*.18);c.lineTo(s*.22,s*.46);c.lineTo(-s*.22,s*.46);c.closePath();c.fill();c.restore(); } },
-    witch_hat: { label:"⬡", draw:function(c,x,y,s){ c.beginPath();c.moveTo(x+s/2,y+s*.04);c.lineTo(x+s*.74,y+s*.68);c.lineTo(x+s*.26,y+s*.68);c.closePath();c.fill();c.fillRect(x+s*.12,y+s*.68,s*.76,s*.2);c.beginPath();c.ellipse(x+s/2,y+s*.78,s*.4,s*.12,0,0,Math.PI*2);c.fill(); } },
-    bell:      { label:"⌖", draw:function(c,x,y,s){ c.beginPath();c.arc(x+s/2,y+s*.42,s*.34,Math.PI,0);c.lineTo(x+s*.88,y+s*.74);c.arc(x+s/2,y+s*.74,s*.38,0,Math.PI);c.closePath();c.fill();c.beginPath();c.arc(x+s/2,y+s*.84,s*.1,0,Math.PI*2);c.fill(); } },
-    lantern:   { label:"⌑", draw:function(c,x,y,s){ c.beginPath();c.ellipse(x+s/2,y+s*.54,s*.34,s*.38,0,0,Math.PI*2);c.fill();c.fillRect(x+s*.44,y+s*.06,s*.12,s*.18);c.fillRect(x+s*.44,y+s*.78,s*.12,s*.16); } },
-    candy:     { label:"⌀", draw:function(c,x,y,s){ c.beginPath();c.arc(x+s*.44,y+s*.48,s*.36,0,Math.PI*2);c.fill();c.fillRect(x+s*.72,y+s*.18,s*.18,s*.52); } },
-    santa:     { label:"⛊", draw:function(c,x,y,s){ c.beginPath();c.arc(x+s/2,y+s*.54,s*.36,0,Math.PI*2);c.fill();c.beginPath();c.moveTo(x+s*.12,y+s*.3);c.lineTo(x+s*.88,y+s*.3);c.lineTo(x+s*.76,y+s*.06);c.lineTo(x+s/2,y+s*.16);c.closePath();c.fill();c.beginPath();c.arc(x+s*.76,y+s*.06,s*.1,0,Math.PI*2);c.fill();c.fillRect(x+s*.12,y+s*.28,s*.76,s*.08); } },
-    ghost:     { label:"⚇", draw:function(c,x,y,s){ c.beginPath();c.arc(x+s/2,y+s*.36,s*.38,Math.PI,0);c.lineTo(x+s*.88,y+s*.9);c.lineTo(x+s*.72,y+s*.74);c.lineTo(x+s*.56,y+s*.9);c.lineTo(x+s*.4,y+s*.74);c.lineTo(x+s*.24,y+s*.9);c.lineTo(x+s*.12,y+s*.36);c.closePath();c.fill(); } },
+    witch_hat: { label:"🎃", draw:function(c,x,y,s){ drawSVGLayered(c,x,y,s,"M57.357,12.927c-2.659,2.855-9.451,1.578-12.666,3.877 c1.484,10.492,4.646,19.307,6.721,29.208c3.802,0.823,7.583,1.321,11.891,2.327c3.43,0.8,8.407,2.1,8.53,5.687 c0.161,4.704-8.043,5.869-12.666,6.979c-9.204,2.209-17.483,3.428-29.209,2.844c-5.231-0.261-11.959-1.502-17.318-2.326 c-5.782-0.89-12.483-2.057-12.666-6.721c-0.283-7.246,13.653-6.618,19.387-8.53c2.143-6.533,4.393-13.919,7.754-21.455 c3.302-7.4,7.861-19.741,18.869-17.06c1.846,0.45,3.925,1.592,5.945,2.327C54.042,10.852,56.92,11.005,57.357,12.927z",null,0,0,72,72); }},
+    santa: { label:"🎅", draw:function(c,x,y,s){ drawSVGLayered(c,x,y,s,"M60.636,19.789c3.742,0.099,5.989,2.76,5.673,5.964 c-0.254,2.575-2.64,4.977-6.108,4.582c-2.622-0.299-5.12-2.864-4.364-6.4c0.146-0.681,0.534-1.318,0.945-1.891 c-1.247-1.322-2.823-2.316-4.509-3.2c0.506,1.632,1.092,4.433,0,6.109c-0.344,0.528-0.807,0.774-1.164,1.236 c0.401,2.156,0.827,4.095,1.091,6.327c0.085,0.714-0.003,1.559,0.219,2.182c0.219,0.614,1.046,0.963,1.454,1.455 c0.479,0.577,1.226,1.492,1.455,2.255c0.492,1.637-0.265,3.198-1.601,4.072c2.806,3.338,2.79,10.116,0,13.527 c-0.886,1.084-2.146,1.784-3.345,2.474c-0.658,4.276-2.905,7.109-6.909,7.927c-0.492,0.101-1.263,0.034-1.818,0.291 c-0.552,0.254-0.811,1.196-1.236,1.745c-1.154,1.488-3.228,3.042-5.6,3.273c-4.543,0.443-7.493-2.062-8.946-5.164 c-5.508-0.237-8.182-3.309-9.091-8.146c-2.453-1.198-4.418-3.44-5.091-6.618c-0.76-3.586,0.27-7.102,1.963-9.236 c-0.999-0.754-2.15-1.773-1.673-3.709c0.43-1.742,2.402-2.861,2.982-4.364c0.538-1.394,0.481-3.07,0.655-4.437 c0.189-1.492,0.354-2.81,0.727-4.291c-0.826-0.443-1.55-0.832-2.036-1.6c-0.896-1.414-1.079-3.79-0.509-5.746 c0.675-2.317,2.512-3.665,4-4.654c1.382-3.926,3.802-6.989,6.909-9.309c3.303-2.466,6.965-3.986,11.927-4.582 c3.207-0.385,6.728,0.796,9.091,1.891C53.283,5.251,57.646,12.254,60.636,19.789z M38.745,26.625 c-0.951,0.075-2.857,0.985-2.691,2.037c0.179,1.133,2.157,0.382,3.2,0.436c1.202,0.062,1.782,0.742,2.837,0.509 C42.635,27.887,40.748,26.468,38.745,26.625z M22.163,29.534c0.902,0.436,1.89-0.256,2.909-0.291c1.123-0.039,2.325,0.634,3.2,0 C28.539,25.773,21.775,26.394,22.163,29.534z M28.927,36.516c-0.045,1.362,1.811,1.99,3.273,2.037 c1.786,0.058,3.958-1.169,2.545-2.909c-0.502-0.619-1.896-1.022-3.346-0.8C30.314,35.01,28.962,35.442,28.927,36.516z","M42.091,29.607c-1.055,0.233-1.635-0.447-2.837-0.509 c-1.043-0.054-3.021,0.697-3.2-0.436c-0.167-1.051,1.74-1.962,2.691-2.037C40.748,26.468,42.635,27.887,42.091,29.607z M28.272,29.243c-0.875,0.634-2.077-0.039-3.2,0 c-1.019,0.035-2.007,0.727-2.909,0.291C21.775,26.394,28.539,25.773,28.272,29.243z M31.399,34.843c1.45-0.222,2.843,0.182,3.346,0.8 c1.413,1.74-0.759,2.967-2.545,2.909c-1.462-0.047-3.318-0.675-3.273-2.037C28.962,35.442,30.314,35.01,31.399,34.843z",0,0,72,72); }},
+    xmas_tree: { label:"🎄", draw:function(c,x,y,s){ drawSVGLayered(c,x,y,s,"M51.897,20.319c-1.589,0-3.177,0-4.766,0c3.445,4.179,7.196,8.052,10.865,12.008 c-2.243,0.871-6.087,0.141-8.959,0.38c4.528,5.002,9.912,9.149,14.295,14.296c-3.685,0-7.37,0-11.055,0 c4.809,5.547,10.692,10.021,15.63,15.438c-8.831,0.445-18.489,0.063-27.638,0.191c-0.123,3.054,0.248,6.601-0.191,9.339 c-2.81-0.112-6.078,0.234-8.577-0.19c0-2.986,0-5.972,0-8.959c-8.832-0.444-18.488-0.063-27.638-0.189 c4.923-5.561,11.022-9.945,16.011-15.439c-3.304-0.445-7.433-0.064-11.056-0.19c4.307-5.224,9.894-9.168,14.296-14.296 c-2.923,0-5.845,0-8.768,0c1.099-2.233,3.282-4.109,5.146-6.099c1.892-2.02,3.92-3.972,5.528-6.099 c-1.307-0.536-3.827,0.142-5.146-0.381c5.476-6.787,10.759-13.766,16.392-20.395c0.162-0.035,0.18,0.075,0.19,0.191 c3.997,4.956,7.875,9.911,11.818,15.058C49.578,16.683,51.012,18.343,51.897,20.319z",null,0,0,72,72); }},
+    snowman: { label:"⛄", draw:function(c,x,y,s){ drawSVGLayered(c,x,y,s,"M44.786,0.426c0.164,0.466-0.028,3.977-0.201,5.44 c-4.852,0.605-11.261,0.573-16.121,0c-0.195-1.747-0.295-4.457-0.202-5.844C33.208,0.282,40.178-0.501,44.786,0.426z M44.585,6.471c0,0.672,0,1.343,0,2.015c-5.09,0.653-11.037,0.683-16.121,0 c0-0.672,0-1.343,0-2.015C33.563,6.999,39.485,6.999,44.585,6.471z M44.585,10.299c1.983-0.118,4.448-0.765,6.045-0.604 c-1.036,1.315-3.703,0.999-5.844,1.209c1.028,1.757,2.517,3.659,2.217,6.247c-0.254,2.19-1.851,3.716-3.225,4.836 c2.345,1.35,4.755,2.634,6.247,4.836c3.643-2.268,6.951-4.871,10.68-7.053c0.53-2.021,1.455-3.649,2.015-5.642 c0.526,0.078,1.105,0.104,1.411,0.403c-0.398,1.08-0.673,2.283-1.209,3.224c1.616,0.335,2.988-2.997,4.836-1.813 c-0.609,1.607-2.572,1.861-3.627,3.022c0.766,0.554,2.733-0.48,3.425,0c0.281,2.045-4.228,1.07-5.843,1.612 c-1.78,0.597-3.867,2.448-5.643,3.627c-1.93,1.282-3.632,2.735-5.239,3.829c2.922,4.874-0.11,11.192-3.627,13.299 c6.456,2.937,12.737,9.846,9.471,19.345C49.153,78.177,9.933,74.173,16.374,50.197c2.23-3.815,5.204-6.887,9.471-8.665 c-3.165-2.271-6.413-8.233-3.627-13.299c-2.971-2.185-6.782-5.468-10.277-7.456c-0.142-0.081-0.819-0.352-1.008-0.403 c-1.618-0.437-4.712,0.709-5.642-1.209c0.69-0.863,2.374,0.148,3.627,0c-0.838-1.312-2.529-1.77-3.627-2.821 c1.383-2.023,3.115,1.416,4.836,1.612c-0.429-1.048-0.731-2.225-1.209-3.224c0.016-0.656,0.913-0.43,1.41-0.604 c0.628,1.857,1.439,3.531,2.015,5.44c3.412,2.499,7.136,4.686,10.479,7.254c1.886-1.808,3.713-3.675,6.448-4.635 c-1.319-1.368-2.573-2.8-3.224-4.836c-0.181-3.069,1.04-4.736,2.418-6.247c-1.856-0.629-5.029,0.059-6.045-1.411 c1.664-0.253,4.63,0.8,6.448,0.403c0.068-0.404-0.041-0.63-0.403-0.604c3.903-0.272,11.515,0.243,15.717-0.201 C45.016,9.15,43.972,9.998,44.585,10.299z M31.084,13.725c0.713-0.109,0.495,0.713,1.209,0.604c0.318-0.354,0.925-0.418,1.007-1.008 C32.499,12.644,31.478,12.597,31.084,13.725z M39.748,13.725c0.748,0.625,1.912,0.813,2.217-0.403 C41.13,12.479,40.244,12.789,39.748,13.725z M36.323,17.957c0.792-0.536,1.441-1.887,1.209-2.821 c-0.482-0.122-0.919-0.29-1.612-0.201C35.324,15.95,36.117,17.094,36.323,17.957z M43.174,17.957 c-1.414,0.971-2.803,2.506-5.037,2.821c-3.596,0.507-6.368-1.074-8.262-2.821C31.722,22.312,41.354,22.407,43.174,17.957z M36.122,27.83c0.782,0.043,1.264-0.213,1.411-0.806C37.01,25.796,34.86,26.814,36.122,27.83z M35.92,33.271 c0.917,0.111,1.502-0.11,1.612-0.806C37.043,31.409,35.07,31.947,35.92,33.271z M35.92,38.712c0.917,0.11,1.502-0.11,1.612-0.807 C37.043,36.85,35.07,37.388,35.92,38.712z","M33.3,13.322c-0.082,0.589-0.689,0.654-1.007,1.008 c-0.714,0.109-0.496-0.714-1.209-0.604C31.478,12.597,32.499,12.644,33.3,13.322z M41.965,13.322c-0.305,1.217-1.469,1.028-2.217,0.403 C40.244,12.789,41.13,12.479,41.965,13.322z M35.92,14.934c0.693-0.088,1.13,0.08,1.612,0.201 c0.231,0.935-0.418,2.286-1.209,2.821C36.117,17.094,35.324,15.95,35.92,14.934z M29.875,17.957c1.894,1.747,4.667,3.328,8.262,2.821 c2.234-0.315,3.623-1.85,5.037-2.821C41.354,22.407,31.722,22.312,29.875,17.957z M37.532,27.024c-0.146,0.592-0.628,0.849-1.411,0.806 C34.86,26.814,37.01,25.796,37.532,27.024z M37.532,32.465c-0.11,0.696-0.695,0.917-1.612,0.806 C35.07,31.947,37.043,31.409,37.532,32.465z M37.532,37.905c-0.11,0.696-0.695,0.917-1.612,0.807 C35.07,37.388,37.043,36.85,37.532,37.905z",0,0,72,72); }},
+    halo_cat: { label:"🐈‍⬛", draw:function(c,x,y,s){ drawSVGLayered(c,x,y,s,"M54.722-0.034c2.808,0.644,4.786,2.116,6.539,3.814 c0.743-0.25-0.38-0.852,0-1.635c2.856,1.05,4.464,3.347,5.177,6.539c0.596-0.04,0.586-0.687,0.545-1.362 c2.191,1.533,2.784,4.664,2.726,8.446c0.35,0.762,0.562-0.858,1.362-0.545c0.559,11.095-4.086,16.985-8.992,22.614 c0.357,4.801-2.732,9.308-1.635,13.896c0.326,1.362,1.718,2.284,1.907,3.542c0.256,1.691-0.791,4.926-1.362,7.629 c-1.135,5.372-2.303,10.565-9.264,8.174c-0.839-2.42,0.555-4.621,3.27-4.359c1.99-5.044,2.522-12.683-2.18-14.985 c1.676,6.584-1.504,12.039-2.452,17.71c-1.372,1.913-5.304,2.861-8.174,1.635c-0.788-1.668,0.268-3.192,1.09-4.087 c0.817,0,1.635,0,2.452,0c2.358-4.091,3.528-13.398-0.817-16.075c-1.729-4.87,0.117-12.539-3.542-14.986 c-2.343-1.567-5.243-0.789-6.539,0c-3.9,2.374-2.936,7.833-2.997,12.261c-0.031,2.228-1.086,5.883-1.635,9.264 c-0.975,6.002-1.59,9.598-3.814,13.623c-2.017,0.424-5.763,1.298-6.539-0.817c0.213-0.877,0.374-1.807,0.817-2.452 c0.606-0.394,1.314-0.685,2.452-0.545c1.599-4.955,1.648-13.461-1.09-17.165c-2.318,6.4-1.212,16.226-4.904,21.252 c-2.116,0.165-4.929,0.711-6.267-0.545c-0.008-2.369,1.032-3.69,3.542-3.542c0.612-6.161,0.484-13.92-1.09-18.8 c-4.96-0.943-5.918-5.89-12.806-4.904c0.429-1.206,2.076-1.194,3.27-1.635c-0.143-1.674-2.561-1.072-3.814-1.635 c0.249-0.842,1.275-0.905,2.18-1.09c2.109-5.647,0.561-9.25,0.545-16.348c3.17,0.826,5.118,2.875,7.357,4.632 c2.424-0.209,4.516-0.751,7.356-0.545c1.371-3.988,2.538-8.179,5.449-10.626c-0.171-0.555-1.377-0.076-1.09-1.09 c1.571-1.153,3.034-2.415,4.904-3.27c-0.279-0.901-2.233-0.128-2.18-1.362c2.038-0.686,4.105-1.343,6.267-1.907 c0.833-0.504-1.201-0.408-0.817-1.362c1.933-0.437,4.943-0.915,7.084-0.272c0.237-1.146-0.905-0.912-1.362-1.362 c11.834-1.369,18.787,6.81,22.342,15.531c1.85,2.874,2.253,7.192,2.997,11.171c2.75-3.014,1.543-10.026,0-13.351 c0.363,0,0.727,0,1.09,0c-0.956-2.677-2.698-4.567-4.087-6.812c0.727,0,1.453,0,2.18,0c-1.554-2.169-3.632-3.815-4.904-6.267 c0.999-0.09,1.515,0.303,2.18,0.545C56.827,4.037,54.979,2.797,54.722-0.034z M21.209,27.757c2.296,0.156,3.334,1.569,5.177,2.18 c-0.032-2.484,0.535-4.37,0.545-6.812C24.659,24.305,22.027,25.124,21.209,27.757z M12.763,39.746 c-0.044-1.409-0.558-2.349-1.635-2.726c-0.416,0.855-0.27,2.274-1.635,2.181c-0.259-1.389-0.259-2.154,0-3.542 c-0.653-0.165-1.243-0.392-2.18-0.272C5.927,38.899,9.369,40.98,12.763,39.746z M21.209,35.659 c0.034,1.445,0.664,2.877-0.545,3.542c-0.533-0.648-0.527-1.835-1.09-2.453c-0.906,0.637-1.402,1.685-1.907,2.725 c3.002,1.583,6.671-0.242,6.267-3.815C23.258,35.421,21.821,35.126,21.209,35.659z","M26.931,23.125c-0.01,2.441-0.577,4.328-0.545,6.812 c-1.842-0.61-2.881-2.024-5.177-2.18C22.027,25.124,24.659,24.305,26.931,23.125z M7.313,35.386c0.937-0.119,1.527,0.107,2.18,0.272 c-0.259,1.388-0.259,2.154,0,3.542c1.365,0.094,1.219-1.325,1.635-2.181c1.077,0.377,1.59,1.316,1.635,2.726 C9.369,40.98,5.927,38.899,7.313,35.386z M23.934,35.659c0.405,3.573-3.265,5.398-6.267,3.815 c0.505-1.04,1.001-2.088,1.907-2.725c0.562,0.618,0.557,1.804,1.09,2.453c1.208-0.665,0.579-2.098,0.545-3.542 C21.821,35.126,23.258,35.421,23.934,35.659z",0,0,72,72); }},
+    pumpkin: { label:"😊", draw:function(c,x,y,s){ drawSVGLayered(c,x,y,s,"M0.988,43.72c0-0.389,0-0.777,0-1.166c0.518-7.123,3.986-13.199,8.163-18.659 c4.91-6.416,11.096-13.574,22.449-12.828c1.087-2.63,0.206-7.347,0.583-9.913c1.623,0.224,4.145-0.452,4.374,1.166 c2.331-4.59,11.562-4.628,11.37,2.333c-0.998,1.903-6.568,2.098-7.872,0.292c0.145-1.582,3.807-0.951,3.499-2.041 c-2.453-1.435-4.837,1.337-5.54,3.499c0.638,1.695,1.791,2.874,2.624,4.373c10.276,0.076,16.092,4.383,20.7,9.913 c5.493,6.592,10.624,15.538,9.621,24.782c-1.132,10.421-13.239,22.231-24.49,24.198c-6.775,1.185-15.367-0.294-22.449-1.75 C10.861,65.215,2.743,57.896,0.988,43.72z M41.513,35.557c4.421,0.614,9.66-0.434,12.536-2.332 c-1.992-4.908-5.09-8.71-10.204-10.496C44.024,27.063,42.906,31.901,41.513,35.557z M26.644,23.895 c-3.473,3.136-5.557,7.66-6.706,13.12c3.653,0.713,8.27-0.07,11.37-0.875C29.191,32.621,28.517,27.658,26.644,23.895z M32.766,39.347c1.15,3.648,5.911,4.562,6.706,0C37.211,38.876,35.117,39.176,32.766,39.347z M45.886,48.093 c-0.173,0.604,0.36,1.916-0.291,2.041c-1.185,0.371-2.571,0.54-4.082,0.583c0.007-0.687-0.502-0.858-0.292-1.749 c-3.053,0.153-5.985,0.429-9.329,0.292c-0.167,0.512,0.353,1.713-0.292,1.749c-0.858,0.335-3.175-0.031-4.082-0.583 c-0.536-0.412,0.457-1.416-0.292-2.041c-5.472-0.554-9.248-2.803-13.12-4.956c0.61,5.812,5.461,9.887,10.787,11.953 c0.511-0.752,0.119-2.408,1.166-2.624c1.498-0.04,2.873,0.043,3.791,0.583c0.451,0.737-0.36,2.227-0.292,3.499 c5.5,0.949,12.251,0.643,16.91-0.875c-0.155-1.107-0.91-1.616-0.874-2.915c1.157-0.592,2.416-1.082,4.081-1.166 c0.474,0.498,0.883,1.061,0.875,2.04c5.006-2.089,7.531-6.656,8.746-12.536c-0.373-0.016-0.403-0.374-0.875-0.292 C55.315,44.5,50.92,46.616,45.886,48.093z","M43.845,22.729c5.114,1.786,8.212,5.588,10.204,10.496 c-2.876,1.898-8.115,2.946-12.536,2.332C42.906,31.901,44.024,27.063,43.845,22.729z M31.309,36.14c-3.101,0.805-7.717,1.588-11.37,0.875 c1.149-5.459,3.233-9.984,6.706-13.12C28.517,27.658,29.191,32.621,31.309,36.14z M39.472,39.347c-0.795,4.562-5.556,3.648-6.706,0 C35.117,39.176,37.211,38.876,39.472,39.347z M58.422,41.096c0.472-0.082,0.502,0.276,0.875,0.292 c-1.215,5.88-3.74,10.447-8.746,12.536c0.008-0.979-0.401-1.542-0.875-2.04c-1.665,0.084-2.924,0.574-4.081,1.166 c-0.036,1.299,0.719,1.808,0.874,2.915c-4.658,1.518-11.41,1.824-16.91,0.875c-0.068-1.272,0.743-2.762,0.292-3.499 c-0.917-0.54-2.292-0.623-3.791-0.583c-1.047,0.216-0.655,1.872-1.166,2.624c-5.326-2.066-10.177-6.142-10.787-11.953 c3.872,2.153,7.647,4.402,13.12,4.956c0.749,0.625-0.244,1.629,0.292,2.041c0.906,0.552,3.223,0.918,4.082,0.583 c0.644-0.036,0.124-1.237,0.292-1.749c3.344,0.137,6.276-0.139,9.329-0.292c-0.21,0.891,0.299,1.062,0.292,1.749 c1.511-0.043,2.897-0.212,4.082-0.583c0.651-0.125,0.118-1.437,0.291-2.041C50.92,46.616,55.315,44.5,58.422,41.096z",0,0,72,72); }},
+    spump: { label:"😈", draw:function(c,x,y,s){ drawSVGLayered(c,x,y,s,"M36.489,0.272c1.295-0.413,0.796,0.967,0.881,1.764 c5.669-2.45,11.351,1.703,12.345,6.76c-1.086,0.971-3.647,0.467-5.584,0.588c0.274-1.195,2.386-0.553,2.351-2.058 c-2.417-2.743-7.748-0.243-9.699,1.176c0,1.273,0,2.547,0,3.821c21.784-2.68,27.588,10.619,34.681,22.63 c1.961,24.84-15.202,38.506-38.502,36.738C21.203,70.799,12.48,65.014,6.511,57.584c-8.43-10.491-7.875-24.019,0.294-34.681 c5.173-6.752,11.866-11.512,24.688-10.581c0.505-3.218,0.688-6.757,0.881-10.287C34.018,1.72,35.132,0.875,36.489,0.272z M41.191,33.484c0.77,4.031,4.017,5.584,9.111,5.291c4.816-1.192,6.521-9.596,3.232-13.814 C51.231,29.612,46.329,31.666,41.191,33.484z M17.973,34.366c1.215,5.917,13.356,6.364,13.52-0.882 c-6.468-0.292-8.996-4.524-12.05-8.229C18.065,27.404,17.787,30.653,17.973,34.366z M36.783,38.187 c-1.796,0.068-2.602,3.665-2.939,6.172c1.804-0.155,4.255,0.336,5.584-0.294C38.977,41.675,38.527,39.283,36.783,38.187z M56.769,46.416c-0.823-1.039-1.395-2.329-2.646-2.939c-1.138,2.978-2.28,5.949-4.702,7.642c0.046-2.201-1.193-3.117-2.352-4.114 c-1.843,2.971-4.84,6.311-7.642,7.348c-1.252-1.785-2.402-3.672-3.233-5.879c-2.527,1.588-3.907,4.322-6.76,5.585 c-1.79-2.031-2.447-5.194-4.115-7.348c-2.607,0.82-4.248,2.609-6.76,3.526c-2.295-2.211-2.474-6.539-3.527-9.993 c-3.702,1.203-2.666,9.863-0.588,12.051c0.385-0.889,1.319-1.229,2.646-1.176c0.41,2.039,1.868,3.03,2.057,5.29 c1.534-0.228,2.646-1.815,4.703-1.47c2.351,0.396,3.282,3.285,4.115,5.291c1.886-0.979,3.231-3.471,5.29-3.233 c2.143,0.247,1.884,2.933,3.821,4.115c1.628-1.604,2.585-3.881,5.29-4.409c1.173,0.787,1.808,2.11,2.351,3.527 c2.062-1.661,2.767-4.68,5.291-5.878c0.799,0.964,1.108,2.418,1.176,4.114c2.384-0.751,1.698-4.571,3.232-6.172 c1.626,0.138,2.824,0.702,3.821,1.47c3.229-2.194,3.797-11.412,0.294-13.813C58.268,42.429,57.839,44.742,56.769,46.416z",null,0,0,72,72); }},
+    drip_skull: { label:"💀", draw:function(c,x,y,s){ drawSVGLayered(c,x,y,s,"M69.507,40.639c-0.948,0-1.896,0-2.844,0c0,1.327,0,2.654,0,3.981 c-1.711,0.573-1.008-1.268-1.138-2.275c-2.771,0.263-4.554,1.513-3.981,5.119c-1.002-3.029-4.894-6.448-7.962-3.981 c0.866,4.885,0.126,11.963-1.138,16.494c-2.732-1.817-1.785-7.314-3.981-9.669c-1.054,1.79-1.216,4.472-1.138,7.394 c-2.165-0.868-0.939-5.127-3.412-5.688c-1.318,2.475-0.197,7.387-0.569,10.807c-0.709-1.376-2.193-1.978-1.706-4.55 c-1.489,3.25,0.471,9.949-1.706,12.513c-2.602-4.413-0.753-13.276-3.413-17.632c-1.231,0.665,0.077,3.868-1.707,3.981 c-2.107-0.737-1.153-4.534-3.981-4.55c-1.306,1.159-0.206,4.723-0.569,6.825c-1.444-2.158-3.225-3.979-4.55-6.257 c-1.323,4.176-0.193,10.803-0.569,15.925c-3.817-5.282-1.091-17.108-6.256-21.044c-0.528-2.234,1.978-1.435,1.138-3.981 c-2.924-3.328-5.457,1.108-7.394,2.275c0-0.758,0-1.517,0-2.275c-1.97,1.443,1.176,8.001-1.706,8.532 C9.36,46.374,7.735,40.226,2.962,37.227c2.124-2.042,0.56-4.877-1.137-6.257c2.05-4.932,0.252-9.679-1.707-13.65 C8.033-5.535,55.992-4.188,71.213,11.063c2.415,5.97-3.536,12.522,0,17.631C69.466,31.498,70.415,36.997,69.507,40.639z M19.456,28.126c-0.921-0.975-0.529-3.263-2.844-2.844c-1.571-0.244-0.534,2.121-1.706,2.275c-1.074-2.303-3.383-0.327-5.119,0 c-3.635,13.325,21.561,11.791,22.182,1.707c-1.564-2.419-5.568-4.9-7.962-1.707c-0.145-1.941-1.217-2.954-3.413-2.844 C19.472,25.108,20.734,27.887,19.456,28.126z M41.638,28.695c-1.521,14.582,34.107,4.588,15.925-2.844 c-0.189,2.274,0.731,5.66-1.706,5.688c-0.169-2.675,0.492-6.179-1.706-6.825c-1.286,0.23,0.3,3.333-2.275,2.275 c-0.842-0.105-0.521-1.374-0.568-2.275C45.312,23.904,45.98,31.001,41.638,28.695z M35.95,38.363 c-0.488-1.786,1.33-5.879-1.707-5.119c-1.046,4.839-5.951,3.786-3.981,11.375c1.651,0.737,4.036,0.737,5.688,0 c0.327-1-0.688-3.342,0.569-3.413c1.126,0.77,2.212,1.58,1.707,3.981c8.734-0.321,2.012-10.634-0.569-13.081 C35.351,32.456,37.52,37.279,35.95,38.363z",null,0,0,72,72); }},
+    xskull: { label:"☠", draw:function(c,x,y,s){ drawSVGLayered(c,x,y,s,"M16.364,33.61c-5.478-3.622-15.895,0.284-14.893-8.903 c0.375-3.439,4.379-4.222,4.654-8.902C14.327,16.352,15.733,24.545,16.364,33.61z M66.629,15.805c1.893,5.289,7.445,10.495,1.861,15.71 c-4.545-0.051-9.178-0.202-11.635,2.095C56.334,25.516,58.625,16.052,66.629,15.805z M20.553,50.367c1.145,2.282-0.751,5.634,1.396,7.331 c-5.875,2.816-6.547,11.486-15.358,10.998C5.7,64.143-0.214,59.399,4.264,55.081C11.229,55.237,16.677,53.687,20.553,50.367z M51.734,50.367c4.404,2.901,9.508,5.014,16.756,4.714 c4.441,4.279-1.348,9.161-2.328,13.615c-8.014,1.517-9.023-8.45-15.357-10.474C52.27,55.757,51.816,54.029,51.734,50.367z M41.031,54.558c0.285,0.726,1.791,0.079,1.861,1.047 c0.02,1.339-0.346,0.639-0.932,0.524c0.148,1.214-0.074,2.01-0.465,2.618C40.43,58.31,40.223,55.529,41.031,54.558z M34.98,55.604c2.043,0.67,0.405,5.479,0.931,7.855 C34.746,61.994,33.985,57.815,34.98,55.604z M37.307,63.46c-1.125-2.047-0.629-5.244,0-7.855 C39.449,57.019,37.469,61.312,37.307,63.46z M38.703,55.604c1.744-0.041,1.588,2.054,1.861,3.666c-0.619,0-1.24,0-1.861,0 C38.703,58.048,38.703,56.826,38.703,55.604z M40.564,59.271c1.414,0.646-0.504,1.801,0,3.143 c-1.016-0.078-0.998-1.32-0.93-2.619C40.176,59.879,40.463,59.678,40.564,59.271z M51.734,21.042c-0.988,0.808-0.197,3.619-1.395,4.19 c3.869,2.279,1.77,11.274,5.584,13.615c-0.682,6.563-4.137,10.009-10.705,9.95c-1.014,1.095,0.232,1.494,0,3.142 c-5.012,4.37-10.032,4.382-14.892,2.095c-0.573,0.229-0.956,0.67-0.931,1.571c-0.938-1.361,1.577-3.143-1.861-3.142 c-0.148-1.216,0.075-2.011,0.465-2.619c-5.063-1.984-10.877-3.121-11.17-10.473c3.599-2.584,1.537-11.538,5.585-13.616 c-0.414-1.28-1.084-2.271-0.931-4.189c-0.618,4.962-3.03,9.862-3.258,13.615c-0.805-3.231-1.667-5.753-1.862-7.855 C13.186-7.042,59.021-8.642,56.389,26.802c-0.193,2.621-1.262,4.706-1.396,8.378C53.844,30.538,51.555,27.18,51.734,21.042z M33.584,34.657c-0.581-4.461-6.76-6.002-11.17-3.142c-2.166,3.041-1.684,10.011,1.396,11.521 C29.084,42.723,34.237,39.668,33.584,34.657z M49.873,42.513c2.307-2.492,2.441-9.11,0-11.521 C35.507,25.3,37.492,45.902,49.873,42.513z M34.515,49.844c1.706-1.58,1.833-7.701,0.931-10.473 C33.437,40.795,30.646,48.21,34.515,49.844z M37.773,49.844c4.527-1.005,1.818-9.739-0.931-10.473 C36.794,43.265,36.708,47.202,37.773,49.844z M31.257,54.558c2.258,1.134-0.106,3.819,0,5.76 c-1.17-1.128-2.589-1.974-2.792-4.188c1.51,0.046,1.502,1.801,2.327,2.618C31.28,58.46,30.392,55.71,31.257,54.558z M41.961,60.317c-1.137-1.655,1.539-3.484,2.328-4.713 c-0.467-0.721-0.768,0.223-1.396-1.047C46.213,53.582,43.572,59.298,41.961,60.317z M34.515,59.794c0.265,1.694-0.141,2.634-0.931,3.142 c1.88,1.215,3.272,0.344,5.585,0.524c-0.18-1.37-1.492-1.464-0.932-3.666c1.824-0.482,0.338,2.762,1.396,3.142 c3.514-3.03,7.887-7.88,7.912-13.092c0.199-1.171,2.293-0.212,3.258-0.523c0.164,11.007-4.193,16.928-9.773,21.471 C26.347,73.27,22.549,60.972,21.949,49.32c1.086,0,2.172,0,3.258,0c-0.698,5.894,4.745,9.289,6.981,13.615 C34.28,63.37,32.703,59.675,34.515,59.794z M33.119,55.604c1.769-0.42,0.592,2.477,0.931,3.666c-0.621,0-1.241,0-1.862,0 c0.946,0.382,1.333,2.214,0.465,3.143C30.882,60.582,32.471,57.654,33.119,55.604z","M73.609-2c0.775,23.74,0.775,51.146,0,74.886 C73.609,47.924,73.609,22.962,73.609-2z M23.811,43.036c-3.08-1.51-3.562-8.48-1.396-11.521 c4.41-2.86,10.589-1.319,11.17,3.142C34.237,39.668,29.084,42.723,23.811,43.036z M49.873,30.992c2.441,2.411,2.307,9.029,0,11.521 C37.492,45.902,35.507,25.3,49.873,30.992z M35.446,39.371c0.902,2.771,0.775,8.893-0.931,10.473 C30.646,48.21,33.437,40.795,35.446,39.371z M36.842,39.371c2.75,0.733,5.458,9.468,0.931,10.473 C36.708,47.202,36.794,43.265,36.842,39.371z",0,0,72,72); }},
+  },
+  "Social Media": {
+    instagram: { label:"📷", draw:function(c,x,y,s){ drawSVGParts(c,x,y,s,"M30.191,1.696c21.183-3.479,35.94,8.163,40.017,23.856 C83.05,74.982,12.523,84.189,2.487,45.561C-3.564,22.265,10.809,4.878,30.191,1.696z M19.417,23.243 c-2.5,5.48-1.807,24.104,2.309,27.704c5.853,5.119,25.92,3.909,30.013-0.77c3.497-3.999,4.53-25.376-0.77-30.013 c-3.404-2.978-17.211-3.724-24.626-1.539C23.766,19.385,20.771,20.277,19.417,23.243z M48.661,22.474c3.525,5.223,2.988,19.097,0.77,25.396 c-5.224,3.525-19.097,2.988-25.396,0.77c-3.526-5.223-2.988-19.097-0.77-25.396C28.488,19.717,42.362,20.255,48.661,22.474z M47.892,24.782C39.728,21.397,46.86,33.999,47.892,24.782L47.892,24.782z M36.348,44.791c11.36,0,12.07-21.437-2.309-17.7 C23.69,29.78,26.351,44.791,36.348,44.791z M35.578,30.169c2.951-0.574,5.172,0.461,6.156,2.309 c5.585,10.472-12.671,12.118-11.543,2.309C30.258,34.21,30.444,31.167,35.578,30.169z",null,0,0,72,72); }},
+    youtube: { label:"▶", draw:function(c,x,y,s){ drawSVGParts(c,x,y,s,"M25.404,4.22c8.088-0.385,34.045-1.827,41.006,2.47 c6.149,3.796,6.423,17.075,6.423,29.149c0,10.982,0.864,25.752-5.435,30.137c-1.822,1.269-7.613,2.229-9.881,2.471 c-11.999,1.272-28.388,1.216-41.006,0c-3.613-0.349-9.456-1.472-10.869-2.471c-7.506-5.305-5.617-32.727-4.446-45.453 c0.41-4.457,1.165-11.081,3.953-13.339C9.935,3.308,19.449,4.504,25.404,4.22z M29.357,49.673 c6.118-4.586,12.952-8.457,18.28-13.833c-6.143-4.232-12.045-8.705-18.28-12.845C29.357,31.887,29.357,40.78,29.357,49.673z",null,0,0,72,72); }},
+  },
+  "Animals": {
+    // WHY: the old Animals group (butterfly/cat/crow/dog/fish/puppy outlines)
+    // was deleted per Hali's request — they didn't read as animals. These are
+    // her new icon-pack vectors instead. Bird is intentionally left out — she
+    // asked to fix that one herself before it's added.
+    butterfly: { label:"🦋", draw:function(c,x,y,s){ drawSVGParts(c,x,y,s,"M35.848,32.341c6.453-8.756,13.556-22.292,23.223-28.828 c2.635-1.782,6.295-3.937,10.811-2.803c1.943,1.984,2.229,5.651,2.002,10.811c-0.757,17.222-2.296,29.965-20.42,28.828 c2.273,3.584,7.541,2.567,10.41,4.805c9.317,7.267-2.902,21.773-10.811,24.824c-1.602,0-3.203,0-4.805,0 c-6.067-3.942-6.759-13.261-9.609-20.42c-3.513,4.487-3.616,11.703-6.807,16.416c-1.277,1.887-3.315,2.862-4.805,4.404 C16.256,70.983,6.334,57.82,6.619,51.159c0.302-7.039,8.054-7.048,13.613-10.01c-2.384-2.341-5.441-0.841-8.008-1.602 C1.94,36.5,1.897,26.184,1.014,11.921C0.744,7.571,0.048,3.882,2.615,1.11c2.966-2.211,8.376,0.672,10.811,2.402 C22.414,9.9,31.418,23.293,35.848,32.341z",null,0,0,72,72); }},
+    cat_head: { label:"🐱", draw:function(c,x,y,s){ drawSVGParts(c,x,y,s,"M25.871,13.329c5.503-2.237,14.539-2.437,19.996,0 c2.812-2.516,4.945-5.075,8.123-8.123c2.009-1.927,6.256-6.683,10.623-5.312c4.034,1.267,4.046,10.26,3.749,15.622 c-0.333,6.005-2.586,12.472-1.875,18.433c0.451,3.784,2.438,6.003,2.812,10.623c0.518,6.388-1.246,12.86-4.686,16.559 c-4.467,4.801-11.565,4.457-19.371,7.186c-3.267,1.142-5.797,3.554-10.31,3.125c-4.105-0.391-6.153-2.804-9.686-3.75 c-5.625-1.506-10.516-1.408-14.372-3.749C4.172,59.875,0.715,49.101,3.688,38.636c0.385-1.354,1.631-2.677,1.875-4.374 c0.884-6.159-1.524-12.17-1.875-17.809C3.393,11.708,3.479,0.218,7.75-0.105C16.014-0.732,20.495,8.701,25.871,13.329z M43.679,47.384c5.456,0.236,12.712-0.401,11.248-8.123C48.723,38.3,42.933,40.362,43.679,47.384z M18.685,39.886 c-1.246,7.702,5.124,7.79,11.248,8.123C30.919,40.935,24.345,38.246,18.685,39.886z M31.807,58.319 c1.179,1.008,3.078,1.296,3.749,2.812c0.606,0.644-0.031,2.53,1.562,2.187c0.993-2.651,3.45-3.839,5.312-5.623 c-0.463-0.059-0.287-0.755-0.312-1.25C39.702,55.633,30.583,54.509,31.807,58.319z",null,0,0,72,72); }},
+    crow: { label:"🐦‍⬛", draw:function(c,x,y,s){ drawSVGParts(c,x,y,s,"M27.309,53.857c2.069,2.215,3.806,1.873,6.2,3.358 c0.136,5.819-2.207,9.16-4.908,12.142c-1.002-1.332-3.332-0.849-4.909-1.033C22.134,62.714,27.415,59.712,27.309,53.857z M15.685,69.615c-1.253,0.613-1.181,0.979-2.583,1.292 c0.266-1.284,1.698-1.401,2.325-2.325c8.23,2.585,9.133-12.723,5.683-17.566c-0.637,0.034-1.245,0.039-1.55-0.258 c-0.864,0.468,1.216,1.504,0.517,1.808c-1.089,0.192-2.798,0.094-4.133-1.291c-0.065,0.926,0.776,0.946,0.775,1.808 c-3.376-2.229-5.731-7.07-6.2-12.657C10.113,35.591,7.642,33.717,7.16,28.8c-0.501-5.11,2.353-6.518,4.908-9.558 c2.704-0.477,2.491-2.37,3.358-4.65c1.118-2.94,3.701-7.287,5.683-9.559c2.341-2.684,4.899-5.222,11.108-4.391 c1.24,0.166,2.088,1.034,3.617,1.292c5.191,0.874,9.434-0.438,11.625,4.133c-6.204,1.785-12.719,0.88-12.917,8.008 c-0.06,2.149,0.961,3.234,0.775,5.942c5.18,5.081,8.571,14.869,8.267,22.991c-0.657,0.626-1.26-0.258-1.809-0.517 c3.131,7.116,11.778,8.716,17.309,13.433c-3.347,5.122-14.969,6.406-21.441,3.101c-2.673,2.148-3.745,5.899-4.909,9.558 c1.681,0.217,2.298-0.629,3.358-1.033c1.461,0.348,2.587,1.029,2.325,3.1c-1.009-0.196-0.715-1.696-2.066-1.55 c-0.894-0.032-0.377,1.346-1.033,1.55c-1.935-0.211-5.504-0.751-6.458,0.775c-1.134-0.925-3.958-1.612-5.167-0.259 c-0.641-0.134-0.92-0.629-1.292-1.033c-1.517-0.14-1.718,1.038-2.841,1.292C20.79,69.721,16.236,71.542,15.685,69.615z M23.692,68.324c1.577,0.185,3.906-0.299,4.909,1.033c2.702-2.981,5.044-6.322,4.908-12.142c-2.395-1.485-4.131-1.144-6.2-3.358 C27.415,59.712,22.134,62.714,23.692,68.324z",null,0,0,72,72); }},
+    dcat_head: { label:"🐈", draw:function(c,x,y,s){ drawSVGParts(c,x,y,s,"M35.952,50.755c1.281-0.436,2.068-2.417,3.947-1.535 c0.188,1.43-1.037,1.447-1.973,1.754c-0.027,1.547-0.904,3.035-2.632,2.193c-0.009-1.965-1.612-2.336-2.631-3.289 C32.867,47.699,35.688,49.662,35.952,50.755z M22.137,51.413c0.339,2.634-2.952,1.296-3.508,0.438 C19.571,51.478,20.8,51.392,22.137,51.413z M43.188,57.991c-0.817,4.647-13.004,4.688-13.814,0 c3.144,0.22,4.943-0.904,6.797-1.974C38.256,56.93,39.895,58.288,43.188,57.991z M58.318,55.798c-3.729,1.437-0.167,2.769,1.974,4.824 c1.592,1.529,2.587,2.834,3.069,3.947c-2.168-2.51-4.772-4.583-7.455-6.578c-0.958,0.212-1.212,1.127-1.974,1.535 c1.449,2.57,3.525,4.515,4.386,7.674c-1.566-2.381-2.904-4.989-5.044-6.797c-2.446,2.633-5.04,4.969-8.99,7.235 c-2.196,1.261-5.808,3.491-7.894,3.509c-2.684,0.023-7.452-3.356-9.429-4.604c-3.145-1.986-5.429-3.817-7.675-6.14 c-2.413,1.46-3.092,4.655-5.043,6.578c1.183-2.764,2.454-5.44,4.386-7.455c-0.405-0.546-0.663-1.238-1.315-1.535 c-3.287,1.684-5.758,4.183-8.113,6.797c1.181-2.912,4.45-5.636,7.455-7.455c-0.698-0.472-1.109-1.229-1.973-1.535 c-4.009,1.619-7.087,4.17-10.306,6.579c2.664-2.965,5.779-5.478,9.648-7.236c-2.034-3.844-8.53,1.326-11.622,2.192 c2.606-2.071,5.674-3.682,9.429-4.604c-0.509-0.88-1.125-1.652-1.535-2.632c-2.61-0.182-5.377,1.335-8.113,1.755 C4.34,50.572,7,49.798,9.858,49.22c-1.074-3.604-3.481-5.874-5.701-8.332c0.332-0.663,0.962,0.182,1.535,0 c-0.488-1.34-2.213-1.441-2.631-2.851c0.687-0.045,1.61,0.147,1.974-0.22c-0.538-0.412-1.714-0.186-2.193-0.658 c1.898-1.534,4.589-2.958,4.824-5.701c0.26-3.027-3.804-11.131-4.166-16.446C3.093,9.06,3.459,4.536,5.472,0.321 c9.805,1.524,14.547,8.111,20.174,13.814c4.557-1.516,9.131-2.583,14.691-1.754c2.275,0.339,5.171,1.934,6.579,1.754 c1.504-0.192,2.994-2.981,4.166-4.386c4.021-4.819,9.097-7.97,16.227-9.429c3.178,6.826,2.088,15.015,0.219,21.708 c-0.799,2.864-2.119,5.626-2.412,7.894c-0.512,3.966,2.016,5.172,4.167,7.017c-0.327,0.623-1.291,0.609-2.193,0.658 c0.327,0.622,1.291,0.609,2.193,0.657c-0.354,1.255-1.653,1.563-2.412,2.412c0.332,0.663,0.962-0.182,1.535,0 c-1.871,2.807-4.379,4.977-5.702,8.333c2.403,1.032,5.417,1.454,7.675,2.631c-2.492,0.152-4.913-1.664-8.113-1.535 c-0.514,0.655-0.868,1.471-1.315,2.193c3.005,1.673,6.578,2.777,9.21,4.824c-2.782-0.801-6.124-2.939-9.648-3.729 c-0.984,0.186-1.232,1.107-1.754,1.755c3.608,1.873,6.723,4.241,9.429,7.017c-0.123,0.635-0.342-0.336-0.658-0.22 C64.828,59.521,61.601,57.632,58.318,55.798z M9.2,2.952c3.638,2.721,6.884,5.834,8.771,10.306 c-1.08-0.386-2.219-1.869-3.289-1.535c1.975,1.167,3.424,2.861,4.604,4.824c-1.627-1.005-3.39-3.04-5.482-2.851 c2.018,0.981,4.448,2.714,5.043,4.386c-1.592-0.37-4.248-1.807-5.701-0.877c1.807,0.167,3.405,0.542,4.167,1.754 c-1.665-0.185-4.21-0.572-5.263,0.438c1.714-0.033,3.423-0.061,4.385,0.658c-1.925,0.194-3.904,0.335-5.043,1.315 c0.811,0.14,2.185-0.284,2.631,0.219c-1.065,0.616-2.354,1.008-3.07,1.974c0.723,0.194,1.096-1.074,1.535-0.438 c-1.044,1.297-2.921,2.924-2.851,4.604c0.181-0.278,0.768-1.25,1.096-0.658c-0.624,1.352-1.631,3.482-1.315,5.043 c1.01-2.791,2.751-4.85,4.824-6.578c-1.275,0.117-2.105,1.835-2.851,1.754c0.606-1.513,1.899-2.34,3.07-3.289 c-1.383,0.152-1.869,1.201-3.07,1.535c1.156-1.841,3.349-2.645,5.921-3.07c-0.392-0.267-1.276-0.04-1.535-0.439 c1.231-0.561,3.459,0.126,4.386-0.219c-0.935-0.527-2.357-0.566-3.07-1.315c1.883-0.271,3.59,0.791,4.605,0.658 c-0.598-0.577-2.424-1.077-2.193-1.754c0.876,0.367,1.599,0.887,2.412,1.316C20.063,12.721,15.319,5.114,9.2,2.952z M50.862,20.714c0.838-0.192,1.772-1.435,2.412-1.096c-0.4,0.769-1.421,0.917-1.754,1.754c0.997-0.178,2.194-1.307,3.289-0.658 c-0.901,0.415-2.063,0.567-2.631,1.315c1.7-0.387,3.857-0.688,5.263,0.219c-0.663,0.068-1.706-0.243-1.755,0.439 c2.421,0.137,3.866,1.25,5.263,2.412c-1.252,0.077-2.159-1.342-3.069-0.877c1.384,0.665,3.358,1.901,3.289,3.289 c-1.074-0.972-2.235-1.858-3.728-2.412c2.592,1.72,4.612,4.012,5.92,7.017c-0.233-2.251-1.11-3.859-1.754-5.701 c0.865,0.085,1.009,0.892,1.535,1.315c-0.174-2.021-2.304-3.25-2.632-4.385c0.674,0.057,0.986,0.476,1.535,0.658 c-0.819-1.52-2.943-1.734-4.386-2.631c1.173-0.143,2.919,0.288,3.728-0.219c-1.374-0.819-3.646-0.738-5.481-1.096 c1.191-0.708,3.324-0.477,4.824-0.877c-1.418-0.645-3.964-0.259-5.263-0.438c0.871-1.102,2.878-1.069,3.946-1.973 c-2.308-0.114-4.313,1.238-5.701,1.315c1.178-2.112,3.301-3.277,5.263-4.605c-2.263,0.37-4.146,2.285-5.481,2.851 c0.927-1.997,2.702-3.145,4.166-4.604c-1.283,0.182-2.531,1.557-3.289,1.535c1.933-4.354,5.835-7.906,8.771-10.525 C56.581,6.259,52.534,12.299,50.862,20.714z M44.504,24.88c0.074,2.015,0.765,3.721,1.096,5.921 c0.568-1.481,1.986-3.274,1.974-4.605c-0.68,0.928-0.926,2.29-1.974,2.851c-0.693-3.376-1.087-7.983,1.316-9.868 c0.119,0.319-0.257,1.133,0.219,1.097c0.136-1.18,0.731-1.9,1.315-2.631c0.192,0.934-0.671,1.945,0,2.631 c0.422-3.453,2.599-6.318,3.29-8.771C49.836,15.953,44.278,18.763,44.504,24.88z M28.058,22.907 c-0.461-3.762-3.771-6.154-5.482-8.552c-0.654-0.917-1.065-2.584-1.754-2.193c1.787,2.379,2.613,5.72,3.728,8.771 c0.365-1.34-0.957-2.749,0-3.289c0.25,1.139,0.631,2.147,1.097,3.07c0.291-0.82-0.654-1.516,0-1.974 c2.017,1.675,2.302,7.185,1.096,10.087c-0.602-0.787-1.046-1.731-1.754-2.412c0.676,1.883,1.701,3.416,2.631,5.043 C26.846,28.142,28.403,25.719,28.058,22.907z M31.347,14.574c3.175-0.462,7.261,0.035,10.086-0.219 C38.433,13.893,34,13.511,31.347,14.574z M32.224,27.511c0.489-0.973,0.536-2.388,1.315-3.07c0.54,2.356-0.312,5.052-0.219,6.798 c1.713-2.762,1.228-8.107-0.658-10.306c-0.048,0.861,0.62,2.145,0,2.851c-0.721-1.544-1.006-3.526-2.193-4.605 C31.517,21.494,31.934,24.439,32.224,27.511z M39.898,24.003c-0.239-1.261,0.249-1.886-0.219-2.851 c-1.404,2.292-2.031,7.721-0.22,10.087c-0.255-1.866-0.818-4.587-0.219-6.579c0.764,0.698,0.62,2.304,1.535,2.851 c-0.514-2.759,0.704-6.316,1.096-8.113C40.845,20.563,40.667,22.579,39.898,24.003z M46.916,30.582 c1.245-0.436,2.387-0.976,3.289-1.754c-0.611-0.082-1.335,0.835-1.755,0.219c0.64-0.899,2.118-2.117,2.193-2.851 C49.227,27.483,47.714,28.675,46.916,30.582z M25.865,31.02c-0.928-1.778-2.618-3.958-4.167-4.386 c0.899,0.782,1.862,1.5,2.412,2.631c-0.654-0.016-1.419-1.049-1.754-0.658C23.553,29.385,24.534,30.377,25.865,31.02z M30.47,33.651c-0.076-2.558-0.76-3.819-0.877-5.482C28.733,29.884,29.304,32.655,30.47,33.651z M42.092,34.309 c0.853-1.444,2.127-4.35,0.657-6.14c-0.051,1.074,0.387,1.66,0.22,2.851c-0.592-0.066-0.394-0.922-0.877-1.097 C42.421,31.574,41.939,33.174,42.092,34.309z M16.875,32.774c0.667,0.138,1.889-0.281,2.193,0.219 c-0.876,0.44-2.457,0.175-3.289,0.658c3.785,0.813,6.171-1.385,9.429-0.877c4.71,0.733,4.607,5.464,6.359,9.429 C34.657,33.529,24.255,29.694,16.875,32.774z M41.872,35.625c-0.447,0.383-0.43-0.163-0.877,0.219 c-0.735,1.846-0.538,4.958,0.438,6.359c0.869-6.129,2.855-10.09,8.771-9.429c1.796,0.201,4.289,1.889,5.92,0.658 c-0.898-0.052-1.793-0.108-2.412-0.439c0.03-0.628,1.506,0.19,1.535-0.438C50.238,30.74,43.841,31.88,41.872,35.625z M28.716,38.037c0.411-1.576-0.414-2.348-1.316-3.07c1.713,7.285-8.631,3.411-4.385-0.877 C16.334,37.125,27.385,43.135,28.716,38.037z M47.354,35.405c0.932,0.201,0.937-0.525,0.877-1.315c-0.293,0-0.585,0-0.877,0 C47.286,34.603,46.925,34.996,47.354,35.405z M47.793,39.571c-1.758,0.024-2.588-2.391-3.07-4.385 c-3.929,6.134,7.757,5.942,7.236,0.877c-0.098-0.948-0.896-1.566-1.974-1.974C50.579,36.636,49.683,39.545,47.793,39.571z M24.549,35.186c0.246,0.046,0.341,0.244,0.438,0.438c0.781,0.05,1.146-0.315,1.097-1.096 C25.547,34.055,24.462,34.365,24.549,35.186z M27.619,41.765c-1.61,0.843-4.607,0.153-5.92,0.219c1.671,1.015,5.564,0.684,6.579,0 c-0.227,0.577-0.87,0.739-1.097,1.316c0.959,0.001,1.379-1.682,1.974-1.316c0.184,0.783-1.116,1.204-0.658,1.535 c0.545-0.537,1.018-1.604,1.535-0.438c0.095-1.337-0.099-2.387-0.877-2.851c-4.328,2.325-8.089-0.382-9.429-3.289 c-0.305-0.663,0.06-2.453-1.535-2.193c-0.365,2.487,2.834,4.417,1.974,5.262C21.619,41.587,25.118,41.922,27.619,41.765z M53.274,38.914c-0.192,0.406-1.034,1.285-1.315,0.877c1.569-1.136,1.967-3.442,3.07-5.043c-0.678,0.054-1.24,0.222-1.755,0.438 c-0.372,4.837-5.133,6.7-10.087,5.043c-0.516,0.564-0.95,1.777-0.219,2.412c0.357-1.382,1.198,1.322,1.754,0.438 c-0.453-0.288-1.48-1.136-1.096-1.535c0.551,0.479,1.658,1.549,2.411,1.097c-0.527-0.422-1.414-0.486-1.534-1.315 C47.687,42.846,52.596,41.127,53.274,38.914z M49.547,49.22c-0.424-0.26-1.939-1.432-1.754-0.877 c0.376,0.282,0.862,0.453,0.877,1.097c-0.184,0.548-1.714-0.252-1.535,0.657c2.672-0.922,2.402,0.615,2.851,2.412 c-0.595,0.136-1.74-0.278-1.974,0.22c0.411,0.32,1.453,0.009,1.755,0.438c-0.073,0.512-0.225,0.944-0.658,1.097 c-0.135-0.064-0.844-0.546-0.877,0c0.259,0.105,0.497,0.233,0.657,0.438c-1.979,3.085-11.068,4.009-12.279-0.438 c1.689-1.966,3.879-3.43,4.605-6.359c-0.796-0.211-0.185,0.985-0.878,0.877c-1.872-1.45-4.556,0.815-6.797-0.658 c-0.786-0.055-0.803,0.659-1.535,0.658c-0.379-0.133,0.017-1.04-0.438-1.097c-0.17,3.034,3.119,4.474,4.385,6.798 c-0.833,3.671-9.364,3.477-10.745,1.097c-0.971,0.094-1.388-0.366-1.535-1.097c0.358,0.16,0.954-0.436,0.438-0.438 c-0.545,0.672-1.216-0.378-1.096-1.097c0.679,0.022,1.216-0.099,1.535-0.438c-0.524-0.134-1.591,0.275-1.754-0.219 c0.677-1.382-0.139-1.589,0.877-2.632c0.898-0.228,1.793,0.676,2.412,0c-0.833-0.044-1.56-0.194-2.193-0.438 c0.192-0.685,1.034-0.72,1.315-1.315c-1.034,0.062-1.296,0.896-2.192,1.097c-3.188-0.833-8.688,0.647-10.087-1.974 c0.439,0.089,1.626,0.543,1.974,0c-1.759-1.093-3.379-2.322-4.605-3.947c1.069-0.256,2.353,0.412,2.851,0 c-1.354-0.911-2.77-1.762-3.508-3.289c0.753-0.124,1.341-0.413,1.754-0.877c-0.411,0.049-1.453,0.565-1.754,0 c1.299-0.75,3.199-2.061,3.289-3.29c-0.939,1.035-2.661,1.287-3.947,1.974c0.328,0.037,0.809-0.079,0.877,0.219 c-0.567,0.895-1.99,0.934-2.851,1.535c1.366,0.826,2.784,1.601,3.728,2.851c-0.364,0.367-1.287,0.175-1.974,0.219 c1.034,1.451,2.675,2.296,3.509,3.947c-0.675,0.005-1.662-0.807-1.974-0.438c0.988,0.985,2.413,1.534,3.07,2.851 c-0.321,0.002-1.794-0.083-1.096,0.22c3.563-0.319,7.606-0.275,10.525,0.657c-0.317,0.341-0.292,1.023-0.658,1.315 c-3.935,1.013-5.586-0.86-8.333-1.096c0.751,0.711,2.06,0.863,2.631,1.754c-0.544-0.033-0.91,0.113-1.096,0.438 c1.813-0.513,3.378,0.181,4.385,1.097c-4.214,1.381-0.097,0.294,2.412,0c0.126,0.458,0.544,0.626,0.438,1.315 c-0.95,0.439-2.177,0.601-2.851,1.315c0.973-0.415,2.164-0.614,3.07-1.096c1.049,1.947,3.344,2.649,5.701,3.289 c1.442,5.786,14.536,5.51,15.788-0.22c1.758-0.143,2.853-0.948,4.166-1.535c1.884,0.312,3.158,2.395,4.386,2.632 c-1.129-1.21-2.659-2.019-3.947-3.07c0.365-0.439,0.589-1.019,1.316-1.096c1.562,0.633,3.608,1.943,5.043,1.973 c-1.718-0.84-3.481-1.634-5.263-2.411c0.445-0.141,0.145-1.025,0.658-1.097c2.298,0.042,4.358,1.486,6.14,1.315 c-1.208-0.546-2.875-0.634-3.728-1.535c0.755-0.194,1.617-0.282,1.754-1.096c-1.146,0.169-4.291,2.729-4.166-0.438 c2.898-0.121,5.924,0.799,8.113,0.657c-0.694-0.329-1.738-0.309-2.412-0.657c0.749-0.859,2.432-0.785,3.069-1.755 c-3.469,0.578-4.745,2.365-8.99,1.315c0.234-0.818-0.544-0.625-0.438-1.315c2.705-0.877,7.913-0.419,10.307-0.877 c-2.843,0.109,2.104-2.193,1.973-3.069c-0.748,0.055-1.053,0.554-1.973,0.438c0.954-1.531,2.716-2.255,3.728-3.729 c-0.596-0.136-1.74,0.278-1.974-0.219c0.841-1.352,2.548-1.838,3.509-3.07c-1.412-0.415-2.984-0.67-3.729-1.754 c0.328-0.037,0.81,0.078,0.877-0.22c-1.215-0.465-2.394-0.968-3.289-1.754c0.469,1.943,2.504,2.321,3.509,3.728 c-0.385,0.061-1.094-0.617-1.315,0c0.521,0.356,1.261,0.493,1.754,0.877c-0.752,1.368-2.441,1.799-3.289,3.07 c1.017,0.229,1.898-0.404,2.412,0c-1.156,1.621-2.884,2.672-4.386,3.947c0.796,0.267,1.731-0.438,1.974,0 C58.534,49.729,52.954,48.388,49.547,49.22z M50.644,42.203c-1.404,0.492-3.757-0.06-4.824,0.219 C47.266,42.827,49.525,43.179,50.644,42.203z M25.646,63.254c0.12-0.319-0.256-1.134,0.219-1.097 c1.255,1.596,2.517,3.184,4.385,4.166c0.107-0.691-0.395-0.774-0.219-1.535c1.091,0.666,2.146,2.529,3.289,2.412 c-0.192-0.198-0.628-1.237-0.219-1.315c1.39,0.876,2.072,2.46,3.509,3.289c0.593-1.525,1.765-2.474,3.07-3.289 c0.021,0.68-0.269,1.048-0.438,1.535c1.418-0.482,1.934-1.867,3.289-2.412c0.12,0.318-0.257,1.134,0.219,1.097 c1.585-1.12,2.787-2.623,4.167-3.947c-0.07,0.509,0.035,0.842,0.219,1.097c1.606-1.026,3.535-2.896,3.509-4.824 c-0.611,1.582-1.685,2.701-3.07,3.508c0.155-0.812-0.374-0.94-0.219-1.754c-1.421,1.138-1.888,3.229-3.728,3.947 c-0.131-0.454,0.271-1.44-0.22-1.535c-0.83,1.362-1.688,2.697-3.289,3.289c-0.126-0.386,0.265-1.288-0.22-1.315 c-0.659,0.656-1.056,1.575-2.192,1.754c0.098-0.431,0.813-1.355,0.22-1.754c-0.465,1.07-0.888,2.183-1.755,2.851 c-0.529-1.006-1.043-2.027-1.754-2.851c-0.34,0.869,0.829,1.34,0.219,1.754c-0.79-0.452-1.184-1.302-1.974-1.754 c-0.473,0.186,0.082,1.397-0.438,1.535c-1.214-0.906-2.066-2.174-3.07-3.289c-0.422,0.259,0.478,1.388-0.438,1.534 c-1.226-1.26-2.25-2.721-3.29-4.166c-0.503,0.229,0.104,1.565-0.438,1.754c-1.558-0.78-2.146-2.531-3.508-3.508 C22.398,60.508,23.605,62.298,25.646,63.254z","M31.566,42.203c-1.752-3.965-1.649-8.696-6.359-9.429 c-3.257-0.507-5.644,1.691-9.429,0.877c0.833-0.483,2.413-0.218,3.289-0.658c-0.304-0.5-1.526-0.082-2.193-0.219 C24.255,29.694,34.657,33.529,31.566,42.203z M26.084,34.528c0.05,0.781-0.315,1.146-1.097,1.096 c-0.097-0.195-0.192-0.392-0.438-0.438C24.462,34.365,25.547,34.055,26.084,34.528z M45.819,42.422c1.067-0.278,3.42,0.273,4.824-0.219 C49.525,43.179,47.266,42.827,45.819,42.422z M50.644,26.196c-0.075,0.733-1.554,1.952-2.193,2.851 c0.42,0.616,1.144-0.301,1.755-0.219c-0.902,0.779-2.044,1.319-3.289,1.754C47.714,28.675,49.227,27.483,50.644,26.196z M42.092,29.923c0.483,0.174,0.285,1.031,0.877,1.097 c0.167-1.19-0.271-1.776-0.22-2.851c1.47,1.79,0.195,4.696-0.657,6.14C41.939,33.174,42.421,31.574,42.092,29.923z",0,0,72,72); }},
+    detail_dog: { label:"🐕", draw:function(c,x,y,s){ drawSVGParts(c,x,y,s,"M54.788,16.725c-1.128,5.428,3.584,7.29,7.565,9.835 c1.217,0.778,2.711,1.628,4.54,2.648c1.549,0.863,3.76,1.933,3.972,3.215c0.472,2.862-2.642,3.898-3.594,5.674 c-0.413,0.771-0.304,1.787-0.567,2.459c-0.709,1.811-2.364,4.611-3.972,5.296c-1.007,0.429-1.782-0.006-3.026,0.379 c-1.168,0.36-1.594,1.355-2.648,1.513c-2.145,0.32-3.228-1.504-5.485-1.513c-1.397-0.006-2.727,1.005-3.594,0.945 c-2.502-0.171-2.673-3.607-4.917-4.161c-3.853-0.951-7.31,2.871-7.566,5.863c-0.132,0.7,0.299,0.836,0.946,0.757 c-0.891,2.325-1.562,4.869-2.459,7.188c2.253-2.35,3.287-5.918,4.729-9.079c0.329-0.959-0.821-0.439-0.757-1.135 c0.954-1.793,5.039-3.071,6.62-0.945c-6.074,2.872-3.726,14.36-3.404,21.751c-1.018-2.513-1.67-5.391-2.459-8.133 c-1.309,2.69-1.628,7.287-1.135,11.159c-1.718-0.808-3.603-1.667-5.296-2.648c-1.438-0.833-3.649-1.966-4.54-3.215 c-1.267-1.777-0.975-4.433-1.892-6.81c-0.767-1.988-1.995-3.48-2.458-5.674c-0.857-4.058-0.725-9.443-0.757-14.753 c-3.352,8.794-3.972,24.372,1.513,31.208c-8.625-2.219-14.952-6.736-15.131-17.401c-1.674,3.496-2.826,7.515-3.026,12.483 c-3.14,0.454-5.05,2.138-6.998,3.783c-0.041-4.745,2.73-8.063,4.729-12.105c4.819-9.745,7.462-21.34,13.24-30.073 c-0.362-2.925-5.292-5.295-5.296-8.511c-0.003-2.474,5.709-6.359,7.566-7.755c1.498-1.126,2.915-1.929,4.539-3.026 c1.775-1.198,3.39-3.067,6.053-2.837c1.955,0.168,4.082,1.553,6.053,1.891c5.048,0.868,8.544,1.333,11.537,3.972 c1.384,1.22,2.135,2.838,3.405,4.35C51.933,14.65,53.839,15.237,54.788,16.725z M29.254,13.888 c-0.033-2.793,2.044-5.144,0.567-7.565c-1.728,2.03-3.521,2.985-3.594,5.674c-0.091,3.37,3.553,6.068,2.081,9.457 C32.419,20.305,29.288,16.802,29.254,13.888z M33.982,23.534c-0.274,4.418-1.849,9.823-4.917,10.024 c-1.737,0.114-3.607-1.701-4.918-2.837c-1.596-1.383-2.951-2.524-3.972-3.783c-2.481-3.059-2.918-8.001-6.431-8.89 c3.852,4.092,5.131,10.757,10.403,13.429c-0.916,7.428,4.659,11.594,6.809,17.212c1.635-6.541-4.07-8.709-4.35-14.564 c5.546,2.298,8.2-4.628,8.511-9.268c0.232-3.457-0.722-7.213-0.189-10.781c0.272-1.825,1.217-3.107,0.946-4.54 C33.343,13.206,34.325,18.019,33.982,23.534z M20.932,22.588c1.35-3.576,0.858-7.503-0.378-10.781 C16.704,14.205,19.974,19.484,20.932,22.588z M44.007,18.995c0.812,2.97,5.788,1.778,7.755,3.594 c-0.729-1.54-1.441-3.098-1.892-4.917C47.6,16.441,45.846,18.576,44.007,18.995z M64.623,34.315c0.396,1.696,3.073,0.728,3.783,0 c-0.108-0.333,0.229-1.111-0.189-1.135C67.792,34.334,65.925,35.191,64.623,34.315z M62.921,42.448 c0.199-0.01,0.149-0.242-0.188-0.189c-3.259,3.478-9.93,2.343-14.375,0.757C52.179,45.626,59.941,46.23,62.921,42.448z M50.249,44.15c-1.562,0.006-3.206,0.537-4.161-0.378C46.034,45.438,49.928,45.638,50.249,44.15z M49.682,18.238c-0.145,0.825,0.233,1.752,0,2.081 c-1.695,0.494-3.543,0.349-4.351-0.946C46.146,18.329,48.256,16.97,49.682,18.238z M48.546,18.995 c0.301-0.282,0.277-1.078-0.378-0.946C47.868,18.332,47.892,19.127,48.546,18.995z","M28.308,21.454c1.472-3.389-2.171-6.087-2.081-9.457 c0.073-2.689,1.866-3.645,3.594-5.674c1.477,2.421-0.6,4.772-0.567,7.565C29.288,16.802,32.419,20.305,28.308,21.454z M35.874,9.538c0.271,1.433-0.673,2.714-0.946,4.54 c-0.533,3.568,0.421,7.324,0.189,10.781c-0.311,4.64-2.965,11.566-8.511,9.268c0.28,5.855,5.985,8.023,4.35,14.564 c-2.15-5.618-7.725-9.784-6.809-17.212c-5.272-2.672-6.551-9.337-10.403-13.429c3.513,0.889,3.95,5.832,6.431,8.89 c1.021,1.258,2.376,2.4,3.972,3.783c1.311,1.136,3.181,2.951,4.918,2.837c3.069-0.202,4.643-5.606,4.917-10.024 C34.325,18.019,33.343,13.206,35.874,9.538z M20.553,11.807c1.237,3.278,1.728,7.206,0.378,10.781 C19.974,19.484,16.704,14.205,20.553,11.807z M49.87,17.671c0.45,1.819,1.162,3.377,1.892,4.917 c-1.967-1.816-6.942-0.624-7.755-3.594C45.846,18.576,47.6,16.441,49.87,17.671z M45.331,19.373c0.808,1.295,2.655,1.44,4.351,0.946 c0.233-0.329-0.145-1.256,0-2.081C48.256,16.97,46.146,18.329,45.331,19.373z M48.168,18.049c0.655-0.132,0.679,0.664,0.378,0.946 C47.892,19.127,47.868,18.332,48.168,18.049z M68.217,33.181c0.418,0.023,0.081,0.802,0.189,1.135 c-0.71,0.728-3.388,1.696-3.783,0C65.925,35.191,67.792,34.334,68.217,33.181z M46.088,43.772c0.955,0.915,2.6,0.384,4.161,0.378 C49.928,45.638,46.034,45.438,46.088,43.772z M48.357,43.016c4.445,1.586,11.116,2.721,14.375-0.757 c0.338-0.053,0.388,0.18,0.188,0.189C59.941,46.23,52.179,45.626,48.357,43.016z",0,0,72,72); }},
+    fish: { label:"🐟", draw:function(c,x,y,s){ drawSVGParts(c,x,y,s,"M37.482,0.37c5.961,2.845,9.161,8.451,11.538,14.879 c-2.649,0.018-4.14-1.123-6.983-0.911C40.682,9.519,38.854,5.172,37.482,0.37z M58.131,21.93c-0.53,3.08-2.707,6.247-3.341,10.628 c-1.13,7.819,1.077,16.272,3.341,21.256c-2.814,2.854-7.656,3.681-11.539,5.466c-18.979,1.062-25.627-10.204-34.01-19.737 C8.455,42.803,5.288,47.025,0.74,49.866c0.617-4.264,4.523-7.709,4.555-11.843c0.031-4.111-3.778-7.435-4.555-11.539 c0.971-0.554,2.449,0.983,2.733,2.126c3.476,1.989,5.705,5.227,8.806,7.591c2.965-2.5,5.232-5.7,7.592-8.806 c3.042-1.715,4.937-4.578,8.199-6.073c0.231-0.478,0.963-0.454,0.911-1.214c1.854-0.575,3.859-1,4.858-2.429 C42.98,15.311,52.737,17.781,58.131,21.93z M59.952,23.145c2.947,2.853,14.314,10.326,11.235,17.612 c-1.994,4.719-7.349,8.891-10.932,12.146C54.539,46.63,54.789,29.832,59.952,23.145z M62.989,37.72c0.304,0,0.607,0,0.911,0 c1.891-1.329,1.104-4.522-0.607-5.466C61.792,32.816,60.79,37.043,62.989,37.72z M46.896,61.102c-1.96,4.619-4.891,8.268-9.413,10.324 c0.854-3.498,2.153-6.552,3.34-9.717C43.166,61.825,45.297,61.729,46.896,61.102z","M63.293,32.254c1.712,0.943,2.498,4.137,0.607,5.466 c-0.304,0-0.607,0-0.911,0C60.79,37.043,61.792,32.816,63.293,32.254z",0,0,72,72); }},
+    puppy: { label:"🐶", draw:function(c,x,y,s){ drawSVGParts(c,x,y,s,"M59.357,61.183c-0.707-1.62-2.608-2.045-3.49-3.491 c0.024-15.297,0.236-30.782-4.364-41.455c-3.329,2.691-0.162,7.669,0.437,11.782c1.059,7.273,3.026,19.377,1.31,28.364 c-1.45,7.588-8.631,12.104-15.71,14.4c-0.514-3.223-0.859-11.252,0-15.71c2.566-3.474,6.066-4.959,6.109-9.163 c0.091-8.778-14.127-10.011-15.272-1.31c-0.739,5.609,3.715,7.067,6.109,10.473c0,5.236,0,10.473,0,15.71 c-8.381-1.364-11.847-7.645-15.709-13.527c0.011-10.261-0.248-21.079,1.309-30.11c0.652-3.783,3.175-7.996,0.873-10.909 c-2.608,2.271-2.864,6.646-3.491,10.473c-1.437,8.775-1.397,20.052-1.309,30.981c-0.905,1.567-2.948,1.998-3.927,3.491 C5.94,53.84-3.919,44.41,1.321,31.073c1.393-3.545,4.816-7.31,7.854-11.345c6.461-8.584,11.632-16.452,24-17.891 c5.997-0.698,15.677,2.285,19.2,5.236c5.665,4.746,17.133,19.744,19.2,27.491C74.536,45.658,65.701,54.412,59.357,61.183z M29.249,30.637c1.023-1.482,1.023-3.754,0-5.236c-0.727,0-1.455,0-2.182,0C24.854,26.413,25.224,32.014,29.249,30.637z M44.958,30.637c1.625-0.753,1.604-4.036,0.437-5.236c-0.873,0-1.746,0-2.619,0C41.458,26.888,41.337,31.562,44.958,30.637z",null,0,0,72,72); }},
   },
   "Objects": {
-    music:     { label:"♫", draw:function(c,x,y,s){ c.fillRect(x+s*.28,y+s*.16,s*.5,s*.1);c.fillRect(x+s*.28,y+s*.3,s*.5,s*.1);c.fillRect(x+s*.62,y+s*.16,s*.1,s*.52);c.beginPath();c.ellipse(x+s*.48,y+s*.74,s*.18,s*.13,-.3,0,Math.PI*2);c.fill();c.fillRect(x+s*.28,y+s*.3,s*.1,s*.44);c.beginPath();c.ellipse(x+s*.32,y+s*.78,s*.18,s*.13,-.3,0,Math.PI*2);c.fill(); } },
-    phone:     { label:"☏", draw:function(c,x,y,s){ roundRect(c,x+s*.22,y+s*.06,s*.56,s*.88,s*.12);c.fill(); } },
-    smiley:    { label:"☺", draw:function(c,x,y,s){ c.beginPath();c.arc(x+s/2,y+s/2,s*.46,0,Math.PI*2);c.fill();c.save();c.globalCompositeOperation="destination-out";c.beginPath();c.arc(x+s*.34,y+s*.38,s*.09,0,Math.PI*2);c.fill();c.beginPath();c.arc(x+s*.66,y+s*.38,s*.09,0,Math.PI*2);c.fill();c.beginPath();c.arc(x+s/2,y+s*.5,s*.24,0,Math.PI);c.lineWidth=s*.12;c.strokeStyle="rgba(0,0,0,1)";c.stroke();c.restore(); } },
-    ghost2:    { label:"⚈", draw:function(c,x,y,s){ c.beginPath();c.arc(x+s/2,y+s*.34,s*.4,Math.PI,0);c.lineTo(x+s*.9,y+s*.92);c.lineTo(x+s*.7,y+s*.72);c.lineTo(x+s*.5,y+s*.92);c.lineTo(x+s*.3,y+s*.72);c.lineTo(x+s*.1,y+s*.92);c.closePath();c.fill(); } },
+    book: { label:"📖", draw:function(c,x,y,s){drawSVG(c,x,y,s,'M35.023,68.262C30.46,60.568,20.302,54.373,8.37,56.376 C6.936,39.8,7.644,19.162,8.01,1.988c12.786-1.433,21.775,3.868,27.014,11.166C35.023,31.523,35.023,49.893,35.023,68.262z M64.919,1.988c0,17.889,0,35.778,0,53.667 c-13.582-0.614-22.706,5.147-27.374,12.246c0-12.773,0-27.382,0-41.061c0-4.457-0.905-9.836,0-13.327 C38.827,8.568,48.744,3.26,55.193,1.988C58.422,1.351,61.753,1.707,64.919,1.988z',0.0,0.0,72.0,72.0);} },
+    house: { label:"⌂", draw:function(c,x,y,s){drawSVG(c,x,y,s,'M49.422,13.146c1.019-1.777-0.18-5.771,1.258-7.128 c0.488,0.068,0.746-0.092,0.839-0.419c7.517,0.17,2.751,9.499,4.193,14.256c0.956,3.156,6.45,6.847,9.225,9.644 c3.149,3.175,7.868,6.5,4.612,11.322c-4.364,0.18-7.211-4.169-9.644-6.709c-7.879-8.223-15.743-16.728-23.901-25.158 c-8.026,7.536-15.031,15.64-23.481,24.32c-0.781,0.802-10.335,13.266-11.322,4.612c-0.345-3.027,5.873-8.224,7.548-10.063 c8.378-9.201,18.51-18.843,25.578-27.255C41.815,2.304,43.567,9.776,49.422,13.146z M57.809,69.753c-13.703,0.698-30.325,0.698-44.028,0 c-2.438-8.63-1.334-23.742-0.419-33.125c7.13-8.105,14.819-15.651,22.224-23.481c7.872,7.643,15.617,15.412,23.062,23.481 C58.207,47.23,60.746,60.756,57.809,69.753z',0.0,0.0,72.0,72.0);} },
   },
 };
 
@@ -1610,6 +885,74 @@ SHAPES.custom_char = { label:'✎', draw:(c,x,y,s,chars)=>{
   var ch = chars && chars.length ? chars[Math.floor(Math.random()*chars.length)] : '★';
   drawChar(c,x,y,s,ch);
 }};
+
+// WHY: drawSVG uses browser Path2D API which natively parses SVG d= strings.
+// This means Hali's exact Illustrator paths are used with no manual conversion.
+// x0,y0 = SVG coordinate origin, w,h = SVG coordinate space size
+function drawSVG(ctx, cx, cy, cellSize, d, x0, y0, w, h) {
+  ctx.save();
+  ctx.translate(cx, cy);
+  var sx = cellSize / w;
+  var sy = cellSize / h;
+  ctx.scale(sx, sy);
+  ctx.translate(-x0, -y0);
+  ctx.fill(new Path2D(d));
+  ctx.restore();
+}
+
+// WHY: the Holiday & Seasonal icons were originally built in Illustrator as a
+// solid black silhouette PLUS separate white shapes drawn on top for eyes /
+// carved details (not true path holes) — so a single Path2D fill can't
+// reproduce them. We fill the black silhouette, then punch the white shapes
+// out with 'destination-out' so they show the real QR background/gradient
+// instead of a hardcoded white that would look wrong on non-white designs.
+// WHY _qrModuleRenderMode: punching the carved-out detail (a pumpkin's face,
+// a skull's eyes) out of a module that's often only a few pixels wide removes
+// too much dark fill for scanners to read reliably — tested with OpenCV's QR
+// decoder and these shapes failed to scan even at 3000px/10" print size,
+// while the solid-silhouette version scanned fine. So the picker preview
+// (plenty of pixels, purely cosmetic) still shows full carved detail, but
+// the actual QR module draw skips the punch and renders a solid silhouette.
+function drawSVGLayered(ctx, cx, cy, cellSize, blackD, whiteD, x0, y0, w, h) {
+  ctx.save();
+  ctx.translate(cx, cy);
+  var sx = cellSize / w;
+  var sy = cellSize / h;
+  ctx.scale(sx, sy);
+  ctx.translate(-x0, -y0);
+  ctx.fill(new Path2D(blackD));
+  if (whiteD && !_qrModuleRenderMode) {
+    ctx.save();
+    ctx.globalCompositeOperation = 'destination-out';
+    ctx.fill(new Path2D(whiteD));
+    ctx.restore();
+  }
+  ctx.restore();
+}
+
+// WHY: the social-media/animal icon vectors use evenodd compound paths
+// (holes built into the same path via winding, e.g. Instagram's camera
+// ring, CatHead's eyes) and some also layer a separate white shape on top
+// like the holiday icons. drawSVG's plain ctx.fill() uses nonzero winding,
+// which would fill those holes in solid — so this fills with 'evenodd'
+// explicitly, then (outside QR-module rendering) punches any white parts
+// with destination-out, same safety rule as drawSVGLayered.
+function drawSVGParts(ctx, cx, cy, cellSize, blackD, whiteD, x0, y0, w, h) {
+  ctx.save();
+  ctx.translate(cx, cy);
+  var sx = cellSize / w;
+  var sy = cellSize / h;
+  ctx.scale(sx, sy);
+  ctx.translate(-x0, -y0);
+  ctx.fill(new Path2D(blackD), 'evenodd');
+  if (whiteD && !_qrModuleRenderMode) {
+    ctx.save();
+    ctx.globalCompositeOperation = 'destination-out';
+    ctx.fill(new Path2D(whiteD), 'evenodd');
+    ctx.restore();
+  }
+  ctx.restore();
+}
 
 // ── HELPER DRAW FUNCTIONS ─────────────────────────────────────────────────────
 function roundRect(ctx,x,y,w,h,r){
@@ -1762,8 +1105,17 @@ function buildShapePickerFor(gridId, pickerFieldId, prefix, onSelect) {
       var btn = document.createElement('div');
       btn.className = 'shape-opt' + (key==='square'?' selected':'');
       btn.title = key.replace(/_/g,' ');
-      btn.textContent = SHAPE_GROUPS[group][key].label;
-      btn.style.fontSize = '1.15rem';
+      // WHY: preview the ACTUAL draw() output on a small canvas instead of a
+      // generic Unicode glyph. The glyphs (e.g. the outline-only "white
+      // hexagon"/"white pentagon" code points) didn't match the real filled
+      // shape at all — that mismatch, not the shape geometry, was why shapes
+      // in the picker looked tiny, unfilled, or wrong.
+      var cv = document.createElement('canvas');
+      cv.width = 56; cv.height = 56;
+      var cctx = cv.getContext('2d');
+      cctx.fillStyle = '#f0ece3';
+      SHAPE_GROUPS[group][key].draw(cctx, 0, 0, 56);
+      btn.appendChild(cv);
       btn.onclick = function(){
         grid.querySelectorAll('.shape-opt').forEach(b=>b.classList.remove('selected'));
         btn.classList.add('selected');
@@ -1773,27 +1125,38 @@ function buildShapePickerFor(gridId, pickerFieldId, prefix, onSelect) {
     });
     grid.appendChild(row);
   });
-  // Add custom char button at end
-  var charHeader = document.createElement('div');
-  charHeader.style.cssText='width:100%;font-family:Cinzel,serif;font-size:.6rem;letter-spacing:.1em;color:var(--muted);margin:8px 0 4px;text-transform:uppercase;';
-  charHeader.textContent = 'Custom Character';
-  grid.appendChild(charHeader);
-  var btn = document.createElement('div');
-  btn.className = 'shape-opt';
-  btn.title = 'Custom character — pick letters, numbers or symbols below';
-  btn.textContent = '✎';
-  btn.style.fontSize = '1.15rem';
-  btn.onclick = function(){
-    grid.querySelectorAll('.shape-opt').forEach(b=>b.classList.remove('selected'));
-    btn.classList.add('selected');
-    onSelect('custom_char');
-  };
-  grid.appendChild(btn);
+  // Add emojis accordion — WHY: placed before the custom-character (pencil)
+  // button per Hali's request, so emojis are discovered before the edit UI.
+  var eAcc=document.createElement('div');
+  eAcc.className='char-accordion'; eAcc.id=prefix+'-acc-emoji';
+  var eHdr=document.createElement('div');
+  eHdr.className='char-acc-header';
+  eHdr.onclick=function(){toggleCharAcc(prefix+'-acc-emoji');};
+  eHdr.innerHTML='<span class="char-acc-title">Add emojis to your design</span><span class="char-acc-arrow">▾</span>';
+  var eBdy=document.createElement('div');
+  eBdy.className='char-acc-body';
+  eBdy.innerHTML='<div style="font-size:.72rem;color:var(--gold2);line-height:1.7;margin-bottom:8px;">'
+    +'<strong>Note:</strong> Emojis render in their <strong>full original color</strong> and cannot be recolored. '
+    +'They are randomly placed as QR dots. Use letters and numbers above for full color control.</div>'
+    +'<div style="font-size:.88rem;line-height:2.2;">'
+    +'🌙 ☀️ ⚡ ❄ 🌊 🌿 🍃 🌸 🌺 🌻 🌹 🌷 🍄 🌴 🌵 🍀 ☘️ 🌈 🔥 💧 🌱 🌲 🌳 🍂 🍁<br>'
+    +'🐶 🐱 🦋 🐝 🐞 🦊 🐺 🦁 🐯 🐻 🐼 🦄 🐸 🐧 🦅 🐠 🐬 🦈 🐢 🐌 🐛 🐜<br>'
+    +'😊 😎 🥰 😂 🤩 😍 🙌 👏 ✌️ 💪 ❤️ 💛 💚 💙 💜 💖 💫 ✨ 🌟 💥 🎉 🎊 🎈 🏆 💎<br>'
+    +'🍎 🍊 🍋 🍇 🍓 🫐 🍉 🍑 🍒 🍍 🥥 🍌 🍕 🍔 🌮 🍜 🍣 🍩 🍰 🎂 🧁 🍫 ☕<br>'
+    +'🎃 🎅 🎄 🎆 🎇 🥚 🐰 🦃 🎁 🎀 🕎 ☪️ ✝️ 🪔 🏮 🧹 🪣 🧺 🧻 🧼 🧽 🫧</div>';
+  eAcc.appendChild(eHdr); eAcc.appendChild(eBdy);
+  grid.appendChild(eAcc);
 
-  // Custom Character section
+  // WHY: the pencil/custom-char shape button was removed per Hali's request
+  // — selecting it didn't visibly do anything (the letter/number/keyboard
+  // pickers above the grid aren't gated by it). The request section below
+  // (title + $5/$50 rows) stays; only this non-functional button is gone.
+
+  // Custom Character Request section — title sits directly above the
+  // request inputs below it.
   var customTitle = document.createElement('div');
   customTitle.style.cssText='width:100%;margin-top:14px;padding-top:10px;border-top:1px solid var(--line);font-family:Cinzel,serif;font-size:.68rem;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);margin-bottom:8px;';
-  customTitle.textContent='Custom Character';
+  customTitle.textContent='Custom Character Request';
   grid.appendChild(customTitle);
 
   // Generic $5 request — published to all users
@@ -1833,37 +1196,16 @@ function buildShapePickerFor(gridId, pickerFieldId, prefix, onSelect) {
   reqB2.onclick=function(){requestShape(prefix,'custom');};
   reqRow2.appendChild(reqInp2); reqRow2.appendChild(reqB2);
   grid.appendChild(reqRow2);
-
-  // Add emojis accordion
-  var eAcc=document.createElement('div');
-  eAcc.className='char-accordion'; eAcc.id=prefix+'-acc-emoji';
-  var eHdr=document.createElement('div');
-  eHdr.className='char-acc-header';
-  eHdr.onclick=function(){toggleCharAcc(prefix+'-acc-emoji');};
-  eHdr.innerHTML='<span class="char-acc-title">Add emojis to your design</span><span class="char-acc-arrow">▾</span>';
-  var eBdy=document.createElement('div');
-  eBdy.className='char-acc-body';
-  eBdy.innerHTML='<div style="font-size:.72rem;color:var(--gold2);line-height:1.7;margin-bottom:8px;">'
-    +'<strong>Note:</strong> Emojis render in their <strong>full original color</strong> and cannot be recolored. '
-    +'They are randomly placed as QR dots. Use letters and numbers above for full color control.</div>'
-    +'<div style="font-size:.88rem;line-height:2.2;">'
-    +'🌙 ☀️ ⚡ ❄ 🌊 🌿 🍃 🌸 🌺 🌻 🌹 🌷 🍄 🌴 🌵 🍀 ☘️ 🌈 🔥 💧 🌱 🌲 🌳 🍂 🍁<br>'
-    +'🐶 🐱 🦋 🐝 🐞 🦊 🐺 🦁 🐯 🐻 🐼 🦄 🐸 🐧 🦅 🐠 🐬 🦈 🐢 🐌 🐛 🐜<br>'
-    +'😊 😎 🥰 😂 🤩 😍 🙌 👏 ✌️ 💪 ❤️ 💛 💚 💙 💜 💖 💫 ✨ 🌟 💥 🎉 🎊 🎈 🏆 💎<br>'
-    +'🍎 🍊 🍋 🍇 🍓 🫐 🍉 🍑 🍒 🍍 🥥 🍌 🍕 🍔 🌮 🍜 🍣 🍩 🍰 🎂 🧁 🍫 ☕<br>'
-    +'🎃 🎅 🎄 🎆 🎇 🥚 🐰 🦃 🎁 🎀 🕎 ☪️ ✝️ 🪔 🏮 🧹 🪣 🧺 🧻 🧼 🧽 🫧</div>';
-  eAcc.appendChild(eHdr); eAcc.appendChild(eBdy);
-  grid.appendChild(eAcc);
 }
 
 document.addEventListener('DOMContentLoaded', function() {
   // WHY: DOM must be ready before getElementById calls can find elements
   buildShapePickerFor('shape-grid', null, 's', function(key){ _selectedShape=key; });
   buildShapePickerFor('d-shape-grid', null, 'd', function(key){ _selectedShapeD=key; });
-  buildCharPicker('s');
-  buildCharPicker('d');
-  // WHY: build char pickers separately — their containers are above shape grid
-  // and must be populated independently of the shape picker
+  // WHY: build char pickers once per prefix — their containers are above the
+  // shape grid and are populated independently of the shape picker. (This used
+  // to call buildCharPicker twice per prefix, which duplicated every letter/
+  // number/keyboard accordion's id and silently broke their open/close toggle.)
   buildCharPicker('s');
   buildCharPicker('d');
   setColorMode('solid','d');
@@ -1909,6 +1251,15 @@ function handleLogo(input, prefix) {
   hidden canvas and reading pixel data row by row.
 */
 function getQRMatrix(text, ec, size) {
+  // WHY: previously this reverse-engineered the module grid by sampling pixels
+  // off a rendered canvas and guessing module width from the first color
+  // transition in row 0. That transition lands at the edge of the finder
+  // pattern's 7-module-wide black border, not at 1 module, so the guessed
+  // module size was ~7x too large and the detected grid was only a handful
+  // of modules (e.g. 6 instead of the real 41) — every custom-shaped QR
+  // generated by this tool was corrupted/unscannable. qrcodejs exposes its
+  // real data model directly (_oQRCode.moduleCount / .isDark(row,col)), so
+  // read that instead of reconstructing it from pixels.
   return new Promise(function(resolve){
     var tmp = document.createElement('div');
     tmp.style.cssText = 'position:absolute;left:-9999px;top:-9999px;';
@@ -1918,34 +1269,22 @@ function getQRMatrix(text, ec, size) {
       colorDark:'#000000', colorLight:'#ffffff',
       correctLevel: QRCode.CorrectLevel[ec]
     });
-    setTimeout(function(){
-      var canvas = tmp.querySelector('canvas');
-      if (!canvas) { document.body.removeChild(tmp); resolve(null); return; }
-      var ctx = canvas.getContext('2d');
-      var data = ctx.getImageData(0,0,canvas.width,canvas.height);
-      // Detect module count from pixel pattern
-      var pw = canvas.width;
-      // Read top row to find module size
-      var moduleSize = 1;
-      var prevDark = data.data[0] < 128;
-      for (var px=1; px<pw; px++) {
-        var isDark = data.data[px*4] < 128;
-        if (isDark !== prevDark) { moduleSize = px; break; }
-      }
-      var modules = Math.round(pw/moduleSize);
-      var matrix = [];
-      for (var row=0; row<modules; row++) {
-        matrix[row] = [];
-        for (var col=0; col<modules; col++) {
-          var sx = Math.floor(col*moduleSize + moduleSize/2);
-          var sy = Math.floor(row*moduleSize + moduleSize/2);
-          var idx = (sy*pw + sx)*4;
-          matrix[row][col] = data.data[idx] < 128;
-        }
-      }
+    var model = qr._oQRCode;
+    if (!model || typeof model.isDark !== 'function') {
       document.body.removeChild(tmp);
-      resolve(matrix);
-    }, 200);
+      resolve(null);
+      return;
+    }
+    var modules = model.moduleCount;
+    var matrix = [];
+    for (var row=0; row<modules; row++) {
+      matrix[row] = [];
+      for (var col=0; col<modules; col++) {
+        matrix[row][col] = model.isDark(row, col);
+      }
+    }
+    document.body.removeChild(tmp);
+    resolve(matrix);
   });
 }
 
@@ -1981,6 +1320,7 @@ async function generateCustomQR() {
 
   // Draw modules
   ctx.fillStyle = fg;
+  _qrModuleRenderMode = true; // solid silhouettes only for real modules — see drawSVGLayered WHY
   for (var row=0; row<modules; row++) {
     for (var col=0; col<modules; col++) {
       if (!matrix[row][col]) continue;
@@ -1992,6 +1332,7 @@ async function generateCustomQR() {
       SHAPES[_selectedShape].draw(ctx, x, y, cellSize, _selectedChars['s']);
     }
   }
+  _qrModuleRenderMode = false;
 
   // Draw finder squares (corners)
   drawFinder(ctx, padding, padding, cellSize, finderOuter, finderInner);
