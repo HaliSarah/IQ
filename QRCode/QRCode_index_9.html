@@ -829,15 +829,19 @@ footer a{color:var(--muted);}footer a:hover{color:var(--white);}
       </div>
       <button class="nav-btn primary" onclick="showView('home');switchTab('dynamic')">+ New Dynamic Code</button>
     </div>
-    <!-- WHY this toolbar: the per-card checkboxes already existed for bulk
-         CSV export, but there was nowhere to act on a selection — checking
-         boxes visibly did nothing. Delete Selected is new; the other two
-         just wire up functions that already existed. -->
+    <!-- WHY this toolbar: the per-card checkboxes exist for bulk CSV export,
+         bulk stats, and bulk delete — checking one includes that code's data
+         in whichever of those three you run next. Stats and Delete Selected
+         only appear once something is checked (Export CSV stays put — it's
+         the one action worth leaving visible even with nothing selected yet,
+         since clicking it is itself the prompt to go select some). -->
     <div class="dash-toolbar">
       <button class="act-btn" onclick="selectAllQRCodes()">☑ Select All</button>
-      <button class="act-btn" onclick="downloadAllCSV()">⬇ Export CSV</button>
-      <button class="act-btn act-btn-danger" onclick="deleteSelectedQRCodes()">🗑 Delete Selected</button>
+      <button class="act-btn" onclick="openCSVExportPayment()">⬇ Export CSV — $25</button>
+      <button class="act-btn" id="dash-bulk-stats-btn" style="display:none;" onclick="openBulkStatsPanel()">📊 Stats for Selected</button>
+      <button class="act-btn act-btn-danger" id="dash-delete-selected-btn" style="display:none;" onclick="deleteSelectedQRCodes()">🗑 Delete Selected</button>
     </div>
+    <p style="font-size:.74rem;color:var(--muted);margin:-10px 0 16px;">Check codes below to include them in CSV export, bulk stats, or bulk delete.</p>
     <div id="qr-list"><div class="empty-state"><p>No QR codes yet.</p></div></div>
   </div>
 </div>
@@ -881,6 +885,42 @@ footer a{color:var(--muted);}footer a:hover{color:var(--white);}
   </div>
 </div>
 
+<!-- BULK STATS MODAL — pick which stats to view across every checked code
+     at once, instead of opening each card's own stats panel one by one. -->
+<div class="modal-bg" id="bulk-stats-modal">
+  <div class="modal">
+    <button class="modal-close" onclick="closeModal('bulk-stats-modal')">✕</button>
+    <h3>View Stats for Selected Codes</h3>
+    <p style="font-size:.82rem;color:var(--muted);margin-bottom:14px;" id="bulk-stats-sub"></p>
+    <div class="dl-opt-row"><input type="checkbox" id="bst-all" onchange="toggleBulkStatAll()">
+      <label for="bst-all">Select all</label></div>
+    <div class="dl-opt-row"><input type="checkbox" class="bst-opt" id="bst-total" data-stat="total" onchange="updateBulkStatTotal()">
+      <label for="bst-total">Total Scans</label><span class="dl-price">$5 / code</span></div>
+    <div class="dl-opt-row"><input type="checkbox" class="bst-opt" id="bst-today" data-stat="today" onchange="updateBulkStatTotal()">
+      <label for="bst-today">Scans Today</label><span class="dl-price">$5 / code</span></div>
+    <div class="dl-opt-row"><input type="checkbox" class="bst-opt" id="bst-mobile" data-stat="mobile" onchange="updateBulkStatTotal()">
+      <label for="bst-mobile">Mobile %</label><span class="dl-price">$5 / code</span></div>
+    <div class="dl-total-row"><span>Total</span><span id="bst-total-amt">$0.00</span></div>
+    <button class="gen-btn" id="bst-pay-btn" disabled onclick="openBulkStatsPayment()">Select a stat</button>
+  </div>
+</div>
+
+<!-- BRANDED CONFIRM MODAL — WHY: Hali wants every "are you sure" styled to
+     match the app instead of the browser's native confirm() box. Promise-
+     based so callers can just `if (!(await brandedConfirm('…'))) return;`
+     exactly where a confirm() call used to sit. -->
+<div class="modal-bg" id="confirm-modal">
+  <div class="modal">
+    <button class="modal-close" onclick="resolveConfirm(false)">✕</button>
+    <h3 style="color:var(--red);">Are you sure?</h3>
+    <p id="confirm-modal-msg" style="font-size:.92rem;line-height:1.6;margin:14px 0 22px;"></p>
+    <div style="display:flex;gap:10px;">
+      <button class="act-btn" style="flex:1;" onclick="resolveConfirm(false)">Cancel</button>
+      <button class="act-btn act-btn-danger" style="flex:1;" onclick="resolveConfirm(true)">Delete</button>
+    </div>
+  </div>
+</div>
+
 <!-- PAYMENT MODAL -->
 <div class="modal-bg" id="pay-modal">
   <div class="modal">
@@ -908,7 +948,14 @@ footer a{color:var(--muted);}footer a:hover{color:var(--white);}
 <script>
 var STRIPE_PK = 'pk_live_51KGEFWCL2m4xr1VIspOtCN2T1EVYCgfhsF5zgDOT4NkIKbQ8PqiPTYBmaoYzJwXqp9jkFdb2TNZOf5QKBaQh5RAv00IYVZw3oI';
 var WORKER_URL = 'https://lulu-order.halisarahparsons.workers.dev';
-var BASE_REDIRECT = 'https://iqproductionz.com/QRCode/Account/';
+// WHY ?slug= instead of a clean path (…/Account/ntn-ntn2): the redirect
+// handler at QRCode/Account/index.html only ever reads the slug from
+// window.location.search (or a #hash fallback) — it never parses the URL
+// path. A path-style slug isn't just unread by that page, it never even
+// reaches it: GitHub Pages (and most static hosts) 404 on a path with no
+// matching file before any JS runs. ?slug= hits the real, existing
+// QRCode/Account/ page every time, no server rewrite rule required.
+var BASE_REDIRECT = 'https://iqproductionz.com/QRCode/Account/?slug=';
 // WHY a username, not an email or a secret: this only lets ONE specific
 // already-registered account (signed in with its own password, same as
 // anyone else) skip the Stripe charge step so Hali can click through every
@@ -2527,10 +2574,13 @@ function buildQRItem(data) {
   var div=document.createElement('div');
   div.className='qr-item'; div.id='qritem-'+data.slug;
   div.style.position='relative';
-  // WHY: checkbox allows selecting multiple codes for bulk CSV export
+  // WHY: checkbox allows selecting multiple codes for bulk CSV export, bulk
+  // stats, and bulk delete — onchange keeps the toolbar's Stats/Delete
+  // Selected buttons in sync with whether anything is actually checked.
   var cb=document.createElement('input');
   cb.type='checkbox'; cb.className='qr-select-cb'; cb.dataset.slug=data.slug;
   cb.style.cssText='position:absolute;top:14px;left:14px;width:16px;height:16px;cursor:pointer;accent-color:var(--gold);';
+  cb.onchange=updateToolbarVisibility;
   div.appendChild(cb);
   div.style.paddingLeft='38px';
   var redirectUrl=BASE_REDIRECT+data.slug;
@@ -3062,23 +3112,15 @@ async function deleteOneQRDoc(slug) {
   await fb.deleteDoc(fb.doc(fb.db,'qrcodes',slug));
 }
 
-async function deleteQRCode(slug, name) {
-  if (!confirm('Delete "'+(name||slug)+'"? This cannot be undone — the printed QR code will stop working.')) return;
-  try {
-    await deleteOneQRDoc(slug);
-    var el=document.getElementById('qritem-'+slug);
-    if (el) el.remove();
-    delete _purchasedStats[slug];
-    toast('QR code deleted.','ok');
-    var list=document.getElementById('qr-list');
-    if (list && !list.querySelector('.qr-item')) list.innerHTML='<div class="empty-state"><p>No dynamic QR codes yet.</p></div>';
-  } catch(e) { toast('Delete failed: '+e.message,'err'); }
-}
-
+// WHY no single-code delete function/button anymore: checking just that
+// one code's box and clicking Delete Selected does the exact same thing —
+// a dedicated per-card Delete button next to it was a redundant second way
+// to do it, per Hali's request.
 async function deleteSelectedQRCodes() {
   var selected=Array.from(document.querySelectorAll('.qr-select-cb:checked')).map(cb=>cb.dataset.slug);
   if (selected.length===0) { toast('Select at least one QR code first.','err'); return; }
-  if (!confirm('Delete '+selected.length+' QR code'+(selected.length>1?'s':'')+'? This cannot be undone — the printed codes will stop working.')) return;
+  var ok=await brandedConfirm('Delete '+selected.length+' QR code'+(selected.length>1?'s':'')+'? This cannot be undone — the printed codes will stop working.');
+  if (!ok) return;
   try {
     for (var i=0;i<selected.length;i++) {
       await deleteOneQRDoc(selected[i]);
@@ -3089,6 +3131,7 @@ async function deleteSelectedQRCodes() {
     toast(selected.length+' QR code'+(selected.length>1?'s':'')+' deleted.','ok');
     var list=document.getElementById('qr-list');
     if (list && !list.querySelector('.qr-item')) list.innerHTML='<div class="empty-state"><p>No dynamic QR codes yet.</p></div>';
+    updateToolbarVisibility();
   } catch(e) { toast('Delete failed: '+e.message,'err'); }
 }
 
@@ -3356,6 +3399,23 @@ async function doSignOut(){await window._fb.signOut(window._fb.auth);showView('h
 function showErr(msg){var el=document.getElementById('auth-err');el.textContent=msg;el.style.display='block';}
 function openModal(id){document.getElementById(id).classList.add('open');}
 function closeModal(id){document.getElementById(id).classList.remove('open');}
+
+// WHY a Promise instead of the browser's confirm(): confirm() blocks the
+// whole page and looks nothing like the rest of the app — this opens the
+// same branded #confirm-modal every "are you sure" uses, and resolves once
+// the person picks Cancel or the destructive action.
+var _confirmResolve = null;
+function brandedConfirm(message){
+  return new Promise(function(resolve){
+    document.getElementById('confirm-modal-msg').textContent = message;
+    _confirmResolve = resolve;
+    openModal('confirm-modal');
+  });
+}
+function resolveConfirm(result){
+  closeModal('confirm-modal');
+  if (_confirmResolve) { var r=_confirmResolve; _confirmResolve=null; r(result); }
+}
 function toast(msg,type){var t=document.getElementById('toast');t.textContent=msg;t.className=type||'';t.style.display='block';clearTimeout(window._tt);window._tt=setTimeout(()=>t.style.display='none',3500);}
 document.querySelectorAll('.modal-bg').forEach(bg=>bg.addEventListener('click',function(e){if(e.target===bg)bg.classList.remove('open');}));
 </script>
