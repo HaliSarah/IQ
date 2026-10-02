@@ -39,7 +39,8 @@
 <script src="https://js.stripe.com/v3/"></script>
 <!-- WHY: qrcodejs generates the base QR matrix; we use a custom canvas renderer
      on top of it for shape/gradient/logo customization -->
-<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+<!-- WHY inlined, not loaded from cdnjs: when the CDN script was blocked (ad-blocker, firewall, offline), QRCode was undefined and every QR render — the live preview and the main Generate button — silently failed with a blank canvas and no error shown. Inlining removes that single point of failure. Source: qrcodejs 1.0.0 (MIT), unmodified. -->
+<script>var QRCode;!function(){function a(a){this.mode=c.MODE_8BIT_BYTE,this.data=a,this.parsedData=[];for(var b=[],d=0,e=this.data.length;e>d;d++){var f=this.data.charCodeAt(d);f>65536?(b[0]=240|(1835008&f)>>>18,b[1]=128|(258048&f)>>>12,b[2]=128|(4032&f)>>>6,b[3]=128|63&f):f>2048?(b[0]=224|(61440&f)>>>12,b[1]=128|(4032&f)>>>6,b[2]=128|63&f):f>128?(b[0]=192|(1984&f)>>>6,b[1]=128|63&f):b[0]=f,this.parsedData=this.parsedData.concat(b)}this.parsedData.length!=this.data.length&&(this.parsedData.unshift(191),this.parsedData.unshift(187),this.parsedData.unshift(239))}function b(a,b){this.typeNumber=a,this.errorCorrectLevel=b,this.modules=null,this.moduleCount=0,this.dataCache=null,this.dataList=[]}function i(a,b){if(void 0==a.length)throw new Error(a.length+"/"+b);for(var c=0;c<a.length&&0==a[c];)c++;this.num=new Array(a.length-c+b);for(var d=0;d<a.length-c;d++)this.num[d]=a[d+c]}function j(a,b){this.totalCount=a,this.dataCount=b}function k(){this.buffer=[],this.length=0}function m(){return"undefined"!=typeof CanvasRenderingContext2D}function n(){var a=!1,b=navigator.userAgent;return/android/i.test(b)&&(a=!0,aMat=b.toString().match(/android ([0-9]\.[0-9])/i),aMat&&aMat[1]&&(a=parseFloat(aMat[1]))),a}function r(a,b){for(var c=1,e=s(a),f=0,g=l.length;g>=f;f++){var h=0;switch(b){case d.L:h=l[f][0];break;case d.M:h=l[f][1];break;case d.Q:h=l[f][2];break;case d.H:h=l[f][3]}if(h>=e)break;c++}if(c>l.length)throw new Error("Too long data");return c}function s(a){var b=encodeURI(a).toString().replace(/\%[0-9a-fA-F]{2}/g,"a");return b.length+(b.length!=a?3:0)}a.prototype={getLength:function(){return this.parsedData.length},write:function(a){for(var b=0,c=this.parsedData.length;c>b;b++)a.put(this.parsedData[b],8)}},b.prototype={addData:function(b){var c=new a(b);this.dataList.push(c),this.dataCache=null},isDark:function(a,b){if(0>a||this.moduleCount<=a||0>b||this.moduleCount<=b)throw new Error(a+","+b);return this.modules[a][b]},getModuleCount:function(){return this.moduleCount},make:function(){this.makeImpl(!1,this.getBestMaskPattern())},makeImpl:function(a,c){this.moduleCount=4*this.typeNumber+17,this.modules=new Array(this.moduleCount);for(var d=0;d<this.moduleCount;d++){this.modules[d]=new Array(this.moduleCount);for(var e=0;e<this.moduleCount;e++)this.modules[d][e]=null}this.setupPositionProbePattern(0,0),this.setupPositionProbePattern(this.moduleCount-7,0),this.setupPositionProbePattern(0,this.moduleCount-7),this.setupPositionAdjustPattern(),this.setupTimingPattern(),this.setupTypeInfo(a,c),this.typeNumber>=7&&this.setupTypeNumber(a),null==this.dataCache&&(this.dataCache=b.createData(this.typeNumber,this.errorCorrectLevel,this.dataList)),this.mapData(this.dataCache,c)},setupPositionProbePattern:function(a,b){for(var c=-1;7>=c;c++)if(!(-1>=a+c||this.moduleCount<=a+c))for(var d=-1;7>=d;d++)-1>=b+d||this.moduleCount<=b+d||(this.modules[a+c][b+d]=c>=0&&6>=c&&(0==d||6==d)||d>=0&&6>=d&&(0==c||6==c)||c>=2&&4>=c&&d>=2&&4>=d?!0:!1)},getBestMaskPattern:function(){for(var a=0,b=0,c=0;8>c;c++){this.makeImpl(!0,c);var d=f.getLostPoint(this);(0==c||a>d)&&(a=d,b=c)}return b},createMovieClip:function(a,b,c){var d=a.createEmptyMovieClip(b,c),e=1;this.make();for(var f=0;f<this.modules.length;f++)for(var g=f*e,h=0;h<this.modules[f].length;h++){var i=h*e,j=this.modules[f][h];j&&(d.beginFill(0,100),d.moveTo(i,g),d.lineTo(i+e,g),d.lineTo(i+e,g+e),d.lineTo(i,g+e),d.endFill())}return d},setupTimingPattern:function(){for(var a=8;a<this.moduleCount-8;a++)null==this.modules[a][6]&&(this.modules[a][6]=0==a%2);for(var b=8;b<this.moduleCount-8;b++)null==this.modules[6][b]&&(this.modules[6][b]=0==b%2)},setupPositionAdjustPattern:function(){for(var a=f.getPatternPosition(this.typeNumber),b=0;b<a.length;b++)for(var c=0;c<a.length;c++){var d=a[b],e=a[c];if(null==this.modules[d][e])for(var g=-2;2>=g;g++)for(var h=-2;2>=h;h++)this.modules[d+g][e+h]=-2==g||2==g||-2==h||2==h||0==g&&0==h?!0:!1}},setupTypeNumber:function(a){for(var b=f.getBCHTypeNumber(this.typeNumber),c=0;18>c;c++){var d=!a&&1==(1&b>>c);this.modules[Math.floor(c/3)][c%3+this.moduleCount-8-3]=d}for(var c=0;18>c;c++){var d=!a&&1==(1&b>>c);this.modules[c%3+this.moduleCount-8-3][Math.floor(c/3)]=d}},setupTypeInfo:function(a,b){for(var c=this.errorCorrectLevel<<3|b,d=f.getBCHTypeInfo(c),e=0;15>e;e++){var g=!a&&1==(1&d>>e);6>e?this.modules[e][8]=g:8>e?this.modules[e+1][8]=g:this.modules[this.moduleCount-15+e][8]=g}for(var e=0;15>e;e++){var g=!a&&1==(1&d>>e);8>e?this.modules[8][this.moduleCount-e-1]=g:9>e?this.modules[8][15-e-1+1]=g:this.modules[8][15-e-1]=g}this.modules[this.moduleCount-8][8]=!a},mapData:function(a,b){for(var c=-1,d=this.moduleCount-1,e=7,g=0,h=this.moduleCount-1;h>0;h-=2)for(6==h&&h--;;){for(var i=0;2>i;i++)if(null==this.modules[d][h-i]){var j=!1;g<a.length&&(j=1==(1&a[g]>>>e));var k=f.getMask(b,d,h-i);k&&(j=!j),this.modules[d][h-i]=j,e--,-1==e&&(g++,e=7)}if(d+=c,0>d||this.moduleCount<=d){d-=c,c=-c;break}}}},b.PAD0=236,b.PAD1=17,b.createData=function(a,c,d){for(var e=j.getRSBlocks(a,c),g=new k,h=0;h<d.length;h++){var i=d[h];g.put(i.mode,4),g.put(i.getLength(),f.getLengthInBits(i.mode,a)),i.write(g)}for(var l=0,h=0;h<e.length;h++)l+=e[h].dataCount;if(g.getLengthInBits()>8*l)throw new Error("code length overflow. ("+g.getLengthInBits()+">"+8*l+")");for(g.getLengthInBits()+4<=8*l&&g.put(0,4);0!=g.getLengthInBits()%8;)g.putBit(!1);for(;;){if(g.getLengthInBits()>=8*l)break;if(g.put(b.PAD0,8),g.getLengthInBits()>=8*l)break;g.put(b.PAD1,8)}return b.createBytes(g,e)},b.createBytes=function(a,b){for(var c=0,d=0,e=0,g=new Array(b.length),h=new Array(b.length),j=0;j<b.length;j++){var k=b[j].dataCount,l=b[j].totalCount-k;d=Math.max(d,k),e=Math.max(e,l),g[j]=new Array(k);for(var m=0;m<g[j].length;m++)g[j][m]=255&a.buffer[m+c];c+=k;var n=f.getErrorCorrectPolynomial(l),o=new i(g[j],n.getLength()-1),p=o.mod(n);h[j]=new Array(n.getLength()-1);for(var m=0;m<h[j].length;m++){var q=m+p.getLength()-h[j].length;h[j][m]=q>=0?p.get(q):0}}for(var r=0,m=0;m<b.length;m++)r+=b[m].totalCount;for(var s=new Array(r),t=0,m=0;d>m;m++)for(var j=0;j<b.length;j++)m<g[j].length&&(s[t++]=g[j][m]);for(var m=0;e>m;m++)for(var j=0;j<b.length;j++)m<h[j].length&&(s[t++]=h[j][m]);return s};for(var c={MODE_NUMBER:1,MODE_ALPHA_NUM:2,MODE_8BIT_BYTE:4,MODE_KANJI:8},d={L:1,M:0,Q:3,H:2},e={PATTERN000:0,PATTERN001:1,PATTERN010:2,PATTERN011:3,PATTERN100:4,PATTERN101:5,PATTERN110:6,PATTERN111:7},f={PATTERN_POSITION_TABLE:[[],[6,18],[6,22],[6,26],[6,30],[6,34],[6,22,38],[6,24,42],[6,26,46],[6,28,50],[6,30,54],[6,32,58],[6,34,62],[6,26,46,66],[6,26,48,70],[6,26,50,74],[6,30,54,78],[6,30,56,82],[6,30,58,86],[6,34,62,90],[6,28,50,72,94],[6,26,50,74,98],[6,30,54,78,102],[6,28,54,80,106],[6,32,58,84,110],[6,30,58,86,114],[6,34,62,90,118],[6,26,50,74,98,122],[6,30,54,78,102,126],[6,26,52,78,104,130],[6,30,56,82,108,134],[6,34,60,86,112,138],[6,30,58,86,114,142],[6,34,62,90,118,146],[6,30,54,78,102,126,150],[6,24,50,76,102,128,154],[6,28,54,80,106,132,158],[6,32,58,84,110,136,162],[6,26,54,82,110,138,166],[6,30,58,86,114,142,170]],G15:1335,G18:7973,G15_MASK:21522,getBCHTypeInfo:function(a){for(var b=a<<10;f.getBCHDigit(b)-f.getBCHDigit(f.G15)>=0;)b^=f.G15<<f.getBCHDigit(b)-f.getBCHDigit(f.G15);return(a<<10|b)^f.G15_MASK},getBCHTypeNumber:function(a){for(var b=a<<12;f.getBCHDigit(b)-f.getBCHDigit(f.G18)>=0;)b^=f.G18<<f.getBCHDigit(b)-f.getBCHDigit(f.G18);return a<<12|b},getBCHDigit:function(a){for(var b=0;0!=a;)b++,a>>>=1;return b},getPatternPosition:function(a){return f.PATTERN_POSITION_TABLE[a-1]},getMask:function(a,b,c){switch(a){case e.PATTERN000:return 0==(b+c)%2;case e.PATTERN001:return 0==b%2;case e.PATTERN010:return 0==c%3;case e.PATTERN011:return 0==(b+c)%3;case e.PATTERN100:return 0==(Math.floor(b/2)+Math.floor(c/3))%2;case e.PATTERN101:return 0==b*c%2+b*c%3;case e.PATTERN110:return 0==(b*c%2+b*c%3)%2;case e.PATTERN111:return 0==(b*c%3+(b+c)%2)%2;default:throw new Error("bad maskPattern:"+a)}},getErrorCorrectPolynomial:function(a){for(var b=new i([1],0),c=0;a>c;c++)b=b.multiply(new i([1,g.gexp(c)],0));return b},getLengthInBits:function(a,b){if(b>=1&&10>b)switch(a){case c.MODE_NUMBER:return 10;case c.MODE_ALPHA_NUM:return 9;case c.MODE_8BIT_BYTE:return 8;case c.MODE_KANJI:return 8;default:throw new Error("mode:"+a)}else if(27>b)switch(a){case c.MODE_NUMBER:return 12;case c.MODE_ALPHA_NUM:return 11;case c.MODE_8BIT_BYTE:return 16;case c.MODE_KANJI:return 10;default:throw new Error("mode:"+a)}else{if(!(41>b))throw new Error("type:"+b);switch(a){case c.MODE_NUMBER:return 14;case c.MODE_ALPHA_NUM:return 13;case c.MODE_8BIT_BYTE:return 16;case c.MODE_KANJI:return 12;default:throw new Error("mode:"+a)}}},getLostPoint:function(a){for(var b=a.getModuleCount(),c=0,d=0;b>d;d++)for(var e=0;b>e;e++){for(var f=0,g=a.isDark(d,e),h=-1;1>=h;h++)if(!(0>d+h||d+h>=b))for(var i=-1;1>=i;i++)0>e+i||e+i>=b||(0!=h||0!=i)&&g==a.isDark(d+h,e+i)&&f++;f>5&&(c+=3+f-5)}for(var d=0;b-1>d;d++)for(var e=0;b-1>e;e++){var j=0;a.isDark(d,e)&&j++,a.isDark(d+1,e)&&j++,a.isDark(d,e+1)&&j++,a.isDark(d+1,e+1)&&j++,(0==j||4==j)&&(c+=3)}for(var d=0;b>d;d++)for(var e=0;b-6>e;e++)a.isDark(d,e)&&!a.isDark(d,e+1)&&a.isDark(d,e+2)&&a.isDark(d,e+3)&&a.isDark(d,e+4)&&!a.isDark(d,e+5)&&a.isDark(d,e+6)&&(c+=40);for(var e=0;b>e;e++)for(var d=0;b-6>d;d++)a.isDark(d,e)&&!a.isDark(d+1,e)&&a.isDark(d+2,e)&&a.isDark(d+3,e)&&a.isDark(d+4,e)&&!a.isDark(d+5,e)&&a.isDark(d+6,e)&&(c+=40);for(var k=0,e=0;b>e;e++)for(var d=0;b>d;d++)a.isDark(d,e)&&k++;var l=Math.abs(100*k/b/b-50)/5;return c+=10*l}},g={glog:function(a){if(1>a)throw new Error("glog("+a+")");return g.LOG_TABLE[a]},gexp:function(a){for(;0>a;)a+=255;for(;a>=256;)a-=255;return g.EXP_TABLE[a]},EXP_TABLE:new Array(256),LOG_TABLE:new Array(256)},h=0;8>h;h++)g.EXP_TABLE[h]=1<<h;for(var h=8;256>h;h++)g.EXP_TABLE[h]=g.EXP_TABLE[h-4]^g.EXP_TABLE[h-5]^g.EXP_TABLE[h-6]^g.EXP_TABLE[h-8];for(var h=0;255>h;h++)g.LOG_TABLE[g.EXP_TABLE[h]]=h;i.prototype={get:function(a){return this.num[a]},getLength:function(){return this.num.length},multiply:function(a){for(var b=new Array(this.getLength()+a.getLength()-1),c=0;c<this.getLength();c++)for(var d=0;d<a.getLength();d++)b[c+d]^=g.gexp(g.glog(this.get(c))+g.glog(a.get(d)));return new i(b,0)},mod:function(a){if(this.getLength()-a.getLength()<0)return this;for(var b=g.glog(this.get(0))-g.glog(a.get(0)),c=new Array(this.getLength()),d=0;d<this.getLength();d++)c[d]=this.get(d);for(var d=0;d<a.getLength();d++)c[d]^=g.gexp(g.glog(a.get(d))+b);return new i(c,0).mod(a)}},j.RS_BLOCK_TABLE=[[1,26,19],[1,26,16],[1,26,13],[1,26,9],[1,44,34],[1,44,28],[1,44,22],[1,44,16],[1,70,55],[1,70,44],[2,35,17],[2,35,13],[1,100,80],[2,50,32],[2,50,24],[4,25,9],[1,134,108],[2,67,43],[2,33,15,2,34,16],[2,33,11,2,34,12],[2,86,68],[4,43,27],[4,43,19],[4,43,15],[2,98,78],[4,49,31],[2,32,14,4,33,15],[4,39,13,1,40,14],[2,121,97],[2,60,38,2,61,39],[4,40,18,2,41,19],[4,40,14,2,41,15],[2,146,116],[3,58,36,2,59,37],[4,36,16,4,37,17],[4,36,12,4,37,13],[2,86,68,2,87,69],[4,69,43,1,70,44],[6,43,19,2,44,20],[6,43,15,2,44,16],[4,101,81],[1,80,50,4,81,51],[4,50,22,4,51,23],[3,36,12,8,37,13],[2,116,92,2,117,93],[6,58,36,2,59,37],[4,46,20,6,47,21],[7,42,14,4,43,15],[4,133,107],[8,59,37,1,60,38],[8,44,20,4,45,21],[12,33,11,4,34,12],[3,145,115,1,146,116],[4,64,40,5,65,41],[11,36,16,5,37,17],[11,36,12,5,37,13],[5,109,87,1,110,88],[5,65,41,5,66,42],[5,54,24,7,55,25],[11,36,12],[5,122,98,1,123,99],[7,73,45,3,74,46],[15,43,19,2,44,20],[3,45,15,13,46,16],[1,135,107,5,136,108],[10,74,46,1,75,47],[1,50,22,15,51,23],[2,42,14,17,43,15],[5,150,120,1,151,121],[9,69,43,4,70,44],[17,50,22,1,51,23],[2,42,14,19,43,15],[3,141,113,4,142,114],[3,70,44,11,71,45],[17,47,21,4,48,22],[9,39,13,16,40,14],[3,135,107,5,136,108],[3,67,41,13,68,42],[15,54,24,5,55,25],[15,43,15,10,44,16],[4,144,116,4,145,117],[17,68,42],[17,50,22,6,51,23],[19,46,16,6,47,17],[2,139,111,7,140,112],[17,74,46],[7,54,24,16,55,25],[34,37,13],[4,151,121,5,152,122],[4,75,47,14,76,48],[11,54,24,14,55,25],[16,45,15,14,46,16],[6,147,117,4,148,118],[6,73,45,14,74,46],[11,54,24,16,55,25],[30,46,16,2,47,17],[8,132,106,4,133,107],[8,75,47,13,76,48],[7,54,24,22,55,25],[22,45,15,13,46,16],[10,142,114,2,143,115],[19,74,46,4,75,47],[28,50,22,6,51,23],[33,46,16,4,47,17],[8,152,122,4,153,123],[22,73,45,3,74,46],[8,53,23,26,54,24],[12,45,15,28,46,16],[3,147,117,10,148,118],[3,73,45,23,74,46],[4,54,24,31,55,25],[11,45,15,31,46,16],[7,146,116,7,147,117],[21,73,45,7,74,46],[1,53,23,37,54,24],[19,45,15,26,46,16],[5,145,115,10,146,116],[19,75,47,10,76,48],[15,54,24,25,55,25],[23,45,15,25,46,16],[13,145,115,3,146,116],[2,74,46,29,75,47],[42,54,24,1,55,25],[23,45,15,28,46,16],[17,145,115],[10,74,46,23,75,47],[10,54,24,35,55,25],[19,45,15,35,46,16],[17,145,115,1,146,116],[14,74,46,21,75,47],[29,54,24,19,55,25],[11,45,15,46,46,16],[13,145,115,6,146,116],[14,74,46,23,75,47],[44,54,24,7,55,25],[59,46,16,1,47,17],[12,151,121,7,152,122],[12,75,47,26,76,48],[39,54,24,14,55,25],[22,45,15,41,46,16],[6,151,121,14,152,122],[6,75,47,34,76,48],[46,54,24,10,55,25],[2,45,15,64,46,16],[17,152,122,4,153,123],[29,74,46,14,75,47],[49,54,24,10,55,25],[24,45,15,46,46,16],[4,152,122,18,153,123],[13,74,46,32,75,47],[48,54,24,14,55,25],[42,45,15,32,46,16],[20,147,117,4,148,118],[40,75,47,7,76,48],[43,54,24,22,55,25],[10,45,15,67,46,16],[19,148,118,6,149,119],[18,75,47,31,76,48],[34,54,24,34,55,25],[20,45,15,61,46,16]],j.getRSBlocks=function(a,b){var c=j.getRsBlockTable(a,b);if(void 0==c)throw new Error("bad rs block @ typeNumber:"+a+"/errorCorrectLevel:"+b);for(var d=c.length/3,e=[],f=0;d>f;f++)for(var g=c[3*f+0],h=c[3*f+1],i=c[3*f+2],k=0;g>k;k++)e.push(new j(h,i));return e},j.getRsBlockTable=function(a,b){switch(b){case d.L:return j.RS_BLOCK_TABLE[4*(a-1)+0];case d.M:return j.RS_BLOCK_TABLE[4*(a-1)+1];case d.Q:return j.RS_BLOCK_TABLE[4*(a-1)+2];case d.H:return j.RS_BLOCK_TABLE[4*(a-1)+3];default:return void 0}},k.prototype={get:function(a){var b=Math.floor(a/8);return 1==(1&this.buffer[b]>>>7-a%8)},put:function(a,b){for(var c=0;b>c;c++)this.putBit(1==(1&a>>>b-c-1))},getLengthInBits:function(){return this.length},putBit:function(a){var b=Math.floor(this.length/8);this.buffer.length<=b&&this.buffer.push(0),a&&(this.buffer[b]|=128>>>this.length%8),this.length++}};var l=[[17,14,11,7],[32,26,20,14],[53,42,32,24],[78,62,46,34],[106,84,60,44],[134,106,74,58],[154,122,86,64],[192,152,108,84],[230,180,130,98],[271,213,151,119],[321,251,177,137],[367,287,203,155],[425,331,241,177],[458,362,258,194],[520,412,292,220],[586,450,322,250],[644,504,364,280],[718,560,394,310],[792,624,442,338],[858,666,482,382],[929,711,509,403],[1003,779,565,439],[1091,857,611,461],[1171,911,661,511],[1273,997,715,535],[1367,1059,751,593],[1465,1125,805,625],[1528,1190,868,658],[1628,1264,908,698],[1732,1370,982,742],[1840,1452,1030,790],[1952,1538,1112,842],[2068,1628,1168,898],[2188,1722,1228,958],[2303,1809,1283,983],[2431,1911,1351,1051],[2563,1989,1423,1093],[2699,2099,1499,1139],[2809,2213,1579,1219],[2953,2331,1663,1273]],o=function(){var a=function(a,b){this._el=a,this._htOption=b};return a.prototype.draw=function(a){function g(a,b){var c=document.createElementNS("http://www.w3.org/2000/svg",a);for(var d in b)b.hasOwnProperty(d)&&c.setAttribute(d,b[d]);return c}var b=this._htOption,c=this._el,d=a.getModuleCount();Math.floor(b.width/d),Math.floor(b.height/d),this.clear();var h=g("svg",{viewBox:"0 0 "+String(d)+" "+String(d),width:"100%",height:"100%",fill:b.colorLight});h.setAttributeNS("http://www.w3.org/2000/xmlns/","xmlns:xlink","http://www.w3.org/1999/xlink"),c.appendChild(h),h.appendChild(g("rect",{fill:b.colorDark,width:"1",height:"1",id:"template"}));for(var i=0;d>i;i++)for(var j=0;d>j;j++)if(a.isDark(i,j)){var k=g("use",{x:String(i),y:String(j)});k.setAttributeNS("http://www.w3.org/1999/xlink","href","#template"),h.appendChild(k)}},a.prototype.clear=function(){for(;this._el.hasChildNodes();)this._el.removeChild(this._el.lastChild)},a}(),p="svg"===document.documentElement.tagName.toLowerCase(),q=p?o:m()?function(){function a(){this._elImage.src=this._elCanvas.toDataURL("image/png"),this._elImage.style.display="block",this._elCanvas.style.display="none"}function d(a,b){var c=this;if(c._fFail=b,c._fSuccess=a,null===c._bSupportDataURI){var d=document.createElement("img"),e=function(){c._bSupportDataURI=!1,c._fFail&&_fFail.call(c)},f=function(){c._bSupportDataURI=!0,c._fSuccess&&c._fSuccess.call(c)};return d.onabort=e,d.onerror=e,d.onload=f,d.src="data:image/gif;base64,iVBORw0KGgoAAAANSUhEUgAAAAUAAAAFCAYAAACNbyblAAAAHElEQVQI12P4//8/w38GIAXDIBKE0DHxgljNBAAO9TXL0Y4OHwAAAABJRU5ErkJggg==",void 0}c._bSupportDataURI===!0&&c._fSuccess?c._fSuccess.call(c):c._bSupportDataURI===!1&&c._fFail&&c._fFail.call(c)}if(this._android&&this._android<=2.1){var b=1/window.devicePixelRatio,c=CanvasRenderingContext2D.prototype.drawImage;CanvasRenderingContext2D.prototype.drawImage=function(a,d,e,f,g,h,i,j){if("nodeName"in a&&/img/i.test(a.nodeName))for(var l=arguments.length-1;l>=1;l--)arguments[l]=arguments[l]*b;else"undefined"==typeof j&&(arguments[1]*=b,arguments[2]*=b,arguments[3]*=b,arguments[4]*=b);c.apply(this,arguments)}}var e=function(a,b){this._bIsPainted=!1,this._android=n(),this._htOption=b,this._elCanvas=document.createElement("canvas"),this._elCanvas.width=b.width,this._elCanvas.height=b.height,a.appendChild(this._elCanvas),this._el=a,this._oContext=this._elCanvas.getContext("2d"),this._bIsPainted=!1,this._elImage=document.createElement("img"),this._elImage.style.display="none",this._el.appendChild(this._elImage),this._bSupportDataURI=null};return e.prototype.draw=function(a){var b=this._elImage,c=this._oContext,d=this._htOption,e=a.getModuleCount(),f=d.width/e,g=d.height/e,h=Math.round(f),i=Math.round(g);b.style.display="none",this.clear();for(var j=0;e>j;j++)for(var k=0;e>k;k++){var l=a.isDark(j,k),m=k*f,n=j*g;c.strokeStyle=l?d.colorDark:d.colorLight,c.lineWidth=1,c.fillStyle=l?d.colorDark:d.colorLight,c.fillRect(m,n,f,g),c.strokeRect(Math.floor(m)+.5,Math.floor(n)+.5,h,i),c.strokeRect(Math.ceil(m)-.5,Math.ceil(n)-.5,h,i)}this._bIsPainted=!0},e.prototype.makeImage=function(){this._bIsPainted&&d.call(this,a)},e.prototype.isPainted=function(){return this._bIsPainted},e.prototype.clear=function(){this._oContext.clearRect(0,0,this._elCanvas.width,this._elCanvas.height),this._bIsPainted=!1},e.prototype.round=function(a){return a?Math.floor(1e3*a)/1e3:a},e}():function(){var a=function(a,b){this._el=a,this._htOption=b};return a.prototype.draw=function(a){for(var b=this._htOption,c=this._el,d=a.getModuleCount(),e=Math.floor(b.width/d),f=Math.floor(b.height/d),g=['<table style="border:0;border-collapse:collapse;">'],h=0;d>h;h++){g.push("<tr>");for(var i=0;d>i;i++)g.push('<td style="border:0;border-collapse:collapse;padding:0;margin:0;width:'+e+"px;height:"+f+"px;background-color:"+(a.isDark(h,i)?b.colorDark:b.colorLight)+';"></td>');g.push("</tr>")}g.push("</table>"),c.innerHTML=g.join("");var j=c.childNodes[0],k=(b.width-j.offsetWidth)/2,l=(b.height-j.offsetHeight)/2;k>0&&l>0&&(j.style.margin=l+"px "+k+"px")},a.prototype.clear=function(){this._el.innerHTML=""},a}();QRCode=function(a,b){if(this._htOption={width:256,height:256,typeNumber:4,colorDark:"#000000",colorLight:"#ffffff",correctLevel:d.H},"string"==typeof b&&(b={text:b}),b)for(var c in b)this._htOption[c]=b[c];"string"==typeof a&&(a=document.getElementById(a)),this._android=n(),this._el=a,this._oQRCode=null,this._oDrawing=new q(this._el,this._htOption),this._htOption.text&&this.makeCode(this._htOption.text)},QRCode.prototype.makeCode=function(a){this._oQRCode=new b(r(a,this._htOption.correctLevel),this._htOption.correctLevel),this._oQRCode.addData(a),this._oQRCode.make(),this._el.title=a,this._oDrawing.draw(this._oQRCode),this.makeImage()},QRCode.prototype.makeImage=function(){"function"==typeof this._oDrawing.makeImage&&(!this._android||this._android>=3)&&this._oDrawing.makeImage()},QRCode.prototype.clear=function(){this._oDrawing.clear()},QRCode.CorrectLevel=d}();</script>
 <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700&family=Raleway:wght@300;400;500;600&display=swap" rel="stylesheet">
 
 <style>
@@ -58,7 +59,7 @@
   --r:10px;
 }
 *{box-sizing:border-box;margin:0;padding:0;}
-body{font-family:'Raleway',sans-serif;background:var(--bg);color:var(--white);min-height:100vh;}
+body{font-family:'Raleway',sans-serif;background:var(--bg);color:var(--white);min-height:100vh;display:flex;flex-direction:column;}
 a{color:var(--gold2);text-decoration:none;}
 button{cursor:pointer;}
 input,select,textarea{font-family:inherit;}
@@ -67,7 +68,7 @@ h1,h2,h3{text-transform:none;}
 /* NAV */
 nav{display:flex;justify-content:space-between;align-items:center;padding:14px 28px;background:#222;border-bottom:1px solid var(--line);position:sticky;top:0;z-index:100;backdrop-filter:blur(8px);flex-wrap:wrap;gap:10px;}
 .nav-brand{display:flex;align-items:center;gap:10px;text-decoration:none;}
-.nav-brand img{height:32px;width:auto;filter:drop-shadow(0 0 8px rgba(201,138,46,.4));}
+.nav-brand img{height:32px;width:auto;filter:drop-shadow(0 0 8px rgba(201,138,46,.4));position:relative;top:-3px;}
 .nav-brand span{font-family:'Cinzel',serif;font-weight:700;font-size:1rem;color:var(--white);letter-spacing:1px;}
 #nav-right{display:flex;gap:8px;align-items:center;flex-wrap:wrap;}
 .nav-btn{padding:7px 16px;border-radius:7px;font-size:.82rem;font-weight:500;border:1px solid var(--line);background:transparent;color:var(--muted);transition:all .2s;font-family:'Raleway',sans-serif;}
@@ -132,8 +133,8 @@ nav{display:flex;justify-content:space-between;align-items:center;padding:14px 2
 
 .field{margin-bottom:18px;}
 .field label{display:block;font-size:.72rem;font-weight:600;letter-spacing:.05em;color:var(--muted);margin-bottom:7px;font-family:'Cinzel',serif;}
-.field input,.field select{width:100%;padding:10px 14px;background:var(--navy);border:1px solid var(--line);border-radius:7px;color:var(--white);font-size:.92rem;outline:none;transition:border-color .2s;}
-.field input:focus,.field select:focus{border-color:var(--gold);}
+.field input,.field select,.field textarea{width:100%;padding:10px 14px;background:var(--navy);border:1px solid var(--line);border-radius:7px;color:var(--white);font-size:.92rem;outline:none;transition:border-color .2s;font-family:inherit;resize:vertical;}
+.field input:focus,.field select:focus,.field textarea:focus{border-color:var(--gold);}
 .field input::placeholder{color:#555;}
 
 /* SHAPE PICKER */
@@ -191,6 +192,19 @@ nav{display:flex;justify-content:space-between;align-items:center;padding:14px 2
 .stat-box{background:var(--panel);border-radius:7px;padding:14px;text-align:center;}
 .stat-num{font-family:'Cinzel',serif;font-size:1.5rem;font-weight:700;color:var(--gold2);}
 .stat-label{font-size:.7rem;color:var(--muted);margin-top:3px;}
+/* WHY a column instead of the old lone thumbnail: the "Change Design" button
+   sits right under the QR thumbnail, per Hali's request, so the two read as
+   one unit instead of the button getting lost among the other actions. */
+.qr-item-qr-col{display:flex;flex-direction:column;align-items:center;gap:6px;flex-shrink:0;}
+.qr-item-qr-col .act-btn{font-size:.68rem;padding:5px 10px;white-space:nowrap;}
+.dl-panel{background:var(--navy);border:1px solid var(--line);border-radius:var(--r);padding:18px;margin-top:14px;display:none;width:100%;}
+.dl-opt-row{display:flex;align-items:center;gap:10px;padding:7px 0;font-size:.84rem;border-bottom:1px solid var(--line);}
+.dl-opt-row:last-of-type{border-bottom:none;}
+.dl-opt-row input[type=checkbox]{width:16px;height:16px;accent-color:var(--gold);cursor:pointer;}
+.dl-opt-row label{flex:1;cursor:pointer;}
+.dl-opt-row .dl-price{color:var(--muted);font-size:.78rem;}
+.dl-total-row{display:flex;justify-content:space-between;align-items:center;margin:12px 0 4px;font-size:.84rem;font-weight:600;}
+.dl-total-row span:last-child{color:var(--gold2);font-family:'Cinzel',serif;}
 
 /* MODALS */
 .modal-bg{display:none;position:fixed;inset:0;background:rgba(0,0,0,.75);z-index:200;align-items:center;justify-content:center;padding:20px;}
@@ -241,7 +255,11 @@ nav{display:flex;justify-content:space-between;align-items:center;padding:14px 2
 @keyframes spin{to{transform:rotate(360deg);}}
 
 #how-grid .type-card{cursor:default!important;border-color:var(--line)!important;transform:none!important;}
-footer{text-align:center;padding:40px 24px;margin-top:80px;border-top:1px solid var(--line);font-size:.76rem;color:var(--muted);}
+/* WHY margin-top:auto (not a fixed px value): with body as a flex column,
+   this pushes the footer to the bottom of the viewport on short pages
+   instead of it floating up right under the content; on tall pages it
+   behaves exactly as before and just sits after the content. */
+footer{text-align:center;padding:40px 24px;margin-top:auto;border-top:1px solid var(--line);font-size:.76rem;color:var(--muted);}
 .ftr-links{display:flex;gap:20px;justify-content:center;flex-wrap:wrap;margin-bottom:8px;}
 footer a{color:var(--muted);}footer a:hover{color:var(--white);}
 
@@ -257,7 +275,7 @@ footer a{color:var(--muted);}footer a:hover{color:var(--white);}
 <body>
 
 <nav>
-  <a class="nav-brand" href="https://iqproductionz.com/">
+  <a class="nav-brand" href="https://iqproductionz.com/QRCode">
     <img src="https://static.wixstatic.com/media/b63ec4_2117e26bc8e646c8ad8b0050222de71b~mv2.png/v1/fill/w_295,h_92,al_c,q_85,usm_0.66_1.00_0.01,enc_avif,quality_auto/IQ-noglow_edited_edited.png" alt="I.Q. Productionz" onerror="this.style.display='none'">
     <span>QR Platform</span>
   </a>
@@ -287,7 +305,7 @@ footer a{color:var(--muted);}footer a:hover{color:var(--white);}
           <li>Instant generation</li>
           <li>Custom shapes, colors &amp; gradients</li>
           <li>Logo in center</li>
-          <li>Download PNG or <strong>SVG</strong> — print-ready, infinitely scalable</li>
+          <li>PNG or <strong>SVG</strong> download — print-ready, scalable</li>
           <li>Never expires</li>
           <li class="na">Cannot change destination</li>
           <li class="na">No scan tracking</li>
@@ -304,7 +322,7 @@ footer a{color:var(--muted);}footer a:hover{color:var(--white);}
           <li>Scan count tracking</li>
           <li>Device &amp; location data</li>
           <li>Reset scan counter</li>
-          <li>Download PNG or <strong>SVG</strong> — print-ready, infinitely scalable</li>
+          <li>PNG or <strong>SVG</strong> download — print-ready, scalable</li>
           <li>Your code never expires</li>
         </ul>
         <div class="pricing-note">No monthly fee. <strong>$25</strong> to change the redirect. <strong>$5</strong> to view scan statistics.</div>
@@ -406,59 +424,28 @@ footer a{color:var(--muted);}footer a:hover{color:var(--white);}
                 <div class="char-preview-note" id="s-char-note">Select characters above — they will be randomly placed as QR dots in your chosen color.</div>
               </div>
             </div>
-            <!-- LETTERS NUMBERS KEYBOARD — above shape grid, always visible -->
+
+            <!-- LIVE PREVIEW — WHY moved here (left column, right after the
+                 basic settings) per Hali's request: the right column was
+                 getting too long once Inner Dot Style and Overall Shape grew
+                 to full libraries, and the preview belongs somewhere always
+                 visible without scrolling past everything else. Updates as
+                 shape/colors change, so Hali can see what she's building
+                 without clicking Generate every time. Uses a sample URL when
+                 the real one is still empty, so the preview is never blank. -->
             <div class="field">
-              <label>Characters as Dots — render in your chosen color</label>
-              <div class="char-picker-wrap">
-                <div class="char-accordion" id="d-acc-letters">
-                  <div class="char-acc-header" onclick="toggleCharAcc('d-acc-letters')">
-                    <span class="char-acc-title">🔤 Letters A–Z <span id="d-letters-count" style="color:var(--gold2);font-size:.6rem;"></span></span>
-                    <span class="char-acc-arrow">▾</span>
-                  </div>
-                  <div class="char-acc-body">
-                    <div class="char-acc-actions">
-                      <button class="char-acc-btn" onclick="selectAllChars('d','letters')">Select All</button>
-                      <button class="char-acc-btn" onclick="clearChars('d','letters')">Clear</button>
-                    </div>
-                    <div class="char-options" id="d-letters"></div>
-                  </div>
-                </div>
-                <div class="char-accordion" id="d-acc-numbers">
-                  <div class="char-acc-header" onclick="toggleCharAcc('d-acc-numbers')">
-                    <span class="char-acc-title">🔢 Numbers 0–9 <span id="d-numbers-count" style="color:var(--gold2);font-size:.6rem;"></span></span>
-                    <span class="char-acc-arrow">▾</span>
-                  </div>
-                  <div class="char-acc-body">
-                    <div class="char-acc-actions">
-                      <button class="char-acc-btn" onclick="selectAllChars('d','numbers')">Select All</button>
-                      <button class="char-acc-btn" onclick="clearChars('d','numbers')">Clear</button>
-                    </div>
-                    <div class="char-options" id="d-numbers"></div>
-                  </div>
-                </div>
-                <div class="char-accordion" id="d-acc-keyboard">
-                  <div class="char-acc-header" onclick="toggleCharAcc('d-acc-keyboard')">
-                    <span class="char-acc-title">⌨️ Keyboard Symbols <span id="d-keyboard-count" style="color:var(--gold2);font-size:.6rem;"></span></span>
-                    <span class="char-acc-arrow">▾</span>
-                  </div>
-                  <div class="char-acc-body">
-                    <div class="char-acc-actions">
-                      <button class="char-acc-btn" onclick="selectAllChars('d','keyboard')">Select All</button>
-                      <button class="char-acc-btn" onclick="clearChars('d','keyboard')">Clear</button>
-                    </div>
-                    <div class="char-options" id="d-keyboard"></div>
-                  </div>
-                </div>
-                <div class="char-preview-note" id="d-char-note">Select characters above — they will be randomly placed as QR dots in your chosen color.</div>
+              <label>Live Preview</label>
+              <div id="qr-live-preview-wrap" style="display:flex;align-items:center;justify-content:center;padding:14px;background:#fff;border-radius:10px;">
+                <canvas id="qr-live-canvas" width="220" height="220"></canvas>
               </div>
+              <div style="font-size:.68rem;color:var(--muted);margin-top:6px;text-align:center;" id="qr-live-note">Preview updates as you pick a shape and colors.</div>
             </div>
+
             <!-- DOT SHAPE -->
             <div class="field">
               <label>Choose Dot Type — vector shapes below respond to your chosen color</label>
               <div class="shape-grid" id="shape-grid"></div>
             </div>
-
-            
 
             <!-- LOGO UPLOAD -->
             <div class="field">
@@ -523,6 +510,35 @@ footer a{color:var(--muted);}footer a:hover{color:var(--white);}
                 <div class="grad-stop"><input type="color" id="c-finder-inner" value="#000000"><span>Inner</span></div>
               </div>
             </div>
+
+            <!-- FINDER (CORNER) STYLE — WHY only 5 options here vs. the full
+                 dot-shape picker: the corners are how a scanner locates the
+                 code, so only shapes that keep the center-line ratio intact
+                 are offered. See FINDER_RING_SHAPES' WHY in the script below. -->
+            <div class="field">
+              <label>Corner Style</label>
+              <div class="shape-grid" id="finder-style-grid" style="max-height:none;"></div>
+            </div>
+
+            <!-- INNER DOT STYLE — the small center "eye" of each finder,
+                 styled independently from the outer corner frame above. WHY
+                 NOT max-height:none like the other finder pickers: this one
+                 now offers the full dot-shape library (~50 options) per
+                 Hali's request, so it keeps the default .shape-grid scroll
+                 cap (320px, same as the main Dot Type picker on the left)
+                 instead of stretching the column out. -->
+            <div class="field">
+              <label>Inner Dot Style</label>
+              <div class="shape-grid" id="finder-dot-style-grid"></div>
+            </div>
+
+            <!-- OVERALL SHAPE — wraps the real, untouched square QR in a
+                 bigger decorative silhouette (filler dots + thin outline).
+                 See drawFrame's WHY in the script below. -->
+            <div class="field">
+              <label>Overall Shape</label>
+              <div class="shape-grid" id="frame-shape-grid" style="max-height:none;"></div>
+            </div>
           </div>
         </div><!-- end design-grid -->
 
@@ -549,6 +565,11 @@ footer a{color:var(--muted);}footer a:hover{color:var(--white);}
         <div class="field">
           <label>Initial Destination URL</label>
           <input type="text" id="d-url" placeholder="https://yourwebsite.com">
+          <!-- WHY hidden by default: only shown while editing an existing
+               code's design, where this field is locked (see enterDesignEditMode)
+               so the $5 design edit can't be used to change the destination
+               for free — that's the separate $25 "Change Redirect" feature. -->
+          <p id="d-url-lock-note" style="display:none;font-size:.72rem;color:var(--gold2);margin-top:6px;">Destination is locked here — use "Change Redirect — $25" on your dashboard to change where this code sends people.</p>
         </div>
         <p style="font-size:.8rem;color:var(--muted);margin-bottom:18px;line-height:1.55;">
           Your QR code always points to <strong style="color:var(--gold2);">iqproductionz.com/QRCode/Account/[yourcode]</strong> — redirects wherever you set. Change anytime for $25.
@@ -586,14 +607,74 @@ footer a{color:var(--muted);}footer a:hover{color:var(--white);}
               💡 <strong>Print tip:</strong> For car decals use 3000px+. For billboards or vehicle wraps use 6000px. Always <strong>download SVG</strong> for the sharpest print result — SVG scales to any size without losing quality.
             </div>
 
-            <!-- DOT SHAPE + CUSTOM CHAR PICKER -->
+            <!-- CUSTOM CHARACTER PICKER — WHY relocated here: this block's
+                 'd-' prefixed ids (d-acc-letters, d-letters, etc.) are what
+                 buildCharPicker('d') and the Dynamic tab's own JS already
+                 target, but the HTML itself had been pasted into the STATIC
+                 panel by mistake, leaving this placeholder empty and the
+                 Dynamic tab with no visible character picker at all. Moved
+                 to its correct tab while fixing the "too long" layout below. -->
+            <div class="field">
+              <label>Characters as Dots — render in your chosen color</label>
+              <div class="char-picker-wrap">
+                <div class="char-accordion" id="d-acc-letters">
+                  <div class="char-acc-header" onclick="toggleCharAcc('d-acc-letters')">
+                    <span class="char-acc-title">🔤 Letters A–Z <span id="d-letters-count" style="color:var(--gold2);font-size:.6rem;"></span></span>
+                    <span class="char-acc-arrow">▾</span>
+                  </div>
+                  <div class="char-acc-body">
+                    <div class="char-acc-actions">
+                      <button class="char-acc-btn" onclick="selectAllChars('d','letters')">Select All</button>
+                      <button class="char-acc-btn" onclick="clearChars('d','letters')">Clear</button>
+                    </div>
+                    <div class="char-options" id="d-letters"></div>
+                  </div>
+                </div>
+                <div class="char-accordion" id="d-acc-numbers">
+                  <div class="char-acc-header" onclick="toggleCharAcc('d-acc-numbers')">
+                    <span class="char-acc-title">🔢 Numbers 0–9 <span id="d-numbers-count" style="color:var(--gold2);font-size:.6rem;"></span></span>
+                    <span class="char-acc-arrow">▾</span>
+                  </div>
+                  <div class="char-acc-body">
+                    <div class="char-acc-actions">
+                      <button class="char-acc-btn" onclick="selectAllChars('d','numbers')">Select All</button>
+                      <button class="char-acc-btn" onclick="clearChars('d','numbers')">Clear</button>
+                    </div>
+                    <div class="char-options" id="d-numbers"></div>
+                  </div>
+                </div>
+                <div class="char-accordion" id="d-acc-keyboard">
+                  <div class="char-acc-header" onclick="toggleCharAcc('d-acc-keyboard')">
+                    <span class="char-acc-title">⌨️ Keyboard Symbols <span id="d-keyboard-count" style="color:var(--gold2);font-size:.6rem;"></span></span>
+                    <span class="char-acc-arrow">▾</span>
+                  </div>
+                  <div class="char-acc-body">
+                    <div class="char-acc-actions">
+                      <button class="char-acc-btn" onclick="selectAllChars('d','keyboard')">Select All</button>
+                      <button class="char-acc-btn" onclick="clearChars('d','keyboard')">Clear</button>
+                    </div>
+                    <div class="char-options" id="d-keyboard"></div>
+                  </div>
+                </div>
+                <div class="char-preview-note" id="d-char-note">Select characters above — they will be randomly placed as QR dots in your chosen color.</div>
+              </div>
+            </div>
+
+            <!-- LIVE PREVIEW — moved to the left column; see the Static
+                 tab's matching block for the WHY. -->
+            <div class="field">
+              <label>Live Preview</label>
+              <div id="d-qr-live-preview-wrap" style="display:flex;align-items:center;justify-content:center;padding:14px;background:#fff;border-radius:10px;">
+                <canvas id="d-qr-live-canvas" width="220" height="220"></canvas>
+              </div>
+              <div style="font-size:.68rem;color:var(--muted);margin-top:6px;text-align:center;" id="d-qr-live-note">Preview updates as you pick a shape and colors.</div>
+            </div>
+
+            <!-- DOT SHAPE -->
             <div class="field">
               <label>Choose Dot Type — vector shapes below respond to your chosen color</label>
               <div class="shape-grid" id="d-shape-grid"></div>
             </div>
-
-            <!-- CUSTOM CHARACTER PICKER -->
-            
 
             <div class="field">
               <label>Center Logo (optional)</label>
@@ -650,11 +731,31 @@ footer a{color:var(--muted);}footer a:hover{color:var(--white);}
                 <div class="grad-stop"><input type="color" id="d-c-finder-inner" value="#000000"><span>Inner</span></div>
               </div>
             </div>
+
+            <!-- FINDER (CORNER) STYLE — mirrors the Static tab's; see that
+                 block's WHY and FINDER_RING_SHAPES' WHY in the script below. -->
+            <div class="field">
+              <label>Corner Style</label>
+              <div class="shape-grid" id="d-finder-style-grid" style="max-height:none;"></div>
+            </div>
+
+            <!-- INNER DOT STYLE — mirrors the Static tab's; see its WHY on
+                 not capping with max-height:none. -->
+            <div class="field">
+              <label>Inner Dot Style</label>
+              <div class="shape-grid" id="d-finder-dot-style-grid"></div>
+            </div>
+
+            <!-- OVERALL SHAPE — mirrors the Static tab's. -->
+            <div class="field">
+              <label>Overall Shape</label>
+              <div class="shape-grid" id="d-frame-shape-grid" style="max-height:none;"></div>
+            </div>
           </div>
         </div><!-- end design-grid -->
 
-        <button class="gen-btn" onclick="createDynamic()">Create Dynamic QR Code — Free to Start</button>
-        <p style="font-size:.74rem;color:var(--muted);margin-top:10px;text-align:center;">Account required &#8212; sign in or sign up to continue.</p>
+        <button class="gen-btn" id="dyn-gen-btn" onclick="createDynamic()">Create Dynamic QR Code — Free to Start</button>
+        <p style="font-size:.74rem;color:var(--muted);margin-top:10px;text-align:center;" id="dyn-gen-note">Account required &#8212; sign in or sign up to continue.</p>
       </div>
     </div>
   </div>
@@ -774,6 +875,9 @@ var _currentQRItem = null;
 var _logoImg = null;
 var _colorMode = 'solid';
 var _selectedShape = 'square';
+var _finderStyle = 'square';
+var _finderDotStyle = 'square';
+var _frameShape = 'none';
 var _qrModuleRenderMode = false; // true only while drawing actual QR modules; see drawSVGLayered
 window._cv = 'home';
 
@@ -885,6 +989,298 @@ SHAPES.custom_char = { label:'✎', draw:(c,x,y,s,chars)=>{
   var ch = chars && chars.length ? chars[Math.floor(Math.random()*chars.length)] : '★';
   drawChar(c,x,y,s,ch);
 }};
+
+// ── FINDER (CORNER) STYLES ──────────────────────────────────────────────────
+// WHY a separate, much smaller set than the dot SHAPES above: the three
+// corner "finder" squares are how a scanner LOCATES the code in the first
+// place — it looks for the nested-ring 1:1:3:1:1 dark:light:dark:light:dark
+// ratio along a straight line through the center. A shape that stays
+// symmetric on both the horizontal and vertical center lines (square,
+// rounded square, circle) keeps that ratio intact no matter which way the
+// scanner crosses it. Anything with points or notches (the dot shapes —
+// stars, crosses, icons, triangles) breaks it, because the ring thickness
+// changes depending on exactly where the line crosses — a triangle is worse
+// than diamond here since it isn't even symmetric top-to-bottom, so it's
+// deliberately left out. Diamond preserves the exact ratio on the two
+// center lines themselves (its widest point is exactly at center), but any
+// OTHER line through it is narrower than a square's or circle's would be at
+// the same offset — synthetic scan testing flagged both circle and diamond
+// as unreliable, but Hali confirmed both scan fine on her own phone, which
+// matches the known gap between real camera-based scanners (much more
+// tolerant) and the simpler algorithmic detectors used for automated
+// testing here. Teardrop (one corner fully rounded, the other three sharp)
+// is included on the same basis — another vendor's generator offers it and
+// Hali has seen it work in practice.
+//
+// WHY outer "ring" shapes and the inner "dot" shape are now independent:
+// the outer two rings (the dark border and the background gap inside it)
+// share one shape so the border reads as a uniform frame, while the small
+// 3×3 center "eye" can be styled on its own — this is the same corner-frame
+// vs. corner-dot split most QR styling tools use, and it's what Hali asked
+// for ("the inner dot options... there's still no place to choose that").
+var FINDER_RING_SHAPES = {
+  square: function(ctx, cx, cy, r, color) {
+    ctx.fillStyle = color;
+    ctx.fillRect(cx-r, cy-r, r*2, r*2);
+  },
+  rounded: function(ctx, cx, cy, r, color) {
+    ctx.fillStyle = color;
+    roundRectPath(ctx, cx-r, cy-r, r*2, r*2, r*0.46);
+    ctx.fill();
+  },
+  circle: function(ctx, cx, cy, r, color) {
+    ctx.fillStyle = color;
+    ctx.beginPath();
+    ctx.arc(cx, cy, r, 0, Math.PI*2);
+    ctx.fill();
+  },
+  diamond: function(ctx, cx, cy, r, color) {
+    ctx.fillStyle = color;
+    ctx.beginPath();
+    ctx.moveTo(cx, cy-r); ctx.lineTo(cx+r, cy); ctx.lineTo(cx, cy+r); ctx.lineTo(cx-r, cy);
+    ctx.closePath();
+    ctx.fill();
+  },
+  teardrop: function(ctx, cx, cy, r, color) {
+    ctx.fillStyle = color;
+    // WHY one corner at the full radius, the other three at 0: a classic
+    // teardrop/leaf finder is a square with three sharp corners and one
+    // corner rounded into a full quarter-circle, not a uniformly-rounded
+    // square. Bottom-right is rounded, matching the common convention of
+    // using the same orientation on all three finders (not rotated to
+    // "point" toward the center of the code).
+    roundRectPath(ctx, cx-r, cy-r, r*2, r*2, [0, 0, r, 0]);
+    ctx.fill();
+  }
+};
+
+var FINDER_STYLE_LABELS = {
+  square: 'Square', rounded: 'Rounded', circle: 'Circle', diamond: 'Diamond', teardrop: 'Teardrop'
+};
+
+// WHY a shared path builder: both rounded() and teardrop() need an
+// arbitrary-per-corner rounded-rect path, and ctx.roundRect's radii-array
+// form isn't in every canvas implementation (older browsers, some headless
+// renderers), so this always has the manual fallback available.
+function roundRectPath(ctx, x, y, w, h, radii) {
+  if (typeof radii === 'number') radii = [radii, radii, radii, radii];
+  var tl=radii[0], tr=radii[1], br=radii[2], bl=radii[3];
+  if (ctx.roundRect) { ctx.beginPath(); ctx.roundRect(x, y, w, h, [tl,tr,br,bl]); return; }
+  ctx.beginPath();
+  ctx.moveTo(x+tl, y);
+  ctx.lineTo(x+w-tr, y);
+  ctx.arcTo(x+w, y, x+w, y+tr, tr);
+  ctx.lineTo(x+w, y+h-br);
+  ctx.arcTo(x+w, y+h, x+w-br, y+h, br);
+  ctx.lineTo(x+bl, y+h);
+  ctx.arcTo(x, y+h, x, y+h-bl, bl);
+  ctx.lineTo(x, y+tl);
+  ctx.arcTo(x, y, x+tl, y, tl);
+  ctx.closePath();
+}
+
+// WHY a composite drawer: draws the full 3-ring finder (outer border + bg
+// gap in the OUTER shape, inner eye in its own, possibly different, shape).
+function drawFinderComposite(ctx, x, y, cellSize, outerColor, innerColor, gapColor, outerKey, innerKey, chars) {
+  var cx = x+cellSize*3.5, cy = y+cellSize*3.5;
+  var outerFn = FINDER_RING_SHAPES[outerKey] || FINDER_RING_SHAPES.square;
+  outerFn(ctx, cx, cy, cellSize*3.5, outerColor);
+  outerFn(ctx, cx, cy, cellSize*2.5, gapColor || '#ffffff');
+  drawFinderInnerDot(ctx, cx, cy, cellSize*1.5, innerColor, innerKey || outerKey, chars);
+}
+
+// WHY the inner eye needs its own draw path instead of just reusing
+// FINDER_RING_SHAPES like the outer ring does: Hali asked for the inner dot
+// picker to offer every shape the main "Choose Dot Type" picker does, not
+// just the five finder-safe outlines. Those five live in FINDER_RING_SHAPES
+// and draw with a (ctx,cx,cy,r,color) contract; the full dot library lives
+// in SHAPES and draws with (ctx,x,y,boxSize,chars). This tries the fast
+// finder-safe path first (unchanged for every design saved before this),
+// and otherwise adapts center+radius into a top-left+box call for whichever
+// shape from the full library was picked.
+function drawFinderInnerDot(ctx, cx, cy, r, color, key, chars) {
+  var ringFn = FINDER_RING_SHAPES[key];
+  if (ringFn) { ringFn(ctx, cx, cy, r, color); return; }
+  var def = SHAPES[key] || SHAPES['dot'];
+  ctx.fillStyle = color;
+  _qrModuleRenderMode = true; // solid silhouette, same as real modules — see drawSVGLayered WHY
+  def.draw(ctx, cx-r, cy-r, r*2, chars || []);
+  _qrModuleRenderMode = false;
+}
+
+// WHY a tiny, separate picker builder (not buildShapePickerFor): only a
+// handful of options, no categories/accordion/custom-request section —
+// this is only the outer Corner Style picker now (the inner eye uses
+// buildInnerDotPickerFor below, which needs the full grouped library).
+function buildFinderStylePickerFor(gridId, prefix, onSelect) {
+  var grid = document.getElementById(gridId);
+  if (!grid) return;
+  // WHY a flex row wrapper: .shape-grid's own CSS only turns a DIRECT CHILD
+  // div with an inline "flex" style into a wrapping flex row (that's how
+  // buildShapePickerFor's category rows lay out side by side) — appending
+  // the buttons straight onto the block-level grid would stack them
+  // vertically instead.
+  var row = document.createElement('div');
+  row.style.cssText = 'display:flex;flex-wrap:wrap;gap:5px;';
+  grid.appendChild(row);
+  Object.keys(FINDER_RING_SHAPES).forEach(function(key){
+    var btn = document.createElement('div');
+    btn.className = 'shape-opt' + (key==='square' ? ' selected' : '');
+    // WHY inline overrides instead of a new CSS class: .shape-opt is a
+    // fixed 44×44 row-flex box sized for an icon-only swatch (the dot
+    // picker). These options need room for a text label too, so they get
+    // their own size/direction without touching that shared rule.
+    btn.style.cssText = 'width:auto;height:auto;flex-direction:column;padding:6px 8px;gap:2px;';
+    btn.title = FINDER_STYLE_LABELS[key];
+    btn.dataset.finderKey = key;
+    var cv = document.createElement('canvas');
+    cv.width = 56; cv.height = 56;
+    cv.style.cssText = 'width:36px;height:36px;';
+    var cctx = cv.getContext('2d');
+    drawFinderComposite(cctx, 0, 0, 8, '#f0ece3', '#f0ece3', 'transparent', key, key);
+    btn.appendChild(cv);
+    var lbl = document.createElement('div');
+    lbl.style.cssText = 'font-size:.58rem;color:var(--muted);text-align:center;white-space:nowrap;';
+    lbl.textContent = FINDER_STYLE_LABELS[key];
+    btn.appendChild(lbl);
+    btn.onclick = function(){
+      grid.querySelectorAll('.shape-opt').forEach(function(b){ b.classList.remove('selected'); });
+      btn.classList.add('selected');
+      onSelect(key);
+    };
+    row.appendChild(btn);
+  });
+}
+
+// WHY the inner eye gets the SAME grouped layout as the main "Choose Dot
+// Type" picker (buildShapePickerFor) instead of reusing it directly: that
+// one also renders the emoji accordion and $5/$50 custom-character request
+// sections, which don't belong on a finder-eye picker. This mirrors just
+// its category-grid part — every SHAPE_GROUPS entry, grouped with the same
+// headers — so "the options I have as the main dot options" means exactly
+// that here. Reuses dataset.finderKey so setFinderGridSelection keeps
+// working to re-highlight a saved design's choice.
+function buildInnerDotPickerFor(gridId, prefix, onSelect) {
+  var grid = document.getElementById(gridId);
+  if (!grid) return;
+  Object.keys(SHAPE_GROUPS).forEach(function(group){
+    var header = document.createElement('div');
+    header.style.cssText='width:100%;font-family:Cinzel,serif;font-size:.6rem;letter-spacing:.1em;color:var(--muted);margin:8px 0 4px;text-transform:uppercase;';
+    header.textContent = group;
+    grid.appendChild(header);
+    var row = document.createElement('div');
+    row.style.cssText='display:flex;flex-wrap:wrap;gap:5px;margin-bottom:4px;';
+    Object.keys(SHAPE_GROUPS[group]).forEach(function(key){
+      var btn = document.createElement('div');
+      btn.className = 'shape-opt' + (key==='square' ? ' selected' : '');
+      btn.title = key.replace(/_/g,' ');
+      btn.dataset.finderKey = key;
+      var cv = document.createElement('canvas');
+      cv.width = 56; cv.height = 56;
+      var cctx = cv.getContext('2d');
+      cctx.fillStyle = '#f0ece3';
+      _qrModuleRenderMode = true;
+      SHAPE_GROUPS[group][key].draw(cctx, 0, 0, 56, []);
+      _qrModuleRenderMode = false;
+      btn.appendChild(cv);
+      btn.onclick = function(){
+        grid.querySelectorAll('.shape-opt').forEach(function(b){ b.classList.remove('selected'); });
+        btn.classList.add('selected');
+        onSelect(key);
+      };
+      row.appendChild(btn);
+    });
+    grid.appendChild(row);
+  });
+}
+
+function setFinderGridSelection(gridId, key) {
+  var grid = document.getElementById(gridId);
+  if (!grid) return;
+  grid.querySelectorAll('.shape-opt').forEach(function(b){
+    b.classList.toggle('selected', b.dataset.finderKey === key);
+  });
+}
+
+// ── OVERALL SHAPE (FRAME) PICKER ────────────────────────────────────────────
+// WHY only these 7, not every dot SHAPES key: a jagged or very narrow
+// silhouette (a snowflake, a key, a thin crescent) leaves almost no room
+// for the real square QR to sit inside it without being cut into — these
+// seven are the shapes that stay reasonably "round" or full near their own
+// center, per Hali's request to limit the list to ones the square actually
+// fits inside. 'dot' is the plain filled circle SHAPES key — labeled
+// "Circle" here since that's what it reads as at this size.
+var FRAME_SHAPE_OPTIONS = [
+  { key:'dot',     label:'Circle' },
+  { key:'diamond', label:'Diamond' },
+  { key:'tri_up',  label:'Triangle' },
+  { key:'hexagon', label:'Hexagon' },
+  { key:'octagon', label:'Octagon' },
+  { key:'star5',   label:'Star' },
+  { key:'heart',   label:'Heart' }
+];
+
+// WHY its own lightweight builder instead of reusing buildShapePickerFor:
+// that one also renders the emoji accordion and the $5/$50 custom-character
+// request sections, which don't apply to picking a silhouette.
+function buildFrameShapePickerFor(gridId, prefix, onSelect) {
+  var grid = document.getElementById(gridId);
+  if (!grid) return;
+  var row = document.createElement('div');
+  row.style.cssText = 'display:flex;flex-wrap:wrap;gap:5px;';
+  grid.appendChild(row);
+
+  function addOption(key, label, drawFn) {
+    var btn = document.createElement('div');
+    btn.className = 'shape-opt' + (key==='none' ? ' selected' : '');
+    btn.style.cssText = 'width:auto;height:auto;flex-direction:column;padding:6px 8px;gap:2px;';
+    btn.title = label;
+    btn.dataset.frameKey = key;
+    var cv = document.createElement('canvas');
+    cv.width = 56; cv.height = 56;
+    cv.style.cssText = 'width:36px;height:36px;';
+    var cctx = cv.getContext('2d');
+    drawFn(cctx);
+    btn.appendChild(cv);
+    var lbl = document.createElement('div');
+    lbl.style.cssText = 'font-size:.58rem;color:var(--muted);text-align:center;white-space:nowrap;';
+    lbl.textContent = label;
+    btn.appendChild(lbl);
+    btn.onclick = function(){
+      grid.querySelectorAll('.shape-opt').forEach(function(b){ b.classList.remove('selected'); });
+      btn.classList.add('selected');
+      onSelect(key);
+    };
+    row.appendChild(btn);
+  }
+
+  // "None" preview: a plain square outline, since that's what a frame-less
+  // QR's own edge looks like.
+  addOption('none', 'None', function(cctx){
+    cctx.strokeStyle = '#f0ece3';
+    cctx.lineWidth = 2;
+    cctx.strokeRect(8, 8, 40, 40);
+  });
+
+  FRAME_SHAPE_OPTIONS.forEach(function(opt){
+    var def = SHAPES[opt.key];
+    if (!def) return;
+    addOption(opt.key, opt.label, function(cctx){
+      cctx.fillStyle = '#f0ece3';
+      _qrModuleRenderMode = true;
+      def.draw(cctx, 4, 4, 48, []);
+      _qrModuleRenderMode = false;
+    });
+  });
+}
+
+function setFrameGridSelection(gridId, key) {
+  var grid = document.getElementById(gridId);
+  if (!grid) return;
+  grid.querySelectorAll('.shape-opt').forEach(function(b){
+    b.classList.toggle('selected', b.dataset.frameKey === key);
+  });
+}
 
 // WHY: drawSVG uses browser Path2D API which natively parses SVG d= strings.
 // This means Hali's exact Illustrator paths are used with no manual conversion.
@@ -1089,6 +1485,19 @@ function updateCharNote(prefix) {
 
 // ── BUILD SHAPE PICKER ────────────────────────────────────────────────────────
 var _selectedShapeD = 'square';
+var _finderStyleD = 'square';
+var _finderDotStyleD = 'square';
+var _frameShapeD = 'none';
+
+// WHY: used by applyDesignSettings() to re-highlight the saved shape when
+// routing a customer back into the generator to edit an existing design.
+function setGridSelection(gridId, key) {
+  var grid = document.getElementById(gridId);
+  if (!grid) return;
+  grid.querySelectorAll('.shape-opt').forEach(function(b){
+    b.classList.toggle('selected', b.dataset.shapeKey === key);
+  });
+}
 
 function buildShapePickerFor(gridId, pickerFieldId, prefix, onSelect) {
   var grid = document.getElementById(gridId);
@@ -1105,6 +1514,7 @@ function buildShapePickerFor(gridId, pickerFieldId, prefix, onSelect) {
       var btn = document.createElement('div');
       btn.className = 'shape-opt' + (key==='square'?' selected':'');
       btn.title = key.replace(/_/g,' ');
+      btn.dataset.shapeKey = key; // WHY: lets setGridSelection() re-highlight a shape programmatically (used when pre-filling the design-edit flow)
       // WHY: preview the ACTUAL draw() output on a small canvas instead of a
       // generic Unicode glyph. The glyphs (e.g. the outline-only "white
       // hexagon"/"white pentagon" code points) didn't match the real filled
@@ -1200,8 +1610,14 @@ function buildShapePickerFor(gridId, pickerFieldId, prefix, onSelect) {
 
 document.addEventListener('DOMContentLoaded', function() {
   // WHY: DOM must be ready before getElementById calls can find elements
-  buildShapePickerFor('shape-grid', null, 's', function(key){ _selectedShape=key; });
-  buildShapePickerFor('d-shape-grid', null, 'd', function(key){ _selectedShapeD=key; });
+  buildShapePickerFor('shape-grid', null, 's', function(key){ _selectedShape=key; scheduleLivePreview('s'); });
+  buildShapePickerFor('d-shape-grid', null, 'd', function(key){ _selectedShapeD=key; scheduleLivePreview('d'); });
+  buildFinderStylePickerFor('finder-style-grid', 's', function(key){ _finderStyle=key; scheduleLivePreview('s'); });
+  buildFinderStylePickerFor('d-finder-style-grid', 'd', function(key){ _finderStyleD=key; scheduleLivePreview('d'); });
+  buildInnerDotPickerFor('finder-dot-style-grid', 's', function(key){ _finderDotStyle=key; scheduleLivePreview('s'); });
+  buildInnerDotPickerFor('d-finder-dot-style-grid', 'd', function(key){ _finderDotStyleD=key; scheduleLivePreview('d'); });
+  buildFrameShapePickerFor('frame-shape-grid', 's', function(key){ _frameShape=key; scheduleLivePreview('s'); });
+  buildFrameShapePickerFor('d-frame-shape-grid', 'd', function(key){ _frameShapeD=key; scheduleLivePreview('d'); });
   // WHY: build char pickers once per prefix — their containers are above the
   // shape grid and are populated independently of the shape picker. (This used
   // to call buildCharPicker twice per prefix, which duplicated every letter/
@@ -1210,6 +1626,22 @@ document.addEventListener('DOMContentLoaded', function() {
   buildCharPicker('d');
   setColorMode('solid','d');
   switchTab('dynamic');
+
+  // WHY: wire every control that affects the live preview (under the color
+  // pickers) to re-render it, debounced — both tabs now have a working
+  // preview, so both sets of fields are wired, each to its own prefix.
+  ['s-url','s-ec','c-fg','c-bg','g2-1','g2-2','g2-bg','g2-dir','g4-1','g4-2','g4-3','g4-4','g4-bg','c-finder-outer','c-finder-inner']
+    .forEach(function(id){
+      var el = document.getElementById(id);
+      if (el) el.addEventListener('input', function(){ scheduleLivePreview('s'); });
+    });
+  ['d-url','d-ec','d-c-fg','d-c-bg','d-g2-1','d-g2-2','d-g2-bg','d-g2-dir','d-g4-1','d-g4-2','d-g4-3','d-g4-4','d-g4-bg','d-c-finder-outer','d-c-finder-inner']
+    .forEach(function(id){
+      var el = document.getElementById(id);
+      if (el) el.addEventListener('input', function(){ scheduleLivePreview('d'); });
+    });
+  scheduleLivePreview('s');
+  scheduleLivePreview('d');
 });
 
 // ── COLOR MODE ────────────────────────────────────────────────────────────────
@@ -1224,6 +1656,10 @@ function setColorMode(mode, prefix) {
     if(ce) ce.style.display=m===mode?'':'none';
     if(me) me.classList.toggle('active',m===mode);
   });
+  // WHY unconditional now: both tabs have a live preview, so a color-mode
+  // switch on either one needs to re-render its own preview (this used to
+  // only fire for the Static tab, back when the Dynamic tab had none).
+  if (typeof scheduleLivePreview==='function') scheduleLivePreview(prefix);
 }
 
 // ── LOGO UPLOAD ───────────────────────────────────────────────────────────────
@@ -1234,12 +1670,20 @@ function handleLogo(input, prefix) {
   var file = input.files[0]; if (!file) return;
   var reader = new FileReader();
   reader.onload = function(e) {
-    var img = new Image(); img.src = e.target.result;
+    var img = new Image();
+    // WHY onload here (not just after setting .src): the image loads
+    // asynchronously, and renderQRCore only draws it once img.complete is
+    // true — without this, the debounced preview could fire first and miss
+    // the just-uploaded logo. Both tabs now have a preview, so this applies
+    // to either prefix.
+    img.onload = function(){ scheduleLivePreview(prefix); };
+    img.src = e.target.result;
     if (prefix==='d') _logoImgD=img; else _logoImg=img;
     var labelId = prefix==='d'?'d-logo-label':'logo-label';
     var dropId  = prefix==='d'?'d-logo-drop':'logo-drop';
     document.getElementById(labelId).textContent = '✓ ' + file.name + ' — click to change';
     document.getElementById(dropId).style.borderColor = 'var(--gold)';
+    scheduleLivePreview(prefix);
   };
   reader.readAsDataURL(file);
 }
@@ -1289,34 +1733,376 @@ function getQRMatrix(text, ec, size) {
 }
 
 // ── CUSTOM QR RENDERER ────────────────────────────────────────────────────────
-async function generateCustomQR() {
-  var url = document.getElementById('s-url').value.trim();
-  if (!url) { toast('Enter a URL or text to encode.','err'); return; }
-  var size = parseInt(document.getElementById('s-size').value);
-  var ec   = document.getElementById('s-ec').value;
+// WHY split into a core renderer: both the final "Generate QR Code" output
+// and the live preview under the color pickers need the exact same
+// shape/color/finder drawing logic — this used to live only inside
+// generateCustomQR, which made it impossible to reuse for a preview without
+// duplicating (and inevitably drifting from) the real rendering.
+//
+// WHY a prefix param (added when the Dynamic tab got its own live preview):
+// the Static tab's fields have no prefix on the color/shape ids (c-fg,
+// g2-1, shape-grid…) while the Dynamic tab's are all "d-" prefixed — see
+// fieldId() just below. Passing 's' or 'd' lets this one renderer read
+// whichever tab's current DOM state without duplicating all this logic.
+function fieldId(prefix, base) {
+  if (prefix === 's') return (base==='url'||base==='ec'||base==='size') ? 's-'+base : base;
+  return 'd-' + base;
+}
 
+// WHY a settings-object mode too: the dashboard thumbnail and the paid
+// PNG/JPG/SVG downloads need to render a SPECIFIC saved QR code's design —
+// not whatever the generator form currently happens to show — so they can't
+// read live DOM fields the way the Static/Dynamic generators do. Passing a
+// plain object (shape/colorMode/colors/ec, as saved by captureDesignSettings)
+// instead of 's'/'d' renders from that literal data instead of the DOM,
+// through the exact same drawing code, so a saved design never drifts from
+// what the generator actually produces.
+var DEFAULT_DESIGN = {
+  shape:'square', colorMode:'solid', ec:'M', size:300,
+  finderStyle:'square', finderDotStyle:'square', frameShape:'none',
+  colors:{ fg:'#000000', bg:'#ffffff',
+    g2_1:'#c98a2e', g2_2:'#4A1060', g2_bg:'#ffffff', g2_dir:'horizontal',
+    g4_1:'#c98a2e', g4_2:'#e0a84a', g4_3:'#4A1060', g4_4:'#6B2D8E', g4_bg:'#ffffff',
+    finderOuter:'#000000', finderInner:'#000000' }
+};
+
+function resolveRenderSettings(prefix) {
+  if (prefix && typeof prefix === 'object') {
+    var d = prefix;
+    var c = d.colors || {};
+    return {
+      shape: d.shape || 'square',
+      colorMode: d.colorMode || 'solid',
+      finderStyle: d.finderStyle || 'square',
+      // WHY fall back to finderStyle, not 'square': a design saved before
+      // the inner/outer split existed only has finderStyle, and it used to
+      // mean "all three rings" — so an old saved circle/diamond finder
+      // should keep looking the same (inner matching outer) rather than
+      // silently reverting its eye to square.
+      finderDotStyle: d.finderDotStyle || d.finderStyle || 'square',
+      frameShape: d.frameShape || 'none',
+      chars: [], // WHY empty: custom-character dots aren't persisted with a saved design yet
+      logoImg: null, // WHY null: logos aren't persisted with a saved design yet (see captureDesignSettings)
+      colors: {
+        fg: c.fg||'#000000', bg: c.bg||'#ffffff',
+        g2_1: c.g2_1||'#c98a2e', g2_2: c.g2_2||'#4A1060', g2_bg: c.g2_bg||'#ffffff', g2_dir: c.g2_dir||'horizontal',
+        g4_1: c.g4_1||'#c98a2e', g4_2: c.g4_2||'#e0a84a', g4_3: c.g4_3||'#4A1060', g4_4: c.g4_4||'#6B2D8E', g4_bg: c.g4_bg||'#ffffff',
+        finderOuter: c.finderOuter||'#000000', finderInner: c.finderInner||'#000000'
+      }
+    };
+  }
+  prefix = prefix || 's';
+  function val(base, fallback) {
+    var el = document.getElementById(fieldId(prefix, base));
+    return el ? el.value : fallback;
+  }
+  return {
+    shape: prefix==='s' ? _selectedShape : _selectedShapeD,
+    colorMode: prefix==='s' ? _colorMode : _colorModeD,
+    finderStyle: prefix==='s' ? _finderStyle : _finderStyleD,
+    finderDotStyle: prefix==='s' ? _finderDotStyle : _finderDotStyleD,
+    frameShape: prefix==='s' ? _frameShape : _frameShapeD,
+    chars: _selectedChars[prefix] || [],
+    logoImg: prefix==='s' ? _logoImg : _logoImgD,
+    colors: {
+      fg: val('c-fg','#000000'), bg: val('c-bg','#ffffff'),
+      g2_1: val('g2-1','#c98a2e'), g2_2: val('g2-2','#4A1060'), g2_bg: val('g2-bg','#ffffff'), g2_dir: val('g2-dir','horizontal'),
+      g4_1: val('g4-1','#c98a2e'), g4_2: val('g4-2','#e0a84a'), g4_3: val('g4-3','#4A1060'), g4_4: val('g4-4','#6B2D8E'), g4_bg: val('g4-bg','#ffffff'),
+      finderOuter: val('c-finder-outer','#000000'), finderInner: val('c-finder-inner','#000000')
+    }
+  };
+}
+
+// ── OVERALL FRAME SHAPE ──────────────────────────────────────────────────────
+// WHY: "fit the real QR inside a bigger silhouette, filled out with
+// non-scanning decorative dots and a thin outline" — per Hali's description
+// of what other QR tools offer, generalized (her own suggestion) to any
+// shape that still leaves a real square of room near its own center — see
+// FRAME_SHAPE_OPTIONS' WHY for why the list is curated rather than every
+// dot SHAPES entry.
+// WHY a pixel mask instead of real geometry per shape: every SHAPES entry
+// already knows how to fill ONE instance of itself into a given box — a
+// heart, a star, a hexagon, all the same draw(ctx,x,y,s) contract. Asking
+// "is this point inside a heart" generically would mean writing custom
+// hit-testing math for each one. Instead this renders the chosen shape
+// ONCE, large, to a hidden canvas and reads back which pixels landed
+// inside it — works identically for every shape with no extra code.
+//
+// WHY getShapeBBoxRatio/drawShapeFitted exist at all: several SHAPES
+// functions assume their own geometry stays inside the box they're asked
+// to draw into, but don't actually enforce it — hexagon and octagon's
+// circumradius math, for instance, both put their top/bottom (or
+// left/right) vertex a few percent PAST the box edge. Lost among
+// thousands of tiny QR dots that's invisible; blown up to a full frame
+// silhouette it shows as the shape's point getting flatly chopped off by
+// the canvas edge instead of coming to a clean point. This measures each
+// shape's TRUE rendered extent once and rescales/recenters it so that
+// extent — not its nominal box — is what actually fits the frame.
+function getShapeBBoxRatio(shapeKey) {
+  var ref = 100; // the shape's nominal box size for this measurement
+  // WHY draw into a canvas 3x bigger than the nominal box, with that box
+  // centered in the middle third: measuring straight into a ref x ref
+  // canvas would just clip hexagon/octagon's overflow at the SAME edge
+  // being measured, so the overflow would be invisible to the scan and
+  // this whole function would report "fits perfectly" for a shape that
+  // doesn't. The padding gives genuine overflow somewhere to land so it
+  // actually shows up in the pixel scan.
+  var pad = ref;
+  var canvasSize = ref + pad*2;
+  var off = document.createElement('canvas');
+  off.width = off.height = canvasSize;
+  var octx = off.getContext('2d');
+  var def = SHAPES[shapeKey] || SHAPES['dot'];
+  _qrModuleRenderMode = true;
+  octx.fillStyle = '#000';
+  def.draw(octx, pad, pad, ref, []);
+  _qrModuleRenderMode = false;
+  var data = octx.getImageData(0, 0, canvasSize, canvasSize).data;
+  var minX=canvasSize, minY=canvasSize, maxX=0, maxY=0, found=false;
+  for (var y=0; y<canvasSize; y++) {
+    for (var x=0; x<canvasSize; x++) {
+      if (data[(y*canvasSize+x)*4+3] > 128) {
+        found = true;
+        if (x<minX) minX=x; if (x>maxX) maxX=x;
+        if (y<minY) minY=y; if (y>maxY) maxY=y;
+      }
+    }
+  }
+  if (!found) return { ox:0, oy:0, bw:1, bh:1 };
+  // Convert back to ratios relative to the NOMINAL box (origin at pad,pad)
+  // so a shape with no overflow still comes out as ox:0,oy:0,bw:1,bh:1.
+  // +1 so a single-pixel-wide extent doesn't collapse to a zero width/height.
+  return {
+    ox: (minX-pad)/ref, oy: (minY-pad)/ref,
+    bw: (maxX-minX+1)/ref, bh: (maxY-minY+1)/ref
+  };
+}
+function drawShapeFitted(ctx, shapeKey, boxX, boxY, boxSize, bbox) {
+  var def = SHAPES[shapeKey] || SHAPES['dot'];
+  var scale = 1 / Math.max(bbox.bw, bbox.bh, 0.0001);
+  var s = boxSize * scale;
+  var x = boxX + (boxSize - bbox.bw*s)/2 - bbox.ox*s;
+  var y = boxY + (boxSize - bbox.bh*s)/2 - bbox.oy*s;
+  def.draw(ctx, x, y, s, []);
+}
+function buildShapeMask(shapeKey, size) {
+  var bbox = getShapeBBoxRatio(shapeKey);
+  var off = document.createElement('canvas');
+  off.width = off.height = size;
+  var octx = off.getContext('2d');
+  _qrModuleRenderMode = true; // solid silhouette, same as real modules — see drawSVGLayered WHY
+  octx.fillStyle = '#000';
+  drawShapeFitted(octx, shapeKey, 0, 0, size, bbox);
+  _qrModuleRenderMode = false;
+  return { data: octx.getImageData(0, 0, size, size).data, bbox: bbox };
+}
+function maskHasPoint(mask, size, x, y) {
+  if (x<0 || y<0 || x>=size || y>=size) return false;
+  var i = (Math.floor(y)*size + Math.floor(x)) * 4;
+  return mask.data[i+3] > 128; // alpha channel — filled vs. transparent
+}
+
+// WHY a per-shape box instead of one fixed fraction: a circle and a
+// diamond leave wildly different amounts of room for a square — a
+// diamond's corners taper to nothing well before the box edge, a triangle
+// even more so. A fixed margin sized for a circle let the real QR's
+// corners poke straight through a diamond or triangle's edge.
+//
+// WHY search the vertical CENTER too, not just the size, for a fixed
+// centered square: Triangle/Star/Heart are tapered — much wider near their
+// base than near their tip/point — so the biggest square that fits when
+// forced to sit at the exact geometric center is far smaller than the
+// biggest square that fits if it's allowed to slide down toward the wide
+// part (Hali: "if you line the qrcode up with the base of the triangle you
+// can get it much bigger in there"). Every FRAME_SHAPE_OPTIONS shape is
+// horizontally symmetric about its vertical axis, so only the vertical
+// center (cy) ever needs to move — cx always stays at size/2. For each
+// candidate cy, maxHalfSideAt() reuses the same binary search as before
+// (walk the pixel mask outward along all four edges of a candidate
+// square); a ternary search over cy then finds the cy that maximizes that
+// half-side, assuming one wide region per shape (true for all 7 — each
+// tapers from a single widest band with no separate peaks), rather than
+// trying every possible cy.
+function computeFrameInnerBox(mask, size) {
+  var cx = size/2;
+  function fitsAt(cy, a) {
+    var steps = 48;
+    for (var i=0; i<=steps; i++) {
+      var t = -a + (2*a)*(i/steps);
+      if (!maskHasPoint(mask, size, cx+t, cy-a)) return false; // top edge
+      if (!maskHasPoint(mask, size, cx+t, cy+a)) return false; // bottom edge
+      if (!maskHasPoint(mask, size, cx-a, cy+t)) return false; // left edge
+      if (!maskHasPoint(mask, size, cx+a, cy+t)) return false; // right edge
+    }
+    return true;
+  }
+  function maxHalfSideAt(cy) {
+    var hi = Math.min(cy, size-cy); // can't let the square run off-canvas
+    if (hi <= 0) return 0;
+    var lo = 0;
+    for (var iter=0; iter<18; iter++) {
+      var mid = (lo+hi)/2;
+      if (fitsAt(cy, mid)) lo = mid; else hi = mid;
+    }
+    return lo;
+  }
+  var loCy = size*0.05, hiCy = size*0.95;
+  for (var iter=0; iter<30; iter++) {
+    var m1 = loCy + (hiCy-loCy)/3;
+    var m2 = hiCy - (hiCy-loCy)/3;
+    if (maxHalfSideAt(m1) < maxHalfSideAt(m2)) loCy = m1; else hiCy = m2;
+  }
+  var bestCy = (loCy+hiCy)/2;
+  // WHY shrink 6% past the exact fit: leaves the thin outline somewhere to
+  // sit and keeps anti-aliasing at the silhouette's edge from ever nibbling
+  // a corner of the real QR.
+  var halfSide = maxHalfSideAt(bestCy) * 0.94;
+  // Never tighter than the normal quiet-zone-only margin, even if the
+  // search above found (or a buggy mask reported) something larger than
+  // that's sane — matches the old computeFrameMargin's safety clamp.
+  halfSide = Math.min(halfSide, size/2 - Math.floor(size*0.04));
+  return { x0: cx-halfSide, y0: bestCy-halfSide, x1: cx+halfSide, y1: bestCy+halfSide };
+}
+
+// WHY drawn before the real matrix, and only in the margin band outside it:
+// the frame is purely decorative. The actual scannable square — quiet zone
+// included — is laid out exactly as it always was (see renderQRCore), so a
+// frame can never eat into the real quiet zone or put a decorative dot
+// where a scanner would read it as a module.
+function drawFrame(ctx, size, innerX0, innerY0, innerX1, innerY1, cellSize, fg, bg, shapeKey, mask, moduleShapeKey, chars) {
+  if (!shapeKey || shapeKey === 'none') return;
+  var strokeW = Math.max(2, size*0.008);
+  mask = mask || buildShapeMask(shapeKey, size);
+  var bbox = mask.bbox;
+
+  // Everything decorative (outline + filler dots) is built on its own
+  // transparent layer first, THEN cut to the shape's exact silhouette in
+  // one pass with destination-in — this is what "cuts them off cleanly"
+  // even at a concave edge (a heart's center dip, a star's inward points),
+  // where checking only a filler dot's CENTER point isn't enough: the
+  // dot's own edge can still poke past a boundary that curves away right
+  // next to its center.
+  var deco = document.createElement('canvas');
+  deco.width = deco.height = size;
+  var dctx = deco.getContext('2d');
+
+  // Thin outline: full-size silhouette in fg, inset copy cut out of this
+  // (still-transparent) layer on top — the same nested-shape trick
+  // FINDER_RING_SHAPES uses for a ring, just "erase" instead of "paint bg"
+  // since there's no bg to paint on this layer yet. Both calls go through
+  // drawShapeFitted/bbox (see its WHY) so a shape like hexagon or octagon,
+  // whose own geometry runs past its nominal box, still comes out as a
+  // clean point here instead of flat-chopped at the canvas edge.
+  _qrModuleRenderMode = true;
+  dctx.fillStyle = fg;
+  drawShapeFitted(dctx, shapeKey, 0, 0, size, bbox);
+  dctx.globalCompositeOperation = 'destination-out';
+  dctx.fillStyle = '#000';
+  drawShapeFitted(dctx, shapeKey, strokeW, strokeW, size-strokeW*2, bbox);
+  dctx.globalCompositeOperation = 'source-over';
+  _qrModuleRenderMode = false;
+
+  // Decorative filler dots: every module-grid position that falls outside
+  // the real matrix+quiet-zone box but inside the frame silhouette. WHY the
+  // chosen main Dot Type instead of a plain circle: Hali asked for the
+  // filler to visually match the real modules, not read as a separate
+  // "filler" style — same shape key, same chars pool, same full cellSize
+  // (no shrink) as the real module-drawing loop below uses.
+  // WHY a density roll per cell instead of filling every eligible one: a
+  // real QR's data area is only roughly half dark modules — filling every
+  // cell in the margin band packed it solid, which read as a denser, more
+  // "filled-in" block than the real QR pattern it's framing. Skipping
+  // random cells at the real pattern's rough density makes the border
+  // actually look like QR-style scatter instead of a solid mass.
+  var FILLER_DENSITY = 0.5;
+  // WHY a quiet-zone buffer around the real QR box, not just the box edges
+  // themselves: once the box is sized to nearly fill a tapered shape
+  // (Triangle/Star/Heart — see computeFrameInnerBox), filler dots drawn
+  // right up against the real matrix are the SAME shape/size as real
+  // modules, so the real QR's edge became visually indistinguishable from
+  // the decoration around it — a scanner can't find the plain white quiet
+  // zone it needs to lock onto the finder patterns. Keeping filler dots
+  // at least ~1.5 modules clear of the box restores a clean white margin
+  // around the actual matrix, same as any normal QR code has.
+  var qz = cellSize * 1.5;
+  var qzX0 = innerX0-qz, qzY0 = innerY0-qz, qzX1 = innerX1+qz, qzY1 = innerY1+qz;
+  var fillerDef = SHAPES[moduleShapeKey] || SHAPES['dot'];
+  dctx.fillStyle = fg;
+  _qrModuleRenderMode = true;
+  for (var y = strokeW; y < size-strokeW; y += cellSize) {
+    for (var x = strokeW; x < size-strokeW; x += cellSize) {
+      if (x+cellSize > qzX0 && x < qzX1 && y+cellSize > qzY0 && y < qzY1) continue; // inside the real QR box + quiet zone — never touch it
+      if (!maskHasPoint(mask, size, x+cellSize/2, y+cellSize/2)) continue; // outside the silhouette
+      if (Math.random() > FILLER_DENSITY) continue; // thin the grid out to QR-like sparseness
+      fillerDef.draw(dctx, x, y, cellSize, chars || []);
+    }
+  }
+  _qrModuleRenderMode = false;
+
+  // Cut the whole decoration layer to the shape's exact silhouette, then
+  // composite it onto the real canvas.
+  dctx.globalCompositeOperation = 'destination-in';
+  dctx.fillStyle = '#000';
+  _qrModuleRenderMode = true;
+  drawShapeFitted(dctx, shapeKey, 0, 0, size, bbox);
+  _qrModuleRenderMode = false;
+  dctx.globalCompositeOperation = 'source-over';
+  ctx.drawImage(deco, 0, 0);
+
+  // Belt-and-suspenders: re-clear the real QR's own box to bg right before
+  // it draws, regardless of how tight the computed margin was.
+  ctx.fillStyle = bg;
+  ctx.fillRect(innerX0, innerY0, innerX1-innerX0, innerY1-innerY0);
+}
+
+async function renderQRCore(canvas, url, size, ec, prefix) {
+  var settings = resolveRenderSettings(prefix);
   var matrix = await getQRMatrix(url, ec, 400);
-  if (!matrix) { toast('Failed to generate QR matrix.','err'); return; }
+  if (!matrix) return false;
 
   var modules = matrix.length;
-  var canvas = document.getElementById('qr-output');
-  var padding = Math.floor(size * 0.04);
+  // WHY extra, shape-specific padding when an Overall Shape (frame) is set:
+  // the real square QR keeps its normal quiet zone, but needs room beyond
+  // that for the decorative filler dots between it and the outer
+  // silhouette — AND that room has to be big enough that the real QR's own
+  // corners never poke through a narrower shape like a diamond or triangle.
+  // See computeFrameInnerBox's WHY.
+  var hasFrame = settings.frameShape && settings.frameShape !== 'none';
+  var frameMask = hasFrame ? buildShapeMask(settings.frameShape, size) : null;
+  // WHY a box (x0/y0/x1/y1) instead of one symmetric padding value once a
+  // frame is active: Triangle/Star/Heart fit a noticeably bigger real QR
+  // when it's allowed to slide toward the shape's wide part instead of
+  // always sitting dead-center — see computeFrameInnerBox's WHY. Shapes
+  // with no frame keep the plain symmetric quiet-zone-only box.
+  var box = hasFrame ? computeFrameInnerBox(frameMask, size) :
+    { x0: Math.floor(size*0.04), y0: Math.floor(size*0.04), x1: size-Math.floor(size*0.04), y1: size-Math.floor(size*0.04) };
   canvas.width = canvas.height = size;
   var ctx = canvas.getContext('2d');
+  var c = settings.colors;
 
   // Background
-  var bg = _colorMode==='solid' ? document.getElementById('c-bg').value :
-           _colorMode==='grad2' ? document.getElementById('g2-bg').value :
-           document.getElementById('g4-bg').value;
+  var bg = settings.colorMode==='solid' ? c.bg :
+           settings.colorMode==='grad2' ? c.g2_bg : c.g4_bg;
+  bg = bg || '#ffffff';
   ctx.fillStyle = bg;
   ctx.fillRect(0,0,size,size);
 
   // Foreground fill style
-  var fg = buildForegroundStyle(ctx, size);
+  var fg = buildForegroundStyle(ctx, size, settings);
 
-  var cellSize = (size - padding*2) / modules;
-  var finderOuter = document.getElementById('c-finder-outer').value;
-  var finderInner = document.getElementById('c-finder-inner').value;
+  var cellSize = (box.x1 - box.x0) / modules;
+  var finderOuter = c.finderOuter || '#000000';
+  var finderInner = c.finderInner || '#000000';
+
+  // Overall Shape (frame) — a bigger decorative silhouette (non-scanning
+  // filler dots + thin outline) drawn first so the real matrix/finders/logo
+  // always render on top, fully untouched. The real QR's bounding box is
+  // passed so drawFrame skips filler dots that would overlap it.
+  if (hasFrame) {
+    drawFrame(ctx, size, box.x0, box.y0, box.x1, box.y1, cellSize, fg, bg, settings.frameShape, frameMask, settings.shape, settings.chars);
+  }
+
+  var shapeDef = SHAPES[settings.shape] || SHAPES['square'];
 
   // Draw modules
   ctx.fillStyle = fg;
@@ -1326,41 +2112,107 @@ async function generateCustomQR() {
       if (!matrix[row][col]) continue;
       var isFinder = isFinderModule(row, col, modules);
       if (isFinder) continue; // draw finders separately
-      var x = padding + col*cellSize;
-      var y = padding + row*cellSize;
+      var x = box.x0 + col*cellSize;
+      var y = box.y0 + row*cellSize;
       ctx.fillStyle = fg;
-      SHAPES[_selectedShape].draw(ctx, x, y, cellSize, _selectedChars['s']);
+      shapeDef.draw(ctx, x, y, cellSize, settings.chars);
     }
   }
   _qrModuleRenderMode = false;
 
-  // Draw finder squares (corners)
-  drawFinder(ctx, padding, padding, cellSize, finderOuter, finderInner);
-  drawFinder(ctx, padding + (modules-7)*cellSize, padding, cellSize, finderOuter, finderInner);
-  drawFinder(ctx, padding, padding + (modules-7)*cellSize, cellSize, finderOuter, finderInner);
+  // Draw finder squares (corners) — WHY pass bg explicitly: this used to
+  // reach into the Static tab's own DOM/globals for the finder's white gap
+  // color, which was wrong for the Dynamic tab and silently wrong (or just
+  // inapplicable) for a saved-design object with no DOM fields at all.
+  // WHY a style lookup instead of always the plain nested squares: corner
+  // frame style (square/rounded/circle/diamond/teardrop) and the inner eye
+  // dot are now independent, more conservative pickers from the dot SHAPES
+  // — see FINDER_RING_SHAPES' WHY.
+  drawFinderComposite(ctx, box.x0, box.y0, cellSize, finderOuter, finderInner, bg, settings.finderStyle, settings.finderDotStyle, settings.chars);
+  drawFinderComposite(ctx, box.x0 + (modules-7)*cellSize, box.y0, cellSize, finderOuter, finderInner, bg, settings.finderStyle, settings.finderDotStyle, settings.chars);
+  drawFinderComposite(ctx, box.x0, box.y0 + (modules-7)*cellSize, cellSize, finderOuter, finderInner, bg, settings.finderStyle, settings.finderDotStyle, settings.chars);
 
-  // Logo overlay
-  if (_logoImg && _logoImg.complete) {
-    var logoSize = size * 0.2;
-    var logoX = (size - logoSize)/2;
-    var logoY = (size - logoSize)/2;
+  // Logo overlay — WHY centered on the real QR box instead of the canvas:
+  // with no frame the box IS centered on the canvas, so this was always
+  // equivalent; once a frame (Triangle/Star/Heart especially) can slide the
+  // box off-center to make the QR bigger, the logo has to follow the box
+  // so it still lands in the middle of the actual matrix, not off to one side of it.
+  if (settings.logoImg && settings.logoImg.complete) {
+    var logoSize = (box.x1-box.x0) * 0.2;
+    var logoX = (box.x0+box.x1)/2 - logoSize/2;
+    var logoY = (box.y0+box.y1)/2 - logoSize/2;
     ctx.fillStyle = bg;
     ctx.fillRect(logoX-4, logoY-4, logoSize+8, logoSize+8);
-    ctx.drawImage(_logoImg, logoX, logoY, logoSize, logoSize);
+    ctx.drawImage(settings.logoImg, logoX, logoY, logoSize, logoSize);
   }
+
+  return true;
+}
+
+async function generateCustomQR() {
+  var url = document.getElementById('s-url').value.trim();
+  if (!url) { toast('Enter a URL or text to encode.','err'); return; }
+  var size = parseInt(document.getElementById('s-size').value);
+  var ec   = document.getElementById('s-ec').value;
+
+  var canvas = document.getElementById('qr-output');
+  var ok = await renderQRCore(canvas, url, size, ec);
+  if (!ok) { toast('Failed to generate QR matrix.','err'); return; }
 
   document.getElementById('qr-url-note').textContent = 'Encodes: ' + url;
   document.getElementById('qr-result').style.display = 'block';
 }
 
-function buildForegroundStyle(ctx, size) {
-  if (_colorMode==='solid') {
-    return document.getElementById('c-fg').value;
+// ── LIVE PREVIEW (under the color pickers, both Static and Dynamic tabs) ───
+// WHY debounced: color inputs and the shape grid fire on every drag/click —
+// re-running getQRMatrix (which spins up a hidden qrcodejs instance) on
+// every single event would be wasteful and laggy, so rapid changes collapse
+// into one render ~250ms after the user stops.
+// WHY keyed by prefix: the Dynamic tab got its own live preview (it used to
+// have none at all) so both tabs need independent debounce/seq state —
+// otherwise switching tabs mid-render could cancel the wrong one.
+var _livePreviewTimer = { s:null, d:null };
+var _livePreviewSeq = { s:0, d:0 };
+function scheduleLivePreview(prefix) {
+  prefix = prefix || 's';
+  clearTimeout(_livePreviewTimer[prefix]);
+  _livePreviewTimer[prefix] = setTimeout(function(){ updateLivePreview(prefix); }, 250);
+}
+async function updateLivePreview(prefix) {
+  prefix = prefix || 's';
+  var canvas = document.getElementById(prefix==='s' ? 'qr-live-canvas' : 'd-qr-live-canvas');
+  if (!canvas) return;
+  var note = document.getElementById(prefix==='s' ? 'qr-live-note' : 'd-qr-live-note');
+  var urlEl = document.getElementById(fieldId(prefix,'url'));
+  var typed = urlEl ? urlEl.value.trim() : '';
+  var url = typed || 'https://iqproductionz.com';
+  var ecEl = document.getElementById(fieldId(prefix,'ec'));
+  var ec = ecEl ? ecEl.value : 'M';
+  var seq = ++_livePreviewSeq[prefix]; // WHY: guards against an older, slower render
+  // landing after a newer one if two changes fire close together.
+  // WHY try/catch: a render failure here used to leave the canvas blank
+  // with no explanation (e.g. when the QR library hadn't loaded) — now any
+  // failure shows a message instead of silently showing nothing.
+  try {
+    var ok = await renderQRCore(canvas, url, 220, ec, prefix);
+    if (seq !== _livePreviewSeq[prefix]) return;
+    if (!ok) { if (note) note.textContent = 'Preview unavailable — try again in a moment.'; return; }
+    if (note) note.textContent = typed
+      ? 'Previewing your QR code.'
+      : 'Previewing with a sample URL — type yours above to encode it.';
+  } catch (e) {
+    if (seq !== _livePreviewSeq[prefix]) return;
+    if (note) note.textContent = 'Preview unavailable — try again in a moment.';
   }
-  if (_colorMode==='grad2') {
-    var d = document.getElementById('g2-dir').value;
-    var c1 = document.getElementById('g2-1').value;
-    var c2 = document.getElementById('g2-2').value;
+}
+
+function buildForegroundStyle(ctx, size, settings) {
+  var c = settings.colors;
+  if (settings.colorMode==='solid') {
+    return c.fg || '#000000';
+  }
+  if (settings.colorMode==='grad2') {
+    var d = c.g2_dir || 'horizontal';
     var grad;
     if (d==='radial') {
       grad = ctx.createRadialGradient(size/2,size/2,0,size/2,size/2,size/2);
@@ -1368,16 +2220,13 @@ function buildForegroundStyle(ctx, size) {
       var x2 = d==='horizontal'?size:0, y2 = d==='vertical'?size:d==='diagonal'?size:0;
       grad = ctx.createLinearGradient(0,0,x2,y2);
     }
-    grad.addColorStop(0,c1); grad.addColorStop(1,c2);
+    grad.addColorStop(0,c.g2_1); grad.addColorStop(1,c.g2_2);
     return grad;
   }
-  // 4-color gradient — corner-mapped
-  var c1=document.getElementById('g4-1').value, c2=document.getElementById('g4-2').value,
-      c3=document.getElementById('g4-3').value, c4=document.getElementById('g4-4').value;
-  // Use diagonal linear blend as approximation
+  // 4-color gradient — corner-mapped, diagonal linear blend as approximation
   var grad = ctx.createLinearGradient(0,0,size,size);
-  grad.addColorStop(0,c1); grad.addColorStop(.33,c2);
-  grad.addColorStop(.66,c3); grad.addColorStop(1,c4);
+  grad.addColorStop(0,c.g4_1); grad.addColorStop(.33,c.g4_2);
+  grad.addColorStop(.66,c.g4_3); grad.addColorStop(1,c.g4_4);
   return grad;
 }
 
@@ -1387,21 +2236,6 @@ function isFinderModule(row, col, n) {
   if (row<7 && col>=n-7) return true;
   if (row>=n-7 && col<7) return true;
   return false;
-}
-
-function drawFinder(ctx, x, y, cellSize, outerColor, innerColor) {
-  // Outer 7×7 square
-  ctx.fillStyle = outerColor;
-  ctx.fillRect(x, y, cellSize*7, cellSize*7);
-  // White gap 5×5
-  ctx.fillStyle = document.getElementById(
-    _colorMode==='solid' ? 'c-bg' :
-    _colorMode==='grad2' ? 'g2-bg' : 'g4-bg'
-  ).value;
-  ctx.fillRect(x+cellSize, y+cellSize, cellSize*5, cellSize*5);
-  // Inner 3×3
-  ctx.fillStyle = innerColor;
-  ctx.fillRect(x+cellSize*2, y+cellSize*2, cellSize*3, cellSize*3);
 }
 
 function downloadCustomQR(fmt) {
@@ -1422,6 +2256,11 @@ function downloadCustomQR(fmt) {
 
 // ── TYPE CARD CLICK ───────────────────────────────────────────────────────────
 function selectType(type) {
+  // WHY reset here: clicking the Dynamic hero card is always "I want to make
+  // a NEW code," so any leftover design-edit state (from a previous "Change
+  // Design" flow) must not leak in. The edit flow itself never calls
+  // selectType() — it routes straight to switchTab() — so this is safe.
+  if (type==='dynamic') resetDynamicForm();
   document.getElementById('card-static').classList.toggle('selected', type==='static');
   document.getElementById('card-dynamic').classList.toggle('selected', type==='dynamic');
   // WHY: scroll first then switch tab so the tab highlight is visible on arrival
@@ -1458,18 +2297,153 @@ function renderNav() {
   if(u) document.getElementById('dash-email').textContent=u.email;
 }
 
-// ── DYNAMIC CREATE ────────────────────────────────────────────────────────────
+// ── DESIGN SETTINGS CAPTURE / APPLY ───────────────────────────────────────────
+// WHY: a dynamic QR code's visual design (shape, colors, EC, size) was never
+// actually saved anywhere — createDynamic() only wrote name/redirectUrl, so
+// the dashboard thumbnail and every paid download rendered a plain black
+// square no matter what the customer picked. These two functions are the
+// read/write halves that let a design round-trip through Firestore: capture
+// pulls the generator's current DOM state into a plain object to save,
+// apply pushes a saved object back into the generator's DOM to resume
+// editing it (used by enterDesignEditMode below).
+function captureDesignSettings(prefix) {
+  prefix = prefix || 'd';
+  function val(base, fallback) {
+    var el = document.getElementById(fieldId(prefix, base));
+    return el ? el.value : fallback;
+  }
+  return {
+    shape: prefix==='s' ? _selectedShape : _selectedShapeD,
+    colorMode: prefix==='s' ? _colorMode : _colorModeD,
+    finderStyle: prefix==='s' ? _finderStyle : _finderStyleD,
+    finderDotStyle: prefix==='s' ? _finderDotStyle : _finderDotStyleD,
+    frameShape: prefix==='s' ? _frameShape : _frameShapeD,
+    ec: val('ec','M'),
+    size: parseInt(val('size','300'),10) || 300,
+    colors: {
+      fg: val('c-fg','#000000'), bg: val('c-bg','#ffffff'),
+      g2_1: val('g2-1','#c98a2e'), g2_2: val('g2-2','#4A1060'), g2_bg: val('g2-bg','#ffffff'), g2_dir: val('g2-dir','horizontal'),
+      g4_1: val('g4-1','#c98a2e'), g4_2: val('g4-2','#e0a84a'), g4_3: val('g4-3','#4A1060'), g4_4: val('g4-4','#6B2D8E'), g4_bg: val('g4-bg','#ffffff'),
+      finderOuter: val('c-finder-outer','#000000'), finderInner: val('c-finder-inner','#000000')
+    }
+  };
+}
+
+function applyDesignSettings(prefix, design) {
+  prefix = prefix || 'd';
+  if (!design) return;
+  function set(base, value) {
+    var el = document.getElementById(fieldId(prefix, base));
+    if (el && value!=null) el.value = value;
+  }
+  if (design.shape) {
+    if (prefix==='s') _selectedShape = design.shape; else _selectedShapeD = design.shape;
+    setGridSelection(prefix==='s'?'shape-grid':'d-shape-grid', design.shape);
+  }
+  if (design.finderStyle) {
+    if (prefix==='s') _finderStyle = design.finderStyle; else _finderStyleD = design.finderStyle;
+    setFinderGridSelection(prefix==='s'?'finder-style-grid':'d-finder-style-grid', design.finderStyle);
+  }
+  // WHY fallback to finderStyle when finderDotStyle is absent: a design saved
+  // before the inner/outer split (or a legacy record with no finderDotStyle
+  // at all) should still show its one shape in both pickers, not silently
+  // reset the inner dot to square.
+  var dotStyle = design.finderDotStyle || design.finderStyle;
+  if (dotStyle) {
+    if (prefix==='s') _finderDotStyle = dotStyle; else _finderDotStyleD = dotStyle;
+    setFinderGridSelection(prefix==='s'?'finder-dot-style-grid':'d-finder-dot-style-grid', dotStyle);
+  }
+  // WHY always set (not just when truthy) unlike finderStyle/finderDotStyle
+  // above: those fall back to leaving the current shape selected, which is
+  // fine since every design has had SOME dot shape since day one. frameShape
+  // is a brand-new field, so a legacy design with none saved must explicitly
+  // reset to 'none' — otherwise it would wrongly inherit whatever frame was
+  // last selected earlier in the same session.
+  var frameVal = design.frameShape || 'none';
+  if (prefix==='s') _frameShape = frameVal; else _frameShapeD = frameVal;
+  setFrameGridSelection(prefix==='s'?'frame-shape-grid':'d-frame-shape-grid', frameVal);
+  set('ec', design.ec);
+  if (design.size) set('size', String(design.size));
+  var c = design.colors || {};
+  set('c-fg', c.fg); set('c-bg', c.bg);
+  set('g2-1', c.g2_1); set('g2-2', c.g2_2); set('g2-bg', c.g2_bg); set('g2-dir', c.g2_dir);
+  set('g4-1', c.g4_1); set('g4-2', c.g4_2); set('g4-3', c.g4_3); set('g4-4', c.g4_4); set('g4-bg', c.g4_bg);
+  set('c-finder-outer', c.finderOuter); set('c-finder-inner', c.finderInner);
+  if (design.colorMode) setColorMode(design.colorMode, prefix); // also schedules a live preview refresh
+  scheduleLivePreview(prefix);
+}
+
+// ── DYNAMIC CREATE / DESIGN-EDIT ──────────────────────────────────────────────
+// WHY _editingQR: when set, the Dynamic generator is in "edit an existing
+// code's design" mode (routed here from the paid Change Design flow — see
+// enterDesignEditMode) instead of its normal "create a new code" mode.
+var _editingQR = null;
+
+function resetDynamicForm() {
+  _editingQR = null;
+  var nameEl = document.getElementById('d-name'); if (nameEl) nameEl.value = '';
+  var urlEl = document.getElementById('d-url');
+  if (urlEl) { urlEl.value = ''; urlEl.readOnly = false; urlEl.style.opacity = ''; }
+  var lockNote = document.getElementById('d-url-lock-note');
+  if (lockNote) lockNote.style.display = 'none';
+  var btn = document.getElementById('dyn-gen-btn');
+  if (btn) btn.textContent = 'Create Dynamic QR Code — Free to Start';
+  var note = document.getElementById('dyn-gen-note');
+  if (note) note.textContent = 'Account required — sign in or sign up to continue.';
+}
+
+// WHY this is the destination for "Change Design" after payment, per Hali's
+// request — not a type-in description, but the real generator, pre-filled,
+// so the customer builds the actual new look instead of describing it for
+// someone else to build later.
+function enterDesignEditMode(data) {
+  _editingQR = data;
+  var nameEl = document.getElementById('d-name'); if (nameEl) nameEl.value = data.name || '';
+  var urlEl = document.getElementById('d-url');
+  if (urlEl) {
+    urlEl.value = data.redirectUrl || '';
+    // WHY locked: this $5 charge is for the visual design only. Letting it
+    // also change the destination would give a $25 "Change Redirect" for $5.
+    urlEl.readOnly = true;
+    urlEl.style.opacity = '.6';
+  }
+  var lockNote = document.getElementById('d-url-lock-note');
+  if (lockNote) lockNote.style.display = '';
+  applyDesignSettings('d', data.design);
+  var btn = document.getElementById('dyn-gen-btn');
+  if (btn) btn.textContent = 'Save Design Changes';
+  var note = document.getElementById('dyn-gen-note');
+  if (note) note.textContent = 'Editing "' + (data.name||'this code') + '" — its destination and printed pattern stay the same.';
+  showView('home');
+  switchTab('dynamic');
+  document.querySelector('.section').scrollIntoView({behavior:'smooth',block:'start'});
+  scheduleLivePreview('d');
+}
+
 async function createDynamic() {
   if(!window._user){openAuthModal();return;}
   var name=document.getElementById('d-name').value.trim();
   var url=document.getElementById('d-url').value.trim();
   if(!name||!url){toast('Enter a name and destination URL.','err');return;}
+  var design = captureDesignSettings('d');
   try {
     var fb=window._fb;
+    if (_editingQR) {
+      // WHY update the existing doc by its original slug instead of
+      // creating a new one: the slug is baked into the physical printed QR
+      // code (iqproductionz.com/QRCode/Account/[slug]) — changing it would
+      // break every code already printed. Only name + design are touched;
+      // redirectUrl is deliberately left alone (see enterDesignEditMode).
+      await fb.updateDoc(fb.doc(fb.db,'qrcodes',_editingQR.slug),{name:name, design:design});
+      toast('Design updated!','ok');
+      resetDynamicForm();
+      showView('dashboard');
+      return;
+    }
     var userDoc=await fb.getDoc(fb.doc(fb.db,'users',window._user.uid));
     var username=userDoc.exists()?userDoc.data().username:window._user.uid.slice(0,8);
     var slug=username+'-'+name.toLowerCase().replace(/[^a-z0-9]/g,'-').slice(0,20);
-    await fb.setDoc(fb.doc(fb.db,'qrcodes',slug),{uid:window._user.uid,name,slug,redirectUrl:url,type:'dynamic',created:Date.now(),scanCount:0});
+    await fb.setDoc(fb.doc(fb.db,'qrcodes',slug),{uid:window._user.uid,name,slug,redirectUrl:url,type:'dynamic',created:Date.now(),scanCount:0,design:design});
     toast('Dynamic QR code created!','ok');
     showView('dashboard');
   } catch(e){ toast('Error: '+e.message,'err'); }
@@ -1501,34 +2475,281 @@ function buildQRItem(data) {
   div.appendChild(cb);
   div.style.paddingLeft='38px';
   var redirectUrl=BASE_REDIRECT+data.slug;
+
+  // WHY a column wrapper: "Change Design" sits right under the thumbnail so
+  // the two read as one unit, per Hali's request, instead of the button
+  // getting lost among the redirect/stats/download actions.
+  var qrCol=document.createElement('div'); qrCol.className='qr-item-qr-col';
   var qrDiv=document.createElement('div'); qrDiv.className='qr-item-qr';
-  new QRCode(qrDiv,{text:redirectUrl,width:56,height:56,colorDark:'#000',colorLight:'#fff'});
-  div.appendChild(qrDiv);
+  // WHY render through renderQRCore (not the plain qrcodejs call this used
+  // to be): the thumbnail needs to actually show the saved shape/colors —
+  // otherwise every code looks identical on the dashboard no matter what
+  // was designed for it, which was the whole complaint. Falls back to the
+  // plain default look for codes saved before designs were persisted.
+  var thumbCanvas=document.createElement('canvas');
+  thumbCanvas.width=56; thumbCanvas.height=56;
+  qrDiv.appendChild(thumbCanvas);
+  renderQRCore(thumbCanvas, redirectUrl, 56, (data.design&&data.design.ec)||'M', data.design||DEFAULT_DESIGN);
+  qrCol.appendChild(qrDiv);
+  var designBtn=document.createElement('button'); designBtn.className='act-btn'; designBtn.textContent='Change Design — $5';
+  designBtn.onclick=function(){openDesignChange(data);};
+  qrCol.appendChild(designBtn);
+  div.appendChild(qrCol);
+
   var body=document.createElement('div'); body.className='qr-item-body';
   body.innerHTML='<div class="qr-item-name">'+data.name+'<span class="qr-item-type type-'+data.type+'">'+data.type+'</span></div>'
     +'<div class="qr-item-url">→ '+data.redirectUrl+'</div>'
     +'<div style="font-size:.73rem;color:var(--muted);margin-top:4px;">Scans: '+(data.scanCount||0)+'</div>';
   div.appendChild(body);
   var actions=document.createElement('div'); actions.className='qr-item-actions';
-  var dlBtn=document.createElement('button'); dlBtn.className='act-btn'; dlBtn.textContent='⬇ Download';
-  dlBtn.onclick=function(){downloadDashQR(data.slug,redirectUrl);};
+  var dlBtn=document.createElement('button'); dlBtn.className='act-btn'; dlBtn.textContent='⬇ Download ▾';
+  dlBtn.onclick=function(){toggleDlPanel(data.slug);};
   var changeBtn=document.createElement('button'); changeBtn.className='act-btn'; changeBtn.textContent='Change Redirect — $25';
   changeBtn.onclick=function(){openChangeRedirect(data);};
   var statsBtn=document.createElement('button'); statsBtn.className='act-btn'; statsBtn.textContent='View Stats — $5';
   statsBtn.onclick=function(){openStats(data);};
   [dlBtn,changeBtn,statsBtn].forEach(b=>actions.appendChild(b));
   div.appendChild(actions);
+
+  // WHY $5 per format with a running total: each format is billed
+  // separately per Hali's pricing, and "select all" is a shortcut that
+  // checks every box rather than a separate price tier.
+  var dl=document.createElement('div'); dl.className='dl-panel'; dl.id='dlpanel-'+data.slug;
+  dl.innerHTML=
+      '<div class="dl-opt-row"><input type="checkbox" id="dl-all-'+data.slug+'" onchange="toggleDlAll(\''+data.slug+'\')">'
+        +'<label for="dl-all-'+data.slug+'">Select all</label></div>'
+    + '<div class="dl-opt-row"><input type="checkbox" class="dl-fmt" id="dl-png-'+data.slug+'" data-fmt="png" onchange="updateDlTotal(\''+data.slug+'\')">'
+        +'<label for="dl-png-'+data.slug+'">PNG</label><span class="dl-price">$5</span></div>'
+    + '<div class="dl-opt-row"><input type="checkbox" class="dl-fmt" id="dl-jpg-'+data.slug+'" data-fmt="jpg" onchange="updateDlTotal(\''+data.slug+'\')">'
+        +'<label for="dl-jpg-'+data.slug+'">JPG</label><span class="dl-price">$5</span></div>'
+    + '<div class="dl-opt-row"><input type="checkbox" class="dl-fmt" id="dl-svg-'+data.slug+'" data-fmt="svg" onchange="updateDlTotal(\''+data.slug+'\')">'
+        +'<label for="dl-svg-'+data.slug+'">SVG</label><span class="dl-price">$5</span></div>'
+    + '<div class="dl-total-row"><span>Total</span><span id="dl-total-'+data.slug+'">$0.00</span></div>'
+    + '<button class="gen-btn" id="dl-pay-btn-'+data.slug+'" disabled>Select a format</button>';
+  div.appendChild(dl);
+  dl.querySelector('#dl-pay-btn-'+data.slug).onclick=function(){openDownloadPayment(data);};
+
   var sp=document.createElement('div'); sp.className='stats-panel'; sp.id='stats-'+data.slug;
   sp.innerHTML='<div class="stats-grid"><div class="stat-box"><div class="stat-num" id="sn-total-'+data.slug+'">—</div><div class="stat-label">Total Scans</div></div><div class="stat-box"><div class="stat-num" id="sn-today-'+data.slug+'">—</div><div class="stat-label">Today</div></div><div class="stat-box"><div class="stat-num" id="sn-mobile-'+data.slug+'">—</div><div class="stat-label">Mobile %</div></div></div><button class="act-btn" onclick="resetScans(\''+data.slug+'\')">Reset Scan Count</button>';
   div.appendChild(sp);
   return div;
 }
 
-function downloadDashQR(slug,url) {
-  var tmp=document.createElement('div'); tmp.style.cssText='position:absolute;left:-9999px;';
-  document.body.appendChild(tmp);
-  new QRCode(tmp,{text:url,width:400,height:400,colorDark:'#000',colorLight:'#fff'});
-  setTimeout(function(){var c=tmp.querySelector('canvas');if(c){var a=document.createElement('a');a.href=c.toDataURL('image/png');a.download=slug+'.png';a.click();}document.body.removeChild(tmp);},300);
+// ── DASHBOARD DOWNLOAD PANEL (paid, $5 per format) ───────────────────────────
+function toggleDlPanel(slug) {
+  var p=document.getElementById('dlpanel-'+slug);
+  if(!p) return;
+  p.style.display = p.style.display==='block' ? 'none' : 'block';
+}
+
+function updateDlTotal(slug) {
+  var checked=document.querySelectorAll('#dlpanel-'+slug+' .dl-fmt:checked');
+  var allFmts=document.querySelectorAll('#dlpanel-'+slug+' .dl-fmt');
+  var total=checked.length*5;
+  var totalEl=document.getElementById('dl-total-'+slug);
+  if(totalEl) totalEl.textContent='$'+total+'.00';
+  var btn=document.getElementById('dl-pay-btn-'+slug);
+  if(btn){
+    btn.disabled = checked.length===0;
+    btn.textContent = checked.length===0 ? 'Select a format' : 'Pay $'+total+' & Download';
+  }
+  // WHY resync here instead of in toggleDlAll alone: unchecking one format
+  // box by hand after "select all" was checked should un-check "select all" too.
+  var all=document.getElementById('dl-all-'+slug);
+  if(all) all.checked = allFmts.length>0 && checked.length===allFmts.length;
+}
+
+function toggleDlAll(slug) {
+  var all=document.getElementById('dl-all-'+slug);
+  document.querySelectorAll('#dlpanel-'+slug+' .dl-fmt').forEach(function(cb){cb.checked=all.checked;});
+  updateDlTotal(slug);
+}
+
+function openDownloadPayment(data) {
+  var slug=data.slug;
+  var formats=Array.from(document.querySelectorAll('#dlpanel-'+slug+' .dl-fmt:checked')).map(function(cb){return cb.dataset.fmt;});
+  if(formats.length===0){toast('Select at least one format.','err');return;}
+  var amount=formats.length*5;
+  var redirectUrl=BASE_REDIRECT+slug;
+  _currentQRItem=data;
+  _pendingAction={
+    // WHY carry design here: the download needs to render the SAME saved
+    // shape/colors as the dashboard thumbnail, not a plain default — that
+    // was the whole point of persisting a design in the first place.
+    type:'download', qrId:slug, url:redirectUrl, formats:formats, amount:amount, design:data.design,
+    desc:'Download '+formats.map(function(f){return f.toUpperCase();}).join(' + ')+' — '+data.name,
+    title:'Pay to Download'
+  };
+  initiatePayment('download');
+}
+
+async function fulfillDownload() {
+  var action=_pendingAction;
+  if(!action || action.type!=='download') return;
+  for(var i=0;i<action.formats.length;i++){
+    await downloadDashQRFormat(action.qrId, action.url, action.formats[i], action.design);
+  }
+  toast('Payment confirmed — downloading '+action.formats.length+' file(s).','ok');
+}
+
+// WHY renderQRCore instead of a plain qrcodejs render (this used to be a
+// bare black-square canvas no matter what the customer designed): same
+// renderer the generator and dashboard thumbnail use, so the downloaded
+// file actually matches what they built and paid to download.
+async function downloadDashQRFormat(slug,url,fmt,design) {
+  design = design || DEFAULT_DESIGN;
+  if (fmt==='svg'){ await buildDashSVG(slug,url,design); return; }
+  var size = Math.max(design.size||300, 800); // WHY floor at 800: a design's saved "web preview" size is too low-res for a print/decal download
+  var canvas=document.createElement('canvas');
+  var ok = await renderQRCore(canvas, url, size, design.ec||'M', design);
+  if (!ok) { toast('Could not render the QR code — try again.','err'); return; }
+  var a=document.createElement('a');
+  if (fmt==='jpg') {
+    // WHY no separate white-flatten step (the old plain-qrcodejs path
+    // needed one): renderQRCore always paints an opaque background first,
+    // so the canvas has no transparency to begin with.
+    a.href=canvas.toDataURL('image/jpeg',0.95);
+    a.download=slug+'.jpg';
+  } else {
+    a.href=canvas.toDataURL('image/png');
+    a.download=slug+'.png';
+  }
+  a.click();
+}
+
+// WHY a true vector build: the free Static-tab SVG export wraps a raster PNG
+// inside an <svg> tag (a pre-existing limitation left alone elsewhere), but
+// this PAID dashboard export should actually deliver the "infinitely
+// scalable" vector file customers are charged for — one <rect> per dark
+// module, read straight from the real QR matrix, colored to match the saved
+// design (solid or gradient fill, plus finder-square colors). WHY modules
+// stay square here even for a custom dot shape: converting each shape's
+// canvas draw() into SVG path data is a separate, larger project — flagged
+// to Hali as a known gap, not silently shipped as if it were covered.
+async function buildDashSVG(slug,url,design) {
+  design = design || DEFAULT_DESIGN;
+  var matrix=await getQRMatrix(url, design.ec||'M', 400);
+  if(!matrix){ toast('Could not build the SVG — try again.','err'); return; }
+  var n=matrix.length;
+  var c=design.colors||{};
+  var colorMode=design.colorMode||'solid';
+  var bg = colorMode==='solid' ? (c.bg||'#ffffff') : colorMode==='grad2' ? (c.g2_bg||'#ffffff') : (c.g4_bg||'#ffffff');
+
+  var defs='', fillAttr='fill="'+(c.fg||'#000000')+'"';
+  if (colorMode==='grad2') {
+    var dir=c.g2_dir||'horizontal';
+    if (dir==='radial') {
+      defs='<radialGradient id="fg" cx="50%" cy="50%" r="50%"><stop offset="0%" stop-color="'+(c.g2_1||'#000')+'"/><stop offset="100%" stop-color="'+(c.g2_2||'#000')+'"/></radialGradient>';
+    } else {
+      var x2=dir==='horizontal'?'100%':'0%', y2=(dir==='vertical'||dir==='diagonal')?'100%':'0%';
+      defs='<linearGradient id="fg" x1="0%" y1="0%" x2="'+x2+'" y2="'+y2+'"><stop offset="0%" stop-color="'+(c.g2_1||'#000')+'"/><stop offset="100%" stop-color="'+(c.g2_2||'#000')+'"/></linearGradient>';
+    }
+    fillAttr='fill="url(#fg)"';
+  } else if (colorMode==='grad4') {
+    defs='<linearGradient id="fg" x1="0%" y1="0%" x2="100%" y2="100%">'
+      +'<stop offset="0%" stop-color="'+(c.g4_1||'#000')+'"/>'
+      +'<stop offset="33%" stop-color="'+(c.g4_2||'#000')+'"/>'
+      +'<stop offset="66%" stop-color="'+(c.g4_3||'#000')+'"/>'
+      +'<stop offset="100%" stop-color="'+(c.g4_4||'#000')+'"/></linearGradient>';
+    fillAttr='fill="url(#fg)"';
+  }
+
+  var rects='';
+  for(var row=0; row<n; row++){
+    for(var col=0; col<n; col++){
+      if (!matrix[row][col]) continue;
+      if (isFinderModule(row,col,n)) continue; // finders drawn separately below, in their own colors
+      rects+='<rect x="'+col+'" y="'+row+'" width="1" height="1"/>';
+    }
+  }
+
+  // WHY mirror FINDER_RING_SHAPES' 7/5/3 proportions exactly: so the SVG
+  // export matches the PNG/JPG export and the live preview pixel-for-pixel.
+  // Outer ring (border) and gap ring both use finderStyle so the border
+  // still reads as one uniform frame; the inner 3x3 eye uses finderDotStyle
+  // independently — same outer/inner split as the canvas renderer.
+  // NOTE — known limitations in this SVG export, both from the same root
+  // cause: it hand-draws only square/rounded/circle/diamond/teardrop as
+  // real SVG shapes. (1) The Overall Shape (frame) feature isn't reflected
+  // here at all — it relies on a pixel-mask technique (see buildShapeMask's
+  // WHY) with no clean vector equivalent, so an SVG download always
+  // renders as the plain square QR. (2) Since the inner eye (finderDotStyle)
+  // can now be any shape from the full dot library, not just those five,
+  // an SVG download approximates anything outside that five as a plain
+  // square inner eye — the PNG/JPG downloads and live preview show the
+  // real chosen shape; only the SVG path is the simplified one, same as
+  // the frame-shape gap just above.
+  var outerStyle = design.finderStyle || 'square';
+  var innerStyle = design.finderDotStyle || design.finderStyle || 'square';
+  var fOuter = c.finderOuter||'#000000', fInner = c.finderInner||'#000000';
+  function shapeSVG(shape, x, y, w, color){
+    if (shape==='circle') {
+      var r=w/2, cx=x+r, cy=y+r;
+      return '<circle cx="'+cx+'" cy="'+cy+'" r="'+r+'" fill="'+color+'"/>';
+    }
+    if (shape==='diamond') {
+      var r=w/2, cx=x+r, cy=y+r;
+      return '<polygon points="'+cx+','+(cy-r)+' '+(cx+r)+','+cy+' '+cx+','+(cy+r)+' '+(cx-r)+','+cy+'" fill="'+color+'"/>';
+    }
+    if (shape==='rounded') {
+      return '<rect x="'+x+'" y="'+y+'" width="'+w+'" height="'+w+'" rx="'+(w*0.23)+'" fill="'+color+'"/>';
+    }
+    if (shape==='teardrop') {
+      // WHY a path instead of <rect rx>: SVG's rx rounds all four corners
+      // equally, but teardrop needs exactly one (bottom-right) rounded at
+      // the full available radius (w/2) and the other three left sharp —
+      // same geometry as the canvas roundRectPath([0,0,r,0]) version.
+      var radius=w/2;
+      var d='M '+x+','+y+' L '+(x+w)+','+y+' L '+(x+w)+','+(y+w-radius)
+        +' A '+radius+','+radius+' 0 0 1 '+(x+w-radius)+','+(y+w)+' L '+x+','+(y+w)+' Z';
+      return '<path d="'+d+'" fill="'+color+'"/>';
+    }
+    // square (default)
+    return '<rect x="'+x+'" y="'+y+'" width="'+w+'" height="'+w+'" fill="'+color+'"/>';
+  }
+  function finderSVG(x,y){
+    return shapeSVG(outerStyle, x, y, 7, fOuter)
+      + shapeSVG(outerStyle, x+1, y+1, 5, bg)
+      + shapeSVG(innerStyle, x+2, y+2, 3, fInner);
+  }
+  var finders = finderSVG(0,0) + finderSVG(n-7,0) + finderSVG(0,n-7);
+
+  var svg='<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 '+n+' '+n+'" shape-rendering="crispEdges">'
+    + (defs?'<defs>'+defs+'</defs>':'')
+    + '<rect x="0" y="0" width="'+n+'" height="'+n+'" fill="'+bg+'"/>'
+    + '<g '+fillAttr+'>'+rects+'</g>'
+    + finders
+    + '</svg>';
+  var a=document.createElement('a');
+  a.href='data:image/svg+xml;charset=utf-8,'+encodeURIComponent(svg);
+  a.download=slug+'.svg';
+  a.click();
+}
+
+// ── DASHBOARD CHANGE DESIGN (paid, $5 — unlocks the generator, not a request form) ──
+// WHY no modal/textarea here: per Hali's correction, "Change Design" should
+// not be a type-in request queued for her to build later — it should pay,
+// then hand the customer the real generator (pre-filled) so they build the
+// new look themselves. See enterDesignEditMode() near createDynamic().
+function openDesignChange(data) {
+  _currentQRItem = data;
+  _pendingDesignEdit = data;
+  _pendingAction = {
+    type: 'design', qrId: data.slug, amount: 5,
+    desc: 'Unlock design editing for "' + data.name + '"',
+    title: 'Pay to Edit Design'
+  };
+  initiatePayment('design');
+}
+
+var _pendingDesignEdit = null;
+
+async function fulfillDesignEdit() {
+  var data = _pendingDesignEdit;
+  _pendingDesignEdit = null;
+  if (!data) return;
+  toast('Payment confirmed — update your design below.','ok');
+  enterDesignEditMode(data);
 }
 
 function openChangeRedirect(data){_currentQRItem=data;_pendingAction={type:'redirect',qrId:data.slug};document.getElementById('new-redirect-url').value='';openModal('redirect-modal');}
@@ -1570,10 +2791,17 @@ async function resetScans(slug){
 // ── PAYMENT ───────────────────────────────────────────────────────────────────
 function initiatePayment(type){
   closeModal('redirect-modal');
-  var amount=type==='redirect'?25:5;
+  // WHY read amount/desc/title off _pendingAction first: the download and
+  // design-change flows carry a dynamic price (formats selected) and a
+  // custom description, set by the caller before this runs. The type-based
+  // fallbacks below cover the original redirect/stats flows, which never set
+  // those fields.
+  var amount=(_pendingAction && _pendingAction.amount!=null) ? _pendingAction.amount : (type==='redirect'?25:5);
+  var desc=(_pendingAction && _pendingAction.desc) ? _pendingAction.desc : (type==='redirect'?'Update QR code redirect destination':'View QR code scan statistics');
+  var title=(_pendingAction && _pendingAction.title) ? _pendingAction.title : (type==='redirect'?'Pay to Update Redirect':'Pay to View Statistics');
   document.getElementById('pay-amount').textContent='$'+amount+'.00';
-  document.getElementById('pay-desc').textContent=type==='redirect'?'Update QR code redirect destination':'View QR code scan statistics';
-  document.getElementById('pay-title').textContent=type==='redirect'?'Pay to Update Redirect':'Pay to View Statistics';
+  document.getElementById('pay-desc').textContent=desc;
+  document.getElementById('pay-title').textContent=title;
   openModal('pay-modal');
   if(!cardElement){var els=stripe.elements();cardElement=els.create('card',{style:{base:{fontFamily:'Raleway,sans-serif',fontSize:'15px',color:'#f0ece3','::placeholder':{color:'#555'}}}});}
   document.getElementById('card-element').innerHTML='';
@@ -1586,17 +2814,20 @@ async function confirmPayment(){
   var btn=document.getElementById('pay-btn'); var errEl=document.getElementById('card-errors');
   btn.innerHTML='<span class="spin"></span>Processing…'; btn.disabled=true;
   var type=_pendingAction?_pendingAction.type:'redirect';
-  var amount=type==='redirect'?25:type==='shape_request'?5:5;
+  var amount=(_pendingAction && _pendingAction.amount!=null) ? _pendingAction.amount : (type==='redirect'?25:5);
   try{
     var res=await fetch(WORKER_URL+'/create-payment-intent',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({amount:amount,min_amount:amount*100})});
     var data=await res.json(); if(!data.ok)throw new Error(data.error);
     var result=await stripe.confirmCardPayment(data.client_secret,{payment_method:{card:cardElement}});
     if(result.error)throw new Error(result.error.message);
     closeModal('pay-modal');
+    btn.disabled=false; btn.textContent='Pay Now'; // WHY reset here: the modal closing doesn't clear it, and it must be ready for the next paid action this session
     if(type==='redirect') await performRedirectChange(_pendingAction.qrId);
     else if(type==='stats') await loadStats(_pendingAction.qrId);
     else if(type==='shape_request') await fulfillShapeRequest(result.paymentIntent.id);
-    if(type!=='shape_request') toast('Payment confirmed. '+(type==='redirect'?'Redirect updated.':'Stats unlocked.'),'ok');
+    else if(type==='download') await fulfillDownload();
+    else if(type==='design') await fulfillDesignEdit();
+    if(type==='redirect'||type==='stats') toast('Payment confirmed. '+(type==='redirect'?'Redirect updated.':'Stats unlocked.'),'ok');
   }catch(e){errEl.textContent=e.message;btn.textContent='Pay Now';btn.disabled=false;}
 }
 
