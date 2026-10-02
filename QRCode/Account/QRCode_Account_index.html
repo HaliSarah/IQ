@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<!--
+  Title:       QR Code Redirect Handler
+  Author:      Hali Sarah Parsons
+  Date:        2026-09-25
+  Modified By: Claude
+  Description: Reads the slug from ?slug=... (or a #hash fallback), looks up
+               the redirect URL in Firestore, logs the scan (count + device
+               type, for dashboard stats), then redirects. Restyled to match
+               the look of iqproductionz.com's domain-mask loader pages
+               (same logo, Cinzel Decorative wordmark, pulsing glow,
+               spinner, dark plum/gold overlay) so a scanned code feels like
+               part of the same site instead of a plain generic redirect.
+               Deploy to: QRCode/Account/index.html
+               URL format: iqproductionz.com/QRCode/Account/?slug=username-codename
+-->
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Redirecting… | I.Q. Productionz QR</title>
+<meta name="robots" content="noindex,nofollow">
+<link href="https://fonts.googleapis.com/css2?family=Cinzel+Decorative&display=swap" rel="stylesheet">
+<style>
+  /* WHY these exact values (bg color, overlay opacity, gold rgba, font):
+     copied from the iqproductionz.com domain-mask loader Hali uploaded, so
+     a scanned QR code's loading screen looks like the same site, not a
+     separate generic "redirecting…" page. */
+  * { margin:0; padding:0; box-sizing:border-box; }
+  html, body { width:100%; height:100%; overflow:hidden; background:#2a2720; font-family:'Inter',system-ui,sans-serif; }
+  #loader {
+    position:fixed; inset:0;
+    background:#2a2720 url('https://static.wixstatic.com/media/b63ec4_d6fad9165f744284a4b90915a9fbbbc5~mv2.jpg/v1/fill/w_288,h_271,al_c,q_80,usm_0.66_1.00_0.01,enc_avif,quality_auto/b63ec4_d6fad9165f744284a4b90915a9fbbbc5~mv2.jpg') center/cover;
+    display:flex; flex-direction:column; align-items:center; justify-content:center;
+    z-index:10; transition:opacity .8s ease;
+  }
+  #loader::before { content:''; position:absolute; inset:0; background:rgba(20,16,10,.78); }
+  #loader.hidden { opacity:0; pointer-events:none; }
+  #loader img {
+    position:relative; height:72px; width:auto;
+    filter:drop-shadow(0 0 16px rgba(201,138,46,.7));
+    margin-bottom:1.25rem;
+    animation:pulse 2s ease-in-out infinite;
+  }
+  @keyframes pulse {
+    0%,100% { filter:drop-shadow(0 0 10px rgba(201,138,46,.4)); }
+    50%      { filter:drop-shadow(0 0 24px rgba(201,138,46,.9)); }
+  }
+  #loader p {
+    position:relative; font-family:'Cinzel Decorative','Palatino Linotype',serif;
+    font-size:.62rem; letter-spacing:.32em; text-transform:uppercase;
+    color:rgba(201,138,46,.8); text-align:center;
+  }
+  /* WHY a separate look for the error state: the uppercase/letter-spaced
+     style reads fine for a single word like "Redirecting" but turns an
+     actual error message (which needs to stay readable, with a real link
+     in it) into decoration — so an error drops the caps/spacing and widens
+     a bit instead. */
+  #loader p.err {
+    text-transform:none; letter-spacing:.02em; font-family:'Inter',system-ui,sans-serif;
+    font-size:.86rem; color:#e8c9a0; max-width:260px; line-height:1.5;
+  }
+  #loader a { color:#c98a2e; text-decoration:underline; }
+  .spinner {
+    position:relative; width:24px; height:24px;
+    border:2px solid rgba(201,138,46,.2); border-top-color:rgba(201,138,46,.85);
+    border-radius:50%; animation:spin 1s linear infinite; margin-top:1.1rem;
+  }
+  @keyframes spin { to { transform:rotate(360deg); } }
+</style>
+</head>
+<body>
+<div id="loader">
+  <img src="https://static.wixstatic.com/media/b63ec4_2117e26bc8e646c8ad8b0050222de71b~mv2.png/v1/fill/w_295,h_92,al_c,q_85,usm_0.66_1.00_0.01,enc_avif,quality_auto/IQ-noglow_edited_edited.png" alt="I.Q. Productionz">
+  <p id="msg">Redirecting</p>
+  <div class="spinner" id="spinner"></div>
+</div>
+
+<!-- Firebase -->
+<script type="module">
+  import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js';
+  import { getFirestore, doc, getDoc, updateDoc, increment, collection, addDoc }
+    from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js';
+
+  const firebaseConfig = {
+    apiKey: "AIzaSyBClNCsZwvHghZLbhr3BiP3aDys0GDvJys",
+    authDomain: "qr-platform-33671.firebaseapp.com",
+    projectId: "qr-platform-33671",
+    storageBucket: "qr-platform-33671.firebasestorage.app",
+    messagingSenderId: "564631666195",
+    appId: "1:564631666195:web:515eb76f3f3f48c54c09e6"
+  };
+
+  const app      = initializeApp(firebaseConfig);
+  const db       = getFirestore(app);
+  const msg      = document.getElementById('msg');
+  const spinner  = document.getElementById('spinner');
+
+  // WHY a helper instead of inlining this everywhere: every error exit
+  // needs the exact same treatment — drop the all-caps "loading" styling
+  // (see p.err above), hide the spinner since nothing is happening anymore,
+  // and allow a real link back into the site.
+  function showError(html) {
+    spinner.style.display = 'none';
+    msg.classList.add('err');
+    msg.innerHTML = html;
+  }
+
+  // WHY: slug can come from query param ?slug=... (easy with GitHub Pages)
+  // or from the hash #slug (fallback). GitHub Pages doesn't support
+  // server-side path rewrites, so we use query params on the redirect URL.
+  var slug = new URLSearchParams(window.location.search).get('slug')
+          || window.location.hash.replace('#','').trim();
+
+  if (!slug) {
+    showError('No QR code specified. <a href="/QRCode/">Go back</a>');
+  } else {
+    (async () => {
+      try {
+        var ref  = doc(db, 'qrcodes', slug);
+        var snap = await getDoc(ref);
+
+        if (!snap.exists()) {
+          showError('QR code not found. <a href="/QRCode/">Create one</a>');
+          return;
+        }
+
+        var data = snap.data();
+        var dest = data.redirectUrl;
+
+        // WHY: log scan with timestamp, device type, and basic metadata
+        // so dashboard stats are accurate
+        var isMobile = /Mobi|Android|iPhone|iPad/i.test(navigator.userAgent);
+        await Promise.all([
+          // Increment counter on the main doc
+          updateDoc(ref, { scanCount: increment(1) }),
+          // Add a scan log entry for per-day / per-device breakdown
+          addDoc(collection(db,'qrcodes',slug,'scans'), {
+            ts: Date.now(),
+            mobile: isMobile,
+            ua: navigator.userAgent.slice(0,120)
+          })
+        ]);
+
+        // Redirect
+        window.location.replace(dest);
+
+      } catch(e) {
+        showError('Error: ' + e.message + ' · <a href="/QRCode/">Home</a>');
+      }
+    })();
+  }
+</script>
+</body>
+</html>
