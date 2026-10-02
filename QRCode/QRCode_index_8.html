@@ -863,7 +863,7 @@ footer a{color:var(--muted);}footer a:hover{color:var(--white);}
 </footer>
 <script>
 var STRIPE_PK = 'pk_live_51KGEFWCL2m4xr1VIspOtCN2T1EVYCgfhsF5zgDOT4NkIKbQ8PqiPTYBmaoYzJwXqp9jkFdb2TNZOf5QKBaQh5RAv00IYVZw3oI';
-var WORKER_URL = 'https://lulu-order.REPLACE_WITH_YOUR_SUBDOMAIN.workers.dev';
+var WORKER_URL = 'https://lulu-order.halisarahparsons.workers.dev';
 var BASE_REDIRECT = 'https://iqproductionz.com/QRCode/Account/';
 
 // WHY: defer Stripe init until window fully loaded so Stripe.js is available
@@ -2854,7 +2854,12 @@ function openAuthModal(tab){
   openModal('auth-modal');
   authTab(tab);
 }
-function authTab(t){document.getElementById('auth-signin').style.display=t==='signin'?'':'none';document.getElementById('auth-signup').style.display=t==='signup'?'':'none';document.getElementById('atab-signin').classList.toggle('active',t==='signin');document.getElementById('atab-signup').classList.toggle('active',t==='signup');document.getElementById('auth-err').style.display='none';}
+// WHY no atab-signin/atab-signup classList toggles here: those ids were
+// never in the modal's markup (no tab buttons exist — openAuthModal already
+// sets the title/subtitle to show which mode you're in), so calling them
+// threw a TypeError every time this ran and silently killed the auth-err
+// reset on the line after it.
+function authTab(t){document.getElementById('auth-signin').style.display=t==='signin'?'':'none';document.getElementById('auth-signup').style.display=t==='signup'?'':'none';document.getElementById('auth-err').style.display='none';}
 // ── SELECT ALL & CSV EXPORT ───────────────────────────────────────────────────
 function selectAllQRCodes() {
   var cbs = document.querySelectorAll('.qr-select-cb');
