@@ -163,6 +163,12 @@ nav{display:flex;justify-content:space-between;align-items:center;padding:14px 2
 .gen-btn{width:100%;padding:13px;background:linear-gradient(135deg,var(--gold),#a87025);color:#222;border:none;border-radius:8px;font-size:.9rem;font-weight:700;transition:filter .2s;margin-top:4px;font-family:'Cinzel',serif;letter-spacing:.06em;}
 .gen-btn:hover{filter:brightness(1.1);}
 
+/* WHY this exists: some dot/finder/frame-shape combinations render fine but
+   don't actually scan (see the per-shape scan testing in drawFrame/
+   computeFrameInnerBox's WHY) — Hali wants that risk impossible to miss
+   right where someone is about to download, not buried in a tooltip. */
+.scan-warning{color:#c0392b;font-weight:800;text-transform:uppercase;text-align:center;font-size:.8rem;letter-spacing:.03em;line-height:1.5;margin:10px 0;}
+
 /* QR RESULT */
 #qr-result{display:none;margin-top:24px;text-align:center;}
 #qr-canvas-wrap{display:inline-block;padding:16px;background:#fff;border-radius:10px;}
@@ -542,6 +548,7 @@ footer a{color:var(--muted);}footer a:hover{color:var(--white);}
           </div>
         </div><!-- end design-grid -->
 
+        <div class="scan-warning">Make sure code scans before you download (some combinations don't work)</div>
         <button class="gen-btn" onclick="generateCustomQR()">Generate QR Code</button>
 
         <div id="qr-result">
@@ -754,6 +761,7 @@ footer a{color:var(--muted);}footer a:hover{color:var(--white);}
           </div>
         </div><!-- end design-grid -->
 
+        <div class="scan-warning">Make sure code scans before you download (some combinations don't work)</div>
         <button class="gen-btn" id="dyn-gen-btn" onclick="createDynamic()">Create Dynamic QR Code — Free to Start</button>
         <p style="font-size:.74rem;color:var(--muted);margin-top:10px;text-align:center;" id="dyn-gen-note">Account required &#8212; sign in or sign up to continue.</p>
       </div>
