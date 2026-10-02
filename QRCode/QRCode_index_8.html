@@ -30,11 +30,27 @@
 <script type="module">
   import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js';
   import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js';
-  import { getFirestore, doc, setDoc, getDoc, updateDoc, collection, addDoc, query, where, getDocs, increment } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js';
+  import { getFirestore, doc, setDoc, getDoc, updateDoc, deleteDoc, collection, addDoc, query, where, getDocs, increment } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js';
   const cfg={apiKey:"AIzaSyBClNCsZwvHghZLbhr3BiP3aDys0GDvJys",authDomain:"qr-platform-33671.firebaseapp.com",projectId:"qr-platform-33671",storageBucket:"qr-platform-33671.firebasestorage.app",messagingSenderId:"564631666195",appId:"1:564631666195:web:515eb76f3f3f48c54c09e6"};
   const app=initializeApp(cfg); const auth=getAuth(app); const db=getFirestore(app);
-  window._fb={auth,db,createUserWithEmailAndPassword,signInWithEmailAndPassword,signOut,onAuthStateChanged,doc,setDoc,getDoc,updateDoc,collection,addDoc,query,where,getDocs,increment};
-  onAuthStateChanged(auth,user=>{window._user=user||null;renderNav();if(window._cv==='dashboard')showDashboard();});
+  // WHY deleteDoc added to the export list: nothing in this app could ever
+  // delete a QR code before — the dashboard checkbox existed but had no
+  // delete action wired to it anywhere.
+  window._fb={auth,db,createUserWithEmailAndPassword,signInWithEmailAndPassword,signOut,onAuthStateChanged,doc,setDoc,getDoc,updateDoc,deleteDoc,collection,addDoc,query,where,getDocs,increment};
+  // WHY look up the username here instead of only at sign-in: onAuthStateChanged
+  // also fires on page load for an already-logged-in session (no doSignIn()
+  // call happens then), and that's the case this needs to cover too — see
+  // TEST_USERNAME's WHY in the main script below.
+  onAuthStateChanged(auth,user=>{
+    window._user=user||null;
+    window._isTestAccount=false;
+    if(user){
+      getDoc(doc(db,'users',user.uid)).then(function(snap){
+        window._isTestAccount = snap.exists() && snap.data().username===window.TEST_USERNAME;
+      }).catch(function(){ window._isTestAccount=false; });
+    }
+    renderNav();if(window._cv==='dashboard')showDashboard();
+  });
 </script>
 <script src="https://js.stripe.com/v3/"></script>
 <!-- WHY: qrcodejs generates the base QR matrix; we use a custom canvas renderer
@@ -193,7 +209,18 @@ nav{display:flex;justify-content:space-between;align-items:center;padding:14px 2
 .qr-item-actions{display:flex;gap:8px;flex-wrap:wrap;}
 .act-btn{padding:7px 14px;border-radius:6px;font-size:.76rem;font-weight:500;border:1px solid var(--line);background:transparent;color:var(--white);transition:all .2s;}
 .act-btn:hover{border-color:var(--gold);background:var(--navy);}
-.stats-panel{background:var(--navy);border:1px solid var(--line);border-radius:var(--r);padding:20px;margin-top:14px;display:none;}
+/* WHY a separate danger variant instead of reusing .act-btn: delete is
+   destructive and irreversible (no undo, no trash/restore) — it needs to
+   read as different at a glance from the other, non-destructive actions
+   sitting right next to it. */
+.act-btn-danger{color:var(--red);border-color:var(--red);}
+.act-btn-danger:hover{background:var(--red);color:#fff;border-color:var(--red);}
+/* WHY a toolbar instead of leaving the per-card checkboxes to speak for
+   themselves: the checkboxes existed for bulk CSV export + delete, but
+   nothing in the UI ever told you that, or gave you a way to act on a
+   selection — checking a box visibly did nothing. */
+.dash-toolbar{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:16px;}
+.stats-panel{background:var(--navy);border:1px solid var(--line);border-radius:var(--r);padding:20px;margin-top:14px;display:none;width:100%;}
 .stats-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-bottom:18px;}
 .stat-box{background:var(--panel);border-radius:7px;padding:14px;text-align:center;}
 .stat-num{font-family:'Cinzel',serif;font-size:1.5rem;font-weight:700;color:var(--gold2);}
@@ -802,6 +829,15 @@ footer a{color:var(--muted);}footer a:hover{color:var(--white);}
       </div>
       <button class="nav-btn primary" onclick="showView('home');switchTab('dynamic')">+ New Dynamic Code</button>
     </div>
+    <!-- WHY this toolbar: the per-card checkboxes already existed for bulk
+         CSV export, but there was nowhere to act on a selection — checking
+         boxes visibly did nothing. Delete Selected is new; the other two
+         just wire up functions that already existed. -->
+    <div class="dash-toolbar">
+      <button class="act-btn" onclick="selectAllQRCodes()">☑ Select All</button>
+      <button class="act-btn" onclick="downloadAllCSV()">⬇ Export CSV</button>
+      <button class="act-btn act-btn-danger" onclick="deleteSelectedQRCodes()">🗑 Delete Selected</button>
+    </div>
     <div id="qr-list"><div class="empty-state"><p>No QR codes yet.</p></div></div>
   </div>
 </div>
@@ -873,6 +909,15 @@ footer a{color:var(--muted);}footer a:hover{color:var(--white);}
 var STRIPE_PK = 'pk_live_51KGEFWCL2m4xr1VIspOtCN2T1EVYCgfhsF5zgDOT4NkIKbQ8PqiPTYBmaoYzJwXqp9jkFdb2TNZOf5QKBaQh5RAv00IYVZw3oI';
 var WORKER_URL = 'https://lulu-order.halisarahparsons.workers.dev';
 var BASE_REDIRECT = 'https://iqproductionz.com/QRCode/Account/';
+// WHY a username, not an email or a secret: this only lets ONE specific
+// already-registered account (signed in with its own password, same as
+// anyone else) skip the Stripe charge step so Hali can click through every
+// paid capability — redirect changes, stats, redesign, downloads — without
+// real money moving. It's visible in page source to anyone who looks, but
+// that's harmless: it isn't a login bypass, just a "don't charge THIS
+// already-authenticated account" flag, and nobody else can sign in as this
+// account without its password.
+var TEST_USERNAME = 'ntn';
 
 // WHY: defer Stripe init until window fully loaded so Stripe.js is available
 var stripe = null;
@@ -880,6 +925,12 @@ window.addEventListener('load', function(){ stripe = Stripe(STRIPE_PK); });
 var cardElement = null;
 var _pendingAction = null;
 var _currentQRItem = null;
+// WHY tracked client-side per slug instead of re-reading from Firestore:
+// stats are sold individually ($5 each, not one flat $5 for all of them),
+// so once a stat is paid for this session it needs to stay unlocked (and
+// its checkbox stay checked+disabled, never re-billable) across
+// re-opening the panel, buying a second stat, etc. {slug: Set(statKeys)}
+var _purchasedStats = {};
 var _logoImg = null;
 var _colorMode = 'solid';
 var _selectedShape = 'square';
@@ -2499,7 +2550,7 @@ function buildQRItem(data) {
   qrDiv.appendChild(thumbCanvas);
   renderQRCore(thumbCanvas, redirectUrl, 56, (data.design&&data.design.ec)||'M', data.design||DEFAULT_DESIGN);
   qrCol.appendChild(qrDiv);
-  var designBtn=document.createElement('button'); designBtn.className='act-btn'; designBtn.textContent='Change Design — $5';
+  var designBtn=document.createElement('button'); designBtn.className='act-btn'; designBtn.textContent='Redesign — $5';
   designBtn.onclick=function(){openDesignChange(data);};
   qrCol.appendChild(designBtn);
   div.appendChild(qrCol);
@@ -2514,9 +2565,18 @@ function buildQRItem(data) {
   dlBtn.onclick=function(){toggleDlPanel(data.slug);};
   var changeBtn=document.createElement('button'); changeBtn.className='act-btn'; changeBtn.textContent='Change Redirect — $25';
   changeBtn.onclick=function(){openChangeRedirect(data);};
-  var statsBtn=document.createElement('button'); statsBtn.className='act-btn'; statsBtn.textContent='View Stats — $5';
-  statsBtn.onclick=function(){openStats(data);};
-  [dlBtn,changeBtn,statsBtn].forEach(b=>actions.appendChild(b));
+  // WHY a dropdown toggle instead of charging straight on click: stats are
+  // $5 PER STAT, not one flat $5 for everything — this just opens the
+  // selection panel below (same pattern as Download) so you only pay for
+  // the ones you actually pick.
+  var statsBtn=document.createElement('button'); statsBtn.className='act-btn'; statsBtn.textContent='View Stats ▾';
+  statsBtn.onclick=function(){toggleStatsPanel(data.slug);};
+  // WHY its own danger-styled button instead of folding delete into the
+  // checkbox + toolbar alone: deleting a single code is the common case,
+  // and shouldn't require selecting it first.
+  var delBtn=document.createElement('button'); delBtn.className='act-btn act-btn-danger'; delBtn.textContent='🗑 Delete';
+  delBtn.onclick=function(){deleteQRCode(data.slug, data.name);};
+  [dlBtn,changeBtn,statsBtn,delBtn].forEach(b=>actions.appendChild(b));
   div.appendChild(actions);
 
   // WHY $5 per format with a running total: each format is billed
@@ -2537,9 +2597,28 @@ function buildQRItem(data) {
   div.appendChild(dl);
   dl.querySelector('#dl-pay-btn-'+data.slug).onclick=function(){openDownloadPayment(data);};
 
+  // WHY the exact same select-rows/total/pay shape as the download panel:
+  // it's the same "$X per item, pick what you want, pay once for the sum"
+  // pattern Hali already approved there — View Stats — $5 used to charge
+  // one flat $5 and hand over every stat regardless, which wasn't the
+  // actual pricing (it's $5 PER stat). Already-purchased stats (tracked in
+  // _purchasedStats, see loadStats) stay checked, disabled, and free so
+  // re-opening this panel never re-charges for something already bought.
   var sp=document.createElement('div'); sp.className='stats-panel'; sp.id='stats-'+data.slug;
-  sp.innerHTML='<div class="stats-grid"><div class="stat-box"><div class="stat-num" id="sn-total-'+data.slug+'">—</div><div class="stat-label">Total Scans</div></div><div class="stat-box"><div class="stat-num" id="sn-today-'+data.slug+'">—</div><div class="stat-label">Today</div></div><div class="stat-box"><div class="stat-num" id="sn-mobile-'+data.slug+'">—</div><div class="stat-label">Mobile %</div></div></div><button class="act-btn" onclick="resetScans(\''+data.slug+'\')">Reset Scan Count</button>';
+  sp.innerHTML=
+      '<div class="dl-opt-row"><input type="checkbox" id="st-all-'+data.slug+'" onchange="toggleStatAll(\''+data.slug+'\')">'
+        +'<label for="st-all-'+data.slug+'">Select all</label></div>'
+    + '<div class="dl-opt-row"><input type="checkbox" class="st-opt" id="st-total-'+data.slug+'" data-stat="total" onchange="updateStatTotal(\''+data.slug+'\')">'
+        +'<label for="st-total-'+data.slug+'">Total Scans</label><span class="dl-price">$5</span></div>'
+    + '<div class="dl-opt-row"><input type="checkbox" class="st-opt" id="st-today-'+data.slug+'" data-stat="today" onchange="updateStatTotal(\''+data.slug+'\')">'
+        +'<label for="st-today-'+data.slug+'">Scans Today</label><span class="dl-price">$5</span></div>'
+    + '<div class="dl-opt-row"><input type="checkbox" class="st-opt" id="st-mobile-'+data.slug+'" data-stat="mobile" onchange="updateStatTotal(\''+data.slug+'\')">'
+        +'<label for="st-mobile-'+data.slug+'">Mobile %</label><span class="dl-price">$5</span></div>'
+    + '<div class="dl-total-row"><span>Total</span><span id="st-total-amt-'+data.slug+'">$0.00</span></div>'
+    + '<button class="gen-btn" id="st-pay-btn-'+data.slug+'" disabled>Select a stat</button>'
+    + '<div class="stats-grid" id="stats-grid-'+data.slug+'" style="margin-top:16px;"></div>';
   div.appendChild(sp);
+  sp.querySelector('#st-pay-btn-'+data.slug).onclick=function(){openStatsPayment(data);};
   return div;
 }
 
@@ -2761,44 +2840,136 @@ async function fulfillDesignEdit() {
 }
 
 function openChangeRedirect(data){_currentQRItem=data;_pendingAction={type:'redirect',qrId:data.slug};document.getElementById('new-redirect-url').value='';openModal('redirect-modal');}
-function openStats(data){_currentQRItem=data;_pendingAction={type:'stats',qrId:data.slug};initiatePayment('stats');}
 
-async function loadStats(slug) {
+// ── STATS PANEL — $5 PER STAT, not one flat $5 for everything ───────────────
+// WHY a selection panel instead of charging on click: "View Stats — $5" used
+// to hand over every stat for one flat $5, which wasn't the real pricing —
+// each stat (Total Scans, Scans Today, Mobile %) is its own $5 item, same
+// as the Download panel's $5-per-format pattern.
+function toggleStatsPanel(slug) {
+  var p=document.getElementById('stats-'+slug);
+  if(!p) return;
+  p.style.display = p.style.display==='block' ? 'none' : 'block';
+}
+
+function toggleStatAll(slug) {
+  var all=document.getElementById('st-all-'+slug);
+  // WHY :not(:disabled): a disabled box is a stat already bought this
+  // session (see loadStats) — Select All should never try to toggle it off.
+  document.querySelectorAll('#stats-'+slug+' .st-opt:not(:disabled)').forEach(function(cb){cb.checked=all.checked;});
+  updateStatTotal(slug);
+}
+
+function updateStatTotal(slug) {
+  var payable=Array.from(document.querySelectorAll('#stats-'+slug+' .st-opt:not(:disabled)'));
+  var checked=payable.filter(function(cb){return cb.checked;});
+  var total=checked.length*5;
+  var totalEl=document.getElementById('st-total-amt-'+slug);
+  if(totalEl) totalEl.textContent='$'+total+'.00';
+  var btn=document.getElementById('st-pay-btn-'+slug);
+  if(btn){
+    btn.disabled = checked.length===0;
+    btn.textContent = checked.length===0 ? 'Select a stat' : 'Pay $'+total+' & View';
+  }
+  var all=document.getElementById('st-all-'+slug);
+  if(all) all.checked = payable.length>0 && checked.length===payable.length;
+}
+
+function openStatsPayment(data) {
+  var slug=data.slug;
+  var keys=Array.from(document.querySelectorAll('#stats-'+slug+' .st-opt:checked:not(:disabled)')).map(function(cb){return cb.dataset.stat;});
+  if(keys.length===0){toast('Select at least one stat.','err');return;}
+  var labels={total:'Total Scans',today:'Scans Today',mobile:'Mobile %'};
+  _currentQRItem=data;
+  _pendingAction={
+    type:'stats', qrId:slug, stats:keys, amount:keys.length*5,
+    desc:'Unlock '+keys.map(function(k){return labels[k];}).join(' + ')+' — '+data.name,
+    title:'Pay to View Statistics'
+  };
+  initiatePayment('stats');
+}
+
+// WHY newStats merges into _purchasedStats instead of replacing it: re-
+// buying a second stat later in the session (or clicking Reset) shouldn't
+// forget a stat already paid for earlier — see _purchasedStats' WHY.
+async function loadStats(slug, newStats) {
   var fb=window._fb; var panel=document.getElementById('stats-'+slug); if(!panel)return;
+  var purchased = _purchasedStats[slug] || (_purchasedStats[slug]=new Set());
+  (newStats||[]).forEach(function(k){ purchased.add(k); });
   panel.style.display='block';
+  var grid=document.getElementById('stats-grid-'+slug);
   try {
-    var d=await fb.getDoc(fb.doc(fb.db,'qrcodes',slug)); var total=d.data().scanCount||0;
-    document.getElementById('sn-total-'+slug).textContent=total;
-    var today=new Date(); today.setHours(0,0,0,0);
-    var q=fb.query(fb.collection(fb.db,'qrcodes',slug,'scans'),fb.where('ts','>=',today.getTime()));
-    var snap=await fb.getDocs(q); document.getElementById('sn-today-'+slug).textContent=snap.size;
-    var allSnap=await fb.getDocs(fb.collection(fb.db,'qrcodes',slug,'scans'));
-    var m=0; allSnap.forEach(d=>{if(d.data().mobile)m++;});
-    document.getElementById('sn-mobile-'+slug).textContent=allSnap.size>0?Math.round(m/allSnap.size*100)+'%':'—';
-    // Show recent scan log preview
-    var logEl=document.getElementById('scan-log-'+slug);
-    if(logEl && allSnap.size>0){
-      var entries=[];
-      allSnap.forEach(function(d){entries.push(d.data());});
-      entries.sort(function(a,b){return b.ts-a.ts;});
-      logEl.innerHTML='<strong style="color:var(--muted);display:block;margin-bottom:4px;">Recent scans:</strong>'+
-        entries.slice(0,10).map(function(e){
-          var dt=new Date(e.ts);
-          return '<div style="padding:3px 0;border-bottom:1px solid var(--line);">'+dt.toLocaleString()+' · '+(e.mobile?'Mobile':'Desktop')+'</div>';
-        }).join('');
+    var html='', d, allSnap;
+    if (purchased.has('total')) {
+      d = await fb.getDoc(fb.doc(fb.db,'qrcodes',slug));
+      html += '<div class="stat-box"><div class="stat-num">'+(d.data().scanCount||0)+'</div><div class="stat-label">Total Scans</div></div>';
     }
-  } catch(e){panel.innerHTML='<p style="color:var(--red);font-size:.84rem;">Error: '+e.message+'</p>';}
+    if (purchased.has('today')) {
+      var today=new Date(); today.setHours(0,0,0,0);
+      var q=fb.query(fb.collection(fb.db,'qrcodes',slug,'scans'),fb.where('ts','>=',today.getTime()));
+      var snap=await fb.getDocs(q);
+      html += '<div class="stat-box"><div class="stat-num">'+snap.size+'</div><div class="stat-label">Today</div></div>';
+    }
+    if (purchased.has('mobile')) {
+      allSnap = await fb.getDocs(fb.collection(fb.db,'qrcodes',slug,'scans'));
+      var m=0; allSnap.forEach(function(dd){if(dd.data().mobile)m++;});
+      html += '<div class="stat-box"><div class="stat-num">'+(allSnap.size>0?Math.round(m/allSnap.size*100)+'%':'—')+'</div><div class="stat-label">Mobile %</div></div>';
+    }
+    if (grid) grid.innerHTML = html + (purchased.size>0 ? '<button class="act-btn" style="grid-column:1/-1;margin-top:4px;" onclick="resetScans(\''+slug+'\')">Reset Scan Count</button>' : '');
+    // Lock every purchased stat's checkbox so it can never be re-billed.
+    purchased.forEach(function(key){
+      var cb=document.getElementById('st-'+key+'-'+slug);
+      if (cb && !cb.disabled) {
+        cb.checked=true; cb.disabled=true;
+        var priceEl=cb.closest('.dl-opt-row').querySelector('.dl-price');
+        if (priceEl) priceEl.textContent='Owned';
+      }
+    });
+    updateStatTotal(slug);
+  } catch(e){ if (grid) grid.innerHTML='<p style="color:var(--red);font-size:.84rem;">Error: '+e.message+'</p>'; }
 }
 
 async function resetScans(slug){
   if(!confirm('Reset scan count to zero?'))return;
   var fb=window._fb;
-  try{await fb.updateDoc(fb.doc(fb.db,'qrcodes',slug),{scanCount:0});document.getElementById('sn-total-'+slug).textContent='0';document.getElementById('sn-today-'+slug).textContent='0';toast('Scan count reset.','ok');}catch(e){toast('Error: '+e.message,'err');}
+  // WHY re-run loadStats with no new stats instead of poking fixed element
+  // ids: the stat boxes are now built dynamically from whichever stats were
+  // actually purchased (see loadStats), so there's no longer a fixed
+  // sn-total-<slug>/sn-today-<slug> to write into directly — redrawing from
+  // the current purchased set is what keeps this correct either way.
+  try{await fb.updateDoc(fb.doc(fb.db,'qrcodes',slug),{scanCount:0});await loadStats(slug);toast('Scan count reset.','ok');}catch(e){toast('Error: '+e.message,'err');}
 }
 
 // ── PAYMENT ───────────────────────────────────────────────────────────────────
+// WHY pulled out of confirmPayment: the test-account bypass below needs to
+// run this exact same "what happens once payment is settled" dispatch
+// without ever touching Stripe — duplicating it would mean the two paths
+// silently drifting apart over time (a new type added to one and not the
+// other). paymentIntentId is a real id after a real charge, or the literal
+// string 'test-bypass' when skipped — only fulfillShapeRequest forwards it
+// anywhere (into the order record), so that's the one case TEST_USERNAME
+// leaves a visible trace.
+async function fulfillPendingAction(paymentIntentId){
+  var type=_pendingAction?_pendingAction.type:'redirect';
+  if(type==='redirect') await performRedirectChange(_pendingAction.qrId);
+  else if(type==='stats') await loadStats(_pendingAction.qrId, _pendingAction.stats);
+  else if(type==='shape_request') await fulfillShapeRequest(paymentIntentId);
+  else if(type==='download') await fulfillDownload();
+  else if(type==='design') await fulfillDesignEdit();
+  if(type==='redirect'||type==='stats') toast((paymentIntentId==='test-bypass'?'Test account — no charge. ':'Payment confirmed. ')+(type==='redirect'?'Redirect updated.':'Stats unlocked.'),'ok');
+}
+
 function initiatePayment(type){
   closeModal('redirect-modal');
+  // WHY a test-account short-circuit here, before the Stripe modal even
+  // opens: this is the one place every paid action funnels through, so
+  // it's the one place that needs to know about TEST_USERNAME — see its
+  // WHY. Every other paid function stays completely unaware of it.
+  if(window._isTestAccount){
+    toast('Test account — skipping payment.','ok');
+    fulfillPendingAction('test-bypass');
+    return;
+  }
   // WHY read amount/desc/title off _pendingAction first: the download and
   // design-change flows carry a dynamic price (formats selected) and a
   // custom description, set by the caller before this runs. The type-based
@@ -2830,12 +3001,7 @@ async function confirmPayment(){
     if(result.error)throw new Error(result.error.message);
     closeModal('pay-modal');
     btn.disabled=false; btn.textContent='Pay Now'; // WHY reset here: the modal closing doesn't clear it, and it must be ready for the next paid action this session
-    if(type==='redirect') await performRedirectChange(_pendingAction.qrId);
-    else if(type==='stats') await loadStats(_pendingAction.qrId);
-    else if(type==='shape_request') await fulfillShapeRequest(result.paymentIntent.id);
-    else if(type==='download') await fulfillDownload();
-    else if(type==='design') await fulfillDesignEdit();
-    if(type==='redirect'||type==='stats') toast('Payment confirmed. '+(type==='redirect'?'Redirect updated.':'Stats unlocked.'),'ok');
+    await fulfillPendingAction(result.paymentIntent.id);
   }catch(e){errEl.textContent=e.message;btn.textContent='Pay Now';btn.disabled=false;}
 }
 
@@ -2874,6 +3040,56 @@ function selectAllQRCodes() {
   // WHY: toggle — if all checked, uncheck all; otherwise check all
   var allChecked = Array.from(cbs).every(cb=>cb.checked);
   cbs.forEach(cb=>cb.checked=!allChecked);
+}
+
+// ── DELETE ────────────────────────────────────────────────────────────────────
+// WHY this didn't exist before: the per-card checkbox was already wired up
+// for bulk CSV export, but there was never any way to actually delete a QR
+// code, single or bulk — checking a box, or clicking a card, did nothing
+// destructive at all. This is a genuinely new capability, not a fix.
+async function deleteOneQRDoc(slug) {
+  // WHY also sweep the scans subcollection: Firestore never cascade-deletes
+  // a subcollection when its parent doc is deleted — leaving it behind
+  // would orphan scan-log data forever under a slug nothing points to
+  // anymore. Best-effort: a failure here doesn't block deleting the code.
+  var fb=window._fb;
+  try {
+    var scansSnap=await fb.getDocs(fb.collection(fb.db,'qrcodes',slug,'scans'));
+    for (var i=0;i<scansSnap.docs.length;i++) {
+      await fb.deleteDoc(scansSnap.docs[i].ref);
+    }
+  } catch(e) { /* non-fatal — the code itself still gets deleted below */ }
+  await fb.deleteDoc(fb.doc(fb.db,'qrcodes',slug));
+}
+
+async function deleteQRCode(slug, name) {
+  if (!confirm('Delete "'+(name||slug)+'"? This cannot be undone — the printed QR code will stop working.')) return;
+  try {
+    await deleteOneQRDoc(slug);
+    var el=document.getElementById('qritem-'+slug);
+    if (el) el.remove();
+    delete _purchasedStats[slug];
+    toast('QR code deleted.','ok');
+    var list=document.getElementById('qr-list');
+    if (list && !list.querySelector('.qr-item')) list.innerHTML='<div class="empty-state"><p>No dynamic QR codes yet.</p></div>';
+  } catch(e) { toast('Delete failed: '+e.message,'err'); }
+}
+
+async function deleteSelectedQRCodes() {
+  var selected=Array.from(document.querySelectorAll('.qr-select-cb:checked')).map(cb=>cb.dataset.slug);
+  if (selected.length===0) { toast('Select at least one QR code first.','err'); return; }
+  if (!confirm('Delete '+selected.length+' QR code'+(selected.length>1?'s':'')+'? This cannot be undone — the printed codes will stop working.')) return;
+  try {
+    for (var i=0;i<selected.length;i++) {
+      await deleteOneQRDoc(selected[i]);
+      var el=document.getElementById('qritem-'+selected[i]);
+      if (el) el.remove();
+      delete _purchasedStats[selected[i]];
+    }
+    toast(selected.length+' QR code'+(selected.length>1?'s':'')+' deleted.','ok');
+    var list=document.getElementById('qr-list');
+    if (list && !list.querySelector('.qr-item')) list.innerHTML='<div class="empty-state"><p>No dynamic QR codes yet.</p></div>';
+  } catch(e) { toast('Delete failed: '+e.message,'err'); }
 }
 
 async function downloadCSV(slug) {
