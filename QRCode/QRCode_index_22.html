@@ -29,10 +29,41 @@
 <!-- Firebase -->
 <script type="module">
   import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js';
-  import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js';
+  import { getAuth, setPersistence, browserLocalPersistence, inMemoryPersistence, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js';
   import { getFirestore, doc, setDoc, getDoc, updateDoc, deleteDoc, collection, addDoc, query, where, getDocs, increment } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js';
   const cfg={apiKey:"AIzaSyBClNCsZwvHghZLbhr3BiP3aDys0GDvJys",authDomain:"qr-platform-33671.firebaseapp.com",projectId:"qr-platform-33671",storageBucket:"qr-platform-33671.firebasestorage.app",messagingSenderId:"564631666195",appId:"1:564631666195:web:515eb76f3f3f48c54c09e6"};
   const app=initializeApp(cfg); const auth=getAuth(app); const db=getFirestore(app);
+  // WHY an explicit persistence fallback: Hali -- "it wouldn't let me log in
+  // on Safari ... it works on Chrome." Safari/WebKit's IndexedDB (what the
+  // default browserLocalPersistence relies on) has documented cases of
+  // being flatly unavailable (private browsing) or misbehaving outright --
+  // if setting it throws, falling back to inMemoryPersistence means sign-in
+  // still works for the current page load instead of failing before it even
+  // gets to try (the tradeoff: that session won't survive a reload there).
+  //
+  // WHY skip straight to inMemoryPersistence on file:// instead of trying
+  // browserLocalPersistence first: Hali -- "i hit the clear cash on the
+  // developer drop down but i had this happen in the past where i would
+  // try to open htmls there and it wouldnt so i had to manually load them
+  // in chrome until i did a cookie clear." That's a file:// pattern (she's
+  // opening the html directly, not through the hosted site), and
+  // browserLocalPersistence's setup calls indexedDB.open() under the hood
+  // -- a documented WebKit hang spot (IndexedDB can sit "pending" forever
+  // under file:// with no event ever firing), and when IT hangs, the
+  // .catch() fallback below never runs because nothing ever rejects. A
+  // cache clear doesn't fix that because the problem isn't cached data,
+  // it's the open() call itself never resolving. Going straight to
+  // inMemoryPersistence on file:// avoids calling indexedDB.open() at all
+  // -- no real loss, since a locally double-clicked file was never going
+  // to keep a login across a reload anyway (same tradeoff already accepted
+  // above for the catch case).
+  if (location.protocol === 'file:') {
+    setPersistence(auth, inMemoryPersistence).catch(function(){});
+  } else {
+    setPersistence(auth, browserLocalPersistence).catch(function(){
+      return setPersistence(auth, inMemoryPersistence);
+    });
+  }
   // WHY deleteDoc added to the export list: nothing in this app could ever
   // delete a QR code before — the dashboard checkbox existed but had no
   // delete action wired to it anywhere.
@@ -492,6 +523,27 @@ footer a{color:var(--muted);}footer a:hover{color:var(--white);}
             <div class="field">
               <label>Choose Dot Type — vector shapes below respond to your chosen color</label>
               <div class="char-preview-note" style="border-top:none;padding:4px 0 10px;">You can choose more than one dot type — click twice to deselect.</div>
+              <div class="dot-size-btn-row" style="margin-bottom:8px;">
+                <button type="button" id="s-dist-random-btn" class="vary-dot-btn active" onclick="setShapeDist('s','random')">✓ Random</button>
+                <button type="button" id="s-dist-half-btn" class="vary-dot-btn" onclick="setShapeDist('s','half')">Half</button>
+                <button type="button" id="s-dist-quarter-btn" class="vary-dot-btn" onclick="setShapeDist('s','quarter')">Quarter</button>
+              </div>
+              <div id="s-half-tabs" style="display:none;margin-bottom:12px;padding:10px 12px;background:rgba(201,138,46,.06);border:1px solid rgba(201,138,46,.2);border-radius:6px;">
+                <div style="font-size:.72rem;color:var(--gold2);margin-bottom:8px;">Pick dot shape(s) for each side of the QR code — click to add, double-click to remove, ★ Select All at the top:</div>
+                <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
+                  <label style="font-size:.76rem;">Left side<br><select id="s-half-left-shape" multiple size="6" style="width:100%;"></select></label>
+                  <label style="font-size:.76rem;">Right side<br><select id="s-half-right-shape" multiple size="6" style="width:100%;"></select></label>
+                </div>
+              </div>
+              <div id="s-quarter-tabs" style="display:none;margin-bottom:12px;padding:10px 12px;background:rgba(201,138,46,.06);border:1px solid rgba(201,138,46,.2);border-radius:6px;">
+                <div style="font-size:.72rem;color:var(--gold2);margin-bottom:8px;">Pick dot shape(s) for each quadrant of the QR code — click to add, double-click to remove, ★ Select All at the top:</div>
+                <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
+                  <label style="font-size:.76rem;">Q1 — top-left<br><select id="s-q1-shape" multiple size="6" style="width:100%;"></select></label>
+                  <label style="font-size:.76rem;">Q2 — top-right<br><select id="s-q2-shape" multiple size="6" style="width:100%;"></select></label>
+                  <label style="font-size:.76rem;">Q3 — bottom-left<br><select id="s-q3-shape" multiple size="6" style="width:100%;"></select></label>
+                  <label style="font-size:.76rem;">Q4 — bottom-right<br><select id="s-q4-shape" multiple size="6" style="width:100%;"></select></label>
+                </div>
+              </div>
               <div class="char-picker-wrap">
                 <!-- WHY one merged, scrolling section instead of three
                      separate Letters/Numbers/Keyboard accordions: per
@@ -543,6 +595,7 @@ footer a{color:var(--muted);}footer a:hover{color:var(--white);}
               <div class="dot-size-btn-row">
                 <button type="button" id="stretch-dot-btn" class="vary-dot-btn" onclick="setDotSizeMode('s','stretch')">Stretch Dot Size</button>
                 <button type="button" id="vary-dot-btn" class="vary-dot-btn" onclick="setDotSizeMode('s','vary')">Vary Dot Size</button>
+                <button type="button" id="connect-dot-btn" class="vary-dot-btn" onclick="setDotSizeMode('s','connect')" style="display:none;">Connect</button>
               </div>
               <div id="s-dotsize-warn" class="dotsize-warn" style="display:none;"></div>
             </div>
@@ -616,6 +669,7 @@ footer a{color:var(--muted);}footer a:hover{color:var(--white);}
                     </select>
                   </div>
                 </div>
+                <label style="display:flex;align-items:center;cursor:pointer;margin-top:8px;"><input type="checkbox" id="g2-gradient" onchange="scheduleLivePreview('s')" style="width:14px;height:14px;min-width:14px;flex:0 0 14px;margin:0 7px 0 0;padding:0;vertical-align:middle;">Gradient</label>
               </div>
 
               <div id="color-grad4" style="display:none;">
@@ -626,6 +680,7 @@ footer a{color:var(--muted);}footer a:hover{color:var(--white);}
                   <div class="grad-stop"><input type="color" id="g4-4" value="#6B2D8E"><span>Bot-R</span></div>
                   <div class="grad-stop"><input type="color" id="g4-bg" value="#ffffff"><span>Background</span></div>
                 </div>
+                <label style="display:flex;align-items:center;cursor:pointer;margin-top:8px;"><input type="checkbox" id="g4-gradient" onchange="scheduleLivePreview('s')" style="width:14px;height:14px;min-width:14px;flex:0 0 14px;margin:0 7px 0 0;padding:0;vertical-align:middle;">Gradient</label>
               </div>
             </div>
 
@@ -723,6 +778,7 @@ footer a{color:var(--muted);}footer a:hover{color:var(--white);}
                     </select>
                   </div>
                 </div>
+                <label style="display:flex;align-items:center;cursor:pointer;margin-top:8px;"><input type="checkbox" id="c-finder-outer-g2-gradient" onchange="scheduleLivePreview('s')" style="width:14px;height:14px;min-width:14px;flex:0 0 14px;margin:0 7px 0 0;padding:0;vertical-align:middle;">Gradient</label>
               </div>
               <div id="c-finder-outer-color-grad4" style="display:none;">
                 <div class="grad-row">
@@ -731,6 +787,7 @@ footer a{color:var(--muted);}footer a:hover{color:var(--white);}
                   <div class="grad-stop"><input type="color" id="c-finder-outer-g4-3" value="#4A1060"><span>Bot-L</span></div>
                   <div class="grad-stop"><input type="color" id="c-finder-outer-g4-4" value="#6B2D8E"><span>Bot-R</span></div>
                 </div>
+                <label style="display:flex;align-items:center;cursor:pointer;margin-top:8px;"><input type="checkbox" id="c-finder-outer-g4-gradient" onchange="scheduleLivePreview('s')" style="width:14px;height:14px;min-width:14px;flex:0 0 14px;margin:0 7px 0 0;padding:0;vertical-align:middle;">Gradient</label>
               </div>
               <p id="c-finder-outer-match-note" style="display:none;font-size:.72rem;color:var(--muted);margin-top:6px;">Picks up the overall design's own gradient color at this corner's position (gradient Color Modes only — shows as a flat color while the overall Color Mode is Solid).</p>
             </div>
@@ -770,6 +827,7 @@ footer a{color:var(--muted);}footer a:hover{color:var(--white);}
                     </select>
                   </div>
                 </div>
+                <label style="display:flex;align-items:center;cursor:pointer;margin-top:8px;"><input type="checkbox" id="c-finder-inner-g2-gradient" onchange="scheduleLivePreview('s')" style="width:14px;height:14px;min-width:14px;flex:0 0 14px;margin:0 7px 0 0;padding:0;vertical-align:middle;">Gradient</label>
               </div>
               <div id="c-finder-inner-color-grad4" style="display:none;">
                 <div class="grad-row">
@@ -778,6 +836,7 @@ footer a{color:var(--muted);}footer a:hover{color:var(--white);}
                   <div class="grad-stop"><input type="color" id="c-finder-inner-g4-3" value="#4A1060"><span>Bot-L</span></div>
                   <div class="grad-stop"><input type="color" id="c-finder-inner-g4-4" value="#6B2D8E"><span>Bot-R</span></div>
                 </div>
+                <label style="display:flex;align-items:center;cursor:pointer;margin-top:8px;"><input type="checkbox" id="c-finder-inner-g4-gradient" onchange="scheduleLivePreview('s')" style="width:14px;height:14px;min-width:14px;flex:0 0 14px;margin:0 7px 0 0;padding:0;vertical-align:middle;">Gradient</label>
               </div>
               <p id="c-finder-inner-match-note" style="display:none;font-size:.72rem;color:var(--muted);margin-top:6px;">Picks up the overall design's own gradient color at this corner's position (gradient Color Modes only — shows as a flat color while the overall Color Mode is Solid).</p>
             </div>
@@ -901,6 +960,27 @@ footer a{color:var(--muted);}footer a:hover{color:var(--white);}
             <div class="field">
               <label>Choose Dot Type — vector shapes below respond to your chosen color</label>
               <div class="char-preview-note" style="border-top:none;padding:4px 0 10px;">You can choose more than one dot type — click twice to deselect.</div>
+              <div class="dot-size-btn-row" style="margin-bottom:8px;">
+                <button type="button" id="d-dist-random-btn" class="vary-dot-btn active" onclick="setShapeDist('d','random')">✓ Random</button>
+                <button type="button" id="d-dist-half-btn" class="vary-dot-btn" onclick="setShapeDist('d','half')">Half</button>
+                <button type="button" id="d-dist-quarter-btn" class="vary-dot-btn" onclick="setShapeDist('d','quarter')">Quarter</button>
+              </div>
+              <div id="d-half-tabs" style="display:none;margin-bottom:12px;padding:10px 12px;background:rgba(201,138,46,.06);border:1px solid rgba(201,138,46,.2);border-radius:6px;">
+                <div style="font-size:.72rem;color:var(--gold2);margin-bottom:8px;">Pick dot shape(s) for each side of the QR code — click to add, double-click to remove, ★ Select All at the top:</div>
+                <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
+                  <label style="font-size:.76rem;">Left side<br><select id="d-half-left-shape" multiple size="6" style="width:100%;"></select></label>
+                  <label style="font-size:.76rem;">Right side<br><select id="d-half-right-shape" multiple size="6" style="width:100%;"></select></label>
+                </div>
+              </div>
+              <div id="d-quarter-tabs" style="display:none;margin-bottom:12px;padding:10px 12px;background:rgba(201,138,46,.06);border:1px solid rgba(201,138,46,.2);border-radius:6px;">
+                <div style="font-size:.72rem;color:var(--gold2);margin-bottom:8px;">Pick dot shape(s) for each quadrant of the QR code — click to add, double-click to remove, ★ Select All at the top:</div>
+                <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
+                  <label style="font-size:.76rem;">Q1 — top-left<br><select id="d-q1-shape" multiple size="6" style="width:100%;"></select></label>
+                  <label style="font-size:.76rem;">Q2 — top-right<br><select id="d-q2-shape" multiple size="6" style="width:100%;"></select></label>
+                  <label style="font-size:.76rem;">Q3 — bottom-left<br><select id="d-q3-shape" multiple size="6" style="width:100%;"></select></label>
+                  <label style="font-size:.76rem;">Q4 — bottom-right<br><select id="d-q4-shape" multiple size="6" style="width:100%;"></select></label>
+                </div>
+              </div>
               <div class="char-picker-wrap">
                 <div class="char-accordion" id="d-acc-chars">
                   <div class="char-acc-header" onclick="toggleCharAcc('d-acc-chars')">
@@ -927,6 +1007,7 @@ footer a{color:var(--muted);}footer a:hover{color:var(--white);}
               <div class="dot-size-btn-row">
                 <button type="button" id="d-stretch-dot-btn" class="vary-dot-btn" onclick="setDotSizeMode('d','stretch')">Stretch Dot Size</button>
                 <button type="button" id="d-vary-dot-btn" class="vary-dot-btn" onclick="setDotSizeMode('d','vary')">Vary Dot Size</button>
+                <button type="button" id="d-connect-dot-btn" class="vary-dot-btn" onclick="setDotSizeMode('d','connect')" style="display:none;">Connect</button>
               </div>
               <div id="d-dotsize-warn" class="dotsize-warn" style="display:none;"></div>
             </div>
@@ -982,6 +1063,7 @@ footer a{color:var(--muted);}footer a:hover{color:var(--white);}
                     </select>
                   </div>
                 </div>
+                <label style="display:flex;align-items:center;cursor:pointer;margin-top:8px;"><input type="checkbox" id="d-g2-gradient" onchange="scheduleLivePreview('d')" style="width:14px;height:14px;min-width:14px;flex:0 0 14px;margin:0 7px 0 0;padding:0;vertical-align:middle;">Gradient</label>
               </div>
               <div id="d-color-grad4" style="display:none;">
                 <div class="grad-row">
@@ -991,6 +1073,7 @@ footer a{color:var(--muted);}footer a:hover{color:var(--white);}
                   <div class="grad-stop"><input type="color" id="d-g4-4" value="#6B2D8E"><span>Bot-R</span></div>
                   <div class="grad-stop"><input type="color" id="d-g4-bg" value="#ffffff"><span>Background</span></div>
                 </div>
+                <label style="display:flex;align-items:center;cursor:pointer;margin-top:8px;"><input type="checkbox" id="d-g4-gradient" onchange="scheduleLivePreview('d')" style="width:14px;height:14px;min-width:14px;flex:0 0 14px;margin:0 7px 0 0;padding:0;vertical-align:middle;">Gradient</label>
               </div>
             </div>
 
@@ -1046,6 +1129,7 @@ footer a{color:var(--muted);}footer a:hover{color:var(--white);}
                     </select>
                   </div>
                 </div>
+                <label style="display:flex;align-items:center;cursor:pointer;margin-top:8px;"><input type="checkbox" id="d-c-finder-outer-g2-gradient" onchange="scheduleLivePreview('d')" style="width:14px;height:14px;min-width:14px;flex:0 0 14px;margin:0 7px 0 0;padding:0;vertical-align:middle;">Gradient</label>
               </div>
               <div id="d-c-finder-outer-color-grad4" style="display:none;">
                 <div class="grad-row">
@@ -1054,6 +1138,7 @@ footer a{color:var(--muted);}footer a:hover{color:var(--white);}
                   <div class="grad-stop"><input type="color" id="d-c-finder-outer-g4-3" value="#4A1060"><span>Bot-L</span></div>
                   <div class="grad-stop"><input type="color" id="d-c-finder-outer-g4-4" value="#6B2D8E"><span>Bot-R</span></div>
                 </div>
+                <label style="display:flex;align-items:center;cursor:pointer;margin-top:8px;"><input type="checkbox" id="d-c-finder-outer-g4-gradient" onchange="scheduleLivePreview('d')" style="width:14px;height:14px;min-width:14px;flex:0 0 14px;margin:0 7px 0 0;padding:0;vertical-align:middle;">Gradient</label>
               </div>
               <p id="d-c-finder-outer-match-note" style="display:none;font-size:.72rem;color:var(--muted);margin-top:6px;">Picks up the overall design's own gradient color at this corner's position (gradient Color Modes only — shows as a flat color while the overall Color Mode is Solid).</p>
             </div>
@@ -1086,6 +1171,7 @@ footer a{color:var(--muted);}footer a:hover{color:var(--white);}
                     </select>
                   </div>
                 </div>
+                <label style="display:flex;align-items:center;cursor:pointer;margin-top:8px;"><input type="checkbox" id="d-c-finder-inner-g2-gradient" onchange="scheduleLivePreview('d')" style="width:14px;height:14px;min-width:14px;flex:0 0 14px;margin:0 7px 0 0;padding:0;vertical-align:middle;">Gradient</label>
               </div>
               <div id="d-c-finder-inner-color-grad4" style="display:none;">
                 <div class="grad-row">
@@ -1094,6 +1180,7 @@ footer a{color:var(--muted);}footer a:hover{color:var(--white);}
                   <div class="grad-stop"><input type="color" id="d-c-finder-inner-g4-3" value="#4A1060"><span>Bot-L</span></div>
                   <div class="grad-stop"><input type="color" id="d-c-finder-inner-g4-4" value="#6B2D8E"><span>Bot-R</span></div>
                 </div>
+                <label style="display:flex;align-items:center;cursor:pointer;margin-top:8px;"><input type="checkbox" id="d-c-finder-inner-g4-gradient" onchange="scheduleLivePreview('d')" style="width:14px;height:14px;min-width:14px;flex:0 0 14px;margin:0 7px 0 0;padding:0;vertical-align:middle;">Gradient</label>
               </div>
               <p id="d-c-finder-inner-match-note" style="display:none;font-size:.72rem;color:var(--muted);margin-top:6px;">Picks up the overall design's own gradient color at this corner's position (gradient Color Modes only — shows as a flat color while the overall Color Mode is Solid).</p>
             </div>
@@ -1392,6 +1479,37 @@ var _colorMode = 'solid';
 // clicks ANY tile, the array gets its first real entry, and from then on
 // the click handler blocks deselecting the last one (can't go back to zero).
 var _selectedShape = [];
+// WHY a distribution mode on top of the multi-select array above, instead
+// of folding straight into it: Hali -- "give three check marks random,
+// half and quarter. the quarter checked would give the user tabs Q1, Q2,
+// Q3 & Q4 to choose the dot shape for each." Picking several dot types
+// already mixed them randomly across every module (see _selectedShape's
+// own WHY) -- this adds two more deliberate, spatial ways to lay multiple
+// shapes out: Half splits the QR left/right between its own Left/Right
+// pickers, Quarter assigns shapes to each spatial quadrant via its own Q1-
+// Q4 pickers -- both independent of what's checked in the main multi-
+// select picker (see _quarterShapes/_halfShapes below). 'random' is the
+// default, so nothing already saved or already relying on the old always-
+// random behavior changes.
+var _shapeDist = 'random';
+// WHY each quadrant/side holds an ARRAY now, not one shape key: Hali --
+// "we would like them to be able to choose more than one the same way
+// that they can do so for the whole random square" -- Q1-Q4 (and the new
+// Left/Right below) used to be single-select, one shape per region. Now
+// each region keeps its own small pool, and pickShapeForCell (see its own
+// WHY) rolls randomly among whichever shapes are in THAT region's pool,
+// same as the main multi-select already does across the whole grid.
+// Picking just one shape for a region still looks identical to the old
+// single-select behavior, so nothing already saved regresses.
+var _quarterShapes = { q1:['square'], q2:['square'], q3:['square'], q4:['square'] };
+// WHY Half gets its own Left/Right pools instead of reusing whichever two
+// shapes happen to be checked first/second in the main multi-select: that
+// order-dependent pairing was confusing (Hali had to know and manage the
+// checkbox order just to control which shape landed on which side, and
+// picking only one shape made both sides render identically with no way to
+// tell Half was even active). This makes Half a real, deliberate per-side
+// choice, exactly like Quarter's per-quadrant one.
+var _halfShapes = { left:['square'], right:['square'] };
 var _finderStyle = 'square';
 var _finderDotStyle = 'square';
 var _frameShape = 'none';
@@ -1460,10 +1578,27 @@ function gradientColorAt(absX, absY) {
       t = (absX*x2+absY*y2)/lenSq;
     }
     t = Math.max(0, Math.min(1, t));
+    // WHY a hard cutoff at t<.5 instead of calling mix(): this has to land
+    // on exactly the same color buildForegroundStyle's matching coincident-
+    // stops gradient shows at this same point -- see that function's own
+    // WHY for why a transforming shape can't just use that CanvasGradient
+    // object directly and has to resample it as a flat color here instead.
+    if (c.g2_gradient === false) return t < 0.5 ? (c.g2_1||'#000000') : (c.g2_2||'#000000');
     return mix(hx(c.g2_1), hx(c.g2_2), t);
   }
   // grad4 — same diagonal (x+y)/(2*size) domain as buildForegroundStyle's
   // 4-stop approximation.
+  // WHY real Top-L/Top-R/Bot-L/Bot-R quadrant math here instead of also
+  // just hard-cutting the diagonal domain above: buildForegroundStyle's
+  // Gradient-unchecked case uses a true 2D CanvasPattern (4 real spatial
+  // quadrants), not a hard-edged version of the diagonal blend -- this has
+  // to match THAT, not the smooth path, so it needs its own absX/absY-vs-
+  // half comparison rather than reusing t4.
+  if (c.g4_gradient === false) {
+    var halfX = g.size/2, halfY = g.size/2;
+    if (absY < halfY) return absX < halfX ? (c.g4_1||'#000000') : (c.g4_2||'#000000');
+    return absX < halfX ? (c.g4_3||'#000000') : (c.g4_4||'#000000');
+  }
   var t4 = Math.max(0, Math.min(1, (absX+absY)/(2*g.size)));
   var stops = [[0,hx(c.g4_1)],[.33,hx(c.g4_2)],[.66,hx(c.g4_3)],[1,hx(c.g4_4)]];
   for (var i=0;i<stops.length-1;i++) {
@@ -1490,7 +1625,33 @@ window._cv = 'home';
 var CLASSY_PAD = 1;
 var SHAPE_GROUPS = {
   "Basic": {
-    square:        { label:"■", draw:function(c,x,y,s){ c.fillRect(x+s*.01,y+s*.01,s*.98,s*.98); }},
+    // WHY the neighbors-aware inset: Hali -- "can you fix the squares as
+    // well when it comes to the seames? if they are next to eachother, they
+    // should blend together." The 1% inset on every side is deliberate (the
+    // "grid dot" look for isolated squares -- a faint gap between modules
+    // that AREN'T touching), but it was being applied on EVERY side even
+    // when the neighboring cell is also a dark square, leaving a visible
+    // white seam between every pair of adjacent squares anywhere in the
+    // design. Same fix as the right-triangle groups' own seam problem (see
+    // drawTriBoxV's WHY): on any side with a filled neighbor, that edge
+    // skips the inset and instead extends PAST the cell boundary by a small
+    // overscan into the neighbor's own cell -- since the neighbor's square
+    // does the exact same thing back, the two overlap generously and the
+    // anti-aliased seam (two independently-filled shapes meeting at an
+    // exact shared edge still show a faint gray line from partial-coverage
+    // compositing, even with zero gap) disappears. `neighbors` is undefined
+    // everywhere a single module isn't actually being rendered (the picker
+    // swatch preview, the finder inner eye, the frame filler scatter) so
+    // this falls back to the original fixed 1% inset on every side there,
+    // unchanged.
+    square: { label:"■", draw:function(c,x,y,s,chars,neighbors){
+      var inset = s*.01, overscan = s*.05;
+      var x0 = (neighbors && neighbors.left)  ? x - overscan   : x + inset;
+      var x1 = (neighbors && neighbors.right) ? x + s + overscan : x + s - inset;
+      var y0 = (neighbors && neighbors.up)    ? y - overscan   : y + inset;
+      var y1 = (neighbors && neighbors.down)  ? y + s + overscan : y + s - inset;
+      c.fillRect(x0, y0, x1-x0, y1-y0);
+    }},
     dot:           { label:"●", draw:function(c,x,y,s){ c.beginPath();c.arc(x+s/2,y+s/2,s*.5,0,Math.PI*2);c.fill(); }},
     // WHY fixed, hand-picked radius jitter instead of Math.random(): Hali
     // asked for the irregular ink-splatter dot style from a reference QR
@@ -1673,6 +1834,23 @@ var SHAPE_GROUPS = {
     }},
     tri_up:        { label:"▲", draw:function(c,x,y,s){ c.beginPath();c.moveTo(x+s*.5,y);c.lineTo(x+s,y+s);c.lineTo(x,y+s);c.closePath();c.fill(); }},
     tri_down:      { label:"▼", draw:function(c,x,y,s){ c.beginPath();c.moveTo(x+s*.5,y+s);c.lineTo(x+s,y);c.lineTo(x,y);c.closePath();c.fill(); }},
+    // WHY right_triangle exists, and why it's the one shape Vary can group
+    // into a bigger triangle box (see triBoxOkV / drawTriBoxV in
+    // renderQRCore): Hali -- "adding a right triangle shape that would work
+    // out for bigger sizes take all the groupings of three dots with two
+    // staked next to another one have the go right or left depending on
+    // where the dots are" -- and later, after seeing a clipped/backed
+    // version -- "we only want right angle triangles and no dots behind
+    // anything ... squares that are only making up right triangles in any
+    // scale." A right triangle is literally half a square, so unlike every
+    // other shape here it can sit in its OWN single cell exactly on a
+    // group's diagonal edge, with every other cell in the group a plain
+    // full square right next to it -- no overlap, no backing, nothing
+    // hidden. Single-cell default here is a fixed orientation (right angle
+    // at bottom-left); the Vary grouping path draws its own 3 mirrored/
+    // rotated orientations (still one real shape per cell) to match
+    // whichever corner of a bigger group is actually missing.
+    right_triangle:{ label:"◣", draw:function(c,x,y,s){ c.beginPath();c.moveTo(x,y);c.lineTo(x,y+s);c.lineTo(x+s,y+s);c.closePath();c.fill(); }},
     hexagon:       { label:"⬣", draw:function(c,x,y,s){ var r=s*.577,cx=x+s*.5,cy=y+s*.5;c.beginPath();for(var i=0;i<6;i++){var a=Math.PI/3*i-Math.PI/6;i?c.lineTo(cx+r*Math.cos(a),cy+r*Math.sin(a)):c.moveTo(cx+r*Math.cos(a),cy+r*Math.sin(a));}c.closePath();c.fill(); }},
     pentagon:      { label:"⬟", draw:function(c,x,y,s){ var r=s*.62,cx=x+s*.5,cy=y+s*.52;c.beginPath();for(var i=0;i<5;i++){var a=Math.PI*2/5*i-Math.PI/2;i?c.lineTo(cx+r*Math.cos(a),cy+r*Math.sin(a)):c.moveTo(cx+r*Math.cos(a),cy+r*Math.sin(a));}c.closePath();c.fill(); }},
     octagon:       { label:"⬢", draw:function(c,x,y,s){ var r=s*.541,cx=x+s*.5,cy=y+s*.5;c.beginPath();for(var i=0;i<8;i++){var a=Math.PI/4*i;i?c.lineTo(cx+r*Math.cos(a),cy+r*Math.sin(a)):c.moveTo(cx+r*Math.cos(a),cy+r*Math.sin(a));}c.closePath();c.fill(); }},
@@ -1930,6 +2108,55 @@ var SAFE_GROUP_SHAPES = [
   'xmas_tree','crow'
 ];
 
+// WHY Vary gets its OWN, much bigger allowlist instead of reusing
+// SAFE_GROUP_SHAPES above: Hali -- "I don't feel like any of them would
+// break the scan because you're literally just filling in the dots more
+// by grouping them." She's right for Vary specifically, even though
+// SAFE_GROUP_SHAPES' own reasoning (a shape's silhouette can have a real
+// background-colored gap inside its own bbox, invisible at one module but
+// landing on a scan sample point once scaled up) is still correct -- it
+// just doesn't apply here. Vary's grouped-cell pass (see renderQRCore)
+// always draws a normal, already-proven-safe PER-CELL shape under EVERY
+// real module in the group FIRST, and only THEN draws the bigger accent
+// shape centered on top of that -- so every real sample point is already
+// covered by the exact same rendering "Off" mode relies on, before the
+// bigger shape's own silhouette (gaps and all) ever gets layered on. A gap
+// inside the big shape just reveals the small safe shape underneath, never
+// real background. Confirmed, not just reasoned: forced a spread of the
+// worst-case excluded shapes (butterfly, fire, star5, snowflake, x_mark,
+// witch_hat, cat_head, tri_up, crescent) into Vary's grouping and decoded
+// the real rendered PNGs 6 times each with both zbar and OpenCV. Every one
+// read back correctly all 6/6 times with zbar (the decoder that best
+// matches a real phone camera); only fire and crescent occasionally
+// tripped up OpenCV's own pickier built-in detector, which this file has
+// already found to be weaker than real-world scanning elsewhere (the
+// Corner Style testing). Stretch does NOT get this same treatment and
+// keeps using SAFE_GROUP_SHAPES above -- its grouping (drawShapeFittedRect)
+// stretches one shape's raw geometry straight across the group with no
+// backing at all, so a gap in that shape's silhouette really does expose
+// background at a sample point there (confirmed with a forced butterfly:
+// real visible gaps, 0/6 on both decoders). Still excluded from Vary too:
+// splatter/classy, which already have their own neighbor-driven
+// cell-fusing logic built for exactly one cell at a time (grouping them
+// would fight that mechanism, not a scan-safety problem), and custom_char,
+// which is literal text -- fine at module size, not as one big blown-up
+// letter.
+// WHY these 7 ALSO stay out, found while sweeping every single remaining
+// shape through Vary (not just the 9-shape spot check above): hflower,
+// tulip, halo_cat, drip_skull, xskull, instagram, youtube. This isn't a
+// grouping problem at all -- re-tested every one of them back in plain Off
+// mode, single cell, Vary/Stretch untouched, and they ALREADY fail to scan
+// reliably there (0 or 1 out of 3 real zbar decodes). Their own geometry
+// is just too fine/thin to read at real QR module size, grouped or not --
+// a pre-existing gap in the shape library, not something this change
+// caused or can fix by itself. Leaving them off this list so Vary doesn't
+// claim to "support" a shape that was never actually scan-safe to begin
+// with; worth a separate pass on those 7 shapes' own artwork later.
+var SAFE_VARY_SHAPES = Object.keys(SHAPES).filter(function(k){
+  return ['splatter','classy','custom_char','hflower','tulip','halo_cat',
+          'drip_skull','xskull','instagram','youtube'].indexOf(k) === -1;
+});
+
 // ── FINDER (CORNER) STYLES ──────────────────────────────────────────────────
 // WHY a separate, much smaller set than the dot SHAPES above: the three
 // corner "finder" squares are how a scanner LOCATES the code in the first
@@ -2067,9 +2294,51 @@ function drawFinderInnerDot(ctx, cx, cy, r, color, key, chars, gradDescriptor) {
   var ringFn = FINDER_RING_SHAPES[key];
   if (ringFn) { ringFn(ctx, cx, cy, r, color); return; }
   var def = SHAPES[key] || SHAPES['dot'];
+  if (gradDescriptor) {
+    // WHY mask-and-composite instead of just setting _activeGradient and
+    // letting def.draw run straight on ctx (the plain branch below): Hali --
+    // "the gradient works on the inner dot but it wont split it into 2 or 4
+    // colors" for shapes like heart/x_mark. Root cause: those shapes (any
+    // shape that transforms itself before filling -- x_mark, snowflake,
+    // "classy", the SVG icon packs, …) have their OWN internal "if
+    // (_activeGradient) resample my color at my own center" check, baked in
+    // from the earlier BODY-gradient feature, where resampling once per
+    // small scattered instance is correct (many instances average into a
+    // gradient look). The finder's inner eye is only ONE instance, so that
+    // same check just flat-fills the whole silhouette with a single
+    // resampled color -- it can never show a real split that way, no matter
+    // what gradDescriptor says. Drawing the shape's silhouette onto a small
+    // offscreen canvas, then compositing a gradient/pattern built fresh in
+    // that canvas's own LOCAL coordinates with 'source-in' (keep the mask's
+    // alpha, replace its color), gives every shape in the full library --
+    // transforming or not -- a true, consistent spatial split, then that
+    // result is drawn back onto ctx at the real (cx,cy,r) position/size, so
+    // whatever transform ctx currently has (export scale, etc.) still
+    // applies normally via the drawImage call below.
+    var t = (ctx.getTransform ? ctx.getTransform() : null);
+    var sx = (t && t.a) ? Math.abs(t.a) : 1, sy = (t && t.d) ? Math.abs(t.d) : 1;
+    var size = Math.max(2, r*2);
+    var off = document.createElement('canvas');
+    off.width = Math.max(2, Math.round(size*sx));
+    off.height = Math.max(2, Math.round(size*sy));
+    var octx = off.getContext('2d');
+    octx.scale(sx, sy);
+    octx.fillStyle = '#000000';
+    var _savedGrad = _activeGradient;
+    _activeGradient = null;
+    _qrModuleRenderMode = true; // solid silhouette, same as real modules — see drawSVGLayered WHY
+    def.draw(octx, 0, 0, size, chars || []);
+    _qrModuleRenderMode = false;
+    _activeGradient = _savedGrad;
+    octx.globalCompositeOperation = 'source-in';
+    octx.fillStyle = buildFinderGradientStyle(octx, 0, 0, size, gradDescriptor.colorMode, gradDescriptor.colors);
+    octx.fillRect(0, 0, size, size);
+    ctx.drawImage(off, cx-r, cy-r, size, size);
+    return;
+  }
   ctx.fillStyle = color;
   var _savedGrad = _activeGradient;
-  _activeGradient = gradDescriptor || null;
+  _activeGradient = null;
   _qrModuleRenderMode = true; // solid silhouette, same as real modules — see drawSVGLayered WHY
   def.draw(ctx, cx-r, cy-r, r*2, chars || []);
   _qrModuleRenderMode = false;
@@ -2872,6 +3141,9 @@ function updateCharNote(prefix) {
 // WHY empty, not ['square']: same fix as _selectedShape above, for the
 // Dynamic tab's own picker.
 var _selectedShapeD = [];
+var _shapeDistD = 'random';
+var _quarterShapesD = { q1:['square'], q2:['square'], q3:['square'], q4:['square'] };
+var _halfShapesD = { left:['square'], right:['square'] };
 var _finderStyleD = 'square';
 var _finderDotStyleD = 'square';
 var _frameShapeD = 'none';
@@ -3187,6 +3459,12 @@ document.addEventListener('DOMContentLoaded', function() {
   // WHY: DOM must be ready before getElementById calls can find elements
   buildShapePickerFor('shape-grid', null, 's', _selectedShape, function(){ scheduleLivePreview('s'); syncDotSizeButtons('s'); });
   buildShapePickerFor('d-shape-grid', null, 'd', _selectedShapeD, function(){ scheduleLivePreview('d'); syncDotSizeButtons('d'); });
+  populateQuarterSelects('s');
+  populateQuarterSelects('d');
+  populateHalfSelects('s');
+  populateHalfSelects('d');
+  syncShapeDistButtons('s');
+  syncShapeDistButtons('d');
   // WHY branch into a per-corner override when Asymmetric Corners is on:
   // these are the SAME Corner Style / Inner Dot Style grids that have
   // always existed -- Asymmetric Corners reuses them rather than building
@@ -3505,6 +3783,7 @@ function syncDotSizeButtons(prefix) {
   var mode = _dotSizeMode[prefix];
   var stretchBtn = document.getElementById(prefix==='s' ? 'stretch-dot-btn' : 'd-stretch-dot-btn');
   var varyBtn    = document.getElementById(prefix==='s' ? 'vary-dot-btn'    : 'd-vary-dot-btn');
+  var connectBtn = document.getElementById(prefix==='s' ? 'connect-dot-btn' : 'd-connect-dot-btn');
   if (stretchBtn) {
     stretchBtn.classList.toggle('active', mode === 'stretch');
     stretchBtn.textContent = (mode === 'stretch' ? '✓ ' : '') + 'Stretch Dot Size';
@@ -3512,6 +3791,29 @@ function syncDotSizeButtons(prefix) {
   if (varyBtn) {
     varyBtn.classList.toggle('active', mode === 'vary');
     varyBtn.textContent = (mode === 'vary' ? '✓ ' : '') + 'Vary Dot Size';
+  }
+  // WHY shown whenever Dot is AMONG the picked shapes, not only when it's
+  // the sole one: Hali -- "have a connect button show up next to vary for
+  // when we click the dot option" -- then, after testing, "the connect
+  // button doesn't show up for the circle." The first version only
+  // offered it when Dot was the ONE shape selected (nothing else still
+  // checked), which is how the button stayed hidden for her the moment
+  // some other tile from earlier testing was still active alongside Dot --
+  // a real friction point, not what "click the dot option" was asking to
+  // gate on. Connect's own render pass (see renderQRCore) already ignores
+  // whatever else is selected and always uses SHAPES.dot while it's
+  // active, so the button's visibility now matches that same rule: Dot
+  // just needs to be ONE of the picks, not the only one.
+  if (connectBtn) {
+    var shapesArrC = (prefix==='s' ? _selectedShape : _selectedShapeD) || [];
+    var dotOnly = shapesArrC.indexOf('dot') > -1;
+    connectBtn.style.display = dotOnly ? 'inline-flex' : 'none';
+    connectBtn.classList.toggle('active', mode === 'connect');
+    connectBtn.textContent = (mode === 'connect' ? '✓ ' : '') + 'Connect';
+    if (!dotOnly && mode === 'connect') {
+      _dotSizeMode[prefix] = 'off';
+      mode = 'off';
+    }
   }
   // WHY this check, run on every toggle AND every shape-picker change (see
   // buildShapePickerFor's onChange): Stretch/Vary only ever touch shapes on
@@ -3524,17 +3826,241 @@ function syncDotSizeButtons(prefix) {
   var warn = document.getElementById(prefix==='s' ? 's-dotsize-warn' : 'd-dotsize-warn');
   if (warn) {
     var shapesArr = (prefix==='s' ? _selectedShape : _selectedShapeD) || [];
-    var anySupported = shapesArr.some(function(k){ return SAFE_GROUP_SHAPES.indexOf(k) > -1; });
+    // WHY a different allowlist per mode here too: Vary's own SAFE_VARY_SHAPES
+    // (see its WHY) covers nearly everything now, so this warning only
+    // still fires for Vary on the couple of shapes (splatter/classy, their
+    // own fusing logic; custom_char, actual text; and the 7 that turned out
+    // to never scan reliably at all, grouped or not) that genuinely never
+    // group under either mode.
+    var allowList = (mode === 'vary') ? SAFE_VARY_SHAPES : SAFE_GROUP_SHAPES;
+    var anySupported = shapesArr.some(function(k){ return allowList.indexOf(k) > -1; });
     if (mode !== 'off' && shapesArr.length && !anySupported) {
       warn.style.display = 'block';
-      warn.textContent = '⚠ ' + shapesArr.map(function(k){return k.replace(/_/g,' ');}).join(', ') +
-        " can't be grouped bigger (it would risk breaking the scan) -- pick a solid shape like square, dot, diamond, or heart to see " +
-        (mode === 'stretch' ? 'Stretch' : 'Vary') + ' take effect.';
+      var names = shapesArr.map(function(k){return k.replace(/_/g,' ');}).join(', ');
+      // WHY Stretch's own message points to Vary instead of just "pick a
+      // different shape", when Vary itself actually supports the picked
+      // shape(s): Hali, after Vary opened up to almost everything -- "i
+      // dont see the stretch dot size working for butterlys." Stretch
+      // really can't do it safely (it stretches the shape's raw outline
+      // across the group with nothing backing it -- confirmed real gaps,
+      // failed every scan when forced) -- that's not changing. But telling
+      // her to abandon the shape entirely is the wrong fix when Vary can
+      // already group that exact shape bigger safely -- this points her
+      // at the mode that actually does what she's after instead.
+      var varySupported = shapesArr.some(function(k){ return SAFE_VARY_SHAPES.indexOf(k) > -1; });
+      if (mode === 'stretch' && varySupported) {
+        warn.textContent = '⚠ ' + names +
+          " can't be Stretched (stretching warps its outline and leaves real gaps that break the scan) -- switch to Vary Dot Size instead to group " +
+          names + ' bigger safely.';
+      } else {
+        warn.textContent = '⚠ ' + names +
+          " can't be grouped bigger (it would risk breaking the scan) -- pick a solid shape like square, dot, diamond, or heart to see " +
+          (mode === 'stretch' ? 'Stretch' : 'Vary') + ' take effect.';
+      }
     } else {
       warn.style.display = 'none';
       warn.textContent = '';
     }
   }
+}
+
+// ── SHAPE DISTRIBUTION (Random / Half / Quarter) ─────────────────────────────
+// WHY this exists: Hali -- "give three check marks random, half and
+// quarter. the quarter checked would give the user tabs Q1, Q2, Q3 & Q4 to
+// choose the dot shape for each." Random is the existing always-been-there
+// behavior (each real module randomly draws as one of the checked Dot
+// Types -- see _selectedShape's WHY), kept as the default so nothing
+// already relying on it changes. Half and Quarter are new spatial layouts
+// -- see pickShapeForCell in renderQRCore for how a cell's row/col actually
+// picks a shape under each mode, and _shapeDist/_quarterShapes' own WHY for
+// why Quarter ignores the main multi-select picker entirely.
+function setShapeDist(prefix, mode) {
+  prefix = prefix || 's';
+  if (prefix === 's') { _shapeDist = mode; } else { _shapeDistD = mode; }
+  syncShapeDistButtons(prefix);
+  if (typeof scheduleLivePreview==='function') scheduleLivePreview(prefix);
+}
+
+function syncShapeDistButtons(prefix) {
+  prefix = prefix || 's';
+  var mode = (prefix === 's') ? _shapeDist : _shapeDistD;
+  var randomBtn = document.getElementById(prefix + '-dist-random-btn');
+  var halfBtn = document.getElementById(prefix + '-dist-half-btn');
+  var quarterBtn = document.getElementById(prefix + '-dist-quarter-btn');
+  var tabs = document.getElementById(prefix + '-quarter-tabs');
+  var halfTabs = document.getElementById(prefix + '-half-tabs');
+  if (randomBtn) { randomBtn.classList.toggle('active', mode==='random'); randomBtn.textContent = (mode==='random'?'✓ ':'') + 'Random'; }
+  if (halfBtn) { halfBtn.classList.toggle('active', mode==='half'); halfBtn.textContent = (mode==='half'?'✓ ':'') + 'Half'; }
+  if (quarterBtn) { quarterBtn.classList.toggle('active', mode==='quarter'); quarterBtn.textContent = (mode==='quarter'?'✓ ':'') + 'Quarter'; }
+  // WHY Half now gets its own tabs too, same as Quarter: Hali -- "we should
+  // do right side and left side when the user chooses half for the dots" --
+  // Half used to need no extra UI (it just borrowed the first two checked
+  // Dot Types); now it has its own Left/Right pickers, so it shows/hides
+  // exactly like Quarter's Q1-Q4 tabs do.
+  if (tabs) tabs.style.display = (mode==='quarter') ? 'block' : 'none';
+  if (halfTabs) halfTabs.style.display = (mode==='half') ? 'block' : 'none';
+}
+
+// WHY a plain object keyed by quadrant instead of an array-of-arrays: reads
+// clearly at every call site (quarterShapes.q1, not quarterShapes[0]), and
+// matches the four named <select> elements in the HTML one-to-one. Each
+// value is now itself an ARRAY of shape keys (see _quarterShapes' own WHY),
+// so `selectedArr` here is whatever the multi-select widget currently has
+// checked, not a single value.
+function setQuarterShape(prefix, q, selectedArr) {
+  prefix = prefix || 's';
+  var obj = (prefix === 's') ? _quarterShapes : _quarterShapesD;
+  obj[q] = (selectedArr && selectedArr.length) ? selectedArr.slice() : ['square'];
+  if (typeof scheduleLivePreview==='function') scheduleLivePreview(prefix);
+}
+
+// WHY a twin of setQuarterShape instead of folding 'left'/'right' into the
+// same q1-q4 keys: Half and Quarter are separate distribution modes with
+// separate state objects (_halfShapes vs _quarterShapes) so switching
+// between them never clobbers the other's picks.
+function setHalfShape(prefix, side, selectedArr) {
+  prefix = prefix || 's';
+  var obj = (prefix === 's') ? _halfShapes : _halfShapesD;
+  obj[side] = (selectedArr && selectedArr.length) ? selectedArr.slice() : ['square'];
+  if (typeof scheduleLivePreview==='function') scheduleLivePreview(prefix);
+}
+
+// WHY one shared option-building routine for Quarter's 4 selects AND Half's
+// 2: both pull from the exact same catalog (every SHAPE_GROUPS entry, PLUS
+// 'custom_char' -- see its own WHY below), so there's one place that can
+// never let the two drift apart.
+// WHY 'custom_char' is included here at all: Hali -- "what didn't add on
+// the quadrant option drop downs were the characters such as ABC, one, two,
+// three, and the regular sign symbols." The Custom Characters picker (the
+// 🔤 Characters accordion) feeds ONE shared pool (_selectedChars) that
+// 'custom_char' draws from wherever it's picked as a dot type (see
+// SHAPES.custom_char/syncCustomCharShape) -- Quarter/Half just needed the
+// option to pick it too, same as the main multi-select already can;
+// whichever actual letters/numbers/symbols get used still comes from that
+// one shared Characters picker, not a separate pool per region.
+function buildRegionShapeOptions(sel) {
+  sel.innerHTML = '';
+  var allOpt = document.createElement('option');
+  allOpt.value = '__all__';
+  allOpt.textContent = '★ Select All';
+  sel.appendChild(allOpt);
+  Object.keys(SHAPE_GROUPS).forEach(function(group){
+    Object.keys(SHAPE_GROUPS[group]).forEach(function(key){
+      var opt = document.createElement('option');
+      opt.value = key;
+      opt.textContent = SHAPE_GROUPS[group][key].label + '  ' + key.replace(/_/g,' ');
+      sel.appendChild(opt);
+    });
+  });
+  var charOpt = document.createElement('option');
+  charOpt.value = 'custom_char';
+  charOpt.textContent = SHAPES.custom_char.label + '  characters (letters/numbers/symbols)';
+  sel.appendChild(charOpt);
+}
+
+// WHY custom mousedown/dblclick handling instead of native multi-select's
+// ctrl/cmd-click: Hali -- "they can or should be able to select more than
+// one ... double click to deselect ... select all be at the top." Native
+// <select multiple> clears every other pick on a plain click unless the
+// user holds Ctrl/Cmd -- not an obvious gesture. This keeps the native
+// dropdown/listbox widget (still scrollable, still keyboard-usable) but
+// rewires its click contract: plain click ADDS the clicked option to
+// whatever's already picked, double-click REMOVES just that one option,
+// and the pinned "★ Select All" option (never itself shown as selected)
+// adds or clears every real option at once on click/double-click. Because
+// preventDefault on mousedown stops the browser's own selection + change
+// event from firing, this calls onChange itself after editing .selected --
+// nothing here waits on a native 'change' event.
+function wireRegionMultiSelect(sel, onChange) {
+  if (!sel || sel.__multiWired) return;
+  sel.__multiWired = true;
+  function allRealSelected() {
+    return Array.prototype.every.call(sel.options, function(o){ return o.value==='__all__' || o.selected; });
+  }
+  function fire() {
+    var chosen = Array.prototype.filter.call(sel.options, function(o){ return o.selected && o.value!=='__all__'; })
+      .map(function(o){ return o.value; });
+    onChange(chosen);
+  }
+  sel.addEventListener('mousedown', function(e){
+    if (e.target.tagName !== 'OPTION') return;
+    e.preventDefault();
+    sel.focus();
+    var opt = e.target;
+    if (opt.value === '__all__') {
+      var turnOn = !allRealSelected();
+      Array.prototype.forEach.call(sel.options, function(o){ if (o.value!=='__all__') o.selected = turnOn; });
+    } else {
+      opt.selected = true;
+    }
+    fire();
+  });
+  sel.addEventListener('dblclick', function(e){
+    if (e.target.tagName !== 'OPTION') return;
+    e.preventDefault();
+    var opt = e.target;
+    if (opt.value === '__all__') {
+      Array.prototype.forEach.call(sel.options, function(o){ o.selected = false; });
+    } else {
+      opt.selected = false;
+    }
+    fire();
+  });
+  // WHY keydown too: mousedown's preventDefault only overrides mouse
+  // interaction -- keyboard users (Tab to the list, arrow to an option)
+  // still get the browser's own built-in behavior for everything except
+  // actually toggling a choice, which Space/Enter now does explicitly so
+  // keyboard-only use isn't left worse off than before this change.
+  sel.addEventListener('keydown', function(e){
+    if (e.key !== ' ' && e.key !== 'Enter') return;
+    e.preventDefault();
+    var opt = sel.options[sel.selectedIndex];
+    if (!opt) return;
+    if (opt.value === '__all__') {
+      var turnOn = !allRealSelected();
+      Array.prototype.forEach.call(sel.options, function(o){ if (o.value!=='__all__') o.selected = turnOn; });
+    } else {
+      opt.selected = !opt.selected;
+    }
+    fire();
+  });
+}
+
+// WHY populated at init (and again on applyDesignSettings) instead of
+// hard-coded <option> tags in the HTML: this reuses the exact same
+// SHAPE_GROUPS catalog the main Dot Type grid draws from, so the two lists
+// can never drift apart as shapes get added later.
+function populateQuarterSelects(prefix) {
+  prefix = prefix || 's';
+  var qsObj = (prefix === 's') ? _quarterShapes : _quarterShapesD;
+  ['q1','q2','q3','q4'].forEach(function(q){
+    var sel = document.getElementById(prefix + '-' + q + '-shape');
+    if (!sel) return;
+    if (!sel.options.length) {
+      buildRegionShapeOptions(sel);
+      wireRegionMultiSelect(sel, function(chosen){ setQuarterShape(prefix, q, chosen); });
+    }
+    var picked = qsObj[q];
+    if (!Array.isArray(picked)) picked = picked ? [picked] : ['square']; // WHY: back-compat for a design saved before Quarter was multi-select -- see applyDesignSettings' own WHY
+    Array.prototype.forEach.call(sel.options, function(o){ o.selected = picked.indexOf(o.value) > -1; });
+  });
+}
+
+// WHY a twin of populateQuarterSelects, not folded in: same shared option
+// list and wiring, just two regions (left/right) instead of four.
+function populateHalfSelects(prefix) {
+  prefix = prefix || 's';
+  var hsObj = (prefix === 's') ? _halfShapes : _halfShapesD;
+  ['left','right'].forEach(function(side){
+    var sel = document.getElementById(prefix + '-half-' + side + '-shape');
+    if (!sel) return;
+    if (!sel.options.length) {
+      buildRegionShapeOptions(sel);
+      wireRegionMultiSelect(sel, function(chosen){ setHalfShape(prefix, side, chosen); });
+    }
+    var picked = hsObj[side] || ['square'];
+    Array.prototype.forEach.call(sel.options, function(o){ o.selected = picked.indexOf(o.value) > -1; });
+  });
 }
 
 // ── FINDER (CORNER) COLOR MODE ───────────────────────────────────────────────
@@ -3774,6 +4300,25 @@ function resolveRenderSettings(prefix) {
       // silently losing half its grouping the first time it's reopened.
       stretchH: typeof d.stretchH === 'boolean' ? d.stretchH : true,
       stretchV: typeof d.stretchV === 'boolean' ? d.stretchV : true,
+      // WHY these weren't here before: this whole branch renders a SAVED
+      // design object (dashboard thumbnails, a paid download) rather than
+      // the live in-page form state the other branch below reads from --
+      // Random/Half/Quarter and their per-region shape pools need to round-
+      // trip through here too, or a saved design using Half/Quarter would
+      // silently render as plain Random anywhere outside the live editor.
+      // WHY the per-field isArray check: a design saved before Quarter
+      // became multi-select stored one shape key (a string) per quadrant.
+      shapeDist: d.shapeDist || 'random',
+      quarterShapes: {
+        q1: Array.isArray(d.quarterShapes && d.quarterShapes.q1) ? d.quarterShapes.q1 : [(d.quarterShapes && d.quarterShapes.q1) || 'square'],
+        q2: Array.isArray(d.quarterShapes && d.quarterShapes.q2) ? d.quarterShapes.q2 : [(d.quarterShapes && d.quarterShapes.q2) || 'square'],
+        q3: Array.isArray(d.quarterShapes && d.quarterShapes.q3) ? d.quarterShapes.q3 : [(d.quarterShapes && d.quarterShapes.q3) || 'square'],
+        q4: Array.isArray(d.quarterShapes && d.quarterShapes.q4) ? d.quarterShapes.q4 : [(d.quarterShapes && d.quarterShapes.q4) || 'square']
+      },
+      halfShapes: {
+        left: Array.isArray(d.halfShapes && d.halfShapes.left) ? d.halfShapes.left : ['square'],
+        right: Array.isArray(d.halfShapes && d.halfShapes.right) ? d.halfShapes.right : ['square']
+      },
       // WHY these now round-trip (used to always be empty/null with a "not
       // persisted yet" note): captureDesignSettings saves them and
       // applyDesignSettings restores them now too, so a saved design that
@@ -3814,10 +4359,10 @@ function resolveRenderSettings(prefix) {
         // setFinderColorMode's WHY) is fully independent of the body's and
         // of each other's — picking blue/orange for the outer ring doesn't
         // touch whatever the inner eye or the main body are set to.
-        finderOuterG2_1: c.finderOuterG2_1||'#c98a2e', finderOuterG2_2: c.finderOuterG2_2||'#4A1060', finderOuterG2_dir: c.finderOuterG2_dir||'horizontal',
-        finderOuterG4_1: c.finderOuterG4_1||'#c98a2e', finderOuterG4_2: c.finderOuterG4_2||'#e0a84a', finderOuterG4_3: c.finderOuterG4_3||'#4A1060', finderOuterG4_4: c.finderOuterG4_4||'#6B2D8E',
-        finderInnerG2_1: c.finderInnerG2_1||'#c98a2e', finderInnerG2_2: c.finderInnerG2_2||'#4A1060', finderInnerG2_dir: c.finderInnerG2_dir||'horizontal',
-        finderInnerG4_1: c.finderInnerG4_1||'#c98a2e', finderInnerG4_2: c.finderInnerG4_2||'#e0a84a', finderInnerG4_3: c.finderInnerG4_3||'#4A1060', finderInnerG4_4: c.finderInnerG4_4||'#6B2D8E'
+        finderOuterG2_1: c.finderOuterG2_1||'#c98a2e', finderOuterG2_2: c.finderOuterG2_2||'#4A1060', finderOuterG2_dir: c.finderOuterG2_dir||'horizontal', finderOuterG2_gradient: c.finderOuterG2_gradient,
+        finderOuterG4_1: c.finderOuterG4_1||'#c98a2e', finderOuterG4_2: c.finderOuterG4_2||'#e0a84a', finderOuterG4_3: c.finderOuterG4_3||'#4A1060', finderOuterG4_4: c.finderOuterG4_4||'#6B2D8E', finderOuterG4_gradient: c.finderOuterG4_gradient,
+        finderInnerG2_1: c.finderInnerG2_1||'#c98a2e', finderInnerG2_2: c.finderInnerG2_2||'#4A1060', finderInnerG2_dir: c.finderInnerG2_dir||'horizontal', finderInnerG2_gradient: c.finderInnerG2_gradient,
+        finderInnerG4_1: c.finderInnerG4_1||'#c98a2e', finderInnerG4_2: c.finderInnerG4_2||'#e0a84a', finderInnerG4_3: c.finderInnerG4_3||'#4A1060', finderInnerG4_4: c.finderInnerG4_4||'#6B2D8E', finderInnerG4_gradient: c.finderInnerG4_gradient
       },
       // WHY fall back through the old fields: a design saved before this
       // 4-mode toggle existed has either the outer/inner boolean split
@@ -3834,6 +4379,13 @@ function resolveRenderSettings(prefix) {
     var el = document.getElementById(fieldId(prefix, base));
     return el ? el.value : fallback;
   }
+  // WHY a separate helper instead of reusing val(): a checkbox's own .value
+  // is always the fixed string "on" whether it's checked or not -- .checked
+  // is the only DOM property that actually reflects the toggle.
+  function checkedVal(base, fallback) {
+    var el = document.getElementById(fieldId(prefix, base));
+    return el ? el.checked : fallback;
+  }
   var liveShapes = (prefix==='s' ? _selectedShape : _selectedShapeD);
   return {
     shape: liveShapes[0] || 'square',
@@ -3849,6 +4401,9 @@ function resolveRenderSettings(prefix) {
     dotSizeMode: _dotSizeMode[prefix],
     stretchH: _stretchDir[prefix].h,
     stretchV: _stretchDir[prefix].v,
+    shapeDist: prefix==='s' ? _shapeDist : _shapeDistD,
+    quarterShapes: prefix==='s' ? _quarterShapes : _quarterShapesD,
+    halfShapes: prefix==='s' ? _halfShapes : _halfShapesD,
     chars: _selectedChars[prefix] || [],
     emoji: _selectedEmoji[prefix] || [],
     emojiSize: _emojiSize[prefix],
@@ -3859,13 +4414,13 @@ function resolveRenderSettings(prefix) {
     logoCutoutSize: _logoCutoutSize[prefix],
     colors: {
       fg: val('c-fg','#000000'), bg: val('c-bg','#ffffff'),
-      g2_1: val('g2-1','#c98a2e'), g2_2: val('g2-2','#4A1060'), g2_bg: val('g2-bg','#ffffff'), g2_dir: val('g2-dir','horizontal'),
-      g4_1: val('g4-1','#c98a2e'), g4_2: val('g4-2','#e0a84a'), g4_3: val('g4-3','#4A1060'), g4_4: val('g4-4','#6B2D8E'), g4_bg: val('g4-bg','#ffffff'),
+      g2_1: val('g2-1','#c98a2e'), g2_2: val('g2-2','#4A1060'), g2_bg: val('g2-bg','#ffffff'), g2_dir: val('g2-dir','horizontal'), g2_gradient: checkedVal('g2-gradient', true),
+      g4_1: val('g4-1','#c98a2e'), g4_2: val('g4-2','#e0a84a'), g4_3: val('g4-3','#4A1060'), g4_4: val('g4-4','#6B2D8E'), g4_bg: val('g4-bg','#ffffff'), g4_gradient: checkedVal('g4-gradient', true),
       finderOuter: val('c-finder-outer','#000000'), finderInner: val('c-finder-inner','#000000'),
-      finderOuterG2_1: val('c-finder-outer-g2-1','#c98a2e'), finderOuterG2_2: val('c-finder-outer-g2-2','#4A1060'), finderOuterG2_dir: val('c-finder-outer-g2-dir','horizontal'),
-      finderOuterG4_1: val('c-finder-outer-g4-1','#c98a2e'), finderOuterG4_2: val('c-finder-outer-g4-2','#e0a84a'), finderOuterG4_3: val('c-finder-outer-g4-3','#4A1060'), finderOuterG4_4: val('c-finder-outer-g4-4','#6B2D8E'),
-      finderInnerG2_1: val('c-finder-inner-g2-1','#c98a2e'), finderInnerG2_2: val('c-finder-inner-g2-2','#4A1060'), finderInnerG2_dir: val('c-finder-inner-g2-dir','horizontal'),
-      finderInnerG4_1: val('c-finder-inner-g4-1','#c98a2e'), finderInnerG4_2: val('c-finder-inner-g4-2','#e0a84a'), finderInnerG4_3: val('c-finder-inner-g4-3','#4A1060'), finderInnerG4_4: val('c-finder-inner-g4-4','#6B2D8E')
+      finderOuterG2_1: val('c-finder-outer-g2-1','#c98a2e'), finderOuterG2_2: val('c-finder-outer-g2-2','#4A1060'), finderOuterG2_dir: val('c-finder-outer-g2-dir','horizontal'), finderOuterG2_gradient: checkedVal('c-finder-outer-g2-gradient', true),
+      finderOuterG4_1: val('c-finder-outer-g4-1','#c98a2e'), finderOuterG4_2: val('c-finder-outer-g4-2','#e0a84a'), finderOuterG4_3: val('c-finder-outer-g4-3','#4A1060'), finderOuterG4_4: val('c-finder-outer-g4-4','#6B2D8E'), finderOuterG4_gradient: checkedVal('c-finder-outer-g4-gradient', true),
+      finderInnerG2_1: val('c-finder-inner-g2-1','#c98a2e'), finderInnerG2_2: val('c-finder-inner-g2-2','#4A1060'), finderInnerG2_dir: val('c-finder-inner-g2-dir','horizontal'), finderInnerG2_gradient: checkedVal('c-finder-inner-g2-gradient', true),
+      finderInnerG4_1: val('c-finder-inner-g4-1','#c98a2e'), finderInnerG4_2: val('c-finder-inner-g4-2','#e0a84a'), finderInnerG4_3: val('c-finder-inner-g4-3','#4A1060'), finderInnerG4_4: val('c-finder-inner-g4-4','#6B2D8E'), finderInnerG4_gradient: checkedVal('c-finder-inner-g4-gradient', true)
     },
     finderOuterColorMode: prefix==='s' ? _finderOuterColorMode : _finderOuterColorModeD,
     finderInnerColorMode: prefix==='s' ? _finderInnerColorMode : _finderInnerColorModeD
@@ -4062,6 +4617,89 @@ function drawShapeFittedUniform(ctx, shapeKey, boxX, boxY, boxW, boxH, chars, cl
   ctx.restore();
   _activeGradient = _savedGrad;
 }
+
+// WHY: Hali, after seeing even dot-backed squares still show a peek of
+// background through a shape's own notch -- "if the shape cant cleanly be
+// enlarged anywhere then just dont do it because it looks too messy with
+// shapes behind it." This checks, for a given shape and a given SQUARE
+// group size (2x2 or 3x3), whether that shape's own overlay silhouette
+// (at the exact size/position renderQRCore's Vary pass actually draws it)
+// fully covers the REAL dot backing underneath it -- every pixel of every
+// backing dot, not just each dot's center point. A solid, roughly-square
+// shape (heart, diamond, hexagon) covers all of them easily; a shape with
+// a real gap in its own outline at that spot (a star's point missing a
+// neighbor, a snowflake's branches, a crescent's concave inside) won't,
+// and THAT'S the "shapes behind it" look she means -- a visible dot
+// peeking through a hole in the bigger shape's own silhouette, not just a
+// gap at its edges (the overscale already handles edges -- see that WHY).
+// WHY whole-pixel coverage, not just each dot's center: a center-only
+// check first shipped here and still called butterfly's 2x2 "clean" --
+// its center points happened to land inside the wings, but plenty of each
+// dot's own ROUND edge sat outside the wing's actual silhouette and
+// stayed visibly peeking, which is exactly what looked messy in practice.
+// Checking every pixel of the dot layer against the overlay layer catches
+// that; a center-point sample can't. WHY runs are checked too now, not
+// just squares: Hali -- "ive asked you to just take this out for the ones
+// that arnt clean they DO NOT look good" -- after seeing runs still
+// produce messy-looking clusters for some shapes, she made clear the
+// "approved" dot-chain look was never a blanket exemption for every
+// shape's runs, just a description of what a GOOD one looks like -- any
+// grouping (square OR run) that doesn't cleanly cover its own backing
+// dots should simply not happen, full stop. So this now takes the
+// group's actual w x h (a 3x3 square, a 1x7 horizontal run, etc.) and
+// gates every candidate in the chain below, not only the two square
+// sizes. Pure function of the shape's own fixed geometry (never the
+// render context), so -- same reasoning as getShapeBBoxRatioCached --
+// safe to compute once per shape+size and reuse for the session instead
+// of re-rasterizing on every single group.
+var _varyGroupCleanCache = {};
+function canCleanlyGroup(shapeKey, w, h) {
+  var key = shapeKey + '_' + w + 'x' + h;
+  if (key in _varyGroupCleanCache) return _varyGroupCleanCache[key];
+  var REF = 60, OVERSCALE = 1.35;
+  var boxW = w * REF, boxH = h * REF;
+  var ow = boxW * OVERSCALE, oh = boxH * OVERSCALE;
+  var pad = REF * 2;
+  var canvasW = Math.ceil(Math.max(boxW, ow) + pad*2);
+  var canvasH = Math.ceil(Math.max(boxH, oh) + pad*2);
+  var originX = pad, originY = pad;
+  var _savedMode = _qrModuleRenderMode;
+
+  // Layer 1: the real dot backing, exactly as drawn for every cell in
+  // the group -- same call renderQRCore's Vary pass actually makes.
+  var dotCanvas = document.createElement('canvas');
+  dotCanvas.width = canvasW; dotCanvas.height = canvasH;
+  var dctx = dotCanvas.getContext('2d');
+  _qrModuleRenderMode = true;
+  dctx.fillStyle = '#000';
+  for (var r=0; r<h; r++) for (var c=0; c<w; c++) {
+    SHAPES.dot.draw(dctx, originX + c*REF, originY + r*REF, REF, []);
+  }
+  _qrModuleRenderMode = _savedMode;
+  var dotData = dctx.getImageData(0, 0, canvasW, canvasH).data;
+
+  // Layer 2: the overlay shape, at the exact size/position the real
+  // render draws it (same ow/oh/ox/oy formula as renderQRCore's Vary
+  // group branch below).
+  var ovCanvas = document.createElement('canvas');
+  ovCanvas.width = canvasW; ovCanvas.height = canvasH;
+  var octx = ovCanvas.getContext('2d');
+  var ox = originX + boxW/2 - ow/2, oy = originY + boxH/2 - oh/2;
+  _qrModuleRenderMode = true;
+  octx.fillStyle = '#000';
+  drawShapeFittedUniform(octx, shapeKey, ox, oy, ow, oh, [], null, REF, false);
+  _qrModuleRenderMode = _savedMode;
+  var ovData = octx.getImageData(0, 0, canvasW, canvasH).data;
+
+  // Clean only if every pixel the dot backing would actually show through
+  // is also covered by the overlay.
+  var clean = true;
+  for (var i=3; i<dotData.length && clean; i+=4) {
+    if (dotData[i] > 128 && ovData[i] <= 200) clean = false;
+  }
+  _varyGroupCleanCache[key] = clean;
+  return clean;
+}
 // WHY circle and square stay on a direct ctx.arc()/ctx.rect() clip instead
 // of going through the general shaped path below: both reduce to ONE
 // built-in canvas primitive each, cheap and exact — no reason to route
@@ -4221,7 +4859,7 @@ function computeFrameInnerBox(mask, size) {
 // included — is laid out exactly as it always was (see renderQRCore), so a
 // frame can never eat into the real quiet zone or put a decorative dot
 // where a scanner would read it as a module.
-function drawFrame(ctx, size, innerX0, innerY0, innerX1, innerY1, cellSize, fg, bg, shapeKey, mask, moduleShapeKeys, chars, emoji, emojiSize, emojiDensity) {
+function drawFrame(ctx, size, innerX0, innerY0, innerX1, innerY1, cellSize, fg, bg, shapeKey, mask, moduleShapeKeys, chars, emoji, emojiSize, emojiDensity, dotSizeMode, stretchH, stretchV) {
   if (!shapeKey || shapeKey === 'none') return;
   var strokeW = Math.max(2, size*0.008);
   mask = mask || buildShapeMask(shapeKey, size);
@@ -4303,26 +4941,113 @@ function drawFrame(ctx, size, innerX0, innerY0, innerX1, innerY1, cellSize, fg, 
   var EMOJI_SIZE_MULT = (typeof emojiSize === 'number') ? emojiSize : 1.4;
   dctx.fillStyle = fg;
   _qrModuleRenderMode = true;
-  for (var y = strokeW; y < size-strokeW; y += cellSize) {
-    for (var x = strokeW; x < size-strokeW; x += cellSize) {
-      if (x+cellSize > qzX0 && x < qzX1 && y+cellSize > qzY0 && y < qzY1) continue; // inside the real QR box + quiet zone — never touch it
-      if (!maskHasPoint(mask, size, x+cellSize/2, y+cellSize/2)) continue; // outside the silhouette
+  // WHY built as an indexed row/col grid first, rather than drawn straight
+  // in this one pass like before: Hali -- "on the overall shape with the
+  // extra dots, if you want to vary the size, those dots don't change."
+  // Stretch/Vary need to know which filler cells sit next to which to
+  // group them the same way they group real modules -- impossible to tell
+  // from a single inline draw call. WHY no SAFE_GROUP_SHAPES/
+  // SAFE_VARY_SHAPES safety gate here at all, unlike the real module
+  // grouping below: these dots sit entirely outside the real QR's own box
+  // (see the qz skip just below) -- a scanner's sample grid never reaches
+  // them, so there's no gap-exposes-background risk to guard against, and
+  // any shape can group freely under either mode.
+  var fCols = Math.ceil((size - 2*strokeW) / cellSize);
+  var fRows = fCols;
+  var fillerOn = []; // true = eligible, density-rolled, still needs its shape drawn (grouped or single)
+  for (var fr = 0; fr < fRows; fr++) fillerOn.push(new Array(fCols).fill(false));
+  for (var fr = 0; fr < fRows; fr++) {
+    for (var fc = 0; fc < fCols; fc++) {
+      var fx = strokeW + fc*cellSize, fy = strokeW + fr*cellSize;
+      if (fx >= size-strokeW || fy >= size-strokeW) continue;
+      if (fx+cellSize > qzX0 && fx < qzX1 && fy+cellSize > qzY0 && fy < qzY1) continue; // inside the real QR box + quiet zone — never touch it
+      if (!maskHasPoint(mask, size, fx+cellSize/2, fy+cellSize/2)) continue; // outside the silhouette
       if (Math.random() > FILLER_DENSITY) continue; // thin the grid out to QR-like sparseness
       if (emojiList.length && Math.random() < EMOJI_FILLER_SHARE) {
-        // WHY drawn ~40% bigger than its own cell, centered on it, instead
-        // of exactly cell-sized: a color emoji glyph at a single QR
-        // module's size reads as an illegible speck — oversizing it
-        // (decoration never has to align to the grid the way real modules
-        // do) is what actually makes it recognizable as, say, a moon or a
-        // star rather than a colored smudge.
+        // WHY drawn immediately here, never added to fillerOn: an emoji is
+        // already drawn ~40% bigger than its own cell and off the module
+        // grid on purpose (see its own WHY) -- grouping was never the point
+        // for these, so they stay exactly as before, independent of
+        // Stretch/Vary.
         var eSize = cellSize*EMOJI_SIZE_MULT;
-        var ecx = x+cellSize/2, ecy = y+cellSize/2;
+        var ecx = fx+cellSize/2, ecy = fy+cellSize/2;
         drawEmoji(dctx, ecx-eSize/2, ecy-eSize/2, eSize, emojiList[Math.floor(Math.random()*emojiList.length)]);
       } else {
+        fillerOn[fr][fc] = true;
+      }
+    }
+  }
+
+  if (dotSizeMode === 'stretch') {
+    // Mirrors the real module Stretch pass (see renderQRCore's WHY) one
+    // for one, just against fillerOn instead of the real matrix, and with
+    // no SAFE_GROUP_SHAPES gate (see this block's own WHY above).
+    var fUsed = [];
+    for (var sur=0; sur<fRows; sur++) fUsed.push(new Array(fCols).fill(false));
+    function fCellOk(r,c) { return r>=0 && r<fRows && c>=0 && c<fCols && !fUsed[r][c] && !!fillerOn[r][c]; }
+    for (var sgrow=0; sgrow<fRows; sgrow++) {
+      for (var sgcol=0; sgcol<fCols; sgcol++) {
+        if (!fCellOk(sgrow,sgcol)) continue;
+        var sgKey = fillerKeys.length===1 ? fillerKeys[0] : fillerKeys[Math.floor(Math.random()*fillerKeys.length)];
+        var sgw=1, sgh=1;
+        if (fCellOk(sgrow,sgcol+1) && fCellOk(sgrow+1,sgcol) && fCellOk(sgrow+1,sgcol+1)) { sgw=2; sgh=2; }
+        else if (stretchH && fCellOk(sgrow,sgcol+1) && fCellOk(sgrow,sgcol+2) && fCellOk(sgrow,sgcol+3)) { sgw=4; sgh=1; }
+        else if (stretchV && fCellOk(sgrow+1,sgcol) && fCellOk(sgrow+2,sgcol) && fCellOk(sgrow+3,sgcol)) { sgw=1; sgh=4; }
+        else if (stretchH && fCellOk(sgrow,sgcol+1) && fCellOk(sgrow,sgcol+2)) { sgw=3; sgh=1; }
+        else if (stretchV && fCellOk(sgrow+1,sgcol) && fCellOk(sgrow+2,sgcol)) { sgw=1; sgh=3; }
+        else if (stretchH && fCellOk(sgrow,sgcol+1)) { sgw=2; sgh=1; }
+        else if (stretchV && fCellOk(sgrow+1,sgcol)) { sgw=1; sgh=2; }
+        for (var smr=0; smr<sgh; smr++) for (var smc=0; smc<sgw; smc++) fUsed[sgrow+smr][sgcol+smc] = true;
+        var sgx = strokeW + sgcol*cellSize, sgy = strokeW + sgrow*cellSize;
+        dctx.fillStyle = fg;
+        if (sgw===1 && sgh===1) {
+          var sgDef = SHAPES[sgKey] || SHAPES['dot'];
+          sgDef.draw(dctx, sgx, sgy, cellSize, chars || []);
+        } else {
+          drawShapeFittedRect(dctx, sgKey, sgx, sgy, sgw*cellSize, sgh*cellSize, chars);
+        }
+      }
+    }
+  } else if (dotSizeMode === 'vary') {
+    // Mirrors the real module Vary pass's square-cluster grouping, minus
+    // the per-cell backing layer -- that layer exists purely for scan
+    // safety (see renderQRCore's WHY), which doesn't apply to decoration,
+    // so a plain uniform-fit shape straight onto the (still transparent)
+    // deco layer is enough.
+    var fUsedV = [];
+    for (var uvr=0; uvr<fRows; uvr++) fUsedV.push(new Array(fCols).fill(false));
+    function fCellOkV(r,c) { return r>=0 && r<fRows && c>=0 && c<fCols && !fUsedV[r][c] && !!fillerOn[r][c]; }
+    function fRectOkV(r,c,w,h) {
+      for (var rr=0; rr<h; rr++) for (var cc=0; cc<w; cc++) if (!fCellOkV(r+rr,c+cc)) return false;
+      return true;
+    }
+    for (var vrow=0; vrow<fRows; vrow++) {
+      for (var vcol=0; vcol<fCols; vcol++) {
+        if (!fCellOkV(vrow,vcol)) continue;
+        var vKey = fillerKeys.length===1 ? fillerKeys[0] : fillerKeys[Math.floor(Math.random()*fillerKeys.length)];
+        var vw=1, vh=1;
+        if (fRectOkV(vrow,vcol,3,3)) { vw=3; vh=3; }
+        else if (fRectOkV(vrow,vcol,2,2)) { vw=2; vh=2; }
+        for (var vmr=0; vmr<vh; vmr++) for (var vmc=0; vmc<vw; vmc++) fUsedV[vrow+vmr][vcol+vmc] = true;
+        var vx = strokeW + vcol*cellSize, vy = strokeW + vrow*cellSize;
+        var vDef = SHAPES[vKey] || SHAPES['dot'];
+        dctx.fillStyle = fg;
+        if (vw===1 && vh===1) {
+          vDef.draw(dctx, vx, vy, cellSize, chars || []);
+        } else {
+          drawShapeFittedUniform(dctx, vKey, vx, vy, vw*cellSize, vh*cellSize, chars, null, cellSize, false);
+        }
+      }
+    }
+  } else {
+    for (var ofr=0; ofr<fRows; ofr++) {
+      for (var ofc=0; ofc<fCols; ofc++) {
+        if (!fillerOn[ofr][ofc]) continue;
+        var ofx = strokeW + ofc*cellSize, ofy = strokeW + ofr*cellSize;
         var fillerKey = fillerKeys.length===1 ? fillerKeys[0] : fillerKeys[Math.floor(Math.random()*fillerKeys.length)];
         var fillerDef = SHAPES[fillerKey] || SHAPES['dot'];
         dctx.fillStyle = fg;
-        fillerDef.draw(dctx, x, y, cellSize, chars || []);
+        fillerDef.draw(dctx, ofx, ofy, cellSize, chars || []);
       }
     }
   }
@@ -4406,7 +5131,7 @@ async function renderQRCore(canvas, url, size, ec, prefix) {
   // always render on top, fully untouched. The real QR's bounding box is
   // passed so drawFrame skips filler dots that would overlap it.
   if (hasFrame) {
-    drawFrame(ctx, size, box.x0, box.y0, box.x1, box.y1, cellSize, fg, bg, settings.frameShape, frameMask, settings.shapes, settings.chars, settings.emoji, settings.emojiSize, settings.emojiDensity);
+    drawFrame(ctx, size, box.x0, box.y0, box.x1, box.y1, cellSize, fg, bg, settings.frameShape, frameMask, settings.shapes, settings.chars, settings.emoji, settings.emojiSize, settings.emojiDensity, settings.dotSizeMode, settings.stretchH, settings.stretchV);
   }
 
   // WHY picked per module instead of once outside the loop: Hali can now
@@ -4415,6 +5140,38 @@ async function renderQRCore(canvas, url, size, ec, prefix) {
   // with, say, hexagon + star5 both picked comes out as a genuine mix of
   // the two instead of only ever using whichever was selected last.
   var shapeKeys = (settings.shapes && settings.shapes.length) ? settings.shapes : ['square'];
+
+  // WHY this helper instead of the old inline random pick at every call
+  // site: Hali -- "give three check marks random, half and quarter. the
+  // quarter checked would give the user tabs Q1, Q2, Q3 & Q4 to choose the
+  // dot shape for each." Random is the untouched original behavior (each
+  // cell independently rolls one of the checked Dot Types). Half and
+  // Quarter both ignore the main multi-select entirely and instead roll
+  // randomly among whichever shapes are picked in their OWN region pickers
+  // (settings.halfShapes.left/right, settings.quarterShapes.q1-q4 -- see
+  // _quarterShapes/_halfShapes' own WHY for why each region gets its own
+  // pool instead of reusing the main checklist). row/col here are always
+  // real-matrix coordinates (never finder/frame cells), and `modules` is
+  // the full matrix side length, so modules/2 is the exact midline the
+  // quadrant/half split lands on regardless of QR version.
+  function pickFromRegionArr(arr) {
+    if (!arr || !arr.length) return 'square';
+    return arr.length===1 ? arr[0] : arr[Math.floor(Math.random()*arr.length)];
+  }
+  function pickShapeForCell(row, col, modules, shapeKeys, dist, quarterShapes, halfShapes) {
+    if (dist === 'quarter' && quarterShapes) {
+      var topHalf = row < modules / 2;
+      var leftHalf = col < modules / 2;
+      var qArr = topHalf
+        ? (leftHalf ? quarterShapes.q1 : quarterShapes.q2)
+        : (leftHalf ? quarterShapes.q3 : quarterShapes.q4);
+      return pickFromRegionArr(qArr);
+    }
+    if (dist === 'half' && halfShapes) {
+      return pickFromRegionArr((col < modules / 2) ? halfShapes.left : halfShapes.right);
+    }
+    return shapeKeys.length===1 ? shapeKeys[0] : shapeKeys[Math.floor(Math.random()*shapeKeys.length)];
+  }
 
   // Draw modules
   ctx.fillStyle = fg;
@@ -4450,7 +5207,7 @@ async function renderQRCore(canvas, url, size, ec, prefix) {
     for (var grow=0; grow<modules; grow++) {
       for (var gcol=0; gcol<modules; gcol++) {
         if (!cellOk(grow,gcol)) continue;
-        var gKey = shapeKeys.length===1 ? shapeKeys[0] : shapeKeys[Math.floor(Math.random()*shapeKeys.length)];
+        var gKey = pickShapeForCell(grow, gcol, modules, shapeKeys, settings.shapeDist, settings.quarterShapes, settings.halfShapes);
         var gw=1, gh=1;
         if (SAFE_GROUP_SHAPES.indexOf(gKey) > -1) {
           // WHY the 2x2 square check is never gated by stretchH/stretchV:
@@ -4528,19 +5285,242 @@ async function renderQRCore(canvas, url, size, ec, prefix) {
       }
       return true;
     }
+    // WHY straight runs now join the two square sizes as candidates: Hali,
+    // after seeing grouping limited to perfect squares -- "maybe each shape
+    // that doesnt fit a perfect square might fit in some other combo if it
+    // shows up in the code." A 3x3/2x2 square is a rare, specific pattern
+    // to land on in real QR data; a straight run of 3+ adjacent dark
+    // modules (no 90-degree turn) shows up far more often, so checking for
+    // one gives Vary something to group far more places in a real code.
+    // Reuses the exact run-detection style Stretch already uses (see its
+    // own WHY) -- just without Stretch's h/v checkboxes, since Vary has no
+    // such toggle and nothing here stretches the shape's own proportions
+    // either way (see the overlay sizing below).
+    function runOkV(r,ccol,len,horiz) {
+      for (var i=0; i<len; i++) {
+        if (!cellOkV(horiz?r:r+i, horiz?ccol+i:ccol)) return false;
+      }
+      return true;
+    }
+    // WHY one generalized NxN detector/renderer instead of the earlier
+    // fixed 2x2-L and 3x3-staircase special cases: Hali, after seeing the
+    // 3x3 version render as one big triangle clipped over hidden backing
+    // dot circles -- "no, we dont want a staircase. we only want right
+    // angle triangles and no dots behind anything ... squares that are
+    // only making up right triangles in any scale that this can occur in."
+    // Worked through her own column-by-column description (three vertical
+    // -> bottom two squares, the top one a triangle; two vertical -> top
+    // triangle, bottom square; one -> just a triangle) and it's exactly
+    // the cells sitting ON the group's diagonal that become a small right
+    // triangle (oriented to match the group's own right-angle corner),
+    // every other filled cell becomes a plain full square -- no circles,
+    // no overscale, no clip. That's also why this needs no safety
+    // machinery at all: a lone right_triangle (half-filled) or square
+    // (fully filled) in its OWN single cell is already exactly as
+    // scan-safe as any other un-grouped module -- see
+    // SAFE_GROUP_SHAPES/SAFE_VARY_SHAPES, both already include square and
+    // right_triangle on their own merits. Keyed tl/tr/bl/br the same way
+    // the old lOkV/staircaseOkV were, by whichever corner is left empty;
+    // n=2 reproduces the original 3-cell L exactly, n=3 the original
+    // 6-cell staircase, and n=4+ keeps generalizing the same way, tried
+    // biggest-first like every other Vary candidate.
+    var TRI_RA = { tr:'bl', tl:'br', bl:'tr', br:'tl' }; // missing corner -> this group's right-angle corner
+    // WHY dr>=dc / dr+dc>=n-1 / etc instead of 4 hand-written per-orientation
+    // cell lists: these 4 formulas are the direct algebraic generalization
+    // of the n=3 cell-by-cell math worked out from Hali's own description
+    // (confirmed to reproduce STAIRCASE_MISSING's old hand-listed cells
+    // exactly for n=3, and the L-tromino's for n=2) -- one set of formulas
+    // that scales to any n rather than 4 more hardcoded tables.
+    function triCellFilled(dr, dc, n, missing) {
+      if (missing==='tr') return dr >= dc;
+      if (missing==='tl') return dr+dc >= n-1;
+      if (missing==='bl') return dc >= dr;
+      return dr+dc <= n-1; // 'br'
+    }
+    // WHY the hypotenuse (triangle) cells are exactly dr===dc or
+    // dr+dc===n-1, not "any cell touching the missing region": Hali's own
+    // column breakdown only ever puts a triangle at the TOP of each
+    // column (the cell sitting exactly on the diagonal line) -- a cell one
+    // step further in, like the second-from-top of a tall column, is a
+    // full square even though it's diagonally adjacent to a missing cell
+    // too. The plain diagonal condition matches her example exactly.
+    function triCellIsHyp(dr, dc, n, missing) {
+      if (missing==='tr' || missing==='bl') return dr === dc;
+      return dr+dc === n-1; // 'tl' or 'br'
+    }
+    // WHY an origin helper instead of always treating the outer loop's
+    // anchor (r,ccol) as the box's own top-left corner: the anchor is
+    // guaranteed dark (the outer loop already checked cellOkV(vrow,vcol)
+    // before any of this runs), and triCellFilled's local (0,0) must be
+    // part of the filled set or the anchor cell itself -- a real, known-
+    // dark module -- silently never gets drawn at all (confirmed as a real
+    // bug: 'tl' is the one orientation whose own local (0,0) IS its
+    // missing corner by definition, so anchoring it top-left-first the way
+    // tr/bl/br do left that corner blank, which is exactly the "missing
+    // module" failures that broke zbar scanning down to 0/20 before this
+    // fix). For 'tl' the anchor instead has to BE the box's bottom-right
+    // corner (its own right-angle corner, always filled), with the real
+    // box extending up-left from there.
+    function triBoxOrigin(r, ccol, n, missing) {
+      if (missing==='tl') return [r-(n-1), ccol-(n-1)];
+      return [r, ccol];
+    }
+    function triBoxOkV(r, ccol, n, missing) {
+      var origin = triBoxOrigin(r,ccol,n,missing);
+      var r0=origin[0], c0=origin[1];
+      for (var dr=0; dr<n; dr++) {
+        for (var dc=0; dc<n; dc++) {
+          if (!triCellFilled(dr,dc,n,missing)) continue;
+          if (!cellOkV(r0+dr, c0+dc)) return false;
+        }
+      }
+      return true;
+    }
+    // WHY one parameterized draw instead of reusing SHAPES.right_triangle
+    // for only the 'bl' case and improvising the other 3: 'bl' (right
+    // angle at bottom-left) IS exactly SHAPES.right_triangle's own
+    // vertices, but the other 3 orientations (the triangle mirrored/
+    // rotated to each of the other 3 corners) aren't separate entries in
+    // the shape picker -- they only ever show up as part of this grouped
+    // render, so they're kept local here rather than cluttering SHAPES
+    // with 3 more picker tiles nobody would choose standalone.
+    // WHY the overscan param, and why it pushes vertices outward from the
+    // triangle's own centroid instead of just nudging x/y: Hali -- "make
+    // sure they reach fully to the corners the design touches so that
+    // theres no white lines between the quadrants when combined." Each
+    // cell here (this triangle, the square next to it) is filled with its
+    // own separate ctx.fill()/fillRect() call, each independently anti-
+    // aliased -- even when two cells share an EXACT mathematical edge,
+    // compositing two separately-antialiased edges at that shared boundary
+    // leaves a faint seam (each edge's partial-coverage pixels blend with
+    // the white behind them before the two fills ever combine, so the
+    // seam pixel ends up lighter than either shape's solid fill). Pushing
+    // every vertex outward from the centroid by a hair overlaps that seam
+    // with solid color from both sides instead of leaving it to two
+    // half-covered edges to add up perfectly. Centroid-relative (not a
+    // flat x/y nudge) so it grows the WHOLE triangle slightly in every
+    // direction at once -- legs that touch a real square neighbor AND the
+    // hypotenuse that only touches background both get the same tiny
+    // overlap, no separate-casing which edge needs it.
+    function drawTriCell(ctx, x, y, s, ra, overscan) {
+      var pts;
+      if (ra==='bl') pts = [[x,y],[x,y+s],[x+s,y+s]];
+      else if (ra==='br') pts = [[x+s,y],[x+s,y+s],[x,y+s]];
+      else if (ra==='tl') pts = [[x,y],[x+s,y],[x,y+s]];
+      else pts = [[x,y],[x+s,y],[x+s,y+s]]; // 'tr'
+      if (overscan) {
+        var ccx = (pts[0][0]+pts[1][0]+pts[2][0])/3, ccy = (pts[0][1]+pts[1][1]+pts[2][1])/3;
+        pts = pts.map(function(p){
+          var dx=p[0]-ccx, dy=p[1]-ccy, len=Math.sqrt(dx*dx+dy*dy)||1;
+          return [p[0]+dx/len*overscan, p[1]+dy/len*overscan];
+        });
+      }
+      ctx.beginPath();
+      ctx.moveTo(pts[0][0],pts[0][1]); ctx.lineTo(pts[1][0],pts[1][1]); ctx.lineTo(pts[2][0],pts[2][1]);
+      ctx.closePath();
+      ctx.fill();
+    }
+    function drawTriBoxV(ctx, vx, vy, cs, n, missing, chars) {
+      var ra = TRI_RA[missing];
+      // WHY a fixed fraction of cell size, not SHAPES.square.draw: that
+      // helper insets a square by 1% on purpose (see its own WHY) to put a
+      // hairline gap BETWEEN ordinary neighboring modules -- the exact
+      // opposite of what a seamless triangle-plus-square silhouette needs
+      // here, so the square portions of this box are filled directly with
+      // a small OUTSET instead, matching drawTriCell's own overscan so
+      // every edge inside the group -- square-to-square, square-to-
+      // triangle leg, whichever -- gets the same tiny overlap.
+      var overscan = cs * 0.05;
+      for (var dr=0; dr<n; dr++) {
+        for (var dc=0; dc<n; dc++) {
+          if (!triCellFilled(dr,dc,n,missing)) continue;
+          var cx = vx+dc*cs, cy = vy+dr*cs;
+          if (triCellIsHyp(dr,dc,n,missing)) { drawTriCell(ctx, cx, cy, cs, ra, overscan); }
+          else { ctx.fillRect(cx-overscan, cy-overscan, cs+overscan*2, cs+overscan*2); }
+        }
+      }
+    }
     for (var vrow=0; vrow<modules; vrow++) {
       for (var vcol=0; vcol<modules; vcol++) {
         if (!cellOkV(vrow,vcol)) continue;
-        var vKey = shapeKeys.length===1 ? shapeKeys[0] : shapeKeys[Math.floor(Math.random()*shapeKeys.length)];
-        var vw=1, vh=1;
-        if (SAFE_GROUP_SHAPES.indexOf(vKey) > -1) {
-          if (rectOkV(vrow,vcol,3,3)) { vw=3; vh=3; }
-          else if (rectOkV(vrow,vcol,2,2)) { vw=2; vh=2; }
+        var vKey = pickShapeForCell(vrow, vcol, modules, shapeKeys, settings.shapeDist, settings.quarterShapes, settings.halfShapes);
+        var vw=1, vh=1, vTriN=0, vTriMissing=null;
+        // WHY right_triangle gets its own branch (triBoxOkV), checked right
+        // after the 2x2 square, biggest n first (7 down to 2): Hali wants
+        // real right triangles + full squares with zero backing dots, at
+        // any scale -- a spot that qualifies for a bigger box always also
+        // qualifies for every smaller one nested inside it, so the biggest
+        // has to be tried first or it would never win. KNOWN TRADEOFF: zbar
+        // scan testing on this exact construction failed 0/10-0/20 at every
+        // size from 2 to 7 (the sharp edge between a full square and a
+        // half-filled triangle cell reads as ambiguous with no dot to
+        // anchor it) -- Hali knows this and wants it built anyway, and is
+        // checking scan reliability herself rather than relying on zbar.
+        if (SAFE_VARY_SHAPES.indexOf(vKey) > -1) {
+          // WHY ordered biggest-cell-count first, square ties broken in
+          // the square's favor: a 3x3 (9 cells) beats any run that could
+          // start at this same anchor; after that, a longer run (5,6,7
+          // cells) is a bigger, more interesting cluster than a bare 2x2
+          // (4 cells), so it's tried first -- but a 2x2 and a 4-run tie at
+          // 4 cells, and the square's already-proven compact look wins
+          // that tie.
+          if (rectOkV(vrow,vcol,3,3) && canCleanlyGroup(vKey,3,3)) { vw=3; vh=3; }
+          else if (runOkV(vrow,vcol,7,true) && canCleanlyGroup(vKey,7,1)) { vw=7; vh=1; }
+          else if (runOkV(vrow,vcol,7,false) && canCleanlyGroup(vKey,1,7)) { vw=1; vh=7; }
+          else if (runOkV(vrow,vcol,6,true) && canCleanlyGroup(vKey,6,1)) { vw=6; vh=1; }
+          else if (runOkV(vrow,vcol,6,false) && canCleanlyGroup(vKey,1,6)) { vw=1; vh=6; }
+          else if (runOkV(vrow,vcol,5,true) && canCleanlyGroup(vKey,5,1)) { vw=5; vh=1; }
+          else if (runOkV(vrow,vcol,5,false) && canCleanlyGroup(vKey,1,5)) { vw=1; vh=5; }
+          else if (rectOkV(vrow,vcol,2,2) && canCleanlyGroup(vKey,2,2)) { vw=2; vh=2; }
+          else if (vKey==='right_triangle') {
+            // WHY only 'tr' (never tl/bl/br): the single-cell right_triangle
+            // tile itself (SHAPES.right_triangle, vertices TL/BL/BR) has its
+            // right angle at the bottom-left and its hypotenuse running
+            // top-left to bottom-right -- that's the one "upright" look.
+            // 'tr' is the only one of the 4 box orientations whose filled
+            // region (dr>=dc) matches that exact silhouette scaled up; tl/
+            // bl/br are the other 3 rotations/mirrors, which is what was
+            // reading as "upside down in every odd way." Trying every size
+            // at this one orientation only, biggest first.
+            for (var tn=7; tn>=2 && !vTriMissing; tn--) {
+              if (triBoxOkV(vrow,vcol,tn,'tr')) { vTriN=tn; vTriMissing='tr'; }
+            }
+          }
+          if (!vTriMissing) {
+            if (runOkV(vrow,vcol,4,true) && canCleanlyGroup(vKey,4,1)) { vw=4; vh=1; }
+            else if (runOkV(vrow,vcol,4,false) && canCleanlyGroup(vKey,1,4)) { vw=1; vh=4; }
+            else if (runOkV(vrow,vcol,3,true) && canCleanlyGroup(vKey,3,1)) { vw=3; vh=1; }
+            else if (runOkV(vrow,vcol,3,false) && canCleanlyGroup(vKey,1,3)) { vw=1; vh=3; }
+          }
         }
-        for (var vmr=0; vmr<vh; vmr++) for (var vmc=0; vmc<vw; vmc++) usedV[vrow+vmr][vcol+vmc] = true;
+        if (vTriMissing) {
+          // WHY the box's real origin, not always (vrow,vcol): see
+          // triBoxOrigin's own WHY -- 'tl' anchors at the box's bottom-
+          // right corner, so its real top-left (where cell marking and
+          // drawing both need to start from) sits up-left of the anchor.
+          var triOrigin = triBoxOrigin(vrow, vcol, vTriN, vTriMissing);
+          var tr0 = triOrigin[0], tc0 = triOrigin[1];
+          // WHY only the triangle box's own FILLED cells get marked used:
+          // same reasoning as every other grouped shape here -- the cells
+          // this box's own formula leaves out are real background modules
+          // it never touched, so they stay available for whatever the
+          // next pass over the matrix finds there.
+          for (var tdr=0; tdr<vTriN; tdr++) {
+            for (var tdc=0; tdc<vTriN; tdc++) {
+              if (triCellFilled(tdr,tdc,vTriN,vTriMissing)) usedV[tr0+tdr][tc0+tdc] = true;
+            }
+          }
+        } else {
+          for (var vmr=0; vmr<vh; vmr++) for (var vmc=0; vmc<vw; vmc++) usedV[vrow+vmr][vcol+vmc] = true;
+        }
         var vx = box.x0 + vcol*cellSize;
         var vy = box.y0 + vrow*cellSize;
         ctx.fillStyle = fg;
+        if (vTriMissing) {
+          var triVx = box.x0 + tc0*cellSize, triVy = box.y0 + tr0*cellSize;
+          drawTriBoxV(ctx, triVx, triVy, cellSize, vTriN, vTriMissing, settings.chars);
+          continue;
+        }
         var vShapeDef = SHAPES[vKey] || SHAPES['square'];
         if (vw===1 && vh===1) {
           var vNeighbors = {
@@ -4551,37 +5531,136 @@ async function renderQRCore(canvas, url, size, ec, prefix) {
           };
           vShapeDef.draw(ctx, vx, vy, cellSize, settings.chars, vNeighbors);
         } else {
-          // WHY a normal single-cell shape UNDER each real cell of the
-          // group, THEN the bigger uniform-fit shape on top, instead of a
-          // solid color backing: a solid backing technically fixed the
-          // scan-breaking gap (see drawShapeFittedUniform's fillBacking
-          // WHY) but made every non-square group (anything that isn't an
-          // exact 2x2/3x3) look like a plain block -- the bigger shape,
+          // WHY a plain dot UNDER each real cell of the group, THEN the
+          // bigger uniform-fit shape on top, instead of either a solid
+          // color backing or the group's own shape repeated small: a solid
+          // backing technically fixed the scan-breaking gap (see
+          // drawShapeFittedUniform's fillBacking WHY) but made every
+          // non-square group look like a plain block -- the bigger shape,
           // drawn the SAME color as its own solid backing, was completely
-          // invisible against it. This gets the same safety guarantee a
-          // different way: each cell keeps the exact per-cell rendering
-          // "Off" mode already relies on (already proven reliable, since
-          // that's the site's own default), so every module's own sample
-          // point is covered independently of the group geometry, THEN
-          // the bigger accent shape draws on top, centered on the whole
-          // group -- same color, so it just visually merges with/extends
-          // past the small tiled ones rather than hiding them, and a
-          // viewer sees one bigger shape, not a flat block, because the
-          // small shapes underneath don't fill their own cells edge to
-          // edge (that's exactly what gave the group room to exist).
+          // invisible against it. The first fix for THAT used the group's
+          // own shape small under each cell (a mini butterfly under each
+          // cell of a butterfly group) -- technically safe, since it's the
+          // exact per-cell rendering "Off" mode already relies on, but
+          // Hali -- "it kindo of looks like the groupings still have the
+          // small designs in them so its skewing the shape" -- a shape
+          // with any real notch in its own silhouette (a butterfly's
+          // wing gap, a star's points, even a heart's top dip) reads as
+          // visibly separate little copies poking out around the bigger
+          // one instead of merging into it. A plain round dot never has
+          // that problem -- round, no points or notches of its own to
+          // clash with whatever's drawn on top -- while still being the
+          // exact same proven-safe per-cell fallback "Off" mode already
+          // uses for every shape (see SHAPES.dot), so the safety guarantee
+          // (every real module's own sample point independently covered,
+          // regardless of the group geometry or the bigger accent shape's
+          // own gaps) is identical either way. Confirmed by eye across
+          // butterfly/heart/star5: dot backing reads as one clean bigger
+          // shape with a soft round fringe, not a cluster of smaller ones.
           for (var bmr=0; bmr<vh; bmr++) {
             for (var bmc=0; bmc<vw; bmc++) {
-              var bRow = vrow+bmr, bCol = vcol+bmc;
-              var bNeighbors = {
-                up:    bRow>0            && !!matrix[bRow-1][bCol],
-                down:  bRow<modules-1    && !!matrix[bRow+1][bCol],
-                left:  bCol>0            && !!matrix[bRow][bCol-1],
-                right: bCol<modules-1    && !!matrix[bRow][bCol+1]
-              };
-              vShapeDef.draw(ctx, vx+bmc*cellSize, vy+bmr*cellSize, cellSize, settings.chars, bNeighbors);
+              SHAPES.dot.draw(ctx, vx+bmc*cellSize, vy+bmr*cellSize, cellSize, settings.chars);
             }
           }
-          drawShapeFittedUniform(ctx, vKey, vx, vy, vw*cellSize, vh*cellSize, settings.chars, null, cellSize, false);
+          // WHY overscaled past the group's own box instead of a plain
+          // uniform fit inside it: a uniform fit sized exactly to the box
+          // only reaches edge to edge on whichever axis is tighter -- a
+          // shape noticeably wider than tall (a butterfly's wingspan)
+          // leaves real margin on the other axis where the dot backing
+          // underneath still peeks out past it. BUT this overscale is NOT
+          // risk-free the way the backing layer is: it's drawn OUTSIDE the
+          // group's own cells, which were never backed with a dot because
+          // they're not part of the group -- if the overlay reaches far
+          // enough to cover one of THOSE cells' own sample point and that
+          // cell is real background, that's a genuine corrupted module,
+          // no different from Stretch's problem. Squares (2x2/3x3) tested
+          // safe at 1.35x of each axis independently (real decode sweep,
+          // 47/47 shapes). A straight run's SHORT axis is always just 1
+          // cell, though -- an early version of this sized the overlay as
+          // a flat (shortAxis+1)-cell square, which for a run meant fully
+          // DOUBLING that short axis (1 -> 2 cells), reaching a full cell
+          // into the row/column above and below the run -- cells that are
+          // almost always real, unbacked background. Real testing caught
+          // it immediately (square/dot/cross/sun and others, previously
+          // 47/47, dropped to scattered failures the moment runs could
+          // fire). Back to the same proven-safe 1.35x on each axis
+          // independently instead -- on a run's 1-cell short axis that's
+          // only +0.35 cells of real overflow, the same safe margin
+          // already confirmed for squares, just applied consistently.
+          // Uniform fit is still capped by whichever axis is tighter, so
+          // on a run that's always the short axis -- the rendered shape
+          // comes out modest (close to dot-sized) and centered on the
+          // run's own middle, with the rest of the run showing as plain
+          // connecting dots on either side. Smaller than the flat-square
+          // version visually, but it's the version that doesn't corrupt
+          // real modules.
+          var VARY_OVERLAY_OVERSCALE = 1.35;
+          var ow = vw*cellSize*VARY_OVERLAY_OVERSCALE, oh = vh*cellSize*VARY_OVERLAY_OVERSCALE;
+          var ox = vx + vw*cellSize/2 - ow/2, oy = vy + vh*cellSize/2 - oh/2;
+          drawShapeFittedUniform(ctx, vKey, ox, oy, ow, oh, settings.chars, null, cellSize, false);
+        }
+      }
+    }
+  } else if (settings.dotSizeMode === 'connect') {
+    // WHY: Hali -- "have a cnnect button show up next to vary for when we
+    // click the dot option for dots that smartly scans the structure and
+    // creates wavy patterns ... the top dot would keep the circle shape
+    // and then the squares would get filled in solid until the next break
+    // when it would end curved and for when dots connect on the right or
+    // left to keep the curve on the opposite side to make it look like a
+    // wavy line." Two passes. First, every real dark non-finder module
+    // gets its own full SHAPES.dot circle, exactly like Off mode -- same
+    // base safety guarantee used everywhere in this file: whatever else
+    // gets layered on top, every real sample point already has the exact
+    // shape "Off" always relied on underneath it. Second, for every PAIR
+    // of adjacent dark non-finder modules (checked once per edge -- right
+    // and down only, so the same edge is never drawn twice from both
+    // sides), one round-capped stroke the width of a full module connects
+    // the two cell centers. WHY round caps are the whole trick, not a
+    // hand-built fillet at each bend: a round line cap is a half-circle
+    // exactly the width of the stroke -- the same size and shape as the
+    // module's own dot. A straight run's interior cells sit under TWO
+    // overlapping segments capping into the same center point from
+    // opposite sides, which reads as one unbroken capsule; a run's end
+    // cell only has one segment capping into it, so it stays rounded; and
+    // a bend -- a cell connecting in two different directions -- gets
+    // caps from both its segments landing on that exact same center, so
+    // the two straight arms both flow into one rounded joint instead of
+    // meeting at a hard corner, which is what actually makes it read as a
+    // continuous wavy line instead of a blocky staircase. WHY this is
+    // provably safe with no overscale tuning to get right, unlike Vary's
+    // group overlay: a segment's own length is exactly one module between
+    // two real adjacent centers, widened by its round cap on each end by
+    // exactly half the stroke width -- that reaches precisely to the FAR
+    // edge of each of those same two (already-confirmed-real) cells and
+    // not one pixel further, so there's no neighboring cell it could ever
+    // bleed into even in principle, let alone one real testing has to
+    // catch after the fact.
+    for (var dr=0; dr<modules; dr++) {
+      for (var dc=0; dc<modules; dc++) {
+        if (!matrix[dr][dc] || isFinderModule(dr,dc,modules)) continue;
+        SHAPES.dot.draw(ctx, box.x0+dc*cellSize, box.y0+dr*cellSize, cellSize, settings.chars);
+      }
+    }
+    ctx.strokeStyle = fg;
+    ctx.lineWidth = cellSize;
+    ctx.lineCap = 'round';
+    for (var dr2=0; dr2<modules; dr2++) {
+      for (var dc2=0; dc2<modules; dc2++) {
+        if (!matrix[dr2][dc2] || isFinderModule(dr2,dc2,modules)) continue;
+        var dcx = box.x0 + dc2*cellSize + cellSize/2;
+        var dcy = box.y0 + dr2*cellSize + cellSize/2;
+        if (dc2<modules-1 && matrix[dr2][dc2+1] && !isFinderModule(dr2,dc2+1,modules)) {
+          ctx.beginPath();
+          ctx.moveTo(dcx, dcy);
+          ctx.lineTo(dcx+cellSize, dcy);
+          ctx.stroke();
+        }
+        if (dr2<modules-1 && matrix[dr2+1][dc2] && !isFinderModule(dr2+1,dc2,modules)) {
+          ctx.beginPath();
+          ctx.moveTo(dcx, dcy);
+          ctx.lineTo(dcx, dcy+cellSize);
+          ctx.stroke();
         }
       }
     }
@@ -4594,7 +5673,7 @@ async function renderQRCore(canvas, url, size, ec, prefix) {
         var x = box.x0 + col*cellSize;
         var y = box.y0 + row*cellSize;
         ctx.fillStyle = fg;
-        var moduleKey = shapeKeys.length===1 ? shapeKeys[0] : shapeKeys[Math.floor(Math.random()*shapeKeys.length)];
+        var moduleKey = pickShapeForCell(row, col, modules, shapeKeys, settings.shapeDist, settings.quarterShapes, settings.halfShapes);
         var shapeDef = SHAPES[moduleKey] || SHAPES['square'];
         // WHY computed per real module, raw matrix lookups (not
         // isFinderModule-filtered): Hali, after seeing the splatter/ink-blot
@@ -4642,16 +5721,16 @@ async function renderQRCore(canvas, url, size, ec, prefix) {
       if (settings.colorMode !== 'solid') out.outer = gradientColorAt(fx + cellSize*3.5, fy + cellSize*3.5);
     } else if (finderOuterMode === 'grad2' || finderOuterMode === 'grad4') {
       out.outer = buildFinderGradientStyle(ctx, fx, fy, boxSize, finderOuterMode, {
-        g2_1: c.finderOuterG2_1, g2_2: c.finderOuterG2_2, g2_dir: c.finderOuterG2_dir,
-        g4_1: c.finderOuterG4_1, g4_2: c.finderOuterG4_2, g4_3: c.finderOuterG4_3, g4_4: c.finderOuterG4_4
+        g2_1: c.finderOuterG2_1, g2_2: c.finderOuterG2_2, g2_dir: c.finderOuterG2_dir, g2_gradient: c.finderOuterG2_gradient,
+        g4_1: c.finderOuterG4_1, g4_2: c.finderOuterG4_2, g4_3: c.finderOuterG4_3, g4_4: c.finderOuterG4_4, g4_gradient: c.finderOuterG4_gradient
       });
     }
     if (finderInnerMode === 'match') {
       if (settings.colorMode !== 'solid') out.inner = gradientColorAt(fx + cellSize*3.5, fy + cellSize*3.5);
     } else if (finderInnerMode === 'grad2' || finderInnerMode === 'grad4') {
       var innerColors = {
-        g2_1: c.finderInnerG2_1, g2_2: c.finderInnerG2_2, g2_dir: c.finderInnerG2_dir,
-        g4_1: c.finderInnerG4_1, g4_2: c.finderInnerG4_2, g4_3: c.finderInnerG4_3, g4_4: c.finderInnerG4_4
+        g2_1: c.finderInnerG2_1, g2_2: c.finderInnerG2_2, g2_dir: c.finderInnerG2_dir, g2_gradient: c.finderInnerG2_gradient,
+        g4_1: c.finderInnerG4_1, g4_2: c.finderInnerG4_2, g4_3: c.finderInnerG4_3, g4_4: c.finderInnerG4_4, g4_gradient: c.finderInnerG4_gradient
       };
       out.inner = buildFinderGradientStyle(ctx, fx, fy, boxSize, finderInnerMode, innerColors);
       out.innerGrad = { colorMode: finderInnerMode, colors: innerColors, size: boxSize, ox: fx, oy: fy };
@@ -4816,6 +5895,20 @@ async function updateLivePreview(prefix) {
   }
 }
 
+// WHY a hard-edge CanvasGradient (two coincident color stops at the
+// midpoint) instead of a flat "half" fill done some other way: Hali --
+// "in the color sections on 2 & 4 colors, have a check box that says
+// gradient. if ched, it does gradient, if not it does half." A gradient's
+// addColorStop lets two stops share the exact same offset -- everything up
+// to that point renders the first stop's color, everything after renders
+// the second's, with zero blend between them -- so the SAME createLinear/
+// RadialGradient call (same axis, same direction picker) the smooth
+// version already uses can produce a crisp 50/50 split too, just by
+// changing where the stops sit. That's also why this stays inside
+// buildForegroundStyle rather than becoming a totally separate code path:
+// Stretch/Vary's grouped shapes and anything resampling via
+// gradientColorAt (see its own matching g2_gradient check) both need to
+// agree with whatever this function draws, pixel for pixel.
 function buildForegroundStyle(ctx, size, settings) {
   var c = settings.colors;
   if (settings.colorMode==='solid') {
@@ -4830,14 +5923,45 @@ function buildForegroundStyle(ctx, size, settings) {
       var x2 = d==='horizontal'?size:0, y2 = d==='vertical'?size:d==='diagonal'?size:0;
       grad = ctx.createLinearGradient(0,0,x2,y2);
     }
-    grad.addColorStop(0,c.g2_1); grad.addColorStop(1,c.g2_2);
+    if (c.g2_gradient === false) {
+      grad.addColorStop(0,c.g2_1); grad.addColorStop(.5,c.g2_1);
+      grad.addColorStop(.5,c.g2_2); grad.addColorStop(1,c.g2_2);
+    } else {
+      grad.addColorStop(0,c.g2_1); grad.addColorStop(1,c.g2_2);
+    }
     return grad;
   }
-  // 4-color gradient — corner-mapped, diagonal linear blend as approximation
+  // 4-color gradient — corner-mapped, diagonal linear blend as approximation.
+  // WHY a CanvasPattern instead of a hard-edge gradient for the Gradient-
+  // unchecked case: a single linear/radial CanvasGradient only ever varies
+  // along ONE axis, so it can approximate "4 bands along the diagonal" (the
+  // existing blend below) but can't produce 4 real spatial quadrants
+  // (Top-L/Top-R/Bot-L/Bot-R, matching the labels right there on the color
+  // pickers) -- that needs actual 2D positioning, which only a pattern
+  // (or per-pixel fill) can give. See buildHardQuadrantPattern below, and
+  // gradientColorAt's matching g4_gradient check for how a transforming
+  // shape (which can't just use this fillStyle directly) resamples the
+  // same quadrant colors as plain per-pixel math instead.
+  if (c.g4_gradient === false) {
+    return buildHardQuadrantPattern(ctx, size, c);
+  }
   var grad = ctx.createLinearGradient(0,0,size,size);
   grad.addColorStop(0,c.g4_1); grad.addColorStop(.33,c.g4_2);
   grad.addColorStop(.66,c.g4_3); grad.addColorStop(1,c.g4_4);
   return grad;
+}
+
+function buildHardQuadrantPattern(ctx, size, c) {
+  var off = document.createElement('canvas');
+  off.width = Math.max(2, Math.round(size));
+  off.height = Math.max(2, Math.round(size));
+  var octx = off.getContext('2d');
+  var half = off.width/2, halfH = off.height/2;
+  octx.fillStyle = c.g4_1 || '#000000'; octx.fillRect(0, 0, half, halfH);
+  octx.fillStyle = c.g4_2 || '#000000'; octx.fillRect(half, 0, off.width-half, halfH);
+  octx.fillStyle = c.g4_3 || '#000000'; octx.fillRect(0, halfH, half, off.height-halfH);
+  octx.fillStyle = c.g4_4 || '#000000'; octx.fillRect(half, halfH, off.width-half, off.height-halfH);
+  return ctx.createPattern(off, 'no-repeat');
 }
 
 // WHY a second, finder-scoped gradient builder instead of reusing
@@ -4873,15 +5997,59 @@ function buildFinderGradientStyle(ctx, boxX0, boxY0, boxSize, mode, c) {
       var x2 = d==='horizontal' ? boxSize : 0, y2 = d==='vertical' ? boxSize : (d==='diagonal' ? boxSize : 0);
       grad = ctx.createLinearGradient(boxX0, boxY0, boxX0+x2, boxY0+y2);
     }
-    grad.addColorStop(0, c.g2_1); grad.addColorStop(1, c.g2_2);
+    // WHY the same coincident-stop trick as buildForegroundStyle's own
+    // g2_gradient===false branch: a CanvasGradient with two stops at the
+    // SAME offset (.5/.5) renders as an abrupt cut instead of a blend --
+    // no separate code path needed, just different stop positions on the
+    // exact same gradient object this finder box already builds.
+    if (c.g2_gradient === false) {
+      grad.addColorStop(0, c.g2_1); grad.addColorStop(.5, c.g2_1);
+      grad.addColorStop(.5, c.g2_2); grad.addColorStop(1, c.g2_2);
+    } else {
+      grad.addColorStop(0, c.g2_1); grad.addColorStop(1, c.g2_2);
+    }
     return grad;
   }
   // grad4 — same corner-mapped diagonal blend as the body's 4-color mode,
   // just anchored to this finder's own box instead of the whole canvas.
+  // WHY buildHardQuadrantPatternAt instead of buildHardQuadrantPattern: the
+  // body's version always starts its quadrant canvas at the real canvas
+  // origin (0,0), which is fine there because the body gradient covers the
+  // whole canvas anyway -- a finder box sits at its own offset (boxX0,
+  // boxY0) partway into the canvas, so the pattern has to be positioned at
+  // that same offset (via CanvasPattern.setTransform) or the quadrants
+  // would line up with the canvas corner instead of this finder's own box.
+  if (c.g4_gradient === false) {
+    return buildHardQuadrantPatternAt(ctx, boxX0, boxY0, boxSize, c);
+  }
   var grad = ctx.createLinearGradient(boxX0, boxY0, boxX0+boxSize, boxY0+boxSize);
   grad.addColorStop(0, c.g4_1); grad.addColorStop(.33, c.g4_2);
   grad.addColorStop(.66, c.g4_3); grad.addColorStop(1, c.g4_4);
   return grad;
+}
+
+function buildHardQuadrantPatternAt(ctx, boxX0, boxY0, boxSize, c) {
+  var off = document.createElement('canvas');
+  off.width = Math.max(2, Math.round(boxSize));
+  off.height = Math.max(2, Math.round(boxSize));
+  var octx = off.getContext('2d');
+  var half = off.width/2, halfH = off.height/2;
+  octx.fillStyle = c.g4_1 || '#000000'; octx.fillRect(0, 0, half, halfH);
+  octx.fillStyle = c.g4_2 || '#000000'; octx.fillRect(half, 0, off.width-half, halfH);
+  octx.fillStyle = c.g4_3 || '#000000'; octx.fillRect(0, halfH, half, off.height-halfH);
+  octx.fillStyle = c.g4_4 || '#000000'; octx.fillRect(half, halfH, off.width-half, off.height-halfH);
+  var pattern = ctx.createPattern(off, 'no-repeat');
+  // WHY setTransform instead of just returning the pattern as-is: a
+  // CanvasPattern always tiles starting from the canvas's real (0,0) by
+  // default, so without this the quadrants would land at the canvas's
+  // top-left corner instead of this finder box's own (boxX0,boxY0) --
+  // translating the pattern's own matrix moves its origin to match,
+  // the same way createLinearGradient/createRadialGradient above already
+  // take boxX0/boxY0 as real arguments instead of local 0..size ones.
+  if (pattern && pattern.setTransform) {
+    pattern.setTransform(new DOMMatrix().translate(boxX0, boxY0));
+  }
+  return pattern;
 }
 
 function isFinderModule(row, col, n) {
@@ -4966,6 +6134,10 @@ function captureDesignSettings(prefix) {
     var el = document.getElementById(fieldId(prefix, base));
     return el ? el.value : fallback;
   }
+  function checkedVal(base, fallback) {
+    var el = document.getElementById(fieldId(prefix, base));
+    return el ? el.checked : fallback;
+  }
   return {
     // WHY .slice() on shape/chars/emoji: these are saved into a plain
     // object (eventually JSON into Firestore) — capturing the live array
@@ -4988,6 +6160,9 @@ function captureDesignSettings(prefix) {
     dotSizeMode: _dotSizeMode[prefix],
     stretchH: _stretchDir[prefix].h,
     stretchV: _stretchDir[prefix].v,
+    shapeDist: prefix==='s' ? _shapeDist : _shapeDistD,
+    quarterShapes: { q1:(prefix==='s'?_quarterShapes:_quarterShapesD).q1.slice(), q2:(prefix==='s'?_quarterShapes:_quarterShapesD).q2.slice(), q3:(prefix==='s'?_quarterShapes:_quarterShapesD).q3.slice(), q4:(prefix==='s'?_quarterShapes:_quarterShapesD).q4.slice() },
+    halfShapes: { left:(prefix==='s'?_halfShapes:_halfShapesD).left.slice(), right:(prefix==='s'?_halfShapes:_halfShapesD).right.slice() },
     chars: (_selectedChars[prefix]||[]).slice(),
     emoji: (_selectedEmoji[prefix]||[]).slice(),
     emojiSize: _emojiSize[prefix],
@@ -4999,13 +6174,13 @@ function captureDesignSettings(prefix) {
     size: parseInt(val('size','300'),10) || 300,
     colors: {
       fg: val('c-fg','#000000'), bg: val('c-bg','#ffffff'),
-      g2_1: val('g2-1','#c98a2e'), g2_2: val('g2-2','#4A1060'), g2_bg: val('g2-bg','#ffffff'), g2_dir: val('g2-dir','horizontal'),
-      g4_1: val('g4-1','#c98a2e'), g4_2: val('g4-2','#e0a84a'), g4_3: val('g4-3','#4A1060'), g4_4: val('g4-4','#6B2D8E'), g4_bg: val('g4-bg','#ffffff'),
+      g2_1: val('g2-1','#c98a2e'), g2_2: val('g2-2','#4A1060'), g2_bg: val('g2-bg','#ffffff'), g2_dir: val('g2-dir','horizontal'), g2_gradient: checkedVal('g2-gradient', true),
+      g4_1: val('g4-1','#c98a2e'), g4_2: val('g4-2','#e0a84a'), g4_3: val('g4-3','#4A1060'), g4_4: val('g4-4','#6B2D8E'), g4_bg: val('g4-bg','#ffffff'), g4_gradient: checkedVal('g4-gradient', true),
       finderOuter: val('c-finder-outer','#000000'), finderInner: val('c-finder-inner','#000000'),
-      finderOuterG2_1: val('c-finder-outer-g2-1','#c98a2e'), finderOuterG2_2: val('c-finder-outer-g2-2','#4A1060'), finderOuterG2_dir: val('c-finder-outer-g2-dir','horizontal'),
-      finderOuterG4_1: val('c-finder-outer-g4-1','#c98a2e'), finderOuterG4_2: val('c-finder-outer-g4-2','#e0a84a'), finderOuterG4_3: val('c-finder-outer-g4-3','#4A1060'), finderOuterG4_4: val('c-finder-outer-g4-4','#6B2D8E'),
-      finderInnerG2_1: val('c-finder-inner-g2-1','#c98a2e'), finderInnerG2_2: val('c-finder-inner-g2-2','#4A1060'), finderInnerG2_dir: val('c-finder-inner-g2-dir','horizontal'),
-      finderInnerG4_1: val('c-finder-inner-g4-1','#c98a2e'), finderInnerG4_2: val('c-finder-inner-g4-2','#e0a84a'), finderInnerG4_3: val('c-finder-inner-g4-3','#4A1060'), finderInnerG4_4: val('c-finder-inner-g4-4','#6B2D8E')
+      finderOuterG2_1: val('c-finder-outer-g2-1','#c98a2e'), finderOuterG2_2: val('c-finder-outer-g2-2','#4A1060'), finderOuterG2_dir: val('c-finder-outer-g2-dir','horizontal'), finderOuterG2_gradient: checkedVal('c-finder-outer-g2-gradient', true),
+      finderOuterG4_1: val('c-finder-outer-g4-1','#c98a2e'), finderOuterG4_2: val('c-finder-outer-g4-2','#e0a84a'), finderOuterG4_3: val('c-finder-outer-g4-3','#4A1060'), finderOuterG4_4: val('c-finder-outer-g4-4','#6B2D8E'), finderOuterG4_gradient: checkedVal('c-finder-outer-g4-gradient', true),
+      finderInnerG2_1: val('c-finder-inner-g2-1','#c98a2e'), finderInnerG2_2: val('c-finder-inner-g2-2','#4A1060'), finderInnerG2_dir: val('c-finder-inner-g2-dir','horizontal'), finderInnerG2_gradient: checkedVal('c-finder-inner-g2-gradient', true),
+      finderInnerG4_1: val('c-finder-inner-g4-1','#c98a2e'), finderInnerG4_2: val('c-finder-inner-g4-2','#e0a84a'), finderInnerG4_3: val('c-finder-inner-g4-3','#4A1060'), finderInnerG4_4: val('c-finder-inner-g4-4','#6B2D8E'), finderInnerG4_gradient: checkedVal('c-finder-inner-g4-gradient', true)
     },
     finderOuterColorMode: prefix==='s' ? _finderOuterColorMode : _finderOuterColorModeD,
     finderInnerColorMode: prefix==='s' ? _finderInnerColorMode : _finderInnerColorModeD
@@ -5018,6 +6193,15 @@ function applyDesignSettings(prefix, design) {
   function set(base, value) {
     var el = document.getElementById(fieldId(prefix, base));
     if (el && value!=null) el.value = value;
+  }
+  // WHY a boolean-specific setter instead of reusing set(): a checkbox is
+  // driven by .checked, not .value, and `false` is a real, meaningful value
+  // here (unlike set()'s value!=null guard, which exists to skip fields a
+  // legacy design never saved -- a checkbox must still accept an explicit
+  // false, not just truthy values).
+  function setChecked(base, value) {
+    var el = document.getElementById(fieldId(prefix, base));
+    if (el) el.checked = !!value;
   }
   if (design.shape) {
     // WHY normalize to an array here too: a design saved before multi-select
@@ -5043,6 +6227,30 @@ function applyDesignSettings(prefix, design) {
   var stretchVEl = document.getElementById(prefix==='s' ? 's-stretch-v' : 'd-stretch-v');
   if (stretchHEl) stretchHEl.checked = _stretchDir[prefix].h;
   if (stretchVEl) stretchVEl.checked = _stretchDir[prefix].v;
+  // Restore the Random/Half/Quarter distribution mode and per-quadrant
+  // shapes too -- same reasoning as Stretch/Vary just above: re-entering
+  // Redesign on a saved code should show the same spatial layout it was
+  // built with, not silently reset back to Random.
+  if (prefix === 's') { _shapeDist = design.shapeDist || 'random'; }
+  else { _shapeDistD = design.shapeDist || 'random'; }
+  // WHY the Array.isArray check per field: a design saved before Quarter
+  // became multi-select stored one shape key (a string) per quadrant --
+  // wrapping it in an array here keeps that old single choice intact
+  // instead of losing it or throwing on the new array-based code below.
+  function asRegionArr(v) { return Array.isArray(v) ? v : (v ? [v] : ['square']); }
+  var qsObj = (prefix === 's') ? _quarterShapes : _quarterShapesD;
+  var savedQS = design.quarterShapes || {};
+  qsObj.q1 = asRegionArr(savedQS.q1);
+  qsObj.q2 = asRegionArr(savedQS.q2);
+  qsObj.q3 = asRegionArr(savedQS.q3);
+  qsObj.q4 = asRegionArr(savedQS.q4);
+  var hsObj = (prefix === 's') ? _halfShapes : _halfShapesD;
+  var savedHS = design.halfShapes || {};
+  hsObj.left = asRegionArr(savedHS.left);
+  hsObj.right = asRegionArr(savedHS.right);
+  populateQuarterSelects(prefix);
+  populateHalfSelects(prefix);
+  syncShapeDistButtons(prefix);
   // WHY restore chars/emoji here too, re-syncing both pickers' own DOM (not
   // just the backing arrays): re-entering Redesign on a saved code used to
   // silently drop any Characters/Emoji Decoration it had — the backing
@@ -5151,12 +6359,24 @@ function applyDesignSettings(prefix, design) {
   var c = design.colors || {};
   set('c-fg', c.fg); set('c-bg', c.bg);
   set('g2-1', c.g2_1); set('g2-2', c.g2_2); set('g2-bg', c.g2_bg); set('g2-dir', c.g2_dir);
+  // WHY the ?? true fallback instead of leaving an unset field alone (like
+  // set() does): a design saved before this checkbox existed has no
+  // c.g2_gradient/c.g4_gradient at all, and the old behavior it was built
+  // with IS the smooth blend -- defaulting a missing value to true keeps
+  // that design rendering exactly as it always has, not silently flipped to
+  // a hard split it was never designed with.
+  setChecked('g2-gradient', c.g2_gradient !== false);
   set('g4-1', c.g4_1); set('g4-2', c.g4_2); set('g4-3', c.g4_3); set('g4-4', c.g4_4); set('g4-bg', c.g4_bg);
+  setChecked('g4-gradient', c.g4_gradient !== false);
   set('c-finder-outer', c.finderOuter); set('c-finder-inner', c.finderInner);
   set('c-finder-outer-g2-1', c.finderOuterG2_1); set('c-finder-outer-g2-2', c.finderOuterG2_2); set('c-finder-outer-g2-dir', c.finderOuterG2_dir);
+  setChecked('c-finder-outer-g2-gradient', c.finderOuterG2_gradient !== false);
   set('c-finder-outer-g4-1', c.finderOuterG4_1); set('c-finder-outer-g4-2', c.finderOuterG4_2); set('c-finder-outer-g4-3', c.finderOuterG4_3); set('c-finder-outer-g4-4', c.finderOuterG4_4);
+  setChecked('c-finder-outer-g4-gradient', c.finderOuterG4_gradient !== false);
   set('c-finder-inner-g2-1', c.finderInnerG2_1); set('c-finder-inner-g2-2', c.finderInnerG2_2); set('c-finder-inner-g2-dir', c.finderInnerG2_dir);
+  setChecked('c-finder-inner-g2-gradient', c.finderInnerG2_gradient !== false);
   set('c-finder-inner-g4-1', c.finderInnerG4_1); set('c-finder-inner-g4-2', c.finderInnerG4_2); set('c-finder-inner-g4-3', c.finderInnerG4_3); set('c-finder-inner-g4-4', c.finderInnerG4_4);
+  setChecked('c-finder-inner-g4-gradient', c.finderInnerG4_gradient !== false);
   // WHY fall back through the old fields: a design saved before this 4-mode
   // toggle existed has either the outer/inner boolean split or, older still,
   // just one combined finderMatchGradient — either way "true" meant "match
@@ -5465,22 +6685,42 @@ async function buildDashSVG(slug,url,design) {
   var bg = colorMode==='solid' ? (c.bg||'#ffffff') : colorMode==='grad2' ? (c.g2_bg||'#ffffff') : (c.g4_bg||'#ffffff');
 
   var defs='', fillAttr='fill="'+(c.fg||'#000000')+'"';
+  // WHY these two hard-split branches: Hali -- "in the color sections on 2
+  // & 4 colors, have a check box that says gradient. if ched, it does
+  // gradient, if not it does half or quarters" -- this paid vector export
+  // has to show the SAME hard split the live canvas preview does (see
+  // buildForegroundStyle's matching WHY) instead of silently always
+  // exporting the smooth blend regardless of the checkbox.
+  var hard2 = c.g2_gradient === false;
+  var hard4 = c.g4_gradient === false;
   if (colorMode==='grad2') {
     var dir=c.g2_dir||'horizontal';
+    // WHY two coincident-offset <stop>s for the hard case: same trick as
+    // the canvas CanvasGradient version -- everything up to 50% renders
+    // Color 1, everything after renders Color 2, with no blend between.
+    var stops2 = hard2
+      ? '<stop offset="0%" stop-color="'+(c.g2_1||'#000')+'"/><stop offset="50%" stop-color="'+(c.g2_1||'#000')+'"/><stop offset="50%" stop-color="'+(c.g2_2||'#000')+'"/><stop offset="100%" stop-color="'+(c.g2_2||'#000')+'"/>'
+      : '<stop offset="0%" stop-color="'+(c.g2_1||'#000')+'"/><stop offset="100%" stop-color="'+(c.g2_2||'#000')+'"/>';
     if (dir==='radial') {
-      defs='<radialGradient id="fg" cx="50%" cy="50%" r="50%"><stop offset="0%" stop-color="'+(c.g2_1||'#000')+'"/><stop offset="100%" stop-color="'+(c.g2_2||'#000')+'"/></radialGradient>';
+      defs='<radialGradient id="fg" cx="50%" cy="50%" r="50%">'+stops2+'</radialGradient>';
     } else {
       var x2=dir==='horizontal'?'100%':'0%', y2=(dir==='vertical'||dir==='diagonal')?'100%':'0%';
-      defs='<linearGradient id="fg" x1="0%" y1="0%" x2="'+x2+'" y2="'+y2+'"><stop offset="0%" stop-color="'+(c.g2_1||'#000')+'"/><stop offset="100%" stop-color="'+(c.g2_2||'#000')+'"/></linearGradient>';
+      defs='<linearGradient id="fg" x1="0%" y1="0%" x2="'+x2+'" y2="'+y2+'">'+stops2+'</linearGradient>';
     }
     fillAttr='fill="url(#fg)"';
-  } else if (colorMode==='grad4') {
+  } else if (colorMode==='grad4' && !hard4) {
     defs='<linearGradient id="fg" x1="0%" y1="0%" x2="100%" y2="100%">'
       +'<stop offset="0%" stop-color="'+(c.g4_1||'#000')+'"/>'
       +'<stop offset="33%" stop-color="'+(c.g4_2||'#000')+'"/>'
       +'<stop offset="66%" stop-color="'+(c.g4_3||'#000')+'"/>'
       +'<stop offset="100%" stop-color="'+(c.g4_4||'#000')+'"/></linearGradient>';
     fillAttr='fill="url(#fg)"';
+  } else if (colorMode==='grad4' && hard4) {
+    // WHY no shared <linearGradient> def here at all: a single SVG
+    // gradient only ever varies along one axis, so it can't produce 4 real
+    // spatial quadrants (Top-L/Top-R/Bot-L/Bot-R) -- each module instead
+    // gets its own flat fill below, picked by its real row/col quadrant.
+    fillAttr = '';
   }
 
   var rects='';
@@ -5488,7 +6728,12 @@ async function buildDashSVG(slug,url,design) {
     for(var col=0; col<n; col++){
       if (!matrix[row][col]) continue;
       if (isFinderModule(row,col,n)) continue; // finders drawn separately below, in their own colors
-      rects+='<rect x="'+col+'" y="'+row+'" width="1" height="1"/>';
+      if (colorMode==='grad4' && hard4) {
+        var qColor = (row < n/2) ? (col < n/2 ? c.g4_1 : c.g4_2) : (col < n/2 ? c.g4_3 : c.g4_4);
+        rects+='<rect x="'+col+'" y="'+row+'" width="1" height="1" fill="'+(qColor||'#000')+'"/>';
+      } else {
+        rects+='<rect x="'+col+'" y="'+row+'" width="1" height="1"/>';
+      }
     }
   }
 
@@ -6174,6 +7419,28 @@ async function fulfillShapeRequest(paymentIntentId) {
 
 var _loginAttempts = 0;
 
+// WHY a timeout wrapper around every Firebase call in the auth flow: Hali --
+// "it wouldn't let me log in on Safari ... no errors ... works on Chrome."
+// That's a documented, Firebase-acknowledged bug: Safari/WebKit's IndexedDB
+// (which the SDK's persistence/connection layer depends on) can silently
+// hang -- Firebase's own requests just stop, nothing rejects, nothing
+// throws, so there was never anything for our try/catch below to catch
+// (see firebase/firebase-js-sdk#9802 -- "Firebase services silently hang in
+// Safari ... no errors thrown"). Firebase's own engineers don't have a
+// permanent fix for it yet, so the fix on our end isn't preventing the
+// hang -- it's making sure it's never SILENT: every awaited Firebase call
+// in sign-in/sign-up/password-reset now races against a timeout, and if
+// Firebase doesn't respond in time, showErr actually gets called with a
+// real explanation instead of the modal just sitting there forever.
+var AUTH_TIMEOUT_MS = 12000;
+var AUTH_TIMEOUT_MSG = "This is taking too long to respond — a known Safari issue with Firebase (no fix on their end yet). Try closing other tabs of this site, reloading the page, or using Chrome instead.";
+function withAuthTimeout(promise) {
+  return Promise.race([
+    promise,
+    new Promise(function(_, reject){ setTimeout(function(){ reject(new Error(AUTH_TIMEOUT_MSG)); }, AUTH_TIMEOUT_MS); })
+  ]);
+}
+
 async function sendPasswordReset() {
   // WHY: Firebase sendPasswordResetEmail requires the email, not username.
   // We look up the email from the usernames collection first.
@@ -6181,14 +7448,14 @@ async function sendPasswordReset() {
   var username = document.getElementById('si-username').value.trim();
   if (!username) { showErr('Enter your username first, then click forgot password.'); return; }
   try {
-    var usnap = await fb.getDoc(fb.doc(fb.db,'usernames',username));
+    var usnap = await withAuthTimeout(fb.getDoc(fb.doc(fb.db,'usernames',username)));
     if (!usnap.exists()) { showErr('Username not found.'); return; }
     var uid = usnap.data().uid;
-    var usnap2 = await fb.getDoc(fb.doc(fb.db,'users',uid));
+    var usnap2 = await withAuthTimeout(fb.getDoc(fb.doc(fb.db,'users',uid)));
     var email = usnap2.data().email;
     // WHY: import sendPasswordResetEmail from firebase/auth at runtime
     var { sendPasswordResetEmail } = await import('https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js');
-    await sendPasswordResetEmail(fb.auth, email);
+    await withAuthTimeout(sendPasswordResetEmail(fb.auth, email));
     showErr('Password reset email sent to your address. Check your inbox.');
     document.getElementById('auth-err').style.color = 'var(--gold2)';
   } catch(e) { showErr('Error: ' + e.message); }
@@ -6202,13 +7469,13 @@ async function doSignIn(){
   try{
     // WHY: Firebase auth uses email, not username. We look up the email from
     // the usernames collection, then sign in with that email.
-    var usnap=await fb.getDoc(fb.doc(fb.db,'usernames',username));
+    var usnap=await withAuthTimeout(fb.getDoc(fb.doc(fb.db,'usernames',username)));
     if(!usnap.exists()){showErr('Username not found.');return;}
     var uid=usnap.data().uid;
-    var usnap2=await fb.getDoc(fb.doc(fb.db,'users',uid));
+    var usnap2=await withAuthTimeout(fb.getDoc(fb.doc(fb.db,'users',uid)));
     if(!usnap2.exists()){showErr('Account not found.');return;}
     var email=usnap2.data().email;
-    await fb.signInWithEmailAndPassword(fb.auth,email,pass);
+    await withAuthTimeout(fb.signInWithEmailAndPassword(fb.auth,email,pass));
     _loginAttempts = 0;
     document.getElementById('forgot-link').style.display = 'none';
     closeModal('auth-modal');showView('dashboard');
@@ -6224,10 +7491,10 @@ async function doSignIn(){
 async function doSignUp(){
   var fb=window._fb;var email=document.getElementById('su-email').value.trim();var pass=document.getElementById('su-pass').value;var username=document.getElementById('su-username').value.trim();
   if(!username){showErr('Choose a username.');return;}
-  try{var ex=await fb.getDoc(fb.doc(fb.db,'usernames',username));if(ex.exists()){showErr('Username taken.');return;}
-  var cred=await fb.createUserWithEmailAndPassword(fb.auth,email,pass);
-  await fb.setDoc(fb.doc(fb.db,'users',cred.user.uid),{email,username,created:Date.now()});
-  await fb.setDoc(fb.doc(fb.db,'usernames',username),{uid:cred.user.uid});
+  try{var ex=await withAuthTimeout(fb.getDoc(fb.doc(fb.db,'usernames',username)));if(ex.exists()){showErr('Username taken.');return;}
+  var cred=await withAuthTimeout(fb.createUserWithEmailAndPassword(fb.auth,email,pass));
+  await withAuthTimeout(fb.setDoc(fb.doc(fb.db,'users',cred.user.uid),{email,username,created:Date.now()}));
+  await withAuthTimeout(fb.setDoc(fb.doc(fb.db,'usernames',username),{uid:cred.user.uid}));
   closeModal('auth-modal');showView('dashboard');toast('Welcome! Your account is ready.','ok');
     // WHY: welcome email confirms signup and lists benefits so user knows what they unlocked
     try {
