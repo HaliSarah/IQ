@@ -1,0 +1,294 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#faf9f5;color:#141413}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<!--
+  Title:       DSC 450 Interview Practice
+  Author:      Hali Sarah Parsons
+  Date:        2026-10-08
+  Modified By: Claude (Anthropic)
+  Description: Self-grading practice test for the DSC 450 capstone mock
+               interviews. Part 1 is multiple choice with instant feedback.
+               Part 2 is five open-ended questions with a speaking timer and
+               talking points. A score report at the bottom lists topics to review.
+-->
+<title>DSC 450 Interview Practice</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;700&family=Inter:wght@400;500;600&display=swap">
+<style>
+/* Layout: one narrow exam-booklet column; light header, weight builds toward the score report at the bottom. */
+:root {
+  /* Single dark look on purpose: matches the Hali Sarah Parsons portfolio brand (navy, teal, purple). */
+  --bg: #060f1f; --paper: #0a1930; --ink: #e8eef9; --muted: #a9b8d3; --line: #1a3560;
+  --accent: #2dd4bf; --on-accent: #060f1f;
+  --mark: #2a1f5c; --mark-ink: #b8a2ff;
+  --good: #2dd4bf; --good-bg: #0b3a3a; --bad: #ff9d95; --bad-bg: #401c1a;
+  --purple: #8b5cf6;
+  --display: "Space Grotesk", "Inter", system-ui, sans-serif;
+  --body: "Inter", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --mono: "Space Grotesk", ui-monospace, Menlo, monospace;
+  color-scheme: dark;
+}
+* { box-sizing: border-box; }
+body { background: var(--bg); color: var(--ink); font-family: var(--body); font-size: 16px; line-height: 1.55; }
+.wrap { max-width: 720px; margin: 0 auto; padding-inline: 16px; padding-block: 20px 72px; display: flex; flex-direction: column; gap: 20px; }
+header.top { display: flex; flex-direction: column; gap: 6px; }
+.eyebrow { font-family: var(--mono); font-size: 12px; letter-spacing: .12em; text-transform: uppercase; color: var(--muted); }
+h1 { font-family: var(--display); font-weight: 700; font-size: clamp(28px, 6vw, 38px); line-height: 1.1; margin: 0; text-wrap: balance; }
+h2 { font-family: var(--display); font-weight: 700; font-size: 24px; line-height: 1.2; margin: 16px 0 0; text-wrap: balance; }
+.lede, .part-note { color: var(--muted); margin: 0; max-width: 60ch; }
+.bar { position: sticky; top: env(safe-area-inset-top, 0px); z-index: 2; background: var(--bg); border-bottom: 2px solid var(--accent); padding: 10px 0; display: flex; flex-wrap: wrap; gap: 8px 16px; align-items: center; justify-content: space-between; font-family: var(--mono); font-size: 13px; font-variant-numeric: tabular-nums; }
+.btn { font: 500 14px var(--body); color: var(--ink); background: transparent; border: 1.5px solid var(--ink); border-radius: 4px; padding: 7px 14px; cursor: pointer; }
+.btn:hover { background: var(--ink); color: var(--bg); }
+.btn.solid { background: var(--accent); border-color: var(--accent); color: var(--on-accent); }
+:focus-visible { outline: 3px solid var(--accent); outline-offset: 2px; }
+.list { display: flex; flex-direction: column; gap: 16px; }
+.q { background: var(--paper); border: 1px solid var(--line); border-radius: 18px; padding: 18px; display: flex; flex-direction: column; gap: 12px; min-width: 0; }
+.q-head { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; font-family: var(--mono); font-size: 12px; color: var(--muted); }
+.chip { background: var(--mark); color: var(--mark-ink); padding: 1px 8px; border-radius: 3px; }
+.prompt { margin: 0; font-weight: 600; font-size: 17px; line-height: 1.4; }
+.opts { display: flex; flex-direction: column; gap: 8px; }
+.opt { text-align: left; font: 400 15px/1.45 var(--body); color: var(--ink); background: transparent; border: 1.5px solid var(--line); border-radius: 4px; padding: 10px 12px; cursor: pointer; display: flex; gap: 10px; }
+.opt .k { font-family: var(--mono); color: var(--muted); flex: none; }
+.opt:hover:not(:disabled) { border-color: var(--accent); }
+.opt:disabled { cursor: default; }
+.opt.right { border-color: var(--good); background: var(--good-bg); }
+.opt.wrong { border-color: var(--bad); background: var(--bad-bg); }
+.why { margin: 0; padding-left: 12px; border-left: 3px solid var(--line); font-size: 15px; }
+.why b.ok { color: var(--good); } .why b.no { color: var(--bad); }
+details { border-top: 1px dashed var(--line); padding-top: 10px; }
+summary { cursor: pointer; font-weight: 600; color: var(--accent); }
+details ul { margin: 8px 0 0; padding-left: 20px; display: flex; flex-direction: column; gap: 6px; font-size: 15px; }
+.timer { display: flex; flex-wrap: wrap; align-items: center; gap: 12px; }
+.clock { font-family: var(--mono); font-size: 20px; font-variant-numeric: tabular-nums; }
+.report { background: linear-gradient(135deg, var(--accent), var(--purple)); color: var(--bg); border-radius: 18px; padding: 28px 22px; display: flex; flex-direction: column; gap: 14px; }
+.report h2 { margin: 0; }
+.score { font-family: var(--display); font-weight: 700; font-size: clamp(56px, 16vw, 96px); line-height: 1; font-variant-numeric: tabular-nums; }
+.report p { margin: 0; max-width: 56ch; }
+.review { display: flex; flex-wrap: wrap; gap: 8px; }
+.report .btn { color: var(--bg); border-color: var(--bg); align-self: flex-start; }
+.report .btn:hover { background: var(--bg); color: var(--ink); }
+.report .chip { background: var(--bg); color: var(--ink); }
+h1 { background: linear-gradient(90deg, var(--accent), #b8a2ff); -webkit-background-clip: text; background-clip: text; color: transparent; }
+</style>
+
+<div class="wrap">
+  <header class="top">
+    <span class="eyebrow">Hali Sarah Parsons &middot; DSC 450 &middot; Capstone &middot; Mock interview prep</span>
+    <h1>Interview Practice Test</h1>
+    <p class="lede">Say each answer out loud first, then pick. Explanations appear after every choice.</p>
+  </header>
+
+  <div class="bar" aria-live="polite">
+    <span id="progress">Answered 0 of 0 &middot; Correct 0</span>
+    <button class="btn" id="resetTop" type="button">Start over</button>
+  </div>
+
+  <h2>Part 1 &middot; Multiple choice</h2>
+  <p class="part-note">Sixteen scenario questions an interviewer could ask a junior data scientist.</p>
+  <div class="list" id="mc"></div>
+
+  <h2>Part 2 &middot; Talk it through</h2>
+  <p class="part-note">Open-ended questions. Start the timer, answer aloud in 90 seconds, then compare against the talking points.</p>
+  <div class="list" id="open"></div>
+
+  <section class="report" aria-live="polite">
+    <span class="eyebrow" style="color:inherit;opacity:.75">Score report</span>
+    <div class="score" id="score">0 / 0</div>
+    <p id="verdict">Answer the multiple-choice questions to build your report.</p>
+    <div class="review" id="review"></div>
+    <button class="btn" id="resetBottom" type="button">Start over</button>
+  </section>
+</div>
+
+<script>
+/* Question bank lives in data so classmates can add questions without touching the rendering code. */
+const MC = [
+  { t: "Query vs. model", p: "The VP asks which customers spent the most last year. What do you reach for first?",
+    o: ["A neural network trained on purchase history", "A database query sorted by total spend", "A clustering model", "A t-test between customer groups"], a: 1,
+    w: "The answer already sits in the data. A query with a sort retrieves it, and a model adds cost with no gain." },
+  { t: "Hypothesis testing", p: "Top customers appear to spend more than average customers. How do you confirm the gap is real?",
+    o: ["Sort the table again", "Train a decision tree", "Run a statistical hypothesis test", "Build a dashboard"], a: 2,
+    w: "A hypothesis test (a t-test, for example) checks whether the gap could come from random chance." },
+  { t: "Pattern finding", p: "Leadership asks what traits separate profitable customers from unprofitable ones. Which approach fits?",
+    o: ["Data mining for patterns, such as a decision tree or clustering", "A single COUNT query", "A p-value on total revenue", "A line chart of sales"], a: 0,
+    w: "Finding the traits that differentiate groups is automated pattern finding, the core of data mining." },
+  { t: "Prediction", p: "Will a new customer be profitable, and how much revenue should we expect? Which pair of methods answers both?",
+    o: ["Clustering, then a query", "Two hypothesis tests", "Regression, then clustering", "Classification for yes or no, regression for the dollar amount"], a: 3,
+    w: "Classification predicts a category. Regression predicts a number. Both learn from historical customers." },
+  { t: "Class imbalance", p: "Only 5% of customers churn. A model predicts 'stays' for everyone. What are its accuracy and recall?",
+    o: ["50% accuracy, 50% recall", "95% accuracy, 0% recall", "5% accuracy, 100% recall", "95% accuracy, 95% recall"], a: 1,
+    w: "It is right about the 95% who stay and catches zero churners. High accuracy hides a useless model." },
+  { t: "Metric choice", p: "Missing a churner costs far more than sending a wasted retention email. Which metric leads?",
+    o: ["Precision", "R-squared", "RMSE", "Recall"], a: 3,
+    w: "Recall measures how many real churners the model catches. It leads when false negatives are the costly error." },
+  { t: "Class imbalance", p: "Which is a sound way to handle the 5% churn imbalance?",
+    o: ["Use class weights or resample the training data, and leave the test set untouched", "Oversample the full dataset before splitting", "Delete the churners", "Report accuracy only"], a: 0,
+    w: "Balancing belongs in training only. The test set must mirror the real world so the score stays honest." },
+  { t: "Missing data", p: "The income column is 15% missing and heavily right-skewed. What is a sensible fill?",
+    o: ["The mean", "Zero", "The median, plus a 'was missing' flag", "Delete every row with a gap"], a: 2,
+    w: "The median resists outliers in skewed data. The flag keeps any signal carried by the gap itself." },
+  { t: "Missing data", p: "You learn that high earners skipped the income question on purpose. What does that mean for your approach?",
+    o: ["The gaps are random, so drop them", "The gaps carry information, so flag them and avoid a blind fill", "Fill with the mean and move on", "Remove the income column"], a: 1,
+    w: "Data missing for a reason tied to its value is informative. Dropping or blind filling would bias the model." },
+  { t: "Model selection", p: "Logistic regression scores 0.86 AUC. Gradient boosting scores 0.87. A regulator requires a reason for each decision. Which do you recommend?",
+    o: ["Logistic regression, because the 0.01 gain costs the explanations the business needs", "Gradient boosting, because higher always wins", "Neither", "Average the two"], a: 0,
+    w: "First ask who uses the model and what an error costs. A tiny accuracy gain rarely outweighs a hard requirement to explain." },
+  { t: "Overfitting", p: "Your model scores 99% on training data and 70% on test data. What happened?",
+    o: ["Underfitting", "The test set is broken", "Overfitting", "Class imbalance"], a: 2,
+    w: "A large train-test gap means the model memorized the training data. Simplify, regularize, or cross-validate." },
+  { t: "Data leakage", p: "You scaled all the data, then split into train and test. Why is that a problem?",
+    o: ["Scaling slows training", "Scaling removes outliers", "Test-set information leaked into training, inflating the score", "It is fine"], a: 2,
+    w: "The scaler saw the test data. Split first, fit the scaler on training data, then apply it to the test data." },
+  { t: "p-values", p: "An A/B test returns p = 0.03. How do you explain it to a manager?",
+    o: ["There is a 3% chance the new version is better", "With no real difference, a result this strong would show up about 3% of the time", "The new version is 97% better", "3% of users preferred the old version"], a: 1,
+    w: "A p-value is the chance of a result this extreme assuming no real effect. Below 0.05, we treat the difference as real." },
+  { t: "Chart choice", p: "You want to show monthly electricity demand across three years. Which chart fits?",
+    o: ["Pie chart", "Scatter plot", "Stacked bar of yearly totals", "Line chart"], a: 3,
+    w: "Lines show change over time. The eye follows trend and seasonality along a continuous axis." },
+  { t: "Chart mistakes", p: "A bar chart's y-axis starts at 80 instead of 0. What is the risk?",
+    o: ["Small differences look huge", "Bars become unreadable", "Colors lose meaning", "No risk"], a: 0,
+    w: "Bar length encodes value. A truncated axis exaggerates gaps and misleads stakeholders." },
+  { t: "Causation", p: "App users spend more than non-users. The CEO wants to force everyone onto the app. Your response?",
+    o: ["Agree, the data proves it", "Say the data is wrong", "Collect more of the same data", "Flag correlation versus causation and propose an A/B test"], a: 3,
+    w: "Loyal big spenders may simply choose the app. A controlled experiment isolates the app's own effect." }
+];
+
+const OPEN = [
+  { t: "Class imbalance", p: "You're predicting churn and only 5% of customers churn. Walk me through how you'd handle that imbalance and which metric you'd prioritize, and why.",
+    pts: ["Name the trap: 95% accuracy comes free by predicting 'stays' for everyone.",
+          "Handle it: class weights or resampling (SMOTE, undersampling) on training data only, with a stratified split.",
+          "Metric: recall when missing a churner is costly, precision when outreach is costly. PR-AUC or F1 summarizes both.",
+          "Close with the business: tune the decision threshold to the cost of each error."] },
+  { t: "Communication", p: "Tell me about a time you had to explain a model's results or a chart to someone non-technical. What worked, and what would you do differently?",
+    pts: ["Use STAR: Situation, Task, Action, Result. Keep it to one real story.",
+          "What worked: lead with the decision, use one chart, swap jargon for a plain comparison.",
+          "Result: state what the listener did with it.",
+          "Do differently: one specific change, such as asking what they needed to decide before building the chart."] },
+  { t: "Missing data", p: "You get a dataset with missing values in a few key columns. Walk me through how you'd decide whether to drop, fill, or flag those gaps.",
+    pts: ["Measure first: how much is missing, in which columns, and does it cluster in certain rows?",
+          "Ask why: random gaps are safe to fill, and gaps tied to the value itself carry signal.",
+          "Drop when the share is tiny or the column is mostly empty. Fill with the median or mode when the share is moderate. Flag when the gap may mean something.",
+          "Check the choice: compare model results with and without the treatment, and document it."] },
+  { t: "Model selection", p: "You've built two models for the same problem: one simpler and interpretable, one more complex but slightly more accurate. How do you decide which to recommend, and what would you want to know first?",
+    pts: ["Ask first: who uses it, what does an error cost, and must each decision be explained?",
+          "Check the gain is real: cross-validated, and larger than run-to-run noise.",
+          "Weigh the cost of complexity: maintenance, speed, monitoring, and trust.",
+          "Default to the simpler model unless the accuracy gain changes a business outcome."] },
+  { t: "Visualization", p: "How do you choose a chart type for a new finding before presenting to stakeholders? What's a visualization mistake you've seen that hurt how clearly something was communicated?",
+    pts: ["Start with the one message, then match the chart: line for trend, bar for comparison, scatter for relationship, histogram for distribution.",
+          "Fit the audience: a title that states the finding, labeled axes, one highlighted series.",
+          "Mistake examples: truncated bar axis, pie chart with many slices, dual axes, rainbow colors.",
+          "Say how you would fix it. The fix shows judgment."] }
+];
+
+const state = { answered: 0, correct: 0, missed: new Set() };
+const $ = (id) => document.getElementById(id);
+
+/* Small element factory keeps the render functions short and uses textContent,
+   so question text can never be parsed as markup. */
+function el(tag, cls, text) {
+  const n = document.createElement(tag);
+  if (cls) n.className = cls;
+  if (text !== undefined) n.textContent = text;
+  return n;
+}
+
+/* Builds one multiple-choice card. Each card owns its own lock so a question
+   scores once, which keeps the report honest. */
+function mcCard(q, i) {
+  const card = el("article", "q");
+  const head = el("div", "q-head");
+  head.append(el("span", "", "Q" + (i + 1)), el("span", "chip", q.t));
+  const opts = el("div", "opts");
+  const why = el("p", "why");
+  why.hidden = true; // explanation stays hidden until a choice is made, so it cannot give the answer away
+
+  q.o.forEach((text, j) => {
+    const b = el("button", "opt");
+    b.type = "button";
+    b.append(el("span", "k", "ABCD"[j]), el("span", "", text));
+    b.addEventListener("click", () => {
+      const ok = j === q.a;
+      // Disable all options so a second click cannot change the recorded score.
+      opts.querySelectorAll("button").forEach((x) => (x.disabled = true));
+      opts.children[q.a].classList.add("right");
+      if (!ok) { b.classList.add("wrong"); state.missed.add(q.t); }
+      state.answered += 1;
+      if (ok) state.correct += 1;
+      why.replaceChildren(el("b", ok ? "ok" : "no", ok ? "Correct. " : "Not quite. "), document.createTextNode(q.w));
+      why.hidden = false;
+      report();
+    });
+    opts.append(b);
+  });
+  card.append(head, el("p", "prompt", q.p), opts, why);
+  return card;
+}
+
+/* Builds one open-ended card with a 90-second speaking timer, because real
+   interview answers run long without a clock. */
+function openCard(q, i) {
+  const card = el("article", "q");
+  const head = el("div", "q-head");
+  head.append(el("span", "", "T" + (i + 1)), el("span", "chip", q.t));
+
+  const row = el("div", "timer");
+  const btn = el("button", "btn", "Start 90s timer");
+  btn.type = "button";
+  const clock = el("span", "clock", "1:30");
+  let left = 90, tick = null;
+  const show = () => (clock.textContent = Math.floor(left / 60) + ":" + String(left % 60).padStart(2, "0"));
+  btn.addEventListener("click", () => {
+    // One button toggles start and reset, so the control never sits in a dead state.
+    clearInterval(tick);
+    if (btn.textContent.startsWith("Reset")) { left = 90; show(); btn.textContent = "Start 90s timer"; return; }
+    btn.textContent = "Reset timer";
+    tick = setInterval(() => {
+      left -= 1; show();
+      if (left <= 0) { clearInterval(tick); clock.textContent = "Time"; }
+    }, 1000);
+  });
+  row.append(btn, clock);
+
+  const d = el("details");
+  d.append(el("summary", "", "Show talking points"));
+  const ul = el("ul");
+  q.pts.forEach((p) => ul.append(el("li", "", p)));
+  d.append(ul);
+
+  card.append(head, el("p", "prompt", q.p), row, d);
+  return card;
+}
+
+/* Refreshes the sticky progress line and the score report after every answer,
+   so progress is visible without scrolling to the bottom. */
+function report() {
+  const n = MC.length;
+  $("progress").textContent = "Answered " + state.answered + " of " + n + " · Correct " + state.correct;
+  $("score").textContent = state.correct + " / " + n;
+  const review = $("review");
+  review.replaceChildren();
+  if (state.answered === 0) { $("verdict").textContent = "Answer the multiple-choice questions to build your report."; return; }
+  if (state.answered < n) {
+    $("verdict").textContent = (n - state.answered) + " questions left.";
+  } else {
+    const pct = state.correct / n;
+    $("verdict").textContent = pct >= 0.85 ? "Interview-ready. Practice saying the explanations aloud."
+      : pct >= 0.65 ? "Solid base. Review the topics below, then retake."
+      : "Review the topics below and retake. The explanations are the study guide.";
+  }
+  state.missed.forEach((t) => review.append(el("span", "chip", t)));
+}
+
+/* Rebuilds every card from the data, which is the simplest reliable way to
+   clear answers, timers, and open details in one step. */
+function start() {
+  state.answered = 0; state.correct = 0; state.missed.clear();
+  $("mc").replaceChildren(...MC.map(mcCard));
+  $("open").replaceChildren(...OPEN.map(openCard));
+  report();
+}
+
+$("resetTop").addEventListener("click", start);
+$("resetBottom").addEventListener("click", () => { start(); window.scrollTo(0, 0); });
+start();
+</script>
+
+</body></html>
