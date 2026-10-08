@@ -1,0 +1,270 @@
+<!DOCTYPE html>
+<!--
+  Title:       Data Science Portfolio - Project 1 Case Study
+  Author:      Hali Sarah Parsons
+  Date:        October 8, 2026
+  Modified By: Claude
+  Description: Full case-study page for Project 1 (DSC 450, Weeks 3-5):
+               Predicting Economic Damage from U.S. Storm Events. Saved as
+               index.html so it serves as the landing page for this folder's
+               URL slug: iqproductionz.com/DataSciencePortfolio/Content/Project1/
+               -- alongside the existing notebook exports and PDF write-up
+               already hosted in this same folder. Shares styles.css with the home page
+               (two levels up) so this reads as one site, not a bolted-on page.
+               Chart numbers below are transcribed from the project's own
+               matplotlib figures (Content/Project1/.../Project Milestone 2
+               write-up) and rendered here as plain HTML bars -- same
+               accessible/crisp-at-any-zoom approach the home page already uses
+               for its model-performance chart -- rather than screenshots.
+-->
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Project 1: Predicting Economic Damage from Storm Events | Hali Sarah Parsons</title>
+<meta name="description" content="DSC 450 Project 1 case study: predicting economic damage from NOAA storm events using Logistic Regression and Random Forest.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../../styles.css">
+</head>
+<body>
+<a class="skip" href="#main">Skip to content</a>
+
+<nav class="top" aria-label="Primary">
+  <div class="wrap">
+    <a class="brand" href="../../index.html">HALI <span>SARAH</span> PARSONS</a>
+    <ul>
+      <li><a href="../../index.html">Home</a></li>
+      <li><a href="../../index.html#projects">Projects</a></li>
+      <li><a href="../../index.html#contact">Contact</a></li>
+      <li><a class="btn-nav" href="../HaliSarahParsons_Resume.pdf" download>Resume</a></li>
+    </ul>
+  </div>
+</nav>
+
+<div class="crumb">
+  <div class="wrap"><a href="../../index.html#projects">&larr; Back to all projects</a></div>
+</div>
+
+<header class="proj-hero">
+  <div class="wrap reveal">
+    <div class="tags">
+      <span class="badge live">Live</span>
+      <span class="tag">Project 1</span>
+      <span class="tag purple">Group project &middot; DSC 450</span>
+      <span class="tag">My role: Data Visualization</span>
+    </div>
+    <h1>Predicting Economic Damage from U.S. Storm Events</h1>
+    <p class="lede">Radar can tell you a storm is coming. It can't tell you what it will cost. This project tests whether the characteristics NOAA already records about a storm event &mdash; before its full impact is known &mdash; carry enough signal to predict economic damage on their own.</p>
+    <ul class="meta">
+      <li class="chip"><b>410,311</b> storm events</li>
+      <li class="chip"><b>0.880</b> ROC-AUC, Random Forest</li>
+      <li class="chip">NOAA data, <b>2020&ndash;2025</b></li>
+    </ul>
+    <div class="cta">
+      <a class="btn primary" href="Project%20Milestone%202%2010.02-2.pdf">Read the full report (PDF)</a>
+      <a class="btn ghost" href="#presentation">Watch the presentation</a>
+      <a class="btn ghost" href="#resources">Code &amp; notebooks</a>
+    </div>
+  </div>
+</header>
+
+<main id="main">
+
+  <section class="proj-section tone-a">
+    <div class="wrap split reveal">
+      <div>
+        <p class="eyebrow">Business Problem</p>
+        <h2>Two kinds of uncertainty</h2>
+        <p>Weather forecasting is rooted in using data to reduce the uncertainty of our climate &mdash; radar, satellites and predictive models let us quantify and visualize storms as they happen. But radar can't measure what an event will do to people, property and communities. That's a second, harder form of uncertainty: <strong>impact.</strong></p>
+        <p>Economic damage from severe weather is costly and difficult to anticipate. Our team wanted to know whether the characteristics NOAA already records about a storm &mdash; before its full impact is known &mdash; carry enough signal to predict that damage on their own.</p>
+        <p style="margin-top:22px"><strong>Research question:</strong> Can we predict whether a weather event will result in economic damage, based on recorded event characteristics in the NOAA Storm Events Database (2020&ndash;2025)?</p>
+      </div>
+      <aside class="facts" aria-label="Project facts">
+        <dl>
+          <div><dt>Data source</dt><dd>NOAA National Centers for Environmental Information, Storm Events Database</dd></div>
+          <div><dt>Study period</dt><dd>January 2020 &ndash; December 2025</dd></div>
+          <div><dt>Predictors</dt><dd>Event type, region, season, storm duration</dd></div>
+          <div><dt>Target</dt><dd>Whether the event had any recorded property or crop damage</dd></div>
+          <div><dt>Models</dt><dd>Logistic Regression (baseline) &amp; Random Forest</dd></div>
+        </dl>
+      </aside>
+    </div>
+  </section>
+
+  <section class="proj-section tone-b">
+    <div class="wrap split reverse reveal">
+      <div class="chart-card chart" role="group" aria-label="Share of events with recorded economic damage, by event type">
+        <h4>Frequency isn't the same as risk</h4>
+        <small>Share of events with recorded economic damage, by event type (2020&ndash;2025)</small>
+        <div class="bar-row"><span>Strong Wind</span><div class="bar-track"><div class="bar c-teal" style="--w:61.3%">61.3%</div></div></div>
+        <div class="bar-row"><span>Tornado</span><div class="bar-track"><div class="bar c-teal" style="--w:42.3%">42.3%</div></div></div>
+        <div class="bar-row"><span>Thunderstorm Wind</span><div class="bar-track"><div class="bar c-teal" style="--w:35.9%">35.9%</div></div></div>
+        <div class="bar-row"><span>Flash Flood</span><div class="bar-track"><div class="bar c-teal" style="--w:30.4%">30.4%</div></div></div>
+        <div class="bar-row"><span>Flood</span><div class="bar-track"><div class="bar c-teal" style="--w:20.5%">20.5%</div></div></div>
+        <div class="bar-row"><span>Hail</span><div class="bar-track-flex"><div class="bar-track"><div class="bar c-muted" style="--w:5.8%"></div></div><span class="val-out">5.8%</span></div></div>
+        <div class="bar-row"><span>Drought</span><div class="bar-track-flex"><div class="bar-track"><div class="bar c-muted" style="--w:1.2%"></div></div><span class="val-out">1.2%</span></div></div>
+        <div class="bar-row"><span>Heat</span><div class="bar-track-flex"><div class="bar-track"><div class="bar c-muted" style="--w:1%"></div></div><span class="val-out">0.01%</span></div></div>
+        <p class="takeaway"><strong>What this shows:</strong> Hail is one of the most common events in the dataset, but rarely linked to recorded damage. Strong Wind and Tornado are far less frequent, yet show damage much more often &mdash; event type carries real signal.</p>
+      </div>
+      <div>
+        <p class="eyebrow">Where the Data Pointed</p>
+        <h2>Occurrence and cost are different problems</h2>
+        <p>Before modeling anything, we compared how often each storm type occurs against how often it's actually tied to recorded economic damage. The patterns weren't the same &mdash; which is exactly why this was worth modeling in the first place.</p>
+        <p>The same split shows up in total dollars: Hurricane events are far less common than something like Thunderstorm Wind, but account for the largest total losses in the dataset by a wide margin (<strong>$50.6B</strong> vs. $1.7B).</p>
+      </div>
+    </div>
+  </section>
+
+  <section class="proj-section tone-a">
+    <div class="wrap reveal">
+      <p class="eyebrow">Hypothesis</p>
+      <h2>What we expected going in</h2>
+      <p class="lede"><strong>Event type</strong> is the strongest predictor of recorded economic damage, with <strong>region, storm duration and seasonal timing</strong> contributing secondary signal. We expected storm characteristics available near an event's onset to beat a no-skill baseline by a meaningful margin &mdash; supporting their use for forward-looking risk assessment by emergency managers, insurers and local governments.</p>
+    </div>
+  </section>
+
+  <section class="proj-section tone-b">
+    <div class="wrap reveal">
+      <p class="eyebrow">Methods</p>
+      <h2>From raw records to a modeling table</h2>
+      <div class="stats" style="grid-template-columns:repeat(4,1fr);margin-top:28px">
+        <div class="stat"><b>410,311</b><span>storm events, 2020&ndash;2025</span></div>
+        <div class="stat"><b>54&rarr;12</b><span>columns cleaned to modeling features</span></div>
+        <div class="stat"><b>75% / 25%</b><span>known vs. unknown economic outcome</span></div>
+        <div class="stat"><b>2 models</b><span>Logistic Regression + Random Forest</span></div>
+      </div>
+      <p style="margin-top:26px"><strong>Evaluation:</strong> Average Precision (PR-AUC) alongside ROC-AUC, since the positive class &mdash; events with recorded damage &mdash; is only about 23% of the data.</p>
+      <p><strong>Train/test split:</strong> grouped by storm episode (<code>EPISODE_ID</code>), not by individual row. Events from the same storm system share nearly identical characteristics &mdash; region, season and duration all move together &mdash; so a row-level split would let the model see near-duplicate records across training and testing, inflating how good it looks. Grouping by episode keeps every event from one storm system on the same side of the split.</p>
+    </div>
+  </section>
+
+  <section class="proj-section tone-a">
+    <div class="wrap split reveal">
+      <div class="chart-card chart" role="group" aria-label="Average precision by model: no-skill baseline 0.219, Logistic Regression 0.652, Random Forest 0.669">
+        <h4>Both models beat the baseline</h4>
+        <small>Average precision, higher is better. Source: project write-up, Appendix A.</small>
+        <div class="bar-row"><span>No-skill baseline</span><div class="bar-track"><div class="bar base" style="--w:32.7%">0.219</div></div></div>
+        <div class="bar-row"><span>Logistic Regression</span><div class="bar-track"><div class="bar lr" style="--w:97.4%">0.652</div></div></div>
+        <div class="bar-row"><span>Random Forest</span><div class="bar-track"><div class="bar rf" style="--w:100%">0.669</div></div></div>
+        <p class="takeaway"><strong>Random Forest</strong> also led on ROC-AUC (0.880 vs. 0.871) &mdash; but the two models are close enough that most of the predictive pattern is already visible in the simpler, more interpretable Logistic Regression.</p>
+      </div>
+      <div class="chart-card chart" role="group" aria-label="Random Forest permutation feature importance: event type 0.408, region 0.171, storm duration 0.079, season 0.023">
+        <h4>What actually predicts damage</h4>
+        <small>Random Forest permutation importance (decrease in validation PR-AUC when shuffled)</small>
+        <div class="bar-row"><span>Event Type</span><div class="bar-track"><div class="bar c-teal" style="--w:100%">0.408</div></div></div>
+        <div class="bar-row"><span>Region</span><div class="bar-track"><div class="bar c-purple" style="--w:41.9%">0.171</div></div></div>
+        <div class="bar-row"><span>Storm Duration</span><div class="bar-track"><div class="bar c-muted" style="--w:19.4%">0.079</div></div></div>
+        <div class="bar-row"><span>Season</span><div class="bar-track-flex"><div class="bar-track"><div class="bar c-muted" style="--w:5.6%"></div></div><span class="val-out">0.023</span></div></div>
+        <p class="takeaway">Event type is roughly <strong>2.4&times;</strong> more important than region. That's predictive weight, not proof of cause &mdash; the model finds association in historical records, not a physical mechanism.</p>
+      </div>
+    </div>
+  </section>
+
+  <section class="proj-section tone-b">
+    <div class="wrap reveal">
+      <p class="eyebrow">Recommendations &amp; Ethical Considerations</p>
+      <h2>Who this affects &mdash; and where it could go wrong</h2>
+      <div class="callout-grid">
+        <div class="callout">
+          <h3>Stakeholder impact</h3>
+          <p>Emergency managers, local governments and insurers could use these patterns to prepare and allocate resources. The risk: over-relying on results for storm types or regions that are rare or less consistently recorded.</p>
+        </div>
+        <div class="callout">
+          <h3>Data assumptions &amp; bias</h3>
+          <p>The model assumes NOAA's historical records are accurate and complete. Reporting practices vary by storm type and have changed over time, and the model assumes future events follow past patterns &mdash; a limitation we state plainly wherever these results are used.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="proj-section tone-a">
+    <div class="wrap reveal">
+      <p class="eyebrow">Conclusion</p>
+      <h2>Back to the real question</h2>
+      <p class="lede" style="margin-bottom:24px">Our interest was never just whether a storm happens &mdash; it was what it costs once it does. Heat and Excessive Heat are among the most frequent events in the dataset, yet almost none carry a recorded economic outcome, while far rarer events like Strong Wind and Tornado are disproportionately tied to damage. As the mix of severe weather shifts, planning that leans on frequency alone risks preparing for the wrong thing.</p>
+      <div class="takeaway-banner">Frequency tells you what's common &mdash; <em>not</em> what's costly.</div>
+      <p style="margin-top:24px"><strong>Next steps:</strong> layering in FEMA National Risk Index exposure and vulnerability data, so predictions reflect who and what is actually in a storm's path, not just the storm's own characteristics.</p>
+    </div>
+  </section>
+
+  <section class="proj-section tone-b" id="presentation">
+    <div class="wrap reveal">
+      <p class="eyebrow">Presentation</p>
+      <h2>Milestone 3 walkthrough</h2>
+      <p class="lede" style="margin-bottom:24px">The recorded team presentation covers this same project end to end &mdash; business problem, methods, results and conclusion &mdash; in about 12 minutes.</p>
+
+      <div class="slide-strip" aria-label="Presentation slide previews">
+        <figure><img src="slides/slide-title.jpg" alt="Title slide: Predicting Economic Damage from Severe Weather" loading="lazy"><figcaption>Title</figcaption></figure>
+        <figure><img src="slides/slide-research.jpg" alt="Slide: Frequency isn't the same as risk" loading="lazy"><figcaption>Research question</figcaption></figure>
+        <figure><img src="slides/slide-results.jpg" alt="Slide: both models beat the baseline" loading="lazy"><figcaption>Results</figcaption></figure>
+        <figure><img src="slides/slide-conclusion.jpg" alt="Slide: back to the real question" loading="lazy"><figcaption>Conclusion</figcaption></figure>
+      </div>
+
+      <div class="office-embed">
+        <!-- Renders only once this file is actually live and publicly reachable at the
+             URL below -- Microsoft's viewer fetches the file itself, so this will show
+             a load error on localhost, in a file:// preview, or before the .pptx is
+             uploaded to this folder. The download button underneath always works. -->
+        <iframe src="https://view.officeapps.live.com/op/embed.aspx?src=https%3A%2F%2Fiqproductionz.com%2FDataSciencePortfolio%2FContent%2FProject1%2FDSC450_Milestone3_Presentation.pptx"
+                title="Project 1 presentation, embedded" allowfullscreen></iframe>
+      </div>
+      <p class="embed-note">If the embed above doesn't load (it needs this page live on iqproductionz.com with the file already uploaded), use the download link below.</p>
+
+      <div class="media-actions">
+        <a class="btn primary" href="DSC450_Milestone3_Presentation.pptx" download>Download presentation (.pptx)</a>
+        <!-- TODO: once the team records the Teams presentation, swap this href for the uploaded video link. -->
+        <a class="btn ghost" href="#">Watch the recording (coming soon)</a>
+      </div>
+    </div>
+  </section>
+
+  <section class="proj-section tone-a" id="resources">
+    <div class="wrap reveal">
+      <p class="eyebrow">Code &amp; Resources</p>
+      <h2>Notebooks, data and write-up</h2>
+      <div class="links" style="margin-top:20px">
+        <a href="DSC450_Project1_Visualization_HaliSarahParsons.html">Visualization notebook</a>
+        <a href="NOAA_data_wrangling.html">Data wrangling notebook</a>
+        <a href="NOAA_Storm_Impact_Modeling.html">Impact modeling notebook</a>
+        <a href="Project%20Milestone%202%2010.02-2.pdf">Full write-up (PDF)</a>
+        <a href="DSC450_Milestone3_Presentation.pptx" download>Presentation (.pptx)</a>
+        <a href="https://github.com/HaliSarah/DSC-450-Group-1-Collab" target="_blank" rel="noopener">Code on GitHub</a>
+      </div>
+    </div>
+  </section>
+
+</main>
+
+<footer class="proj-footer">
+  <div class="wrap">
+    <a href="../../index.html#projects">&larr; Back to all projects</a>
+    <span>&copy; <span id="yr">2026</span> Hali Sarah Parsons. Data Science, Bellevue University.</span>
+  </div>
+</footer>
+
+<script>
+  /* Title: Project page interactions. Author: Hali Sarah Parsons. Modified By: Claude.
+     Why this mirrors the home page's script: same .reveal/.js convention, so scrolling
+     behavior feels identical across every page of the site. */
+  (function () {
+    document.documentElement.classList.add('js');
+    document.getElementById('yr').textContent = new Date().getFullYear();
+    var reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    function revealIn(el) { el.classList.add('in'); }
+    var items = document.querySelectorAll('.reveal');
+    if (reduce || !('IntersectionObserver' in window)) {
+      items.forEach(revealIn);
+    } else {
+      var io = new IntersectionObserver(function (entries) {
+        entries.forEach(function (e) {
+          if (e.isIntersecting) { revealIn(e.target); io.unobserve(e.target); }
+        });
+      }, { threshold: 0.1 });
+      items.forEach(function (el) { io.observe(el); });
+    }
+  })();
+</script>
+</body>
+</html>
