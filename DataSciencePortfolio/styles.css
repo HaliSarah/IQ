@@ -1,0 +1,323 @@
+/*
+  Title:       Data Science Portfolio - Shared Stylesheet
+  Author:      Hali Sarah Parsons
+  Date:        October 8, 2026
+  Modified By: Claude
+  Description: Extracted from index.html's original inline <style> block so the
+               same theme can be shared across the home page and the three
+               project pages (Content/Project1/Project1.html, etc.) without
+               copy-pasting ~200 lines into every file. Everything below the
+               "PROJECT PAGES" divider is new, added to support the sub-pages.
+               Palette, spacing and component patterns are unchanged from the
+               original home page -- new rules reuse the same variables and
+               the same "card" and "bar chart" visual language instead of
+               inventing new ones, so every page still reads as one site.
+*/
+
+/* Palette lives in variables so the whole theme can be retuned in one place. */
+:root{
+  --navy-950:#060f1f;
+  --navy-900:#0a1930;
+  --navy-800:#10264a;
+  --navy-700:#1a3560;
+  --teal:#2dd4bf;
+  --teal-deep:#0f9e91;
+  --purple:#8b5cf6;
+  --purple-soft:#b8a2ff;
+  --ink:#e8eef9;
+  --ink-soft:#a9b8d3;
+  --line:rgba(255,255,255,.12);
+  --radius:18px;
+  --maxw:1120px;
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth;scroll-padding-top:76px}
+body{
+  margin:0;background:var(--navy-950);color:var(--ink);
+  font-family:'Inter',system-ui,-apple-system,'Segoe UI',sans-serif;
+  font-size:17px;line-height:1.65;-webkit-font-smoothing:antialiased;
+}
+h1,h2,h3{font-family:'Space Grotesk','Inter',system-ui,sans-serif;line-height:1.15;margin:0}
+a{color:var(--teal)}
+a:focus-visible,button:focus-visible{outline:3px solid var(--purple-soft);outline-offset:3px;border-radius:6px}
+.wrap{max-width:var(--maxw);margin:0 auto;padding:0 20px}
+.eyebrow{font-size:.78rem;letter-spacing:.18em;text-transform:uppercase;color:var(--teal);font-weight:600;margin:0 0 10px}
+.skip{position:absolute;left:-999px;top:8px;background:var(--teal);color:#032;padding:8px 14px;border-radius:8px;z-index:100}
+.skip:focus{left:12px}
+
+/* ---------- NAV ---------- */
+nav.top{
+  position:sticky;top:0;z-index:50;
+  background:rgba(6,15,31,.82);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);
+  border-bottom:1px solid var(--line);
+}
+nav.top .wrap{display:flex;align-items:center;justify-content:space-between;height:64px;gap:16px}
+.brand{font-family:'Space Grotesk',sans-serif;font-weight:700;letter-spacing:.08em;color:var(--ink);text-decoration:none;font-size:.95rem;white-space:nowrap}
+.brand span{color:var(--teal)}
+nav.top ul{display:flex;gap:6px;list-style:none;margin:0;padding:0;align-items:center}
+nav.top ul a{color:var(--ink-soft);text-decoration:none;font-size:.92rem;font-weight:500;padding:8px 12px;border-radius:999px;transition:color .2s,background .2s}
+nav.top ul a:hover,nav.top ul a.active{color:var(--ink);background:rgba(255,255,255,.08)}
+nav.top ul a.btn-nav{background:linear-gradient(135deg,var(--teal-deep),var(--purple));color:#fff}
+@media(max-width:720px){nav.top ul li:not(:last-child){display:none}}
+
+/* ---------- HERO (weight sits low: copy + portrait anchor to the bottom) ---------- */
+.hero{
+  /* No forced full-screen height: it left a large empty band above the name. Height now follows content. */
+  position:relative;
+  display:flex;align-items:flex-end;overflow:hidden;
+  background:
+    radial-gradient(900px 500px at 85% 95%,rgba(139,92,246,.35),transparent 60%),
+    radial-gradient(800px 480px at 10% 100%,rgba(45,212,191,.22),transparent 60%),
+    linear-gradient(180deg,var(--navy-950) 0%,var(--navy-900) 55%,var(--navy-800) 100%);
+  padding:40px 0 0;
+}
+.hero .wrap{position:relative;z-index:2;width:100%}
+.hero-grid{display:grid;grid-template-columns:.75fr 1.25fr;gap:40px;align-items:end;padding-bottom:96px}
+.hero h1{font-size:clamp(1.65rem,6.6vw,3.5rem);letter-spacing:.01em;font-weight:700;white-space:nowrap}
+.hero h1 em{font-style:normal;background:linear-gradient(90deg,var(--teal),var(--purple-soft));-webkit-background-clip:text;background-clip:text;color:transparent}
+.hero .role{margin:14px 0 0;font-size:clamp(1.05rem,2.2vw,1.35rem);color:var(--ink-soft);max-width:34ch}
+.hero .meta{display:flex;flex-wrap:wrap;gap:10px;margin:22px 0 0;padding:0;list-style:none}
+.chip{border:1px solid var(--line);background:rgba(255,255,255,.05);padding:6px 14px;border-radius:999px;font-size:.88rem;color:var(--ink-soft)}
+.chip b{color:var(--ink);font-weight:600}
+.cta{display:flex;flex-wrap:wrap;gap:12px;margin-top:28px}
+.btn{display:inline-flex;align-items:center;gap:8px;padding:13px 22px;border-radius:12px;font-weight:600;text-decoration:none;font-size:.98rem;border:1px solid transparent;transition:transform .15s,box-shadow .15s}
+.btn:hover{transform:translateY(-2px)}
+.btn.primary{background:linear-gradient(135deg,var(--teal),var(--teal-deep));color:#02221f;box-shadow:0 10px 30px -10px rgba(45,212,191,.7)}
+.btn.ghost{border-color:var(--line);color:var(--ink);background:rgba(255,255,255,.05)}
+.portrait{justify-self:start;position:relative;width:min(340px,70vw);margin-left:8px /* offsets the gradient ring so it lines up with the page edge */}
+.portrait::before{ /* gradient ring so the circle crop reads as a deliberate frame */
+  content:"";position:absolute;inset:-8px;border-radius:50%;
+  background:conic-gradient(from 140deg,var(--teal),var(--purple),var(--teal));opacity:.9;
+}
+.portrait img{
+  position:relative;display:block;width:100%;height:auto;aspect-ratio:1/1;object-fit:cover;object-position:50% 28%;
+  border-radius:50%;border:6px solid var(--navy-900);
+}
+.hero-chart{position:absolute;left:0;right:0;bottom:0;z-index:1;width:100%;height:auto;opacity:.9;pointer-events:none}
+@media(max-width:820px){
+  .hero-grid{grid-template-columns:1fr;padding-bottom:110px}
+  .portrait{justify-self:start;order:-1;width:190px}
+}
+
+/* ---------- SECTIONS ---------- */
+section{padding:96px 0}
+section h2{font-size:clamp(1.9rem,4vw,2.8rem);margin-bottom:14px}
+.lede{color:var(--ink-soft);max-width:62ch;margin:0}
+
+/* About */
+#about{background:linear-gradient(180deg,var(--navy-800),var(--navy-900))}
+.about-grid{display:grid;grid-template-columns:1.2fr .8fr;gap:48px;align-items:start}
+.about-grid p{margin:0 0 16px;color:var(--ink)}
+.facts{border:1px solid var(--line);border-radius:var(--radius);padding:24px;background:rgba(255,255,255,.04)}
+.facts dl{margin:0;display:grid;gap:16px}
+.facts dt{font-size:.75rem;letter-spacing:.14em;text-transform:uppercase;color:var(--teal);font-weight:600}
+.facts dd{margin:2px 0 0;color:var(--ink)}
+@media(max-width:820px){.about-grid{grid-template-columns:1fr;gap:28px}}
+
+/* Projects (home page) */
+#projects{background:var(--navy-900)}
+.project-feature{
+  margin-top:36px;border:1px solid var(--line);border-radius:24px;overflow:hidden;
+  background:linear-gradient(160deg,rgba(26,53,96,.75),rgba(10,25,48,.9));
+  display:grid;grid-template-columns:1.1fr .9fr;
+}
+.pf-main{padding:36px}
+.pf-side{padding:36px;background:rgba(139,92,246,.10);border-left:1px solid var(--line);display:flex;flex-direction:column;gap:22px;justify-content:flex-end}
+.tags{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:16px}
+.tag{font-size:.78rem;font-weight:600;padding:4px 12px;border-radius:999px;background:rgba(45,212,191,.14);color:var(--teal);border:1px solid rgba(45,212,191,.35)}
+.tag.purple{background:rgba(139,92,246,.18);color:var(--purple-soft);border-color:rgba(139,92,246,.45)}
+.tag.wire{background:rgba(255,255,255,.07);color:var(--ink-soft);border-color:var(--line)}
+.project-feature h3{font-size:clamp(1.5rem,3vw,2.1rem);margin-bottom:12px}
+.pf-main p{margin:0 0 14px;color:var(--ink-soft)}
+.pf-main p strong{color:var(--ink)}
+.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin:22px 0}
+.stat{border:1px solid var(--line);border-radius:14px;padding:14px;background:rgba(255,255,255,.04)}
+.stat b{display:block;font-family:'Space Grotesk',sans-serif;font-size:1.55rem;color:var(--ink)}
+.stat span{font-size:.8rem;color:var(--ink-soft);line-height:1.3;display:block}
+.links{display:flex;flex-wrap:wrap;gap:10px;margin-top:6px}
+.links a{font-size:.9rem;font-weight:600;text-decoration:none;padding:9px 14px;border-radius:10px;border:1px solid rgba(45,212,191,.4);color:var(--teal);transition:background .15s}
+.links a:hover{background:rgba(45,212,191,.12)}
+/* Bar chart: plain HTML so it stays crisp, selectable and screen-reader friendly. */
+.chart h4{margin:0 0 4px;font-family:'Space Grotesk',sans-serif;font-size:1.05rem}
+.chart small{color:var(--ink-soft);display:block;margin-bottom:16px;font-size:.82rem}
+.bar-row{display:grid;grid-template-columns:132px 1fr;gap:12px;align-items:center;margin:10px 0;font-size:.88rem}
+.bar-track{background:rgba(255,255,255,.07);border-radius:8px;height:30px;position:relative;overflow:hidden}
+.bar{height:100%;border-radius:8px;display:flex;align-items:center;justify-content:flex-end;padding-right:10px;font-weight:700;font-size:.85rem;color:#05121f;width:var(--w);transition:width 1s cubic-bezier(.2,.8,.2,1)}
+/* Bars start collapsed only when JS is running AND will un-collapse them; otherwise they show final values. */
+.js .reveal:not(.in) .bar{width:0}
+.bar.base{background:#7b8aa5}
+.bar.lr{background:var(--purple-soft)}
+.bar.rf{background:var(--teal)}
+/* Generic aliases for new charts on the project pages, kept distinct from the
+   named base/lr/rf classes above so a reader skimming the CSS can tell a
+   model-comparison chart from any other bar chart. */
+.bar.c-teal{background:var(--teal)}
+.bar.c-purple{background:var(--purple-soft)}
+.bar.c-muted{background:#7b8aa5}
+.takeaway{border-top:1px solid var(--line);padding-top:16px;font-size:.9rem;color:var(--ink-soft)}
+.takeaway strong{color:var(--ink)}
+@media(max-width:900px){
+  .project-feature{grid-template-columns:1fr}
+  .pf-side{border-left:0;border-top:1px solid var(--line)}
+  .pf-main,.pf-side{padding:26px}
+  .stats{grid-template-columns:1fr 1fr 1fr}
+}
+@media(max-width:520px){.stats{grid-template-columns:1fr}.bar-row{grid-template-columns:96px 1fr}}
+
+.project-row{display:grid;grid-template-columns:1fr 1fr;gap:20px;margin-top:20px}
+.placeholder{
+  border:2px dashed rgba(184,162,255,.45);border-radius:var(--radius);padding:30px;min-height:230px;
+  display:flex;flex-direction:column;justify-content:flex-end;gap:10px;
+  background:linear-gradient(180deg,transparent,rgba(139,92,246,.08));
+}
+.placeholder h3{font-size:1.4rem}
+.placeholder p{margin:0;color:var(--ink-soft);font-size:.95rem}
+@media(max-width:720px){.project-row{grid-template-columns:1fr}}
+
+/* Project summary cards on the home page -- each links out to its own case-study page. */
+.project-cards{display:grid;grid-template-columns:repeat(3,1fr);gap:22px;margin-top:34px}
+.project-card{
+  display:flex;flex-direction:column;gap:14px;border:1px solid var(--line);border-radius:var(--radius);
+  padding:26px;background:linear-gradient(160deg,rgba(26,53,96,.55),rgba(10,25,48,.75));
+}
+.project-card h3{font-size:1.3rem}
+.project-card p{margin:0;color:var(--ink-soft);font-size:.95rem;flex:1}
+.project-card .stats{grid-template-columns:repeat(3,1fr);margin:4px 0}
+.project-card .stat{padding:10px}
+.project-card .stat b{font-size:1.15rem}
+.project-card .stat span{font-size:.72rem}
+.badge{font-size:.72rem;font-weight:700;letter-spacing:.05em;text-transform:uppercase;padding:4px 10px;border-radius:999px}
+.badge.live{background:rgba(45,212,191,.16);color:var(--teal);border:1px solid rgba(45,212,191,.4)}
+.badge.progress{background:rgba(184,162,255,.14);color:var(--purple-soft);border:1px solid rgba(184,162,255,.4)}
+@media(max-width:900px){.project-cards{grid-template-columns:1fr}}
+
+/* Skills */
+#skills{background:linear-gradient(180deg,var(--navy-900),var(--navy-800))}
+.skill-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:18px;margin-top:34px}
+.skill-card{border:1px solid var(--line);border-radius:var(--radius);padding:24px;background:rgba(255,255,255,.04)}
+.skill-card h3{font-size:1.15rem;margin-bottom:12px;display:flex;align-items:center;gap:10px}
+.skill-card h3::before{content:"";width:10px;height:10px;border-radius:50%;background:var(--teal)}
+.skill-card:nth-child(3n+2) h3::before{background:var(--purple)}
+.skill-card ul{list-style:none;margin:0;padding:0;display:flex;flex-wrap:wrap;gap:8px}
+.skill-card li{font-size:.86rem;padding:5px 12px;border-radius:999px;background:rgba(255,255,255,.07);color:var(--ink)}
+@media(max-width:900px){.skill-grid{grid-template-columns:1fr 1fr}}
+@media(max-width:560px){.skill-grid{grid-template-columns:1fr}}
+
+/* More work */
+#more{background:var(--navy-800)}
+.more-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:20px;margin-top:34px}
+.more-card{border:1px solid var(--line);border-radius:var(--radius);padding:26px;background:rgba(6,15,31,.45);display:flex;flex-direction:column;gap:12px}
+.more-card h3{font-size:1.2rem}
+.more-card p{margin:0;color:var(--ink-soft);font-size:.95rem;flex:1}
+.thumbs{display:grid;grid-template-columns:repeat(3,1fr);gap:6px}
+.thumbs a{display:block;border-radius:8px;overflow:hidden;border:1px solid var(--line);background:var(--navy-950);aspect-ratio:4/3}
+.thumbs img{width:100%;height:100%;object-fit:cover;display:block;transition:transform .25s}
+.thumbs a:hover img{transform:scale(1.06)}
+@media(max-width:900px){.more-grid{grid-template-columns:1fr}}
+
+/* Contact (heaviest block on the page, closing it out) */
+#contact{
+  padding:120px 0 90px;text-align:center;
+  background:
+    radial-gradient(800px 420px at 50% 100%,rgba(139,92,246,.4),transparent 65%),
+    radial-gradient(700px 380px at 15% 100%,rgba(45,212,191,.25),transparent 65%),
+    linear-gradient(180deg,var(--navy-800),var(--navy-950));
+}
+#contact h2{font-size:clamp(2.2rem,5.5vw,3.8rem);margin-bottom:16px}
+#contact .lede{margin:0 auto 30px}
+.email{
+  display:inline-block;font-family:'Space Grotesk',sans-serif;font-weight:700;
+  font-size:clamp(1.15rem,3.4vw,1.9rem);color:var(--ink);text-decoration:none;
+  padding:18px 30px;border-radius:16px;border:1px solid rgba(45,212,191,.5);
+  background:rgba(45,212,191,.08);word-break:break-all;
+}
+.email:hover{background:rgba(45,212,191,.18)}
+footer{padding:26px 0 40px;text-align:center;color:var(--ink-soft);font-size:.85rem;background:var(--navy-950);border-top:1px solid var(--line)}
+
+/* Scroll reveal only activates when JS adds .js, so the page is fully readable without it. */
+.js .reveal{opacity:0;transform:translateY(22px);transition:opacity .7s ease,transform .7s ease}
+.js .reveal.in{opacity:1;transform:none}
+@media(prefers-reduced-motion:reduce){
+  html{scroll-behavior:auto}
+  .js .reveal{opacity:1;transform:none;transition:none}
+  .bar{transition:none}
+  .btn,.thumbs img{transition:none}
+}
+
+/* =========================================================================
+   PROJECT PAGES (Content/Project1/Project1.html, Project2, Project3)
+   New rules only -- everything above this line is unchanged from the home
+   page so all four pages stay one visual system.
+   ========================================================================= */
+
+/* Breadcrumb row sits below the sticky nav on every project page. */
+.crumb{padding:18px 0;border-bottom:1px solid var(--line);background:var(--navy-950)}
+.crumb a{color:var(--ink-soft);text-decoration:none;font-size:.88rem;font-weight:600}
+.crumb a:hover{color:var(--teal)}
+
+/* Smaller project-page hero: title + tags + one-line pitch, no portrait. */
+.proj-hero{
+  padding:56px 0 64px;
+  background:
+    radial-gradient(760px 420px at 90% 10%,rgba(45,212,191,.18),transparent 60%),
+    radial-gradient(640px 360px at 5% 100%,rgba(139,92,246,.18),transparent 60%),
+    linear-gradient(180deg,var(--navy-950),var(--navy-900));
+}
+.proj-hero h1{font-size:clamp(1.9rem,4.4vw,3.1rem);margin:14px 0}
+.proj-hero .lede{max-width:72ch;font-size:1.1rem}
+
+/* Alternating section backgrounds, same two tones the home page already uses. */
+.proj-section{padding:80px 0}
+.proj-section.tone-a{background:var(--navy-900)}
+.proj-section.tone-b{background:var(--navy-800)}
+
+/* Two-column layout: narrative text beside a chart or callout card. */
+.split{display:grid;grid-template-columns:1.05fr .95fr;gap:44px;align-items:start}
+.split.reverse{grid-template-columns:.95fr 1.05fr}
+.split.reverse .chart-card{order:-1}
+@media(max-width:900px){.split,.split.reverse{grid-template-columns:1fr}}
+
+.chart-card{border:1px solid var(--line);border-radius:var(--radius);padding:26px;background:rgba(255,255,255,.04)}
+
+/* Ethics / recommendations callouts -- same card look as skill-card, two across. */
+.callout-grid{display:grid;grid-template-columns:1fr 1fr;gap:22px;margin-top:30px}
+.callout{border:1px solid var(--line);border-radius:var(--radius);padding:26px;background:rgba(255,255,255,.04)}
+.callout h3{font-size:1.05rem;color:var(--teal);margin-bottom:10px}
+.callout p{margin:0;color:var(--ink-soft);font-size:.95rem}
+@media(max-width:820px){.callout-grid{grid-template-columns:1fr}}
+
+/* Key-takeaway banner used for the conclusion. */
+.takeaway-banner{
+  border:1px solid rgba(45,212,191,.35);border-radius:var(--radius);padding:30px 34px;
+  background:linear-gradient(160deg,rgba(45,212,191,.08),rgba(139,92,246,.06));
+  font-family:'Space Grotesk',sans-serif;font-size:clamp(1.15rem,2.4vw,1.5rem);color:var(--ink);
+}
+.takeaway-banner em{font-style:normal;color:var(--teal)}
+
+/* Presentation section: Office-viewer embed (16:9, since the deck is 13.33x7.5in = 56.25%). */
+.office-embed{position:relative;width:100%;padding-top:56.25%;border-radius:var(--radius);overflow:hidden;border:1px solid var(--line);background:#fff}
+.office-embed iframe{position:absolute;inset:0;width:100%;height:100%;border:0}
+.media-actions{display:flex;flex-wrap:wrap;gap:12px;margin-top:18px}
+.embed-note{margin-top:10px;font-size:.82rem;color:var(--ink-soft)}
+
+/* Slide preview strip: a few key slides as a horizontal-scroll filmstrip above the embed. */
+.slide-strip{display:flex;gap:12px;overflow-x:auto;padding:4px 2px 14px;margin-bottom:6px}
+.slide-strip img{width:200px;flex:none;border-radius:10px;border:1px solid var(--line);display:block}
+.slide-strip figure{margin:0;flex:none}
+.slide-strip figcaption{font-size:.74rem;color:var(--ink-soft);margin-top:6px;text-align:center;width:200px}
+
+/* For a bar under ~12% width, the value label doesn't fit inside the colored
+   bar and spills onto the dark track, where its dark-on-bar text color
+   becomes unreadable. These rows move the label outside the track instead. */
+.bar-track-flex{display:flex;align-items:center;gap:10px}
+.bar-track-flex .bar-track{flex:1}
+.val-out{font-weight:700;font-size:.85rem;color:var(--ink-soft);white-space:nowrap}
+
+/* Wireframe badge for Project 2 / Project 3 pages. */
+.wire-note{
+  display:flex;align-items:center;gap:10px;margin:20px 0 0;padding:14px 18px;border-radius:12px;
+  border:1px dashed rgba(184,162,255,.45);background:rgba(139,92,246,.07);color:var(--ink-soft);font-size:.9rem;
+}
+
+footer.proj-footer{padding:40px 0}
+.proj-footer .wrap{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px}
