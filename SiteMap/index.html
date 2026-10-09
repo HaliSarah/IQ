@@ -1,0 +1,294 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<!--ARTIFACT-START-->
+<title>I.Q. Productionz Sitemap</title>
+<!--
+  Title:       I.Q. Productionz Sitemap
+  Author:      Hali Sarah Parsons
+  Date:        2026-10-08
+  Modified By: Claude (Anthropic)
+  Description: Visual map of the three hosted sites (Mary Kay, Haligricity, I.Q. Productionz).
+               Shows how each local "Hosted" folder becomes a live subdomain and lists every
+               published page with a working link. Regenerate with build.py after adding pages.
+-->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Gloock&family=Figtree:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap">
+<style>
+/* Layout: compact header → folder-to-domain map → page trees growing in size → heavy plum "check these" footer (bottom-heavy). */
+:root{
+  --bg:#fbf7f9; --surface:#ffffff; --fg:#2a1328; --muted:#75606f; --line:#eadde5;
+  --plum:#4a1942; --gold:#a8831a; --gold-soft:#f4e9c8;
+  --mk:#b8336a; --hal:#a8831a; --iq:#5b2a86; --wix:#2f6f8f;
+  --foot-bg:#3a1334; --foot-fg:#f6ecf2; --foot-muted:#d6bfd0;
+  --warn:#b4541a;
+  --display:"Gloock", Georgia, "Times New Roman", serif;
+  --body:"Figtree", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --mono:"JetBrains Mono", ui-monospace, Menlo, Consolas, monospace;
+}
+@media (prefers-color-scheme: dark){ :root:not([data-theme="light"]){
+  --bg:#170d16; --surface:#221521; --fg:#f3e9ef; --muted:#b39fad; --line:#3a2738;
+  --plum:#e4b7d9; --gold:#e3c25e; --gold-soft:#3b301a;
+  --mk:#f07aa8; --hal:#e3c25e; --iq:#bb92e8; --wix:#7cc0e0;
+  --foot-bg:#2d0f28; --foot-fg:#f6ecf2; --foot-muted:#cdb3c6; --warn:#f0a066; color-scheme:dark }}
+:root[data-theme="dark"]{
+  --bg:#170d16; --surface:#221521; --fg:#f3e9ef; --muted:#b39fad; --line:#3a2738;
+  --plum:#e4b7d9; --gold:#e3c25e; --gold-soft:#3b301a;
+  --mk:#f07aa8; --hal:#e3c25e; --iq:#bb92e8; --wix:#7cc0e0;
+  --foot-bg:#2d0f28; --foot-fg:#f6ecf2; --foot-muted:#cdb3c6; --warn:#f0a066; color-scheme:dark }
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--fg);font:15px/1.55 var(--body)}
+.wrap{max-width:1080px;margin:0 auto;padding-inline:20px}
+a{color:inherit}
+:focus-visible{outline:2px solid var(--gold);outline-offset:2px;border-radius:4px}
+.mono{font-family:var(--mono);font-size:.86em}
+
+header{padding-block:28px 12px}
+.eyebrow{font-size:.74rem;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);font-weight:600}
+h1{font:400 clamp(1.7rem,4vw,2.3rem)/1.1 var(--display);margin:.25rem 0 .4rem;color:var(--plum);text-wrap:balance}
+.lede{color:var(--muted);max-width:62ch;margin:0}
+
+/* Folder → domain map */
+.map{display:grid;gap:10px;margin-block:22px 8px}
+.maprow{display:grid;grid-template-columns:minmax(0,1fr) auto minmax(0,1.1fr) auto;align-items:center;gap:12px;
+  padding:12px 14px;border:1px solid var(--line);border-radius:10px;background:var(--surface)}
+.maprow .folder{min-width:0;overflow-wrap:anywhere}
+.maprow .arrow{color:var(--gold);font-size:1.1rem}
+.maprow .dom{min-width:0;font-weight:600;overflow-wrap:anywhere}
+.maprow .dom span{color:var(--c)}
+.maprow .n{font-variant-numeric:tabular-nums;color:var(--muted);font-size:.85rem;white-space:nowrap}
+.rule{font-size:.88rem;color:var(--muted);margin:.6rem 0 0}
+.rule code{font-family:var(--mono);font-size:.92em;background:var(--gold-soft);padding:1px 5px;border-radius:4px;color:var(--fg)}
+@media (max-width:640px){ .maprow{grid-template-columns:1fr auto} .maprow .arrow{display:none} .maprow .dom{grid-column:1} .maprow .n{grid-row:1/3;grid-column:2} }
+
+/* Search */
+.tools{position:sticky;top:env(safe-area-inset-top,0px);z-index:2;background:var(--bg);padding-block:12px;margin-top:18px;border-bottom:1px solid var(--line)}
+.tools label{display:block;font-size:.74rem;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);font-weight:600;margin-bottom:4px}
+.tools input{width:100%;font:inherit;padding:10px 12px;border:1px solid var(--line);border-radius:8px;background:var(--surface);color:var(--fg)}
+.tools .row{display:flex;gap:10px;align-items:end;flex-wrap:wrap}
+.tools .row > div{flex:1 1 260px;min-width:0}
+.btn{font:600 .85rem var(--body);padding:10px 12px;border-radius:8px;border:1px solid var(--line);background:var(--surface);color:var(--fg);cursor:pointer}
+.btn:hover{border-color:var(--gold)}
+
+/* Site sections */
+.site{margin-block:30px;border-top:3px solid var(--c);padding-top:14px}
+.site h2{font:400 1.6rem/1.15 var(--display);margin:0;color:var(--c)}
+.site .meta{display:flex;flex-wrap:wrap;gap:6px 16px;font-size:.86rem;color:var(--muted);margin:.35rem 0 12px}
+.site .meta a{color:var(--c);font-weight:600;text-decoration:none}
+.site .meta a:hover{text-decoration:underline}
+details.grp{border-bottom:1px solid var(--line)}
+details.grp > summary{list-style:none;cursor:pointer;display:flex;align-items:baseline;gap:10px;padding:10px 4px}
+details.grp > summary::-webkit-details-marker{display:none}
+details.grp > summary::before{content:"›";color:var(--c);font-weight:700;width:.8em;transition:transform .15s}
+details.grp[open] > summary::before{transform:rotate(90deg)}
+@media (prefers-reduced-motion:reduce){ details.grp > summary::before{transition:none} }
+.gname{font-family:var(--mono);font-weight:500}
+.gcount{margin-left:auto;font-size:.8rem;color:var(--muted);font-variant-numeric:tabular-nums;white-space:nowrap}
+.chip{font-size:.72rem;font-weight:600;padding:1px 7px;border-radius:99px;background:var(--gold-soft);color:var(--fg);white-space:nowrap}
+.chip.warn{background:transparent;border:1px solid var(--warn);color:var(--warn)}
+ul.pages{list-style:none;margin:0 0 10px;padding:0 0 0 1.4em}
+ul.pages li{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:14px;padding:5px 0;border-top:1px dashed var(--line)}
+ul.pages li:first-child{border-top:0}
+ul.pages a{font-family:var(--mono);font-size:.84rem;text-decoration:none;color:var(--c);overflow-wrap:anywhere}
+ul.pages a:hover{text-decoration:underline}
+ul.pages .t{color:var(--muted);font-size:.88rem;min-width:0}
+ul.pages .t em{color:var(--warn);font-style:normal}
+@media (max-width:640px){ ul.pages li{grid-template-columns:1fr;gap:0} }
+.empty{color:var(--muted);padding:12px 4px}
+ul.pages .wx{grid-column:1/-1;font-family:var(--mono);font-size:.76rem;color:var(--muted);overflow-wrap:anywhere;margin-top:-2px}
+ul.pages .wx a{color:var(--wix);font-size:inherit}
+.note{font-size:.9rem;color:var(--muted);max-width:70ch;margin:0 0 12px}
+
+/* Bottom-heavy footer */
+footer{background:var(--foot-bg);color:var(--foot-fg);margin-top:40px;padding-block:36px 48px}
+footer h2{font:400 clamp(1.6rem,3.6vw,2.1rem)/1.15 var(--display);margin:0 0 6px;color:var(--foot-fg)}
+footer .sub{color:var(--foot-muted);margin:0 0 18px;max-width:62ch}
+.issues{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,300px),1fr));gap:12px;margin:0;padding:0;list-style:none}
+.issues li{border:1px solid rgba(255,255,255,.16);border-radius:10px;padding:14px 16px;min-width:0}
+.issues b{display:block;margin-bottom:4px;color:#f2d27a}
+.issues span{color:var(--foot-muted);font-size:.9rem}
+.issues code{font-family:var(--mono);font-size:.84em;color:var(--foot-fg);overflow-wrap:anywhere}
+.stamp{margin-top:26px;font-size:.8rem;color:var(--foot-muted)}
+</style>
+
+<div class="wrap">
+  <header>
+    <div class="eyebrow">Websites folder · 3 GitHub Pages repos</div>
+    <h1>I.Q. Productionz Sitemap</h1>
+    <p class="lede">Each site's <b>Hosted</b> folder is what's live. Its CNAME file sets the subdomain, and every folder inside becomes a path on that domain.</p>
+  </header>
+
+  <section class="map" id="map" aria-label="Folder to domain map"></section>
+  <p class="rule">Folder <code>Hosted/Assess/index.html</code> → URL <code>marykay.iqproductionz.com/Assess/</code>. Paths are case-sensitive on GitHub Pages: <code>/Assess/</code> works, <code>/assess/</code> doesn't.</p>
+
+  <div class="tools">
+    <div class="row">
+      <div><label for="q">Find a page</label><input id="q" type="search" placeholder="Try “Reiki”, “Quiz”, or “Assess”" autocomplete="off"></div>
+      <button class="btn" id="toggle" type="button">Expand all</button>
+    </div>
+  </div>
+
+  <main id="sites"></main>
+</div>
+
+<footer>
+  <div class="wrap">
+    <h2>Check these</h2>
+    <p class="sub">Spotted while mapping the folders. Each one is a URL that either won't load or looks odd to a visitor.</p>
+    <ul class="issues" id="issues"></ul>
+    <div class="stamp" id="stamp"></div>
+  </div>
+</footer>
+
+<script>
+// Data is injected by build.py from the actual folders.
+// WHY embedded JSON: the page works offline and on any host with no fetch calls.
+const SITES = [{"key": "mk", "name": "Mary Kay", "domain": "marykay.iqproductionz.com", "folder": "Assessment/Hosted", "repo": "HaliSarah/MaryKay", "pages": [{"path": "Assess/index.html", "title": "Mary Kay Skin Assessment", "wix": ""}, {"path": "BracketAssess/index.html", "title": "Bracketed Skin Assessment — Mary Kay", "wix": ""}, {"path": "Continue/index.html", "title": "Complete Your Mary Kay Skin Assessment", "wix": ""}, {"path": "FullAssess/index.html", "title": "Mary Kay Full Skin Assessment", "wix": ""}, {"path": "Opportunity/index.html", "title": "Become a Mary Kay Beauty Consultant", "wix": ""}, {"path": "OptOut/index.html", "title": "Until Next Time | Mary Kay by Hali Sarah", "wix": ""}, {"path": "SampleFollowUp/index.html", "title": "Quick Response — Mary Kay", "wix": ""}, {"path": "Samples/index.html", "title": "Request Free Samples — Mary Kay", "wix": ""}, {"path": "SocialMediaCollect/Assess/index.html", "title": "Mary Kay Skin Assessment", "wix": ""}, {"path": "SocialMediaCollect/BracketAssess/index.html", "title": "Bracketed Skin Assessment — Mary Kay", "wix": ""}, {"path": "SocialMediaCollect/FullAssess/index.html", "title": "Mary Kay Full Skin Assessment", "wix": ""}, {"path": "SocialMediaCollect/ThankYou/index.html", "title": "You're All Set — Mary Kay Skin Assessment", "wix": ""}], "pdfs": {}, "hasRoot": false}, {"key": "hal", "name": "Haligricity", "domain": "haligricity.iqproductionz.com", "folder": "Haligricity/Hosted", "repo": "HaliSarah/Haligricity", "pages": [{"path": "index.html", "title": "Haligricity — The Practice of Wholeness", "wix": ""}, {"path": "BrandedEmail/index.html", "title": "Branded Email Reply | Haligricity", "wix": ""}, {"path": "ComingSoon/index.html", "title": "Coming Soon — Feature Badge (Haligricity)", "wix": ""}, {"path": "Contact/index.html", "title": "Contact Us | Haligricity", "wix": ""}, {"path": "Energy/Zodiac/DayEnergy/index.html", "title": "Sky Energy Today", "wix": ""}, {"path": "Energy/Zodiac/index.html", "title": "The Zodiac — Seven Systems | Haligricity", "wix": ""}, {"path": "Energy/Zodiac/Quiz/index.html", "title": "Eight Systems — Haligricity Personal Reading Tool", "wix": ""}, {"path": "FindYourPractice/index.html", "title": "The Haligric Practice Finder", "wix": ""}, {"path": "HistoryCollection/African/index.html", "title": "African Traditions — Haligricity History Collection", "wix": ""}, {"path": "HistoryCollection/Asian/index.html", "title": "Asian Traditions — Haligricity History Collection", "wix": ""}, {"path": "HistoryCollection/Esoteric/index.html", "title": "Western Esoteric Traditions — Haligricity History Collection", "wix": ""}, {"path": "HistoryCollection/European/index.html", "title": "European Heritage — Haligricity History Collection", "wix": ""}, {"path": "HistoryCollection/Global/index.html", "title": "Global Traditions — Haligricity History Collection", "wix": ""}, {"path": "HistoryCollection/index.html", "title": "The History Collection — Haligricity", "wix": ""}, {"path": "HistoryCollection/Indian/index.html", "title": "Indian & South Asian Traditions — Haligricity History Collection", "wix": ""}, {"path": "HistoryCollection/Indigenous/index.html", "title": "Indigenous & Cross-Regional — Haligricity History Collection", "wix": ""}, {"path": "HistoryCollection/Islanders/index.html", "title": "Island Peoples — Haligricity History Collection", "wix": ""}, {"path": "HistoryCollection/Mesoamerican/index.html", "title": "Mesoamerican Traditions — Haligricity History Collection", "wix": ""}, {"path": "HistoryCollection/MiddleEast/index.html", "title": "Middle Eastern Traditions — Haligricity History Collection", "wix": ""}, {"path": "HistoryCollection/NativeAmerican/index.html", "title": "Native American — Haligricity History Collection", "wix": ""}, {"path": "MayanCalendar/index.html", "title": "Maya Sacred Calendar — Today's Day Sign", "wix": ""}, {"path": "Mudras/Quiz/index.html", "title": "", "wix": ""}, {"path": "Pranayama/Quiz/index.html", "title": "", "wix": ""}, {"path": "Promo/index.html", "title": "Promo Materials | Haligricity", "wix": ""}, {"path": "RealMagic/About/index.html", "title": "About | Real Magic: An Introduction", "wix": ""}, {"path": "RealMagic/HelpfulTools/index.html", "title": "Helpful Tools | Real Magic: An Introduction", "wix": ""}, {"path": "RealMagic/index.html", "title": "Home | Real Magic: An Introduction", "wix": ""}, {"path": "RealMagic/OrderNow/index.html", "title": "Order Now | Real Magic: An Introduction", "wix": ""}, {"path": "RealMagic/ReadOnline/index.html", "title": "Read Online | Real Magic: An Introduction", "wix": ""}, {"path": "TempleGuides/index.html", "title": "Temple Guides — Haligricity", "wix": ""}], "pdfs": {"HaligricFoundation": 27, "Mudras": 1, "Pranayama": 1, "Energy": 14, "TempleGuides": 20, "FoodGuide": 8, "RealMagic": 5, "HistoryCollection": 124, "Promo": 1}, "hasRoot": true}, {"key": "iq", "name": "I.Q. Productionz", "domain": "iqproductionz.com", "folder": "IQProductionz/Hosted-Redirect", "repo": "HaliSarah/IQ", "pages": [{"path": "index.html", "title": "IQProductionz.com — Home", "wix": "https://iqproductionz.wixsite.com/iqpr"}, {"path": "404.html", "title": "Redirecting — IQProductionz.com", "wix": ""}, {"path": "About/Academic/index.html", "title": "Academic Certifications | I.Q. Productionz", "wix": ""}, {"path": "About/index.html", "title": "About | I.Q. Productionz", "wix": "https://iqproductionz.wixsite.com/iqpr/about"}, {"path": "About/Spiritual/index.html", "title": "Healing Certifications | I.Q. Productionz", "wix": ""}, {"path": "Agreements/index.html", "title": "Agreements | I.Q. Productionz", "wix": "https://iqproductionz.wixsite.com/iqpr/agreements"}, {"path": "BackEnd/BrandedEmail/index.html", "title": "IQ Email Brand — I.Q. Productionz", "wix": ""}, {"path": "BackEnd/Image2PDF/index.html", "title": "Image → PDF | I.Q. Productionz BackEnd", "wix": ""}, {"path": "BackEnd/index.html", "title": "BackEnd Portal — I.Q. Productionz", "wix": ""}, {"path": "BackEnd/MaryKay/BrandedEmail/index.html", "title": "PersonalJS — Personal Reply Sender", "wix": ""}, {"path": "BackEnd/MaryKay/LeadProcessor/index.html", "title": "FB Lead CSV Processor — Mary Kay", "wix": ""}, {"path": "BackEnd/PitchAssist/index.html", "title": "Launch-Ready Website Pitch — I.Q. Productionz", "wix": ""}, {"path": "BackEnd/VideoEdit/FRYT/index.html", "title": "Crystal Clear YouTube | I.Q. Productionz BackEnd", "wix": ""}, {"path": "BackEnd/VideoEdit/index.html", "title": "Video Editor | I.Q. Productionz BackEnd", "wix": ""}, {"path": "BackEnd/VideoEdit/Smooth/Smooth.html", "title": "Smoother | I.Q. Productionz BackEnd", "wix": ""}, {"path": "BackEnd/Wav2FLAC /index.html", "title": "WAV → FLAC | I.Q. Productionz BackEnd", "wix": ""}, {"path": "BookNow/Audio/index.html", "title": "Book Audio Production | I.Q. Productionz", "wix": ""}, {"path": "BookNow/Fashion/index.html", "title": "Book Fashion Services | I.Q. Productionz", "wix": ""}, {"path": "BookNow/Graphic/index.html", "title": "Book Graphic Design | I.Q. Productionz", "wix": ""}, {"path": "BookNow/Heal/index.html", "title": "Book a Healing Session | I.Q. Productionz", "wix": ""}, {"path": "BookNow/Hosting/index.html", "title": "Hosting Inquiry — I.Q. Productionz", "wix": ""}, {"path": "BookNow/HTML/index.html", "title": "Specialty HTML Request — I.Q. Productionz", "wix": ""}, {"path": "BookNow/index.html", "title": "Book Now | I.Q. Productionz", "wix": ""}, {"path": "BookNow/Learn/index.html", "title": "Learn SELC Reiki | I.Q. Productionz", "wix": ""}, {"path": "BookNow/Learn/Reiki1/index.html", "title": "Reiki Level 1 | I.Q. Productionz", "wix": ""}, {"path": "BookNow/Learn/Reiki2/index.html", "title": "Reiki Level 2 | I.Q. Productionz", "wix": ""}, {"path": "BookNow/Learn/ReikiMaster/index.html", "title": "Reiki Master | I.Q. Productionz", "wix": ""}, {"path": "BookNow/Photo/index.html", "title": "Book Photography | I.Q. Productionz", "wix": ""}, {"path": "BookNow/Promo/index.html", "title": "Book Promotion | I.Q. Productionz", "wix": ""}, {"path": "BookNow/Video/index.html", "title": "Book Videography | I.Q. Productionz", "wix": ""}, {"path": "Claude outputs/Rates.html", "title": "Rates | I.Q. Productionz", "wix": ""}, {"path": "Contact/index.html", "title": "Contact | I.Q. Productionz", "wix": "https://iqproductionz.wixsite.com/iqpr/contact"}, {"path": "Content/ComingSoon/index.html", "title": "Coming Soon | I.Q. Productionz", "wix": ""}, {"path": "DSInterviewGrill/index.html", "title": "DSC 450 Interview Practice", "wix": ""}, {"path": "DSPortfolio/Content/Coursework/Alexa_Logistic_Regression.html", "title": "bu360_alexa_logistic_regression", "wix": ""}, {"path": "DSPortfolio/Content/Coursework/Bayes_Entropy.html", "title": "Week11_BU320_Bayes_Entropy", "wix": ""}, {"path": "DSPortfolio/Content/Coursework/BU350_DataVisualization.html", "title": "BU350_Final_DataVisualization", "wix": ""}, {"path": "DSPortfolio/Content/Coursework/BU350_DataWrangling_Midterm.html", "title": "midterm_digital_habits", "wix": ""}, {"path": "DSPortfolio/Content/Coursework/Custom_NER_PMC.html", "title": "BU360_Final_Milestone_CustomNER", "wix": ""}, {"path": "DSPortfolio/Content/Coursework/Deep_Learning_Embeddings.html", "title": "Week10_USE_DeepLearning", "wix": ""}, {"path": "DSPortfolio/Content/Coursework/Sentiment_Analysis.html", "title": "Week9_Sentiment_Analysis", "wix": ""}, {"path": "DSPortfolio/Content/Project1/index.html", "title": "Project 1: Predicting Economic Damage from Storm Events | Hali Sarah Parsons", "wix": ""}, {"path": "DSPortfolio/Content/Project2/index.html", "title": "Project 2: Forecasting Regional Electricity Grid Demand | Hali Sarah Parsons", "wix": ""}, {"path": "DSPortfolio/Content/Project3/index.html", "title": "Project 3: Recycling Contamination Risk Predictor | Hali Sarah Parsons", "wix": ""}, {"path": "DSPortfolio/index.html", "title": "Hali Sarah Parsons | Data Science Portfolio", "wix": ""}, {"path": "FAQ/index.html", "title": "FAQ | I.Q. Productionz", "wix": "https://iqproductionz.wixsite.com/iqpr/faq"}, {"path": "Humanizer/index.html", "title": "Word Swap — a plain-language rewrite tool", "wix": ""}, {"path": "Products/Bears/Calm/index.html", "title": "Calm Bear | I.Q. Productionz", "wix": "https://iqproductionz.wixsite.com/iqpr/bears?lightbox=dataItem-l91r51vd"}, {"path": "Products/Bears/Creative/index.html", "title": "Creative Bear | I.Q. Productionz", "wix": "https://iqproductionz.wixsite.com/iqpr/bears?lightbox=dataItem-l91r1hpe"}, {"path": "Products/Bears/Divine/index.html", "title": "Divine Bear | I.Q. Productionz", "wix": "https://iqproductionz.wixsite.com/iqpr/bears?lightbox=dataItem-l91r3ogu"}, {"path": "Products/Bears/Healing/index.html", "title": "Healing Bear | I.Q. Productionz", "wix": "https://iqproductionz.wixsite.com/iqpr/bears?lightbox=dataItem-l91r4j9s"}, {"path": "Products/Bears/index.html", "title": "Bears | I.Q. Productionz", "wix": "https://iqproductionz.wixsite.com/iqpr/bears"}, {"path": "Products/Bears/Opportunity/index.html", "title": "Opportunity Bear | I.Q. Productionz", "wix": "https://iqproductionz.wixsite.com/iqpr/bears?lightbox=dataItem-l91r1078"}, {"path": "Products/Bears/Power/index.html", "title": "Power Bear | I.Q. Productionz", "wix": "https://iqproductionz.wixsite.com/iqpr/bears?lightbox=dataItem-l90gceg6"}, {"path": "Products/Bears/Serenity/index.html", "title": "Serenity Bear | I.Q. Productionz", "wix": "https://iqproductionz.wixsite.com/iqpr/bears?lightbox=dataItem-l91r5m73"}, {"path": "Products/Bears/Star/index.html", "title": "Star Bear | I.Q. Productionz", "wix": "https://iqproductionz.wixsite.com/iqpr/bears?lightbox=dataItem-l91r44ks"}, {"path": "Products/Bears/Your-Choice/index.html", "title": "Your Choice Bear | I.Q. Productionz", "wix": "https://iqproductionz.wixsite.com/iqpr/bears?lightbox=dataItem-l8z0y9zv"}, {"path": "Products/Bodies/index.html", "title": "Bodies | I.Q. Productionz", "wix": "https://iqproductionz.wixsite.com/iqpr/bodies"}, {"path": "Products/Bodies/Persistent-Love-Pregnancy-Body/index.html", "title": "Persistent Love Pregnancy Body | I.Q. Productionz", "wix": "https://iqproductionz.wixsite.com/iqpr/bodies?lightbox=dataItem-lgdtz7t9"}, {"path": "Products/Books/index.html", "title": "Books | I.Q. Productionz", "wix": "https://iqproductionz.wixsite.com/iqpr/copy-of-home"}, {"path": "Products/Charging-Plates/Amplified-Heart/index.html", "title": "Amplified Heart Charger | I.Q. Productionz", "wix": "https://iqproductionz.wixsite.com/iqpr/charging-plates?lightbox=dataItem-lgdtz7vy"}, {"path": "Products/Charging-Plates/Demystifying-Holographic-Windowsill/index.html", "title": "Demystifying Holographic Windowsill Plate | I.Q. Productionz", "wix": "https://iqproductionz.wixsite.com/iqpr/charging-plates?lightbox=dataItem-lgdtz7vw"}, {"path": "Products/Charging-Plates/index.html", "title": "Charging Plates | I.Q. Productionz", "wix": "https://iqproductionz.wixsite.com/iqpr/charging-plates"}, {"path": "Products/Charging-Plates/Love-Infused-Square/index.html", "title": "Love Infused Square Plate | I.Q. Productionz", "wix": "https://iqproductionz.wixsite.com/iqpr/charging-plates?lightbox=dataItem-lgdtz7vv"}, {"path": "Products/Crystals/Creativity-Gems/index.html", "title": "Creativity Gems | I.Q. Productionz", "wix": "https://iqproductionz.wixsite.com/iqpr/crystals?lightbox=dataItem-lgdtz7xl"}, {"path": "Products/Crystals/index.html", "title": "Crystals & Gems | I.Q. Productionz", "wix": "https://iqproductionz.wixsite.com/iqpr/crystals"}, {"path": "Products/Crystals/Pocket-Gems/index.html", "title": "Pocket Gems | I.Q. Productionz", "wix": "https://iqproductionz.wixsite.com/iqpr/crystals?lightbox=dataItem-lgdtz7xm"}, {"path": "Products/Crystals/Rainbow-Chakra-Obelisk-Tower/index.html", "title": "Rainbow Chakra Obelisk Tower | I.Q. Productionz", "wix": "https://iqproductionz.wixsite.com/iqpr/crystals?lightbox=dataItem-lgdtz7xj"}, {"path": "Products/Earrings/Aqua-Ovals/index.html", "title": "Aqua Ovals | I.Q. Productionz", "wix": "https://iqproductionz.wixsite.com/iqpr/earings?lightbox=dataItem-l90gceg8"}, {"path": "Products/Earrings/index.html", "title": "Earrings | I.Q. Productionz", "wix": "https://iqproductionz.wixsite.com/iqpr/earings"}, {"path": "Products/Earrings/Marine-Treasures/index.html", "title": "Out of the Box Marine Treasures | I.Q. Productionz", "wix": "https://iqproductionz.wixsite.com/iqpr/earings?lightbox=dataItem-l90gceg4"}, {"path": "Products/Earrings/Midnight-Pinks/index.html", "title": "Midnight Pinks | I.Q. Productionz", "wix": "https://iqproductionz.wixsite.com/iqpr/earings?lightbox=dataItem-l90gceg2"}, {"path": "Products/Earrings/Pink-Diamonds/index.html", "title": "Pink Diamonds | I.Q. Productionz", "wix": "https://iqproductionz.wixsite.com/iqpr/earings?lightbox=dataItem-l90gcegb1"}, {"path": "Products/Earrings/Pink-Gem-Hearts/index.html", "title": "Pink Gem Hearts | I.Q. Productionz", "wix": "https://iqproductionz.wixsite.com/iqpr/earings?lightbox=dataItem-l90gcegd1"}, {"path": "Products/Earrings/Pink-Pizza-Slices/index.html", "title": "Pink Pizza Slices | I.Q. Productionz", "wix": "https://iqproductionz.wixsite.com/iqpr/earings?lightbox=dataItem-l90gceg6"}, {"path": "Products/Earrings/Pink-Promises/index.html", "title": "Out of the Box Pink Promises | I.Q. Productionz", "wix": "https://iqproductionz.wixsite.com/iqpr/earings?lightbox=dataItem-l90gceg0"}, {"path": "Products/Earrings/Slender-Celadons/index.html", "title": "Slender Celadons | I.Q. Productionz", "wix": "https://iqproductionz.wixsite.com/iqpr/earings?lightbox=dataItem-l90gceg91"}, {"path": "Products/Earrings/Teal-Triangles/index.html", "title": "Teal Triangles | I.Q. Productionz", "wix": "https://iqproductionz.wixsite.com/iqpr/earings?lightbox=dataItem-l90gcegf1"}, {"path": "Products/Games/Eye-Contact-Trust-Dominos/index.html", "title": "Eye-Contact Trust Dominos | I.Q. Productionz", "wix": "https://iqproductionz.wixsite.com/iqpr/games?lightbox=dataItem-lgdtz7vf"}, {"path": "Products/Games/index.html", "title": "Games | I.Q. Productionz", "wix": "https://iqproductionz.wixsite.com/iqpr/games"}, {"path": "Products/Hands/Creative-Hand/index.html", "title": "Creative Hand | I.Q. Productionz", "wix": "https://iqproductionz.wixsite.com/iqpr/hands?lightbox=dataItem-lgdtz7v92"}, {"path": "Products/Hands/Healing-Hand/index.html", "title": "Healing Hand | I.Q. Productionz", "wix": "https://iqproductionz.wixsite.com/iqpr/hands?lightbox=dataItem-lgdtz7v7"}, {"path": "Products/Hands/index.html", "title": "Hands | I.Q. Productionz", "wix": "https://iqproductionz.wixsite.com/iqpr/hands"}, {"path": "Products/Keychains/Basic-Keychains/index.html", "title": "Basic Keychains | I.Q. Productionz", "wix": "https://iqproductionz.wixsite.com/iqpr/keychains?lightbox=dataItem-lgdtz7w4"}, {"path": "Products/Keychains/index.html", "title": "Keychains | I.Q. Productionz", "wix": "https://iqproductionz.wixsite.com/iqpr/keychains"}, {"path": "Products/Keychains/Purity-Keychain/index.html", "title": "Purity Keychain | I.Q. Productionz", "wix": "https://iqproductionz.wixsite.com/iqpr/keychains?lightbox=dataItem-lgdtz7w3"}, {"path": "Products/Necklaces/Clear-Empowering-Pi-Shift/index.html", "title": "Clear Empowering Pi Shift | I.Q. Productionz", "wix": "https://iqproductionz.wixsite.com/iqpr/necalaces?lightbox=dataItem-l97sdqza"}, {"path": "Products/Necklaces/index.html", "title": "Necklaces | I.Q. Productionz", "wix": "https://iqproductionz.wixsite.com/iqpr/necalaces"}, {"path": "Products/Necklaces/Misty-Inner-Traveler/index.html", "title": "Misty Inner Traveler | I.Q. Productionz", "wix": "https://iqproductionz.wixsite.com/iqpr/necalaces?lightbox=dataItem-l97s9r0k"}, {"path": "Products/Necklaces/Mossy-Droplet/index.html", "title": "Mossy Droplet | I.Q. Productionz", "wix": "https://iqproductionz.wixsite.com/iqpr/necalaces?lightbox=dataItem-l97sbxgz"}, {"path": "Products/Necklaces/Mossy-Puzzle-Piece/index.html", "title": "Mossy Puzzle Piece | I.Q. Productionz", "wix": "https://iqproductionz.wixsite.com/iqpr/necalaces?lightbox=dataItem-l97seba9"}, {"path": "Products/Necklaces/Passionate-Creativity-Chamber/index.html", "title": "Passionate Creativity Chamber | I.Q. Productionz", "wix": "https://iqproductionz.wixsite.com/iqpr/necalaces?lightbox=dataItem-l97scd9o"}, {"path": "Products/Necklaces/Paw-Spirit-Connection/index.html", "title": "Paw Spirit Connection | I.Q. Productionz", "wix": "https://iqproductionz.wixsite.com/iqpr/necalaces?lightbox=dataItem-l97sd5q1"}, {"path": "Products/Necklaces/Pure-Periwinkle-Pair/index.html", "title": "Pure Periwinkle Pair | I.Q. Productionz", "wix": "https://iqproductionz.wixsite.com/iqpr/necalaces?lightbox=dataItem-l97sf0ii"}, {"path": "Products/Necklaces/Purity-Puzzle-Piece/index.html", "title": "Purity Puzzle Piece | I.Q. Productionz", "wix": "https://iqproductionz.wixsite.com/iqpr/necalaces?lightbox=dataItem-l97sfjo3"}, {"path": "Products/Necklaces/Strawberry-Peach-Copper-Droplet/index.html", "title": "Strawberry Peach Copper Droplet | I.Q. Productionz", "wix": "https://iqproductionz.wixsite.com/iqpr/necalaces?lightbox=dataItem-l97s95x9"}, {"path": "Products/Necklaces/Strawberry-Peach-Half-Heart-Large/index.html", "title": "Strawberry Peach Half-Heart (Large) | I.Q. Productionz", "wix": "https://iqproductionz.wixsite.com/iqpr/necalaces?lightbox=dataItem-l97sb408"}, {"path": "Products/Necklaces/Strawberry-Peach-Rectangle-Half-Heart/index.html", "title": "Strawberry Peach Rectangle Half-Heart | I.Q. Productionz", "wix": "https://iqproductionz.wixsite.com/iqpr/necalaces?lightbox=dataItem-l97sad8m"}, {"path": "Products/Oils/index.html", "title": "Oils | I.Q. Productionz", "wix": "https://iqproductionz.wixsite.com/iqpr/oils"}, {"path": "Products/Orgonites/index.html", "title": "Orgonites | I.Q. Productionz", "wix": "https://iqproductionz.wixsite.com/iqpr/orogone"}, {"path": "Products/Pyramids/Celestial-Oceanic-Bubble-Pyramid/index.html", "title": "Celestial Oceanic Bubble Pyramid | I.Q. Productionz", "wix": "https://iqproductionz.wixsite.com/iqpr/pyramids?lightbox=dataItem-lgdtz7tp1"}, {"path": "Products/Pyramids/Dream-Recall-Pyramid/index.html", "title": "Dream Recall Pyramid | I.Q. Productionz", "wix": "https://iqproductionz.wixsite.com/iqpr/pyramids?lightbox=dataItem-lgdtz7to"}, {"path": "Products/Pyramids/index.html", "title": "Pyramids | I.Q. Productionz", "wix": "https://iqproductionz.wixsite.com/iqpr/pyramids"}, {"path": "Products/Pyramids/Intuitive-Third-Eye-Pyramid/index.html", "title": "Intuitive Third-Eye Pyramid | I.Q. Productionz", "wix": "https://iqproductionz.wixsite.com/iqpr/pyramids?lightbox=dataItem-lgdtz7tq2"}, {"path": "Products/Skulls/index.html", "title": "Skulls | I.Q. Productionz", "wix": "https://iqproductionz.wixsite.com/iqpr/skulls"}, {"path": "Products/Skulls/The-Celestial-Skull/index.html", "title": "The Celestial Skull | I.Q. Productionz", "wix": "https://iqproductionz.wixsite.com/iqpr/skulls?lightbox=dataItem-lgdtz7xb"}, {"path": "QRCode/Account/index.html", "title": "Redirecting… | I.Q. Productionz QR", "wix": ""}, {"path": "QRCode/index.html", "title": "Genuinely Free QR Code Generator — Static & Dynamic | I.Q. Productionz", "wix": ""}, {"path": "Services/Audio/index.html", "title": "Audio | I.Q. Productionz", "wix": "https://iqproductionz.wixsite.com/iqpr/audio"}, {"path": "Services/Fashion/index.html", "title": "Fashion | I.Q. Productionz", "wix": "https://iqproductionz.wixsite.com/iqpr/fashion"}, {"path": "Services/Graphic/index.html", "title": "Graphic | I.Q. Productionz", "wix": "https://iqproductionz.wixsite.com/iqpr/graphic"}, {"path": "Services/Heal/index.html", "title": "Heal | I.Q. Productionz", "wix": "https://iqproductionz.wixsite.com/iqpr/heal"}, {"path": "Services/Hosting/index.html", "title": "Hosting | I.Q. Productionz", "wix": "https://iqproductionz.wixsite.com/iqpr/copy-of-promo-1"}, {"path": "Services/HTML/BrandedEmail/index.html", "title": "Email Brand Intake — I.Q. Productionz", "wix": ""}, {"path": "Services/HTML/index.html", "title": "HTML | I.Q. Productionz", "wix": "https://iqproductionz.wixsite.com/iqpr/copy-of-promo"}, {"path": "Services/index.html", "title": "Rates | I.Q. Productionz", "wix": "https://iqproductionz.wixsite.com/iqpr/rates"}, {"path": "Services/Learn/index.html", "title": "Learn | I.Q. Productionz", "wix": "https://iqproductionz.wixsite.com/iqpr/learn"}, {"path": "Services/Photo/index.html", "title": "Photo | I.Q. Productionz", "wix": "https://iqproductionz.wixsite.com/iqpr/photo"}, {"path": "Services/Promo/index.html", "title": "Promo | I.Q. Productionz", "wix": "https://iqproductionz.wixsite.com/iqpr/promo"}, {"path": "Services/Rates/index.html", "title": "Rates | I.Q. Productionz", "wix": ""}, {"path": "Services/Video/index.html", "title": "Video | I.Q. Productionz", "wix": "https://iqproductionz.wixsite.com/iqpr/video"}, {"path": "Services/Websites/SiteBuilderForm/index.html", "title": "Website Project Intake — I.Q. Productionz", "wix": ""}], "pdfs": {"Content": 36, "DSPortfolio": 7}, "hasRoot": true}];
+const WIX = {"base": "https://iqproductionz.wixsite.com/iqpr", "slugs": ["skulls", "custom-earrings", "copy-of-earrings", "copy-7-of-oils-share-3", "copy-4-of-oils-share-4", "photo", "clocks", "granolas", "custom-bear", "copy-4-of-oils-share-7", "copy-of-necklaces", "agreements", "hands", "copy-of-bears", "copy-7-of-oils-share", "copy-6-of-oils-share", "charging-plates", "bears", "copy-2-of-oils-share-1", "copy-of-promo-1", "keychains", "candles", "copy-4-of-oils-share-3", "necalaces", "games", "selc-reiki", "promo", "about-3", "learn", "copy-4-of-oils-share-1", "copy-of-faq", "graphic", "copy-of-necklaces-1", "copy-4-of-oils-share", "copy-of-charging-plates-share", "copy-6-of-oils-share-1", "bodies", "video", "copy-2-of-faq", "bracelets", "tinctures", "orogone", "copy-of-faq-1", "rings", "copy-4-of-oils-share-2", "copy-2-of-oils-share", "charging-plates-share", "fashion", "contact", "audio", "copy-7-of-oils-share-2", "copy-7-of-oils-share-1", "crystals", "copy-3-of-oils-share", "dream-catchers", "rates", "share-oils", "heal", "faq", "earings", "fashion-1", "copy-5-of-oils-share", "photo-albums", "copy-3-of-oils-share-1", "copy-4-of-oils-share-5", "copy-of-oils-share", "oils", "about", "copy-of-promo", "teas", "pyramids", "copy-4-of-oils-share-6", "pens"]};
+const COLORS = { mk: "var(--mk)", hal: "var(--hal)", iq: "var(--iq)", wix: "var(--wix)" };
+
+// Turns a file path into its public URL path.
+// WHY: GitHub Pages serves folder/index.html at folder/, so we hide "index.html"
+// to match the link people actually share. encodeURI handles folders with spaces.
+function urlPath(p){
+  const clean = p === "index.html" ? "" : p.replace(/(^|\/)index\.html$/, "$1");
+  return "/" + encodeURI(clean);
+}
+
+// Small escape helper. WHY: titles come from files and could contain < or &.
+function esc(s){ return String(s).replace(/[&<>"]/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c])); }
+
+// Groups pages by their top-level folder.
+// WHY: top-level folders are the site's sections, which is how people think about navigation.
+function groupPages(site){
+  const groups = new Map();
+  for (const pg of site.pages){
+    const key = pg.path.includes("/") ? pg.path.split("/")[0] : "";
+    if (!groups.has(key)) groups.set(key, []);
+    groups.get(key).push(pg);
+  }
+  return groups;
+}
+
+// Finds problems a visitor would hit: no landing page, spaces in URLs, missing titles.
+// WHY: these are easy to miss in Finder but obvious once the URLs are listed.
+function findIssues(){
+  const out = [];
+  for (const s of SITES){
+    if (!s.hasRoot) out.push([`${s.domain}/ has no home page`, `No <code>index.html</code> at the top of <code>${esc(s.folder)}</code>, so the bare domain shows a 404. Every link has to point at a sub-page like <code>/Assess/</code>.`]);
+    for (const [g, pages] of groupPages(s)){
+      if (!g) continue;
+      if (!pages.some(p => p.path === g + "/index.html"))
+        out.push([`${s.domain}/${g}/ is empty`, `Only sub-pages exist (e.g. <code>${esc(urlPath(pages[0].path))}</code>). Visiting <code>/${esc(g)}/</code> directly gives a 404.`]);
+    }
+    for (const p of s.pages){
+      if (/ /.test(p.path)) out.push([`Space in a URL on ${s.domain}`, `<code>${esc(p.path)}</code> goes live as <code>${esc(urlPath(p.path))}</code>. Rename the folder without the space.`]);
+      if (!p.title) out.push([`Untitled page`, `<code>${esc(s.domain + urlPath(p.path))}</code> has no &lt;title&gt;, so browser tabs and shared links show the raw URL.`]);
+    }
+  }
+  const iq = SITES.find(s => s.key === "iq");
+  const framed = iq.pages.filter(p => p.wix).length;
+  out.push([`${framed} iqproductionz.com pages are Wix frames`, `Their content belongs to <code>iqproductionz.wixsite.com/iqpr</code> in Google's eyes, so Search Console sees thin pages. Adding a real heading and a short paragraph of text to each wrapper gives Google something to index.`]);
+  if (WIX.slugs.includes("copy-of-home") === false && iq.pages.some(p => (p.wix||"").endsWith("/copy-of-home")))
+    out.push([`Books page isn't in Wix's sitemap`, `<code>/Products/Books/</code> frames <code>/copy-of-home</code>, which Wix leaves out of its sitemap (likely hidden from search).`]);
+  return out;
+}
+
+// Renders everything. WHY one function: search re-renders cheaply from the same data.
+function render(q){
+  const needle = (q || "").trim().toLowerCase();
+  const main = document.getElementById("sites");
+  let html = "";
+  for (const s of SITES){
+    const c = COLORS[s.key];
+    const pdfTotal = Object.values(s.pdfs).reduce((a,b)=>a+b,0);
+    let body = "";
+    for (const [g, pages] of groupPages(s)){
+      const hits = needle ? pages.filter(p => (p.path + " " + p.title + " " + (p.wix||"")).toLowerCase().includes(needle)) : pages;
+      if (!hits.length) continue;
+      const pdf = s.pdfs[g] ? `<span class="chip">${s.pdfs[g]} PDF${s.pdfs[g]>1?"s":""}</span>` : "";
+      const noIndex = g && !pages.some(p => p.path === g + "/index.html") ? `<span class="chip warn">no /${esc(g)}/ page</span>` : "";
+      body += `<details class="grp"${needle ? " open" : ""}><summary><span class="gname">/${esc(g)}${g ? "/" : ""}</span>${noIndex}${pdf}<span class="gcount">${hits.length} page${hits.length>1?"s":""}</span></summary><ul class="pages">` +
+        hits.map(p => {
+          const u = urlPath(p.path);
+          return `<li><a href="https://${s.domain}${u}" target="_blank" rel="noopener">${esc(u)}</a><span class="t">${p.title ? esc(p.title) : "<em>No title set</em>"}</span>${p.wix ? `<span class="wx">↳ shows Wix page <a href="${esc(p.wix)}" target="_blank" rel="noopener">${esc(p.wix.replace(WIX.base, "") || "/ (home)")}</a></span>` : ""}</li>`;
+        }).join("") + `</ul></details>`;
+    }
+    html += `<section class="site" style="--c:${c}" id="${s.key}">
+      <h2>${esc(s.name)}</h2>
+      <div class="meta"><a href="https://${s.domain}/" target="_blank" rel="noopener">${s.domain}</a>
+        <span class="mono">${esc(s.folder)}/</span>
+        <a href="https://github.com/${s.repo}" target="_blank" rel="noopener">github.com/${s.repo}</a>
+        <span>${s.pages.length} pages${pdfTotal ? ` · ${pdfTotal} PDFs` : ""}</span></div>
+      ${body || `<div class="empty">No pages match “${esc(q)}”.</div>`}
+    </section>`;
+  }
+  html += renderWix(needle);
+  main.innerHTML = html;
+}
+
+// Lists every page on the Wix site and which iqproductionz.com page (if any) shows it.
+// WHY: Google indexes iframe content under the Wix URL, so these are the URLs it actually sees.
+function renderWix(needle){
+  const iq = SITES.find(s => s.key === "iq");
+  const used = new Map();
+  for (const p of iq.pages) if (p.wix){
+    const slug = p.wix.replace(WIX.base, "").replace(/^\//, "").split("?")[0];
+    if (!used.has(slug)) used.set(slug, []);
+    used.get(slug).push(urlPath(p.path));
+  }
+  const all = ["", ...WIX.slugs];
+  for (const k of used.keys()) if (!all.includes(k)) all.push(k);
+  const row = slug => {
+    const u = WIX.base + (slug ? "/" + slug : "");
+    const m = used.get(slug);
+    const unlisted = slug && !WIX.slugs.includes(slug);
+    return `<li><a href="${u}" target="_blank" rel="noopener" style="color:var(--wix)">/${esc(slug)}${unlisted ? " " : ""}</a><span class="t">${m ? "→ iqproductionz.com" + m.map(esc).join(", ") : "<em>No iqproductionz.com page</em>"}${unlisted ? " · not in Wix sitemap" : ""}</span></li>`;
+  };
+  const match = s => !needle || (s + " " + (used.get(s)||[]).join(" ")).toLowerCase().includes(needle);
+  const mirrored = all.filter(s => used.has(s) && match(s)).sort();
+  const orphans = all.filter(s => !used.has(s) && match(s)).sort();
+  if (!mirrored.length && !orphans.length) return "";
+  return `<section class="site" style="--c:var(--wix)" id="wix">
+    <h2>Wix source</h2>
+    <div class="meta"><a href="${WIX.base}" target="_blank" rel="noopener">iqproductionz.wixsite.com/iqpr</a>
+      <a href="${WIX.base}/sitemap.xml" target="_blank" rel="noopener">Wix sitemap.xml</a>
+      <span>${WIX.slugs.length + 1} pages in Wix's sitemap · ${used.size} shown on iqproductionz.com</span></div>
+    <p class="note">iqproductionz.com loads these pages inside a full-screen frame. Google reads framed content as belonging to the Wix address, which is why Search Console treats the iqproductionz.com pages as nearly empty.</p>
+    ${mirrored.length ? `<details class="grp"${needle?" open":""}><summary><span class="gname">Shown on iqproductionz.com</span><span class="gcount">${mirrored.length}</span></summary><ul class="pages">${mirrored.map(row).join("")}</ul></details>` : ""}
+    ${orphans.length ? `<details class="grp"${needle?" open":""}><summary><span class="gname">Only on Wix</span><span class="chip warn">no iqproductionz.com page</span><span class="gcount">${orphans.length}</span></summary><ul class="pages">${orphans.map(row).join("")}</ul></details>` : ""}
+  </section>`;
+}
+
+// Builds the folder → domain strip at the top.
+function renderMap(){
+  document.getElementById("map").innerHTML = SITES.map(s =>
+    `<div class="maprow" style="--c:${COLORS[s.key]}">
+      <span class="folder mono">Websites/${esc(s.folder)}/</span><span class="arrow" aria-hidden="true">→</span>
+      <a class="dom" href="#${s.key}"><span>${s.domain.replace(".iqproductionz.com","")}</span>${s.domain.includes(".iqproductionz.com") ? ".iqproductionz.com" : ""}</a>
+      <span class="n">${s.pages.length} pages</span></div>`).join("") +
+    `<div class="maprow" style="--c:var(--wix)"><span class="folder mono">Wix (iframed into iqproductionz.com)</span><span class="arrow" aria-hidden="true">→</span>
+      <a class="dom" href="#wix"><span>iqproductionz</span>.wixsite.com/iqpr</a><span class="n">${WIX.slugs.length + 1} pages</span></div>`;
+}
+
+renderMap();
+render("");
+document.getElementById("issues").innerHTML = findIssues().map(([h,b]) => `<li><b>${h}</b><span>${b}</span></li>`).join("");
+document.getElementById("stamp").textContent = `${SITES.reduce((a,s)=>a+s.pages.length,0)} pages across 3 domains · generated 2026-10-08 from the Hosted folders.`;
+
+// Search: debounce-free because the list is small (under 200 rows).
+document.getElementById("q").addEventListener("input", e => render(e.target.value));
+
+// Expand/collapse all. WHY: IQ Productionz has ~130 pages; collapsed is the readable default.
+let expanded = false;
+document.getElementById("toggle").addEventListener("click", e => {
+  expanded = !expanded;
+  document.querySelectorAll("details.grp").forEach(d => d.open = expanded);
+  e.currentTarget.textContent = expanded ? "Collapse all" : "Expand all";
+});
+</script>
+<!--ARTIFACT-END-->
+</html>
