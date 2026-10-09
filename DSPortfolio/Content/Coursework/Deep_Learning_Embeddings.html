@@ -7429,7 +7429,6 @@ a.anchor-link {
       parent.appendChild(output);
     }
 
-
     /**
      * Post-process to ensure mermaid diagrams contain only valid SVG and XHTML.
      */
@@ -7437,7 +7436,6 @@ a.anchor-link {
       svg = svg.replace(RE_VOID_ELEMENT, replaceVoidElement);
       return `${SVG_XML_HEADER}${svg}`;
     }
-
 
     /**
      * A regular expression for all void elements, which may include attributes and
@@ -7461,7 +7459,6 @@ a.anchor-link {
       }
       return `<${tag} ${rest}>`;
     }
-
 
   /**
    * Named HTML entities with their decimal equivalent codes.
@@ -7793,7 +7790,57 @@ a.anchor-link {
     white-space: normal;
   }
 </style>
-<!-- End of mermaid configuration --></head>
+<!-- End of mermaid configuration -->
+  <!-- SEO:start (written by seo_wire.py; search data only, nothing visible) -->
+  <meta name="description" content="============================================ ; Title: Week 10 — Deep Learning Sentiment Analysis with Universal Sentence Encoder ; Author: Hali Sarah Parsons…">
+  <link rel="canonical" href="https://iqproductionz.com/DSPortfolio/Content/Coursework/Deep_Learning_Embeddings.html">
+  <meta property="og:type" content="website">
+  <meta property="og:site_name" content="I.Q. Productionz">
+  <meta property="og:title" content="Week10_USE_DeepLearning">
+  <meta property="og:description" content="============================================ ; Title: Week 10 — Deep Learning Sentiment Analysis with Universal Sentence Encoder ; Author: Hali Sarah Parsons…">
+  <meta property="og:url" content="https://iqproductionz.com/DSPortfolio/Content/Coursework/Deep_Learning_Embeddings.html">
+  <meta name="twitter:card" content="summary">
+  <meta name="twitter:title" content="Week10_USE_DeepLearning">
+  <meta name="twitter:description" content="============================================ ; Title: Week 10 — Deep Learning Sentiment Analysis with Universal Sentence Encoder ; Author: Hali Sarah Parsons…">
+  <script type="application/ld+json">
+{
+ "@context": "https://schema.org",
+ "@graph": [
+  {
+   "@type": "WebPage",
+   "@id": "https://iqproductionz.com/DSPortfolio/Content/Coursework/Deep_Learning_Embeddings.html",
+   "url": "https://iqproductionz.com/DSPortfolio/Content/Coursework/Deep_Learning_Embeddings.html",
+   "name": "Week10_USE_DeepLearning",
+   "description": "============================================ ; Title: Week 10 — Deep Learning Sentiment Analysis with Universal Sentence Encoder ; Author: Hali Sarah Parsons…",
+   "inLanguage": "en-US",
+   "isPartOf": {
+    "@type": "WebSite",
+    "name": "I.Q. Productionz",
+    "url": "https://iqproductionz.com/"
+   }
+  },
+  {
+   "@type": "BreadcrumbList",
+   "itemListElement": [
+    {
+     "@type": "ListItem",
+     "position": 1,
+     "name": "I.Q. Productionz",
+     "item": "https://iqproductionz.com/"
+    },
+    {
+     "@type": "ListItem",
+     "position": 2,
+     "name": "DSPortfolio",
+     "item": "https://iqproductionz.com/DSPortfolio/"
+    }
+   ]
+  }
+ ]
+}
+  </script>
+  <!-- SEO:end -->
+</head>
 <body class="jp-Notebook" data-jp-theme-light="true" data-jp-theme-name="JupyterLab Light">
 <main>
 <div class="jp-Cell jp-MarkdownCell jp-Notebook-cell">
@@ -8167,7 +8214,6 @@ Embedding shape per sentence: (2, 512)
         <span class="n">embeddings</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">embed</span><span class="p">(</span><span class="n">batch</span><span class="p">)</span><span class="o">.</span><span class="n">numpy</span><span class="p">())</span>
     <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">vstack</span><span class="p">(</span><span class="n">embeddings</span><span class="p">)</span>
 
-
 <span class="nb">print</span><span class="p">(</span><span class="s2">"Encoding train, validation, and test sets..."</span><span class="p">)</span>
 <span class="n">t0</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
 
@@ -8378,13 +8424,15 @@ Training...
 <div class="jp-OutputArea-child">
 <div class="jp-OutputPrompt jp-OutputArea-prompt"></div>
 <div class="jp-RenderedText jp-OutputArea-output" data-mime-type="text/plain" tabindex="0">
-<pre><span class="ansi-bold"> 1/22</span> <span class="ansi-white-fg">━━━━━━━━━━━━━━━━━━━━</span> <span class="ansi-bold">17s</span> 828ms/step - accuracy: 0.4688 - loss: 0.6956</pre>
+<pre>
+<span class="ansi-bold"> 1/22</span> <span class="ansi-white-fg">━━━━━━━━━━━━━━━━━━━━</span> <span class="ansi-bold">17s</span> 828ms/step - accuracy: 0.4688 - loss: 0.6956</pre>
 </div>
 </div>
 <div class="jp-OutputArea-child">
 <div class="jp-OutputPrompt jp-OutputArea-prompt"></div>
 <div class="jp-RenderedText jp-OutputArea-output" data-mime-type="text/plain" tabindex="0">
-<pre><span class="ansi-bold">22/22</span> <span class="ansi-green-fg">━━━━━━━━━━━━━━━━━━━━</span> <span class="ansi-bold">1s</span> 10ms/step - accuracy: 0.9286 - loss: 0.4400 - val_accuracy: 1.0000 - val_loss: 0.1033
+<pre>
+<span class="ansi-bold">22/22</span> <span class="ansi-green-fg">━━━━━━━━━━━━━━━━━━━━</span> <span class="ansi-bold">1s</span> 10ms/step - accuracy: 0.9286 - loss: 0.4400 - val_accuracy: 1.0000 - val_loss: 0.1033
 </pre>
 </div>
 </div>
@@ -8398,13 +8446,15 @@ Training...
 <div class="jp-OutputArea-child">
 <div class="jp-OutputPrompt jp-OutputArea-prompt"></div>
 <div class="jp-RenderedText jp-OutputArea-output" data-mime-type="text/plain" tabindex="0">
-<pre><span class="ansi-bold"> 1/22</span> <span class="ansi-white-fg">━━━━━━━━━━━━━━━━━━━━</span> <span class="ansi-bold">1s</span> 94ms/step - accuracy: 1.0000 - loss: 0.1154</pre>
+<pre>
+<span class="ansi-bold"> 1/22</span> <span class="ansi-white-fg">━━━━━━━━━━━━━━━━━━━━</span> <span class="ansi-bold">1s</span> 94ms/step - accuracy: 1.0000 - loss: 0.1154</pre>
 </div>
 </div>
 <div class="jp-OutputArea-child">
 <div class="jp-OutputPrompt jp-OutputArea-prompt"></div>
 <div class="jp-RenderedText jp-OutputArea-output" data-mime-type="text/plain" tabindex="0">
-<pre><span class="ansi-bold">22/22</span> <span class="ansi-green-fg">━━━━━━━━━━━━━━━━━━━━</span> <span class="ansi-bold">0s</span> 5ms/step - accuracy: 1.0000 - loss: 0.0330 - val_accuracy: 1.0000 - val_loss: 0.0021
+<pre>
+<span class="ansi-bold">22/22</span> <span class="ansi-green-fg">━━━━━━━━━━━━━━━━━━━━</span> <span class="ansi-bold">0s</span> 5ms/step - accuracy: 1.0000 - loss: 0.0330 - val_accuracy: 1.0000 - val_loss: 0.0021
 </pre>
 </div>
 </div>
@@ -8418,13 +8468,15 @@ Training...
 <div class="jp-OutputArea-child">
 <div class="jp-OutputPrompt jp-OutputArea-prompt"></div>
 <div class="jp-RenderedText jp-OutputArea-output" data-mime-type="text/plain" tabindex="0">
-<pre><span class="ansi-bold"> 1/22</span> <span class="ansi-white-fg">━━━━━━━━━━━━━━━━━━━━</span> <span class="ansi-bold">0s</span> 46ms/step - accuracy: 1.0000 - loss: 0.0040</pre>
+<pre>
+<span class="ansi-bold"> 1/22</span> <span class="ansi-white-fg">━━━━━━━━━━━━━━━━━━━━</span> <span class="ansi-bold">0s</span> 46ms/step - accuracy: 1.0000 - loss: 0.0040</pre>
 </div>
 </div>
 <div class="jp-OutputArea-child">
 <div class="jp-OutputPrompt jp-OutputArea-prompt"></div>
 <div class="jp-RenderedText jp-OutputArea-output" data-mime-type="text/plain" tabindex="0">
-<pre><span class="ansi-bold">22/22</span> <span class="ansi-green-fg">━━━━━━━━━━━━━━━━━━━━</span> <span class="ansi-bold">0s</span> 4ms/step - accuracy: 1.0000 - loss: 0.0018 - val_accuracy: 1.0000 - val_loss: 5.3678e-04
+<pre>
+<span class="ansi-bold">22/22</span> <span class="ansi-green-fg">━━━━━━━━━━━━━━━━━━━━</span> <span class="ansi-bold">0s</span> 4ms/step - accuracy: 1.0000 - loss: 0.0018 - val_accuracy: 1.0000 - val_loss: 5.3678e-04
 </pre>
 </div>
 </div>
@@ -8438,13 +8490,15 @@ Training...
 <div class="jp-OutputArea-child">
 <div class="jp-OutputPrompt jp-OutputArea-prompt"></div>
 <div class="jp-RenderedText jp-OutputArea-output" data-mime-type="text/plain" tabindex="0">
-<pre><span class="ansi-bold"> 1/22</span> <span class="ansi-white-fg">━━━━━━━━━━━━━━━━━━━━</span> <span class="ansi-bold">0s</span> 46ms/step - accuracy: 1.0000 - loss: 0.0012</pre>
+<pre>
+<span class="ansi-bold"> 1/22</span> <span class="ansi-white-fg">━━━━━━━━━━━━━━━━━━━━</span> <span class="ansi-bold">0s</span> 46ms/step - accuracy: 1.0000 - loss: 0.0012</pre>
 </div>
 </div>
 <div class="jp-OutputArea-child">
 <div class="jp-OutputPrompt jp-OutputArea-prompt"></div>
 <div class="jp-RenderedText jp-OutputArea-output" data-mime-type="text/plain" tabindex="0">
-<pre><span class="ansi-bold">22/22</span> <span class="ansi-green-fg">━━━━━━━━━━━━━━━━━━━━</span> <span class="ansi-bold">0s</span> 4ms/step - accuracy: 1.0000 - loss: 7.6573e-04 - val_accuracy: 1.0000 - val_loss: 3.4344e-04
+<pre>
+<span class="ansi-bold">22/22</span> <span class="ansi-green-fg">━━━━━━━━━━━━━━━━━━━━</span> <span class="ansi-bold">0s</span> 4ms/step - accuracy: 1.0000 - loss: 7.6573e-04 - val_accuracy: 1.0000 - val_loss: 3.4344e-04
 </pre>
 </div>
 </div>
@@ -8458,13 +8512,15 @@ Training...
 <div class="jp-OutputArea-child">
 <div class="jp-OutputPrompt jp-OutputArea-prompt"></div>
 <div class="jp-RenderedText jp-OutputArea-output" data-mime-type="text/plain" tabindex="0">
-<pre><span class="ansi-bold"> 1/22</span> <span class="ansi-white-fg">━━━━━━━━━━━━━━━━━━━━</span> <span class="ansi-bold">1s</span> 50ms/step - accuracy: 1.0000 - loss: 5.3750e-04</pre>
+<pre>
+<span class="ansi-bold"> 1/22</span> <span class="ansi-white-fg">━━━━━━━━━━━━━━━━━━━━</span> <span class="ansi-bold">1s</span> 50ms/step - accuracy: 1.0000 - loss: 5.3750e-04</pre>
 </div>
 </div>
 <div class="jp-OutputArea-child">
 <div class="jp-OutputPrompt jp-OutputArea-prompt"></div>
 <div class="jp-RenderedText jp-OutputArea-output" data-mime-type="text/plain" tabindex="0">
-<pre><span class="ansi-bold">22/22</span> <span class="ansi-green-fg">━━━━━━━━━━━━━━━━━━━━</span> <span class="ansi-bold">0s</span> 4ms/step - accuracy: 1.0000 - loss: 5.6561e-04 - val_accuracy: 1.0000 - val_loss: 2.5640e-04
+<pre>
+<span class="ansi-bold">22/22</span> <span class="ansi-green-fg">━━━━━━━━━━━━━━━━━━━━</span> <span class="ansi-bold">0s</span> 4ms/step - accuracy: 1.0000 - loss: 5.6561e-04 - val_accuracy: 1.0000 - val_loss: 2.5640e-04
 </pre>
 </div>
 </div>
@@ -8478,13 +8534,15 @@ Training...
 <div class="jp-OutputArea-child">
 <div class="jp-OutputPrompt jp-OutputArea-prompt"></div>
 <div class="jp-RenderedText jp-OutputArea-output" data-mime-type="text/plain" tabindex="0">
-<pre><span class="ansi-bold"> 1/22</span> <span class="ansi-white-fg">━━━━━━━━━━━━━━━━━━━━</span> <span class="ansi-bold">1s</span> 48ms/step - accuracy: 1.0000 - loss: 5.1697e-04</pre>
+<pre>
+<span class="ansi-bold"> 1/22</span> <span class="ansi-white-fg">━━━━━━━━━━━━━━━━━━━━</span> <span class="ansi-bold">1s</span> 48ms/step - accuracy: 1.0000 - loss: 5.1697e-04</pre>
 </div>
 </div>
 <div class="jp-OutputArea-child">
 <div class="jp-OutputPrompt jp-OutputArea-prompt"></div>
 <div class="jp-RenderedText jp-OutputArea-output" data-mime-type="text/plain" tabindex="0">
-<pre><span class="ansi-bold">22/22</span> <span class="ansi-green-fg">━━━━━━━━━━━━━━━━━━━━</span> <span class="ansi-bold">0s</span> 4ms/step - accuracy: 1.0000 - loss: 4.4565e-04 - val_accuracy: 1.0000 - val_loss: 1.9989e-04
+<pre>
+<span class="ansi-bold">22/22</span> <span class="ansi-green-fg">━━━━━━━━━━━━━━━━━━━━</span> <span class="ansi-bold">0s</span> 4ms/step - accuracy: 1.0000 - loss: 4.4565e-04 - val_accuracy: 1.0000 - val_loss: 1.9989e-04
 </pre>
 </div>
 </div>
@@ -8498,13 +8556,15 @@ Training...
 <div class="jp-OutputArea-child">
 <div class="jp-OutputPrompt jp-OutputArea-prompt"></div>
 <div class="jp-RenderedText jp-OutputArea-output" data-mime-type="text/plain" tabindex="0">
-<pre><span class="ansi-bold"> 1/22</span> <span class="ansi-white-fg">━━━━━━━━━━━━━━━━━━━━</span> <span class="ansi-bold">1s</span> 48ms/step - accuracy: 1.0000 - loss: 5.9850e-04</pre>
+<pre>
+<span class="ansi-bold"> 1/22</span> <span class="ansi-white-fg">━━━━━━━━━━━━━━━━━━━━</span> <span class="ansi-bold">1s</span> 48ms/step - accuracy: 1.0000 - loss: 5.9850e-04</pre>
 </div>
 </div>
 <div class="jp-OutputArea-child">
 <div class="jp-OutputPrompt jp-OutputArea-prompt"></div>
 <div class="jp-RenderedText jp-OutputArea-output" data-mime-type="text/plain" tabindex="0">
-<pre><span class="ansi-bold">22/22</span> <span class="ansi-green-fg">━━━━━━━━━━━━━━━━━━━━</span> <span class="ansi-bold">0s</span> 4ms/step - accuracy: 1.0000 - loss: 3.4418e-04 - val_accuracy: 1.0000 - val_loss: 1.6252e-04
+<pre>
+<span class="ansi-bold">22/22</span> <span class="ansi-green-fg">━━━━━━━━━━━━━━━━━━━━</span> <span class="ansi-bold">0s</span> 4ms/step - accuracy: 1.0000 - loss: 3.4418e-04 - val_accuracy: 1.0000 - val_loss: 1.6252e-04
 </pre>
 </div>
 </div>
@@ -8518,13 +8578,15 @@ Training...
 <div class="jp-OutputArea-child">
 <div class="jp-OutputPrompt jp-OutputArea-prompt"></div>
 <div class="jp-RenderedText jp-OutputArea-output" data-mime-type="text/plain" tabindex="0">
-<pre><span class="ansi-bold"> 1/22</span> <span class="ansi-white-fg">━━━━━━━━━━━━━━━━━━━━</span> <span class="ansi-bold">1s</span> 50ms/step - accuracy: 1.0000 - loss: 4.4619e-04</pre>
+<pre>
+<span class="ansi-bold"> 1/22</span> <span class="ansi-white-fg">━━━━━━━━━━━━━━━━━━━━</span> <span class="ansi-bold">1s</span> 50ms/step - accuracy: 1.0000 - loss: 4.4619e-04</pre>
 </div>
 </div>
 <div class="jp-OutputArea-child">
 <div class="jp-OutputPrompt jp-OutputArea-prompt"></div>
 <div class="jp-RenderedText jp-OutputArea-output" data-mime-type="text/plain" tabindex="0">
-<pre><span class="ansi-bold">22/22</span> <span class="ansi-green-fg">━━━━━━━━━━━━━━━━━━━━</span> <span class="ansi-bold">0s</span> 4ms/step - accuracy: 1.0000 - loss: 2.4280e-04 - val_accuracy: 1.0000 - val_loss: 1.3493e-04
+<pre>
+<span class="ansi-bold">22/22</span> <span class="ansi-green-fg">━━━━━━━━━━━━━━━━━━━━</span> <span class="ansi-bold">0s</span> 4ms/step - accuracy: 1.0000 - loss: 2.4280e-04 - val_accuracy: 1.0000 - val_loss: 1.3493e-04
 </pre>
 </div>
 </div>
@@ -8538,13 +8600,15 @@ Training...
 <div class="jp-OutputArea-child">
 <div class="jp-OutputPrompt jp-OutputArea-prompt"></div>
 <div class="jp-RenderedText jp-OutputArea-output" data-mime-type="text/plain" tabindex="0">
-<pre><span class="ansi-bold"> 1/22</span> <span class="ansi-white-fg">━━━━━━━━━━━━━━━━━━━━</span> <span class="ansi-bold">1s</span> 50ms/step - accuracy: 1.0000 - loss: 2.6791e-04</pre>
+<pre>
+<span class="ansi-bold"> 1/22</span> <span class="ansi-white-fg">━━━━━━━━━━━━━━━━━━━━</span> <span class="ansi-bold">1s</span> 50ms/step - accuracy: 1.0000 - loss: 2.6791e-04</pre>
 </div>
 </div>
 <div class="jp-OutputArea-child">
 <div class="jp-OutputPrompt jp-OutputArea-prompt"></div>
 <div class="jp-RenderedText jp-OutputArea-output" data-mime-type="text/plain" tabindex="0">
-<pre><span class="ansi-bold">22/22</span> <span class="ansi-green-fg">━━━━━━━━━━━━━━━━━━━━</span> <span class="ansi-bold">0s</span> 4ms/step - accuracy: 1.0000 - loss: 2.7199e-04 - val_accuracy: 1.0000 - val_loss: 1.1092e-04
+<pre>
+<span class="ansi-bold">22/22</span> <span class="ansi-green-fg">━━━━━━━━━━━━━━━━━━━━</span> <span class="ansi-bold">0s</span> 4ms/step - accuracy: 1.0000 - loss: 2.7199e-04 - val_accuracy: 1.0000 - val_loss: 1.1092e-04
 </pre>
 </div>
 </div>
@@ -8558,13 +8622,15 @@ Training...
 <div class="jp-OutputArea-child">
 <div class="jp-OutputPrompt jp-OutputArea-prompt"></div>
 <div class="jp-RenderedText jp-OutputArea-output" data-mime-type="text/plain" tabindex="0">
-<pre><span class="ansi-bold"> 1/22</span> <span class="ansi-white-fg">━━━━━━━━━━━━━━━━━━━━</span> <span class="ansi-bold">1s</span> 50ms/step - accuracy: 1.0000 - loss: 2.5875e-04</pre>
+<pre>
+<span class="ansi-bold"> 1/22</span> <span class="ansi-white-fg">━━━━━━━━━━━━━━━━━━━━</span> <span class="ansi-bold">1s</span> 50ms/step - accuracy: 1.0000 - loss: 2.5875e-04</pre>
 </div>
 </div>
 <div class="jp-OutputArea-child">
 <div class="jp-OutputPrompt jp-OutputArea-prompt"></div>
 <div class="jp-RenderedText jp-OutputArea-output" data-mime-type="text/plain" tabindex="0">
-<pre><span class="ansi-bold">22/22</span> <span class="ansi-green-fg">━━━━━━━━━━━━━━━━━━━━</span> <span class="ansi-bold">0s</span> 4ms/step - accuracy: 1.0000 - loss: 1.7937e-04 - val_accuracy: 1.0000 - val_loss: 9.2884e-05
+<pre>
+<span class="ansi-bold">22/22</span> <span class="ansi-green-fg">━━━━━━━━━━━━━━━━━━━━</span> <span class="ansi-bold">0s</span> 4ms/step - accuracy: 1.0000 - loss: 1.7937e-04 - val_accuracy: 1.0000 - val_loss: 9.2884e-05
 </pre>
 </div>
 </div>
@@ -8783,7 +8849,6 @@ Test Accuracy:       1.0000
     accuracy                           1.00       150
    macro avg       1.00      1.00      1.00       150
 weighted avg       1.00      1.00      1.00       150
-
 
 Sample Predicted Probabilities (first 8 test reviews):
 Review (truncated)                                       P(not happy)  Predicted     Actual

@@ -7429,7 +7429,6 @@ a.anchor-link {
       parent.appendChild(output);
     }
 
-
     /**
      * Post-process to ensure mermaid diagrams contain only valid SVG and XHTML.
      */
@@ -7437,7 +7436,6 @@ a.anchor-link {
       svg = svg.replace(RE_VOID_ELEMENT, replaceVoidElement);
       return `${SVG_XML_HEADER}${svg}`;
     }
-
 
     /**
      * A regular expression for all void elements, which may include attributes and
@@ -7461,7 +7459,6 @@ a.anchor-link {
       }
       return `<${tag} ${rest}>`;
     }
-
 
   /**
    * Named HTML entities with their decimal equivalent codes.
@@ -7793,7 +7790,57 @@ a.anchor-link {
     white-space: normal;
   }
 </style>
-<!-- End of mermaid configuration --></head>
+<!-- End of mermaid configuration -->
+  <!-- SEO:start (written by seo_wire.py; search data only, nothing visible) -->
+  <meta name="description" content="============================================ ; Title: BU 320 Week 11 — Bayes&#x27; Theorem and Shannon Entropy ; Author: Hali Sarah Parsons ; Date: 24 May 2026…">
+  <link rel="canonical" href="https://iqproductionz.com/DSPortfolio/Content/Coursework/Bayes_Entropy.html">
+  <meta property="og:type" content="website">
+  <meta property="og:site_name" content="I.Q. Productionz">
+  <meta property="og:title" content="Week11_BU320_Bayes_Entropy">
+  <meta property="og:description" content="============================================ ; Title: BU 320 Week 11 — Bayes&#x27; Theorem and Shannon Entropy ; Author: Hali Sarah Parsons ; Date: 24 May 2026…">
+  <meta property="og:url" content="https://iqproductionz.com/DSPortfolio/Content/Coursework/Bayes_Entropy.html">
+  <meta name="twitter:card" content="summary">
+  <meta name="twitter:title" content="Week11_BU320_Bayes_Entropy">
+  <meta name="twitter:description" content="============================================ ; Title: BU 320 Week 11 — Bayes&#x27; Theorem and Shannon Entropy ; Author: Hali Sarah Parsons ; Date: 24 May 2026…">
+  <script type="application/ld+json">
+{
+ "@context": "https://schema.org",
+ "@graph": [
+  {
+   "@type": "WebPage",
+   "@id": "https://iqproductionz.com/DSPortfolio/Content/Coursework/Bayes_Entropy.html",
+   "url": "https://iqproductionz.com/DSPortfolio/Content/Coursework/Bayes_Entropy.html",
+   "name": "Week11_BU320_Bayes_Entropy",
+   "description": "============================================ ; Title: BU 320 Week 11 — Bayes' Theorem and Shannon Entropy ; Author: Hali Sarah Parsons ; Date: 24 May 2026…",
+   "inLanguage": "en-US",
+   "isPartOf": {
+    "@type": "WebSite",
+    "name": "I.Q. Productionz",
+    "url": "https://iqproductionz.com/"
+   }
+  },
+  {
+   "@type": "BreadcrumbList",
+   "itemListElement": [
+    {
+     "@type": "ListItem",
+     "position": 1,
+     "name": "I.Q. Productionz",
+     "item": "https://iqproductionz.com/"
+    },
+    {
+     "@type": "ListItem",
+     "position": 2,
+     "name": "DSPortfolio",
+     "item": "https://iqproductionz.com/DSPortfolio/"
+    }
+   ]
+  }
+ ]
+}
+  </script>
+  <!-- SEO:end -->
+</head>
 <body class="jp-Notebook" data-jp-theme-light="true" data-jp-theme-name="JupyterLab Light">
 <main>
 <div class="jp-Cell jp-MarkdownCell jp-Notebook-cell">
@@ -8234,7 +8281,6 @@ C                  0.275862             0.197734
     <span class="n">probs</span> <span class="o">=</span> <span class="n">probs</span><span class="p">[</span><span class="n">probs</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">]</span>
 
     <span class="k">return</span> <span class="o">-</span><span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">probs</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">log2</span><span class="p">(</span><span class="n">probs</span><span class="p">))</span>
-
 
 <span class="c1"># ── Sanity checks ────────────────────────────────────────────────────────</span>
 <span class="c1"># A fair coin: two equally probable outcomes → maximum entropy for 2 outcomes = 1 bit</span>

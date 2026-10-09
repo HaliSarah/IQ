@@ -7429,7 +7429,6 @@ a.anchor-link {
       parent.appendChild(output);
     }
 
-
     /**
      * Post-process to ensure mermaid diagrams contain only valid SVG and XHTML.
      */
@@ -7437,7 +7436,6 @@ a.anchor-link {
       svg = svg.replace(RE_VOID_ELEMENT, replaceVoidElement);
       return `${SVG_XML_HEADER}${svg}`;
     }
-
 
     /**
      * A regular expression for all void elements, which may include attributes and
@@ -7461,7 +7459,6 @@ a.anchor-link {
       }
       return `<${tag} ${rest}>`;
     }
-
 
   /**
    * Named HTML entities with their decimal equivalent codes.
@@ -7793,7 +7790,57 @@ a.anchor-link {
     white-space: normal;
   }
 </style>
-<!-- End of mermaid configuration --></head>
+<!-- End of mermaid configuration -->
+  <!-- SEO:start (written by seo_wire.py; search data only, nothing visible) -->
+  <meta name="description" content="============================================ ; Title: BU 360 Term Project — Final Milestone ; Custom NER on Real PMC Open Access Corpus ; Author: Hali Sarah…">
+  <link rel="canonical" href="https://iqproductionz.com/DSPortfolio/Content/Coursework/Custom_NER_PMC.html">
+  <meta property="og:type" content="website">
+  <meta property="og:site_name" content="I.Q. Productionz">
+  <meta property="og:title" content="BU360_Final_Milestone_CustomNER">
+  <meta property="og:description" content="============================================ ; Title: BU 360 Term Project — Final Milestone ; Custom NER on Real PMC Open Access Corpus ; Author: Hali Sarah…">
+  <meta property="og:url" content="https://iqproductionz.com/DSPortfolio/Content/Coursework/Custom_NER_PMC.html">
+  <meta name="twitter:card" content="summary">
+  <meta name="twitter:title" content="BU360_Final_Milestone_CustomNER">
+  <meta name="twitter:description" content="============================================ ; Title: BU 360 Term Project — Final Milestone ; Custom NER on Real PMC Open Access Corpus ; Author: Hali Sarah…">
+  <script type="application/ld+json">
+{
+ "@context": "https://schema.org",
+ "@graph": [
+  {
+   "@type": "WebPage",
+   "@id": "https://iqproductionz.com/DSPortfolio/Content/Coursework/Custom_NER_PMC.html",
+   "url": "https://iqproductionz.com/DSPortfolio/Content/Coursework/Custom_NER_PMC.html",
+   "name": "BU360_Final_Milestone_CustomNER",
+   "description": "============================================ ; Title: BU 360 Term Project — Final Milestone ; Custom NER on Real PMC Open Access Corpus ; Author: Hali Sarah…",
+   "inLanguage": "en-US",
+   "isPartOf": {
+    "@type": "WebSite",
+    "name": "I.Q. Productionz",
+    "url": "https://iqproductionz.com/"
+   }
+  },
+  {
+   "@type": "BreadcrumbList",
+   "itemListElement": [
+    {
+     "@type": "ListItem",
+     "position": 1,
+     "name": "I.Q. Productionz",
+     "item": "https://iqproductionz.com/"
+    },
+    {
+     "@type": "ListItem",
+     "position": 2,
+     "name": "DSPortfolio",
+     "item": "https://iqproductionz.com/DSPortfolio/"
+    }
+   ]
+  }
+ ]
+}
+  </script>
+  <!-- SEO:end -->
+</head>
 <body class="jp-Notebook" data-jp-theme-light="true" data-jp-theme-name="JupyterLab Light">
 <main>
 <div class="jp-Cell jp-MarkdownCell jp-Notebook-cell">
@@ -8012,7 +8059,6 @@ All imports loaded.
                 <span class="k">if</span> <span class="n">t</span> <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span><span class="n">t</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">20</span><span class="p">:</span>
                     <span class="n">passages</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">t</span><span class="p">)</span>
     <span class="k">return</span> <span class="s1">' '</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">passages</span><span class="p">)</span>
-
 
 <span class="nb">print</span><span class="p">(</span><span class="s2">"Fetching full-text articles from BioC-PMC API..."</span><span class="p">)</span>
 <span class="n">raw_docs</span> <span class="o">=</span> <span class="p">[]</span>
