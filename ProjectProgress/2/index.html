@@ -13,7 +13,7 @@
   --panel-surface: #24365C; --panel-line: #34497A;
   --c-sarah: #FF4FA3; --c-andrea: #A35CFF; --c-matt: #2F8CFF; --c-everyone: #2E8B8B;
   --on-sarah: #1B2A49; --on-andrea: #FFFFFF; --on-matt: #FFFFFF; --on-everyone: #FFFFFF;
-  --warn: #B4601A;
+  --warn: #B4601A; --danger: #D6334F;
   --font-display: "Archivo", "Arial Narrow", system-ui, sans-serif;
   --font-body: "IBM Plex Sans", system-ui, -apple-system, "Segoe UI", sans-serif;
   --font-mono: "IBM Plex Mono", ui-monospace, "SFMono-Regular", Menlo, monospace;
@@ -94,6 +94,26 @@ h1 { font-family: var(--font-display); font-stretch: 85%; font-weight: 800; font
 .member .bar > i { box-shadow: 0 0 8px var(--oc); background: var(--oc); }
 .member-name .dot { background: var(--oc); box-shadow: 0 0 8px var(--oc); }
 .link-btn { background: none; border: 0; padding: 2px 4px; font-size: 12.5px; color: var(--muted); cursor: pointer; text-decoration: underline; text-underline-offset: 2px; }
+.signs { display: flex; flex-wrap: wrap; gap: 6px 16px; margin-top: 6px; }
+.sign { display: inline-flex; align-items: center; gap: 6px; font-size: 13px; font-weight: 500; cursor: pointer; }
+.sign input { width: 18px; height: 18px; margin: 0; accent-color: var(--oc); cursor: pointer; }
+.sign input:checked { filter: drop-shadow(0 0 3px var(--oc)) drop-shadow(0 0 7px var(--oc)); }
+.sign input:disabled { cursor: default; }
+.sign-count { font-family: var(--font-mono); font-size: 12px; color: var(--muted); width: 22px; text-align: center; padding-top: 2px; font-variant-numeric: tabular-nums; }
+.sign-count.all { color: var(--c-everyone); font-weight: 600; }
+.due { font-family: var(--font-mono); font-size: 12px; color: var(--muted); background: none; border: 1px solid transparent; padding: 2px 7px; border-radius: 6px; white-space: nowrap; font-variant-numeric: tabular-nums; }
+.due.soon { color: var(--warn); font-weight: 600; }
+.due.overdue { color: #FFFFFF; background: var(--danger); }
+.due.unset { font-style: italic; }
+.due-input { font-family: var(--font-mono); font-size: 12px; padding: 2px 6px; border: 1px solid var(--line); border-radius: 6px; background: var(--surface); color: var(--ink); }
+.member-next { font-size: 12.5px; overflow-wrap: anywhere; }
+.member-next b { font-weight: 600; }
+.edit-row { grid-column: 2 / -1; display: grid; grid-template-columns: minmax(0, 1fr) auto auto auto; gap: 8px 10px; align-items: end; padding: 10px; margin-top: 4px; border: 1px solid var(--line); border-radius: 8px; background: var(--surface); }
+.edit-row label { display: grid; gap: 3px; font-size: 12px; color: var(--muted); }
+.edit-row input, .edit-row select { font-size: 14px; padding: 6px 8px; border: 1px solid var(--line); border-radius: 6px; background: var(--bg); color: var(--ink); min-width: 0; width: 100%; }
+.ed-actions { display: flex; gap: 8px; align-items: center; }
+.save-btn { background: var(--teal); color: #FFFFFF; border: 0; border-radius: 6px; padding: 7px 14px; font-weight: 600; cursor: pointer; }
+@media (max-width: 640px) { .edit-row { grid-template-columns: 1fr 1fr; grid-column: 1 / -1; } .edit-row .ed-title, .edit-row .ed-actions { grid-column: 1 / -1; } }
 .confirm { grid-column: 2 / -1; display: flex; gap: 10px; align-items: center; font-size: 13px; }
 .confirm .danger { color: var(--warn); font-weight: 600; }
 .empty { color: var(--muted); padding: 14px 2px; border-bottom: 1px solid var(--line); font-size: 14px; }
@@ -110,9 +130,9 @@ h1 { font-family: var(--font-display); font-stretch: 85%; font-weight: 800; font
 .member-count { font-family: var(--font-mono); font-size: 13px; font-variant-numeric: tabular-nums; }
 .member .bar { background: var(--panel-line); height: 6px; }
 .add { display: grid; gap: 12px; background: var(--panel-surface); border: 1px solid var(--panel-line); border-radius: 12px; padding: 18px; }
-.add-row { display: grid; grid-template-columns: minmax(0, 1fr) auto auto auto; gap: 10px; }
+.add-row { display: grid; grid-template-columns: minmax(0, 1fr) auto auto auto auto; gap: 10px; }
 .add label { font-size: 12px; color: var(--panel-muted); display: grid; gap: 4px; }
-.add input[type="text"], .add select { background: var(--panel); color: var(--panel-ink); border: 1px solid var(--panel-line); border-radius: 8px; padding: 9px 10px; min-width: 0; width: 100%; }
+.add input[type="text"], .add input[type="date"], .add select { background: var(--panel); color: var(--panel-ink); border: 1px solid var(--panel-line); border-radius: 8px; padding: 9px 10px; min-width: 0; width: 100%; }
 .add button[type="submit"] { align-self: end; background: var(--amber); color: #1B2A49; font-weight: 600; border: 0; border-radius: 8px; padding: 10px 18px; cursor: pointer; }
 .add button[disabled] { opacity: .55; cursor: default; }
 .add-note { font-size: 13px; color: var(--panel-muted); margin: 0; }
@@ -168,6 +188,9 @@ h1 { font-family: var(--font-display); font-stretch: 85%; font-weight: 800; font
         <label for="new-milestone">Milestone
           <select id="new-milestone"></select>
         </label>
+        <label for="new-due">Due date
+          <input type="date" id="new-due">
+        </label>
         <button type="submit" id="add-btn">Add task</button>
       </div>
       <p class="add-note" id="add-note"></p>
@@ -194,6 +217,7 @@ let tasks = [], loaded = false;
 let filter = "All";
 let hideDone = false;
 let confirmId = null;
+let editId = null;
 const pending = new Set();
 const names = {};
 
@@ -232,19 +256,49 @@ function dueLabel(iso) {
   return { text: `Due ${fmtDate(iso)} · ${n} days left`, soon: n <= 3 };
 }
 
-function sorted() { return [...tasks].sort((a, b) => (a.order ?? 0) - (b.order ?? 0)); }
+// Tasks flow by due date; undated tasks follow, in the order they were added.
+function sorted() {
+  return [...tasks].sort((a, b) => {
+    const da = a.due || "9999-12-31", dbb = b.due || "9999-12-31";
+    if (da !== dbb) return da < dbb ? -1 : 1;
+    return (a.order ?? 0) - (b.order ?? 0);
+  });
+}
+// Team tasks need a sign-off from each person; a task counts as done only when all three have checked it.
+const PEOPLE = ["Sarah", "Andrea", "Matt"];
+function isTeam(t) { return !PEOPLE.includes(t.owner); }
+function signed(t, p) { return !!(t.signoffs && t.signoffs[p] && t.signoffs[p].done); }
+function isDone(t) { return isTeam(t) ? PEOPLE.every(p => signed(t, p)) : !!t.done; }
+function doneFor(t, p) { return isTeam(t) ? signed(t, p) : !!t.done; }
+
+function taskDueText(t) {
+  if (!t.due) return "Set due date";
+  const n = dayDiff(t.due);
+  if (!isDone(t)) {
+    if (n < 0) return `Overdue · ${fmtDate(t.due)}`;
+    if (n === 0) return "Due today";
+    if (n === 1) return "Due tomorrow";
+  }
+  return `Due ${fmtDate(t.due)}`;
+}
+function dueClass(t) {
+  if (!t.due) return " unset";
+  if (isDone(t)) return "";
+  const n = dayDiff(t.due);
+  return n < 0 ? " overdue" : (n <= 1 ? " soon" : "");
+}
 
 function renderHeader() {
-  const total = tasks.length, done = tasks.filter(t => t.done).length;
+  const total = tasks.length, done = tasks.filter(isDone).length;
   const cnt = $("overall-count");
   cnt.textContent = "";
   if (!loaded) { cnt.textContent = "Loading tasks…"; return; }
   cnt.append(`${done} of ${total} done `, el("span", { text: total ? `(${Math.round(done / total * 100)}%)` : "" }));
   $("overall-bar").style.width = total ? `${done / total * 100}%` : "0";
   const nd = $("next-due"); nd.textContent = "";
-  const next = MILESTONES.find(m => m.due && dayDiff(m.due) >= 0 && tasks.some(t => t.milestone === m.key && !t.done));
+  const next = MILESTONES.find(m => m.due && dayDiff(m.due) >= 0 && tasks.some(t => t.milestone === m.key && !isDone(t)));
   if (next) {
-    const left = tasks.filter(t => t.milestone === next.key && !t.done).length;
+    const left = tasks.filter(t => t.milestone === next.key && !isDone(t)).length;
     nd.append("Next up: ", el("strong", { text: next.name.split(" · ")[0] }), ` · ${dueLabel(next.due).text} · ${left} open`);
   }
 }
@@ -265,29 +319,72 @@ function renderFilters() {
   f.append(el("label", { class: "toggle", for: "hide-done" }, cb, "Hide finished"));
 }
 
+function fmtShort(iso) {
+  const d = new Date(iso);
+  return isNaN(d) ? "" : d.toLocaleDateString(undefined, { month: "short", day: "numeric" });
+}
+
 function taskRow(t) {
-  const cb = el("input", { type: "checkbox", id: "cb-" + t.id, "aria-label": t.title || "Task" });
-  cb.checked = !!t.done;
-  cb.disabled = !canWrite || pending.has(t.id);
-  cb.addEventListener("change", () => toggle(t, cb.checked));
+  const team = isTeam(t);
+  const done = isDone(t);
+  let lead;
+  if (team) {
+    const n = PEOPLE.filter(p => signed(t, p)).length;
+    lead = el("span", { class: "sign-count" + (done ? " all" : ""), text: `${n}/3`, title: `${n} of 3 sign-offs` });
+  } else {
+    lead = el("input", { type: "checkbox", id: "cb-" + t.id, "aria-label": t.title || "Task" });
+    lead.checked = !!t.done;
+    lead.disabled = !canWrite || pending.has(t.id);
+    lead.addEventListener("change", () => toggle(t, lead.checked));
+  }
 
   const meta = [];
-  if (t.done) {
+  if (t.note) meta.push(t.note);
+  if (!team && t.done) {
     const who = t.doneBy ? (names[t.doneBy] || "") : "";
-    let when = "";
-    if (t.doneAt) { const d = new Date(t.doneAt); if (!isNaN(d)) when = d.toLocaleDateString(undefined, { month: "short", day: "numeric" }); }
+    const when = t.doneAt ? fmtShort(t.doneAt) : "";
     meta.push(["Done", who && `by ${who}`, when && `on ${when}`].filter(Boolean).join(" "));
   }
+  if (team && done) meta.push("Approved by all three");
+
   const body = el("div", { class: "t-body" },
-    el("label", { class: "t-title", for: "cb-" + t.id, text: t.title || "Untitled task" }),
+    team ? el("span", { class: "t-title", text: t.title || "Untitled task" })
+         : el("label", { class: "t-title", for: "cb-" + t.id, text: t.title || "Untitled task" }),
     meta.length ? el("div", { class: "t-meta", text: meta.join(" · ") }) : null);
+
+  if (team) {
+    const row = el("div", { class: "signs", role: "group", "aria-label": "Sign-offs" });
+    for (const p of PEOPLE) {
+      const id = `sg-${t.id}-${p}`;
+      const box = el("input", { type: "checkbox", id });
+      box.checked = signed(t, p);
+      box.disabled = !canWrite || pending.has(t.id + ":" + p);
+      box.addEventListener("change", () => toggleSign(t, p, box.checked));
+      const s = t.signoffs && t.signoffs[p];
+      let tip = `${p} has not signed off`;
+      if (s && s.done) {
+        const who = s.by ? (names[s.by] || "") : "";
+        const when = s.at ? fmtShort(s.at) : "";
+        tip = [`${p} signed off`, when && `on ${when}`, who && who !== p && `(checked by ${who})`].filter(Boolean).join(" ");
+      }
+      row.append(el("label", { class: "sign o-" + p, for: id, title: tip }, box, p));
+    }
+    body.append(row);
+  }
 
   const owner = OWNERS.some(o => o.key === t.owner) ? t.owner : "Everyone";
   const ownerLabel = OWNERS.find(o => o.key === owner).label;
-  const side = el("div", { class: "t-side" }, el("span", { class: "owner o-" + owner, text: ownerLabel }));
-  if (canWrite) side.append(el("button", { type: "button", class: "link-btn", text: "Remove", "aria-label": `Remove ${t.title || "task"}`, onclick: () => { confirmId = t.id; render(); } }));
+  const side = el("div", { class: "t-side" });
+  if (t.due || canWrite) side.append(el("span", { class: "due" + dueClass(t), text: taskDueText(t) }));
+  side.append(el("span", { class: "owner o-" + owner, text: ownerLabel }));
+  if (canWrite && editId !== t.id) {
+    side.append(
+      el("button", { type: "button", class: "link-btn", text: "Edit", "aria-label": `Edit ${t.title || "task"}`, onclick: () => { editId = t.id; confirmId = null; render(); } }),
+      el("button", { type: "button", class: "link-btn", text: "Remove", "aria-label": `Remove ${t.title || "task"}`, onclick: () => { confirmId = t.id; editId = null; render(); } }));
+  }
 
-  const li = el("li", { class: "task o-" + owner + (t.done ? " done" : "") }, cb, body, side);
+  const li = el("li", { class: "task o-" + owner + (done ? " done" : "") }, lead, body, side);
+  if (editId === t.id && canWrite) li.append(editForm(t, owner));
   if (confirmId === t.id) {
     li.append(el("div", { class: "confirm" },
       el("span", { text: "Remove this task for everyone?" }),
@@ -305,8 +402,11 @@ function renderMilestones() {
   for (const m of MILESTONES) {
     const all = list.filter(t => (MILESTONES.some(x => x.key === t.milestone) ? t.milestone : "other") === m.key);
     if (!all.length && m.key === "other") continue;
-    const shown = all.filter(t => (filter === "All" || t.owner === filter) && !(hideDone && t.done));
-    const doneCount = all.filter(t => t.done).length;
+    // A person's view also shows team tasks, since each team task needs their sign-off.
+    const inView = (t) => filter === "All" || t.owner === filter || (PEOPLE.includes(filter) && isTeam(t));
+    const hidden = (t) => hideDone && (PEOPLE.includes(filter) ? doneFor(t, filter) : isDone(t));
+    const shown = all.filter(t => inView(t) && !hidden(t));
+    const doneCount = all.filter(isDone).length;
     const meta = el("div", { class: "ms-meta" });
     if (m.due) { const d = dueLabel(m.due); meta.append(el("span", { class: d.soon ? "soon" : "", text: d.text })); }
     meta.append(el("span", { text: `${doneCount}/${all.length} done` }));
@@ -321,17 +421,71 @@ function renderMilestones() {
 function renderTeam() {
   const root = $("team"); root.textContent = "";
   for (const o of OWNERS) {
-    const mine = tasks.filter(t => t.owner === o.key);
-    const done = mine.filter(t => t.done).length;
+    const person = PEOPLE.includes(o.key);
+    // A person's count includes the team tasks they still need to sign off.
+    const mine = tasks.filter(t => t.owner === o.key || (person && isTeam(t)));
+    const done = mine.filter(t => person ? doneFor(t, o.key) : isDone(t)).length;
     const bar = el("div", { class: "bar" }, el("i"));
     bar.firstChild.style.width = mine.length ? `${done / mine.length * 100}%` : "0";
     const dot = el("span", { class: "dot" });
     root.append(el("div", { class: "member o-" + o.key },
       el("div", { class: "member-name" }, dot, o.label),
-      el("div", { class: "member-role", text: o.role }),
+      el("div", { class: "member-role", text: person ? `${o.role} · includes team sign-offs` : "Fully approved by all three" }),
       bar,
-      el("div", { class: "member-count", text: loaded ? `${done} of ${mine.length} done` : "…" })));
+      el("div", { class: "member-count", text: loaded ? `${done} of ${mine.length} done` : "…" }),
+      memberNext(o.key, person, mine)));
   }
+}
+
+function memberNext(key, person, mine) {
+  const box = el("div", { class: "member-next" });
+  if (!loaded) return box;
+  const next = sorted().find(t => person ? ((t.owner === key || isTeam(t)) && !doneFor(t, key)) : (t.owner === key && !isDone(t)));
+  if (!next) { box.textContent = mine.length ? "All done" : "No tasks yet"; return box; }
+  box.append(el("b", { text: "Next: " }), next.title || "Untitled task");
+  if (next.due) box.append(` · ${taskDueText(next)}`);
+  return box;
+}
+
+// Inline editor: task name, owner, and due date. Only changed fields are written,
+// so a teammate's simultaneous edit to another field is not overwritten.
+function editForm(t, owner) {
+  const tid = "ed-title-" + t.id, oid = "ed-owner-" + t.id, did = "ed-due-" + t.id;
+  const ti = el("input", { type: "text", id: tid, maxlength: "200", value: t.title || "" });
+  const os = el("select", { id: oid });
+  for (const o of OWNERS) os.append(el("option", { value: o.key, text: o.label }));
+  os.value = owner;
+  const di = el("input", { type: "date", id: did, value: t.due || "" });
+  const form = el("form", { class: "edit-row" },
+    el("label", { class: "ed-title", for: tid }, "Task name", ti),
+    el("label", { for: oid }, "Owner", os),
+    el("label", { for: did }, "Due date", di),
+    el("div", { class: "ed-actions" },
+      el("button", { type: "submit", class: "save-btn", text: "Save" }),
+      el("button", { type: "button", class: "link-btn", text: "Cancel", onclick: () => { editId = null; render(); } })));
+  form.addEventListener("submit", (ev) => { ev.preventDefault(); saveEdit(t, ti.value.trim(), os.value, di.value); });
+  form.addEventListener("keydown", (e) => { if (e.key === "Escape") { editId = null; render(); } });
+  setTimeout(() => ti.focus(), 0);
+  return form;
+}
+
+async function saveEdit(t, title, owner, due) {
+  if (!title) { setStatus("Give the task a name before saving."); return; }
+  const change = {};
+  if (title !== (t.title || "")) change.title = title;
+  if (owner !== t.owner) change.owner = owner;
+  if (due !== (t.due || "")) change.due = due || null;
+  editId = null; setStatus("");
+  if (Object.keys(change).length) {
+    try { await db.doc("tasks/" + t.id).update(change); } catch (e) { handleWriteError(e); }
+  }
+  render();
+}
+
+async function setDue(t, value) {
+  if ((t.due || "") === value) { render(); return; }
+  try { await db.doc("tasks/" + t.id).update({ due: value || null }); } catch (e) { handleWriteError(e); }
+  render();
 }
 
 function render() {
@@ -342,7 +496,7 @@ function render() {
 let resolving = false;
 async function resolveNames() {
   if (!user || resolving) return;
-  const ids = [...new Set(tasks.map(t => t.doneBy).filter(Boolean))].filter(id => !(id in names));
+  const ids = [...new Set(tasks.flatMap(t => [t.doneBy, ...PEOPLE.map(p => t.signoffs && t.signoffs[p] && t.signoffs[p].by)]).filter(Boolean))].filter(id => !(id in names));
   if (!ids.length) return;
   resolving = true;
   try {
@@ -377,6 +531,19 @@ async function toggle(t, done) {
   pending.delete(t.id); render();
 }
 
+async function toggleSign(t, person, on) {
+  const key = t.id + ":" + person;
+  if (pending.has(key)) return;
+  pending.add(key); setStatus("");
+  try {
+    // Nested update merges, so two people signing at once don't erase each other.
+    await db.doc("tasks/" + t.id).update({ signoffs: { [person]: on
+      ? { done: true, by: myId, at: new Date().toISOString() }
+      : { done: false, by: null, at: null } } });
+  } catch (e) { handleWriteError(e); }
+  pending.delete(key); render();
+}
+
 async function removeTask(t) {
   confirmId = null;
   try { await db.doc("tasks/" + t.id).delete(); } catch (e) { handleWriteError(e); }
@@ -385,7 +552,7 @@ async function removeTask(t) {
 
 function applyWriteState() {
   const off = !canWrite || !db;
-  for (const id of ["new-title", "new-owner", "new-milestone", "add-btn"]) $(id).disabled = off;
+  for (const id of ["new-title", "new-owner", "new-milestone", "new-due", "add-btn"]) $(id).disabled = off;
   $("add-note").textContent = !db ? "Open this page on claude.ai while signed in to load and add tasks."
     : (!canWrite ? "You have view-only access, so you can't add tasks." : "");
 }
@@ -404,10 +571,11 @@ function setupForm() {
     try {
       await db.collection("tasks").add({
         title, owner: os.value, milestone: ms.value, order: Date.now(),
+        due: $("new-due").value || null,
         done: false, doneBy: null, doneAt: null, createdBy: myId,
       });
-      $("new-title").value = "";
-      $("add-note").textContent = "Added. It's at the bottom of its milestone.";
+      $("new-title").value = ""; $("new-due").value = "";
+      $("add-note").textContent = "Added to its milestone, in due-date order. Tasks without a date go at the bottom.";
     } catch (e) { handleWriteError(e); }
     $("add-btn").disabled = !canWrite;
   });
