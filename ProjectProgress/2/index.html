@@ -1,4 +1,17 @@
-<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<!doctype html>
+<!--
+  Title:       Forecast Regional Electricity Grid Demand: Team Tracker
+  Author:      Hali Sarah Parsons
+  Date:        2026-10-11
+  Modified By: Claude (GitHub Pages + Firebase version)
+  Description: Shared DSC 450 Project 2 checklist for Group 1. Hosted on GitHub Pages;
+               tasks, sign-offs, and due dates save to Cloud Firestore so every
+               teammate sees the same live list without a Claude account.
+-->
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Forecast Regional Electricity Grid Demand</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -36,6 +49,9 @@
 }
 
 * { box-sizing: border-box; }
+body { margin: 0; }
+img { max-width: 100%; }
+[hidden] { display: none !important; }
 body { background: var(--bg); color: var(--ink); font-family: var(--font-body); font-size: 15px; line-height: 1.5; }
 .wrap { max-width: 860px; margin: 0 auto; padding-inline: 16px; }
 button, input, select { font: inherit; color: inherit; }
@@ -88,6 +104,9 @@ h1 { font-family: var(--font-display); font-stretch: 85%; font-weight: 800; font
 .o-Andrea { --oc: var(--c-andrea); --on: var(--on-andrea); }
 .o-Matt { --oc: var(--c-matt); --on: var(--on-matt); }
 .o-Everyone { --oc: var(--c-everyone); --on: var(--on-everyone); }
+.me-row { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; font-size: 13px; }
+.me-row .chip[aria-pressed="true"] { background: var(--oc); color: var(--on); border-color: var(--oc); box-shadow: 0 0 12px -2px var(--oc); }
+.seed { display: grid; gap: 10px; justify-items: start; padding: 18px; border: 1px dashed var(--line); border-radius: 10px; }
 .view-label { font-size: 13px; font-weight: 600; color: var(--muted); }
 .chip .dot { box-shadow: 0 0 6px var(--oc); background: var(--oc); }
 .chip[aria-pressed="true"].o-Sarah, .chip[aria-pressed="true"].o-Andrea, .chip[aria-pressed="true"].o-Matt, .chip[aria-pressed="true"].o-Everyone { background: var(--oc); color: var(--on); border-color: var(--oc); box-shadow: 0 0 12px -2px var(--oc); }
@@ -159,12 +178,16 @@ h1 { font-family: var(--font-display); font-stretch: 85%; font-weight: 800; font
 }
 @media (prefers-reduced-motion: reduce) { .bar > i { transition: none; } }
 </style>
+</head>
+<body>
+
 
 <div class="wrap">
   <header>
     <div class="eyebrow">DSC 450 · Project 2 · Group 1</div>
     <h1>Forecast Regional Electricity Grid Demand</h1>
     <p class="sub">Shared checklist for the ERCOT day-ahead demand forecast. Check off your steps as you finish them; everyone sees the same list.</p>
+    <div class="me-row" id="me-row" role="group" aria-label="Who is using this page"></div>
     <div class="overall">
       <div class="overall-top">
         <div class="overall-count" id="overall-count">Loading tasks…</div>
@@ -210,7 +233,409 @@ h1 { font-family: var(--font-display); font-stretch: 85%; font-weight: 800; font
   </div>
 </section>
 
-<script>
+<script type="module">
+// WHY pinned versions: a fixed SDK version keeps the page from breaking when Firebase ships changes.
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+import { getAuth, signInAnonymously } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+import { getFirestore, collection, doc, onSnapshot, addDoc, updateDoc, deleteDoc, writeBatch }
+  from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+
+// Config for Firebase project project-2-dd4bc (Analytics left out: the tracker doesn't need it).
+// WHY it's safe in public code: Firebase web keys identify the project; the
+// Firestore rules are what control access.
+const FIREBASE_CONFIG = {
+  apiKey: "AIzaSyAt2ZJbJ4jXtOP0svgzpG7YJKxwBICRQe8",
+  authDomain: "project-2-dd4bc.firebaseapp.com",
+  projectId: "project-2-dd4bc",
+  storageBucket: "project-2-dd4bc.firebasestorage.app",
+  messagingSenderId: "472501821189",
+  appId: "1:472501821189:web:e6aeaad6f2aff2fc5b616c",
+};
+
+// Starter list: the tasks, due dates, and sign-offs from the Claude version of the tracker.
+const SEED = {
+ "t01": {
+  "done": false,
+  "doneAt": null,
+  "doneBy": null,
+  "due": "2026-10-13",
+  "kind": "choice",
+  "milestone": "m1",
+  "note": "Check each dataset you approve, or write in another. Done once one dataset has all three checks.",
+  "options": {
+   "o1": {
+    "label": "EIA-930 Hourly Electric Grid Monitor: ERCOT hourly demand, Jan 2022 to Sep 2026 (already pulled and cleaned)",
+    "order": 1,
+    "url": "https://www.eia.gov/electricity/gridmonitor/about"
+   }
+  },
+  "order": 1,
+  "owner": "Everyone",
+  "title": "Confirm the dataset"
+ },
+ "t02": {
+  "done": true,
+  "doneAt": "2026-10-12T04:02:49.481Z",
+  "doneBy": "Sarah",
+  "due": "2026-10-15",
+  "milestone": "m1",
+  "note": "Sarah writes it so Andrea can focus on modeling. Uses kickoff decisions.",
+  "order": 3,
+  "owner": "Sarah",
+  "title": "Write the proposal: research questions, methods, challenges, abstract"
+ },
+ "t03": {
+  "done": true,
+  "doneAt": "2026-10-12T04:02:46.247Z",
+  "doneBy": "Sarah",
+  "due": "2026-10-14",
+  "milestone": "m1",
+  "note": "Start from the 6 already in the draft report.",
+  "order": 2,
+  "owner": "Sarah",
+  "title": "Collect 10 APA references"
+ },
+ "t04": {
+  "done": false,
+  "doneAt": null,
+  "doneBy": null,
+  "due": "2026-10-16",
+  "milestone": "m1",
+  "note": "Andrea and Matt read it; quick comments are enough.",
+  "order": 4,
+  "owner": "Everyone",
+  "title": "Review the proposal and send edits to Sarah"
+ },
+ "t05": {
+  "done": false,
+  "doneAt": null,
+  "doneBy": null,
+  "due": "2026-10-17",
+  "milestone": "m1",
+  "note": "One submission for the team, a day before the Sunday deadline.",
+  "order": 5,
+  "owner": "Sarah",
+  "title": "Submit the proposal"
+ },
+ "t10": {
+  "done": true,
+  "doneAt": "2026-10-10T12:00:00-05:00",
+  "doneBy": null,
+  "due": "2026-10-10",
+  "milestone": "m2",
+  "order": 10,
+  "owner": "Sarah",
+  "title": "Pull EIA-930 ERCOT hourly data"
+ },
+ "t11": {
+  "done": true,
+  "doneAt": "2026-10-11T12:00:00-05:00",
+  "doneBy": null,
+  "due": "2026-10-11",
+  "milestone": "m2",
+  "order": 11,
+  "owner": "Sarah",
+  "title": "Clean data and engineer features (wrangling notebook)"
+ },
+ "t12": {
+  "done": true,
+  "doneAt": "2026-10-12T03:38:35.550Z",
+  "doneBy": "Sarah",
+  "due": "2026-10-12",
+  "milestone": "m2",
+  "note": "Andrea and Matt both start from this file.",
+  "order": 12,
+  "owner": "Sarah",
+  "title": "Share eia930_erco_cleaned.csv and the notebook in Teams"
+ },
+ "t13": {
+  "done": false,
+  "doneAt": null,
+  "doneBy": null,
+  "due": "2026-10-14",
+  "milestone": "m2",
+  "note": "Needs the cleaned CSV. This is the score every model must beat.",
+  "order": 13,
+  "owner": "Andrea",
+  "title": "Build the seasonal naive baseline model"
+ },
+ "t14": {
+  "done": false,
+  "doneAt": null,
+  "doneBy": null,
+  "due": "2026-10-17",
+  "milestone": "m2",
+  "note": "Needs the baseline. The longest step, so it gets the most days.",
+  "order": 14,
+  "owner": "Andrea",
+  "title": "Train SARIMA, Prophet, and XGBoost models"
+ },
+ "t15": {
+  "done": false,
+  "doneAt": null,
+  "doneBy": null,
+  "due": "2026-10-19",
+  "milestone": "m2",
+  "note": "Handoff: Matt needs the numbers for charts, Sarah for the methods section.",
+  "order": 15,
+  "owner": "Andrea",
+  "title": "Score models (MAE, RMSE, MAPE) against ERCOT's forecast and send results to the team"
+ },
+ "t16": {
+  "done": false,
+  "doneAt": null,
+  "doneBy": null,
+  "due": "2026-10-15",
+  "milestone": "m2",
+  "note": "Needs the cleaned CSV. Runs alongside Andrea's modeling.",
+  "order": 16,
+  "owner": "Matt",
+  "title": "Make exploratory charts (demand by hour and season, heatmap)"
+ },
+ "t17": {
+  "done": false,
+  "doneAt": null,
+  "doneBy": null,
+  "due": "2026-10-21",
+  "milestone": "m2",
+  "note": "Needs Andrea's results from Mon 10/19. Two days to build them.",
+  "order": 17,
+  "owner": "Matt",
+  "title": "Make report illustrations (3 at ¼ page, 1 at ½ page)"
+ },
+ "t18": {
+  "done": true,
+  "doneAt": "2026-10-12T03:56:14.007Z",
+  "doneBy": "Sarah",
+  "due": "2026-10-19",
+  "milestone": "m2",
+  "note": "Needs the model list from Andrea, not the scores.",
+  "order": 18,
+  "owner": "Sarah",
+  "title": "Draft Milestone 2: data and methods sections"
+ },
+ "t19": {
+  "done": false,
+  "doneAt": null,
+  "doneBy": null,
+  "due": "2026-10-20",
+  "milestone": "m2",
+  "note": "Needs the scored models.",
+  "order": 19,
+  "owner": "Andrea",
+  "title": "Draft Milestone 2: model results section"
+ },
+ "t20": {
+  "done": false,
+  "doneAt": null,
+  "doneBy": null,
+  "due": "2026-10-21",
+  "milestone": "m2",
+  "note": "Write alongside the illustrations.",
+  "order": 20,
+  "owner": "Matt",
+  "title": "Draft Milestone 2: introduction and illustrations"
+ },
+ "t21": {
+  "done": false,
+  "doneAt": null,
+  "doneBy": null,
+  "due": "2026-10-23",
+  "milestone": "m2",
+  "note": "Review the assembled draft, not loose sections.",
+  "order": 27,
+  "owner": "Sarah",
+  "title": "Review Milestone 2: Andrea's and Matt's sections"
+ },
+ "t22": {
+  "done": false,
+  "doneAt": null,
+  "doneBy": null,
+  "due": "2026-10-23",
+  "milestone": "m2",
+  "note": "Review the assembled draft, not loose sections.",
+  "order": 28,
+  "owner": "Andrea",
+  "title": "Review Milestone 2: Sarah's and Matt's sections"
+ },
+ "t23": {
+  "done": false,
+  "doneAt": null,
+  "doneBy": null,
+  "due": "2026-10-23",
+  "milestone": "m2",
+  "note": "Review the assembled draft, not loose sections.",
+  "order": 29,
+  "owner": "Matt",
+  "title": "Review Milestone 2: Sarah's and Andrea's sections"
+ },
+ "t24": {
+  "done": false,
+  "doneAt": null,
+  "doneBy": null,
+  "due": "2026-10-21",
+  "milestone": "m2",
+  "note": "Sarah drafts them from the starter set in the draft report; the team edits during review.",
+  "order": 24,
+  "owner": "Sarah",
+  "title": "Write 10 stakeholder questions and answers"
+ },
+ "t25": {
+  "done": false,
+  "doneAt": null,
+  "doneBy": null,
+  "due": "2026-10-24",
+  "milestone": "m2",
+  "note": "One submission for the team, a day before the Sunday deadline.",
+  "order": 31,
+  "owner": "Sarah",
+  "title": "Export draft report to PDF (3–5 pages, double-spaced, APA) and submit"
+ },
+ "t26": {
+  "done": false,
+  "doneAt": null,
+  "doneBy": null,
+  "due": "2026-10-22",
+  "milestone": "m2",
+  "note": "Needs all three drafts and the illustrations.",
+  "order": 26,
+  "owner": "Sarah",
+  "title": "Assemble the full draft: merge sections, figures, references, formatting"
+ },
+ "t27": {
+  "done": false,
+  "doneAt": null,
+  "doneBy": null,
+  "due": "2026-10-24",
+  "milestone": "m2",
+  "note": "Morning, so Sarah can submit the same day.",
+  "order": 30,
+  "owner": "Everyone",
+  "title": "Make the review edits to your own section"
+ },
+ "t30": {
+  "done": false,
+  "doneAt": null,
+  "doneBy": null,
+  "due": "2026-10-28",
+  "milestone": "m3",
+  "note": "Needs Andrea's final figures. Give each person a section to present.",
+  "order": 39,
+  "owner": "Matt",
+  "title": "Build the presentation slides"
+ },
+ "t31": {
+  "done": false,
+  "doneAt": null,
+  "doneBy": null,
+  "due": "2026-10-30",
+  "milestone": "m3",
+  "note": "Teams call: share screen and hit record.",
+  "order": 44,
+  "owner": "Everyone",
+  "title": "Record the 10–15 minute presentation with audio"
+ },
+ "t32": {
+  "done": false,
+  "doneAt": null,
+  "doneBy": null,
+  "due": "2026-10-28",
+  "milestone": "m3",
+  "note": "Sarah merges everyone's final fixes.",
+  "order": 40,
+  "owner": "Sarah",
+  "title": "Finalize the report / white paper PDF"
+ },
+ "t33": {
+  "done": false,
+  "doneAt": null,
+  "doneBy": null,
+  "due": "2026-10-29",
+  "milestone": "m3",
+  "note": "Update the answers with the final numbers.",
+  "order": 41,
+  "owner": "Sarah",
+  "title": "Finalize the stakeholder Q&A"
+ },
+ "t34": {
+  "done": false,
+  "doneAt": null,
+  "doneBy": null,
+  "due": "2026-10-29",
+  "milestone": "m3",
+  "note": "Andrea sends her modeling notebook; Matt sends his chart notebook.",
+  "order": 42,
+  "owner": "Sarah",
+  "title": "Post the code and link to the GitHub repo"
+ },
+ "t35": {
+  "done": false,
+  "doneAt": null,
+  "doneBy": null,
+  "due": "2026-11-01",
+  "milestone": "m3",
+  "note": "Individual: each person submits their own.",
+  "order": 47,
+  "owner": "Everyone",
+  "title": "Submit the team peer evaluation"
+ },
+ "t36": {
+  "done": false,
+  "doneAt": null,
+  "doneBy": null,
+  "due": "2026-10-31",
+  "milestone": "m3",
+  "note": "Individual: each person does their own.",
+  "order": 46,
+  "owner": "Everyone",
+  "title": "Add the Project 1 page to your portfolio (Portfolio Milestone 2)"
+ },
+ "t37": {
+  "done": false,
+  "doneAt": null,
+  "doneBy": null,
+  "due": "2026-10-26",
+  "milestone": "m3",
+  "note": "If feedback isn't back yet, start final edits anyway.",
+  "order": 37,
+  "owner": "Everyone",
+  "title": "Check-in call: go over draft feedback and split up final fixes"
+ },
+ "t38": {
+  "done": false,
+  "doneAt": null,
+  "doneBy": null,
+  "due": "2026-10-27",
+  "milestone": "m3",
+  "note": "Handoff: Matt builds the slides from these.",
+  "order": 38,
+  "owner": "Andrea",
+  "title": "Finalize model results and forecast figures"
+ },
+ "t39": {
+  "done": false,
+  "doneAt": null,
+  "doneBy": null,
+  "due": "2026-10-29",
+  "milestone": "m3",
+  "note": "Catches timing problems before the recording.",
+  "order": 43,
+  "owner": "Everyone",
+  "title": "Rehearse the presentation once, timed (10–15 minutes)"
+ },
+ "t40": {
+  "done": false,
+  "doneAt": null,
+  "doneBy": null,
+  "due": "2026-10-31",
+  "milestone": "m3",
+  "note": "One submission for the team, a day before the Sunday deadline.",
+  "order": 45,
+  "owner": "Matt",
+  "title": "Submit the final package: report, video, Q&A, code link"
+ }
+};
+
 const MILESTONES = [
   { key: "m1", name: "Milestone 1 · Proposal", due: "2026-10-18" },
   { key: "m2", name: "Milestone 2 · Draft report & 10 questions", due: "2026-10-25" },
@@ -224,7 +649,11 @@ const OWNERS = [
   { key: "Everyone", label: "Team", role: "Shared team tasks" },
 ];
 
-let db = null, user = null, myId = null, canWrite = true;
+let fs = null, canWrite = false;
+// WHY a name instead of an account: the team opens a plain link with no sign-in,
+// so each person picks who they are once and this browser remembers it.
+let myName = null;
+try { myName = localStorage.getItem("myName"); } catch (e) {}
 let tasks = [], loaded = false;
 let filter = "All";
 let hideDone = false;
@@ -232,7 +661,6 @@ let confirmId = null;
 let editId = null;
 let focusEdit = false;
 const pending = new Set();
-const names = {};
 
 try { hideDone = localStorage.getItem("hideDone") === "1"; } catch (e) {}
 
@@ -372,7 +800,7 @@ function taskRow(t) {
   const meta = [];
   if (t.note) meta.push(t.note);
   if (!team && t.done) {
-    const who = t.doneBy ? (names[t.doneBy] || "") : "";
+    const who = t.doneBy || "";
     const when = t.doneAt ? fmtShort(t.doneAt) : "";
     meta.push(["Done", who && `by ${who}`, when && `on ${when}`].filter(Boolean).join(" "));
   }
@@ -396,7 +824,7 @@ function taskRow(t) {
       const s = t.signoffs && t.signoffs[p];
       let tip = `${p} has not signed off`;
       if (s && s.done) {
-        const who = s.by ? (names[s.by] || "") : "";
+        const who = s.by || "";
         const when = s.at ? fmtShort(s.at) : "";
         tip = [`${p} signed off`, when && `on ${when}`, who && who !== p && `(checked by ${who})`].filter(Boolean).join(" ");
       }
@@ -430,7 +858,15 @@ function taskRow(t) {
 function renderMilestones() {
   const root = $("milestones"); root.textContent = "";
   if (!loaded) { root.append(el("p", { class: "empty", text: "Loading the team's tasks…" })); return; }
-  if (!tasks.length) { root.append(el("p", { class: "empty", text: "No tasks yet. Add the first one with the form at the bottom of the page." })); return; }
+  if (!tasks.length) {
+    // WHY a button, not an automatic seed: two people opening a brand-new database
+    // at the same moment would otherwise both write the starter list.
+    const btn = el("button", { type: "button", class: "save-btn", text: "Load the starter task list", onclick: seedTasks });
+    btn.disabled = !canWrite;
+    root.append(el("div", { class: "seed" },
+      el("span", { text: "The database is empty. Load the team's starter list (34 tasks with due dates), or add tasks with the form at the bottom." }), btn));
+    return;
+  }
   const list = sorted();
   for (const m of MILESTONES) {
     const all = list.filter(t => (MILESTONES.some(x => x.key === t.milestone) ? t.milestone : "other") === m.key);
@@ -510,7 +946,7 @@ async function saveEdit(t, title, owner, due) {
   if (due !== (t.due || "")) change.due = due || null;
   editId = null; setStatus("");
   if (Object.keys(change).length) {
-    try { await db.doc("tasks/" + t.id).update(change); } catch (e) { handleWriteError(e); }
+    try { await updateDoc(taskRef(t.id), change); } catch (e) { handleWriteError(e); }
   }
   render();
 }
@@ -548,32 +984,34 @@ function choiceBlock(t) {
 }
 
 async function toggleOptSign(t, o, person, on) {
+  if (needName()) return;
   const key = `${t.id}:${o.id}:${person}`;
   if (pending.has(key)) return;
   pending.add(key); setStatus("");
   try {
-    // Nested update merges, so sign-offs on other datasets and by other people stay intact.
-    await db.doc("tasks/" + t.id).update({ options: { [o.id]: { signoffs: { [person]: on
-      ? { done: true, by: myId, at: new Date().toISOString() }
-      : { done: false, by: null, at: null } } } } });
+    // WHY a field path: it changes only this person's box on this dataset.
+    await updateDoc(taskRef(t.id), { [`options.${o.id}.signoffs.${person}`]: on
+      ? { done: true, by: myName, at: new Date().toISOString() }
+      : { done: false, by: null, at: null } });
   } catch (e) { handleWriteError(e); }
   pending.delete(key); render();
 }
 
 async function addOption(t, label) {
   const id = "w" + Date.now().toString(36);
-  try { await db.doc("tasks/" + t.id).update({ options: { [id]: { label, order: Date.now(), writeIn: true, addedBy: myId } } }); }
+  if (needName()) return;
+  try { await updateDoc(taskRef(t.id), { [`options.${id}`]: { label, order: Date.now(), writeIn: true, addedBy: myName } }); }
   catch (e) { handleWriteError(e); }
 }
 
 async function removeOption(t, o) {
-  try { await db.doc("tasks/" + t.id).update({ options: { [o.id]: { removed: true } } }); }
+  try { await updateDoc(taskRef(t.id), { [`options.${o.id}.removed`]: true }); }
   catch (e) { handleWriteError(e); }
 }
 
 async function setDue(t, value) {
   if ((t.due || "") === value) { render(); return; }
-  try { await db.doc("tasks/" + t.id).update({ due: value || null }); } catch (e) { handleWriteError(e); }
+  try { await updateDoc(taskRef(t.id), { due: value || null }); } catch (e) { handleWriteError(e); }
   render();
 }
 
@@ -582,74 +1020,76 @@ function render() {
   const kept = {};
   document.querySelectorAll("[data-keep]").forEach(n => { kept[n.id] = n.value; });
   const active = document.activeElement && document.activeElement.id;
-  renderHeader(); renderFilters(); renderMilestones(); renderTeam();
+  renderMe(); renderHeader(); renderFilters(); renderMilestones(); renderTeam();
   for (const [id, v] of Object.entries(kept)) { const n = document.getElementById(id); if (n) n.value = v; }
   if (active) { const n = document.getElementById(active); if (n && n !== document.activeElement) n.focus(); }
-  resolveNames();
 }
 
-let resolving = false;
-async function resolveNames() {
-  if (!user || resolving) return;
-  const ids = [...new Set(tasks.flatMap(t => [t.doneBy, ...PEOPLE.map(p => t.signoffs && t.signoffs[p] && t.signoffs[p].by)]).filter(Boolean))].filter(id => !(id in names));
-  if (!ids.length) return;
-  resolving = true;
-  try {
-    const ps = await user.profiles(ids);
-    let changed = false;
-    for (const id of ids) { names[id] = (ps[id] && ps[id].name) || ""; if (names[id]) changed = true; }
-    if (changed) { resolving = false; renderMilestones(); return; }
-  } catch (e) {}
-  resolving = false;
+// WHY: sign-offs record who clicked, so the page needs to know which teammate is using it.
+function renderMe() {
+  const r = $("me-row"); r.textContent = "";
+  r.append(el("span", { class: "view-label", text: myName ? "You are:" : "Pick your name to start checking things off:" }));
+  for (const p of PEOPLE) {
+    r.append(el("button", { type: "button", class: "chip o-" + p, "aria-pressed": String(myName === p), onclick: () => {
+      myName = p; try { localStorage.setItem("myName", p); } catch (e) {} setStatus(""); render(); } }, el("span", { class: "dot" }), p));
+  }
+}
+
+// WHY: every write records who made it, so block writes until a name is picked.
+function needName() {
+  if (myName) return false;
+  setStatus("Pick your name at the top of the page first.");
+  render();
+  return true;
 }
 
 function handleWriteError(e) {
   const code = e && e.code;
-  if (code === "invalid_argument" || code === "not_granted") {
-    canWrite = false; applyWriteState();
-    setStatus("You can view this list but not change it. Ask Sarah to share it with you as an Editor.");
-  } else if (code === "quota_exceeded") {
-    setStatus("The list is full. Remove a few finished tasks, then try again.");
+  if (code === "permission-denied") {
+    setStatus("The database refused that change. Check that the Firestore rules are published and Anonymous sign-in is turned on.");
+  } else if (code === "resource-exhausted") {
+    setStatus("The free Firebase quota is used up for today. Changes will save again tomorrow.");
   } else {
     setStatus("That change didn't save. Check your connection and try again.");
   }
 }
 
 async function toggle(t, done) {
+  if (needName()) return;
   if (pending.has(t.id)) return;
   pending.add(t.id); setStatus("");
   try {
-    await db.doc("tasks/" + t.id).update(done
-      ? { done: true, doneBy: myId, doneAt: new Date().toISOString() }
+    await updateDoc(taskRef(t.id), done
+      ? { done: true, doneBy: myName, doneAt: new Date().toISOString() }
       : { done: false, doneBy: null, doneAt: null });
   } catch (e) { handleWriteError(e); }
   pending.delete(t.id); render();
 }
 
 async function toggleSign(t, person, on) {
+  if (needName()) return;
   const key = t.id + ":" + person;
   if (pending.has(key)) return;
   pending.add(key); setStatus("");
   try {
-    // Nested update merges, so two people signing at once don't erase each other.
-    await db.doc("tasks/" + t.id).update({ signoffs: { [person]: on
-      ? { done: true, by: myId, at: new Date().toISOString() }
-      : { done: false, by: null, at: null } } });
+    // WHY a field path: two people signing at once don't erase each other.
+    await updateDoc(taskRef(t.id), { [`signoffs.${person}`]: on
+      ? { done: true, by: myName, at: new Date().toISOString() }
+      : { done: false, by: null, at: null } });
   } catch (e) { handleWriteError(e); }
   pending.delete(key); render();
 }
 
 async function removeTask(t) {
   confirmId = null;
-  try { await db.doc("tasks/" + t.id).delete(); } catch (e) { handleWriteError(e); }
+  try { await deleteDoc(taskRef(t.id)); } catch (e) { handleWriteError(e); }
   render();
 }
 
 function applyWriteState() {
-  const off = !canWrite || !db;
+  const off = !canWrite || !fs;
   for (const id of ["new-title", "new-owner", "new-milestone", "new-due", "add-btn"]) $(id).disabled = off;
-  $("add-note").textContent = !db ? "Open this page on claude.ai while signed in to load and add tasks."
-    : (!canWrite ? "You have view-only access, so you can't add tasks." : "");
+  $("add-note").textContent = !fs ? "Connecting to the team database…" : "";
 }
 
 function setupForm() {
@@ -661,13 +1101,13 @@ function setupForm() {
   $("add-form").addEventListener("submit", async (ev) => {
     ev.preventDefault();
     const title = $("new-title").value.trim();
-    if (!title || !db || !canWrite) return;
+    if (!title || !fs || !canWrite || needName()) return;
     $("add-btn").disabled = true; setStatus("");
     try {
-      await db.collection("tasks").add({
+      await addDoc(collection(fs, "tasks"), {
         title, owner: os.value, milestone: ms.value, order: Date.now(),
         due: $("new-due").value || null,
-        done: false, doneBy: null, doneAt: null, createdBy: myId,
+        done: false, doneBy: null, doneAt: null, createdBy: myName,
       });
       $("new-title").value = ""; $("new-due").value = "";
       $("add-note").textContent = "Added to its milestone, in due-date order. Tasks without a date go at the bottom.";
@@ -676,24 +1116,45 @@ function setupForm() {
   });
 }
 
+// WHY: writes the starter list in one batch so it lands all at once or not at all.
+async function seedTasks() {
+  if (tasks.length) return;
+  try {
+    const batch = writeBatch(fs);
+    for (const [id, data] of Object.entries(SEED)) batch.set(taskRef(id), data);
+    await batch.commit();
+  } catch (e) { handleWriteError(e); }
+}
+
+// WHY: one place builds a task's document path, so every write targets the same collection.
+function taskRef(id) { return doc(fs, "tasks", id); }
+
+// WHY: connects to Firebase, signs in anonymously so the security rules can tell real
+// page visits from random traffic, then listens for live changes from teammates.
 async function init() {
   setupForm(); render(); applyWriteState();
-  const use = window.claude && window.claude.use;
-  if (!use) { loaded = true; render(); setStatus("Open this page on claude.ai while signed in to see the team's tasks."); return; }
-  [db, user] = await Promise.all([use("db"), use("user")]);
-  if (!db) { loaded = true; render(); applyWriteState(); setStatus("This list couldn't load here. Open it on claude.ai while signed in."); return; }
-  if (user) {
-    myId = await user.id();
-    const cw = await user.can("data.write");
-    if (cw === false) canWrite = false;
+  if (!FIREBASE_CONFIG.apiKey || FIREBASE_CONFIG.apiKey.startsWith("PASTE")) {
+    loaded = true; render();
+    setStatus("Setup needed: paste your Firebase config into FIREBASE_CONFIG near the top of the script.");
+    return;
+  }
+  try {
+    const app = initializeApp(FIREBASE_CONFIG);
+    await signInAnonymously(getAuth(app));
+    fs = getFirestore(app);
+    canWrite = true;
+  } catch (e) {
+    loaded = true; render();
+    setStatus("Couldn't connect to Firebase. Check the config and that Anonymous sign-in is enabled.");
+    return;
   }
   applyWriteState();
-  db.collection("tasks").onSnapshot(snap => {
+  onSnapshot(collection(fs, "tasks"), snap => {
     tasks = snap.docs.map(d => ({ id: d.id, ...d.data() }));
     loaded = true; render();
-  }, () => { setStatus("Live updates stopped. Reload the page to reconnect."); });
+  }, (e) => { handleWriteError(e); });
 }
 init();
 </script>
-
-</body></html>
+</body>
+</html>

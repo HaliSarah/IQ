@@ -1,0 +1,758 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Recycling Contamination Risk Predictor</title>
+<!--
+  Title: Recycling Contamination Risk Predictor - Team Tracker
+  Author: Hali Sarah Parsons
+  Date: 2026-10-11
+  Modified By: Claude (Firebase version for GitHub Pages)
+  Description: Shared DSC 450 Project 3 checklist. Saves to Firebase Firestore so it syncs live from any host.
+-->
+</head><body>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@75..125,500..800&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@500&display=swap">
+<style>
+/* Layout: a light checklist up top, weight gathers at the bottom in a navy
+   panel holding team progress and the add-task form. */
+:root {
+  --navy: #1B2A49; --teal: #2E8B8B; --purple: #6A4C93; --amber: #F4A261; --mist: #E8F4F4;
+  --bg: #F3F7F8; --surface: #FFFFFF; --ink: #1B2A49; --muted: #56647D; --line: #D3E0E3;
+  --track: #DCE8EA; --panel: #1B2A49; --panel-ink: #E8F4F4; --panel-muted: #A9BACF;
+  --panel-surface: #24365C; --panel-line: #34497A;
+  --c-sarah: #FF4FA3; --c-andrea: #A35CFF; --c-matt: #2F8CFF; --c-everyone: #2E8B8B;
+  --on-sarah: #1B2A49; --on-andrea: #FFFFFF; --on-matt: #FFFFFF; --on-everyone: #FFFFFF;
+  --warn: #B4601A; --danger: #D6334F;
+  --font-display: "Archivo", "Arial Narrow", system-ui, sans-serif;
+  --font-body: "IBM Plex Sans", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --font-mono: "IBM Plex Mono", ui-monospace, "SFMono-Regular", Menlo, monospace;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #0E1628; --surface: #16223B; --ink: #E8F4F4; --muted: #9DACC4; --line: #263555;
+    --track: #24334F; --panel: #091022; --panel-ink: #E8F4F4; --panel-muted: #92A3BE;
+    --panel-surface: #142039; --panel-line: #2A3B62;
+    --c-everyone: #4FB8B8; --on-everyone: #0E1628;
+    --warn: #F4A261; color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #0E1628; --surface: #16223B; --ink: #E8F4F4; --muted: #9DACC4; --line: #263555;
+  --track: #24334F; --panel: #091022; --panel-ink: #E8F4F4; --panel-muted: #92A3BE;
+  --panel-surface: #142039; --panel-line: #2A3B62;
+  --c-everyone: #4FB8B8; --on-everyone: #0E1628;
+  --warn: #F4A261; color-scheme: dark;
+}
+
+* { box-sizing: border-box; }
+body { background: var(--bg); color: var(--ink); font-family: var(--font-body); font-size: 15px; line-height: 1.5; }
+.wrap { max-width: 860px; margin: 0 auto; padding-inline: 16px; }
+button, input, select { font: inherit; color: inherit; }
+:focus-visible { outline: 2px solid var(--teal); outline-offset: 2px; }
+
+/* Header */
+header { padding-block: 32px 20px; display: grid; gap: 14px; }
+.eyebrow { font-family: var(--font-mono); font-size: 12px; letter-spacing: .08em; text-transform: uppercase; color: var(--teal); }
+h1 { font-family: var(--font-display); font-stretch: 85%; font-weight: 800; font-size: clamp(28px, 6vw, 44px); line-height: 1.02; margin: 0; text-wrap: balance; letter-spacing: -.01em; }
+.sub { color: var(--muted); margin: 0; max-width: 62ch; }
+.overall { display: grid; gap: 8px; }
+.overall-top { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 6px 16px; align-items: baseline; }
+.overall-count { font-family: var(--font-display); font-weight: 700; font-size: 18px; }
+.overall-count span { color: var(--muted); font-weight: 500; font-family: var(--font-body); font-size: 14px; }
+.next-due { font-size: 14px; color: var(--muted); }
+.whoami { display: flex; gap: 8px; align-items: center; font-size: 13px; color: var(--muted); }
+.whoami select { font-size: 13px; padding: 4px 8px; border: 1px solid var(--line); border-radius: 6px; background: var(--surface); color: var(--ink); }
+.next-due strong { color: var(--ink); font-weight: 600; }
+.bar { height: 8px; background: var(--track); border-radius: 4px; overflow: hidden; }
+.bar > i { display: block; height: 100%; width: 0; background: var(--teal); border-radius: 4px; transition: width .4s ease; }
+
+/* Toolbar */
+.toolbar { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; padding-block: 8px 4px; }
+.chip { border: 1px solid var(--line); background: var(--surface); border-radius: 999px; padding: 5px 12px; font-size: 13px; cursor: pointer; display: inline-flex; align-items: center; gap: 6px; }
+.chip[aria-pressed="true"] { background: var(--ink); color: var(--bg); border-color: var(--ink); }
+.chip .dot { width: 8px; height: 8px; border-radius: 50%; }
+.toggle { margin-left: auto; font-size: 13px; color: var(--muted); display: inline-flex; gap: 6px; align-items: center; cursor: pointer; }
+.toggle input { accent-color: var(--teal); width: 16px; height: 16px; }
+
+.status { font-size: 14px; color: var(--warn); min-height: 0; }
+.status:empty { display: none; }
+.status { padding: 10px 12px; border: 1px solid var(--line); border-radius: 8px; background: var(--surface); margin-top: 8px; }
+
+/* Milestones */
+.milestones { display: grid; gap: 28px; padding-block: 20px 40px; }
+.ms-head { display: flex; flex-wrap: wrap; gap: 4px 14px; align-items: baseline; justify-content: space-between; border-bottom: 2px solid var(--ink); padding-bottom: 6px; }
+.ms-head h2 { font-family: var(--font-display); font-stretch: 90%; font-weight: 700; font-size: 20px; margin: 0; }
+.ms-meta { font-family: var(--font-mono); font-size: 12px; color: var(--muted); display: flex; gap: 12px; flex-wrap: wrap; font-variant-numeric: tabular-nums; }
+.ms-meta .soon { color: var(--warn); }
+.tasks { list-style: none; margin: 0; padding: 0; }
+.task { display: grid; grid-template-columns: auto minmax(0, 1fr) auto; gap: 4px 12px; align-items: start; padding: 11px 2px; border-bottom: 1px solid var(--line); }
+.task input[type="checkbox"] { width: 20px; height: 20px; margin: 1px 0 0; accent-color: var(--oc, var(--teal)); cursor: pointer; }
+.task input[type="checkbox"]:checked { filter: drop-shadow(0 0 3px var(--oc)) drop-shadow(0 0 7px var(--oc)); }
+.task input[type="checkbox"]:disabled { cursor: default; }
+.t-body { min-width: 0; display: grid; gap: 2px; }
+.t-title { overflow-wrap: anywhere; }
+.task.done .t-title { color: var(--muted); text-decoration: line-through; text-decoration-color: var(--line); }
+.t-meta { font-size: 12.5px; color: var(--muted); }
+.t-side { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; justify-content: flex-end; }
+.owner { font-size: 12px; font-weight: 600; padding: 2px 10px; border-radius: 999px; white-space: nowrap; background: var(--oc); color: var(--on); box-shadow: 0 0 10px -2px var(--oc); }
+.o-Sarah { --oc: var(--c-sarah); --on: var(--on-sarah); }
+.o-Andrea { --oc: var(--c-andrea); --on: var(--on-andrea); }
+.o-Matt { --oc: var(--c-matt); --on: var(--on-matt); }
+.o-Everyone { --oc: var(--c-everyone); --on: var(--on-everyone); }
+.view-label { font-size: 13px; font-weight: 600; color: var(--muted); }
+.chip .dot { box-shadow: 0 0 6px var(--oc); background: var(--oc); }
+.chip[aria-pressed="true"].o-Sarah, .chip[aria-pressed="true"].o-Andrea, .chip[aria-pressed="true"].o-Matt, .chip[aria-pressed="true"].o-Everyone { background: var(--oc); color: var(--on); border-color: var(--oc); box-shadow: 0 0 12px -2px var(--oc); }
+.member .bar > i { box-shadow: 0 0 8px var(--oc); background: var(--oc); }
+.member-name .dot { background: var(--oc); box-shadow: 0 0 8px var(--oc); }
+.link-btn { background: none; border: 0; padding: 2px 4px; font-size: 12.5px; color: var(--muted); cursor: pointer; text-decoration: underline; text-underline-offset: 2px; }
+.signs { display: flex; flex-wrap: wrap; gap: 6px 16px; margin-top: 6px; }
+.sign { display: inline-flex; align-items: center; gap: 6px; font-size: 13px; font-weight: 500; cursor: pointer; }
+.sign input { width: 18px; height: 18px; margin: 0; accent-color: var(--oc); cursor: pointer; }
+.sign input:checked { filter: drop-shadow(0 0 3px var(--oc)) drop-shadow(0 0 7px var(--oc)); }
+.sign input:disabled { cursor: default; }
+.choices { display: grid; gap: 8px; margin-top: 8px; }
+.choice { border: 1px solid var(--line); border-radius: 8px; padding: 10px 12px; background: var(--surface); display: grid; gap: 6px; }
+.choice.chosen { border-color: var(--c-everyone); box-shadow: 0 0 0 1px var(--c-everyone); }
+.choice-head { display: flex; flex-wrap: wrap; gap: 4px 10px; align-items: baseline; }
+.choice-head a, .choice-head span:first-child { font-weight: 600; overflow-wrap: anywhere; color: var(--ink); }
+.choice-head a { text-decoration: underline; text-underline-offset: 2px; text-decoration-color: var(--line); }
+.choice-count { font-family: var(--font-mono); font-size: 12px; color: var(--muted); }
+.choice-count.all { color: var(--c-everyone); font-weight: 600; }
+.choice .signs { margin-top: 0; }
+.choice-note { font-size: 13px; color: var(--muted); overflow-wrap: anywhere; }
+.choice-note a { color: var(--teal); text-underline-offset: 2px; }
+.writein { display: flex; gap: 8px; flex-wrap: wrap; }
+.writein input { flex: 1 1 220px; min-width: 0; font-size: 14px; padding: 7px 9px; border: 1px dashed var(--line); border-radius: 6px; background: var(--surface); color: var(--ink); }
+.sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+.sign-count { font-family: var(--font-mono); font-size: 12px; color: var(--muted); width: 22px; text-align: center; padding-top: 2px; font-variant-numeric: tabular-nums; }
+.sign-count.all { color: var(--c-everyone); font-weight: 600; }
+.due { font-family: var(--font-mono); font-size: 12px; color: var(--muted); background: none; border: 1px solid transparent; padding: 2px 7px; border-radius: 6px; white-space: nowrap; font-variant-numeric: tabular-nums; }
+.due.soon { color: var(--warn); font-weight: 600; }
+.due.overdue { color: #FFFFFF; background: var(--danger); }
+.due.unset { font-style: italic; }
+.due-input { font-family: var(--font-mono); font-size: 12px; padding: 2px 6px; border: 1px solid var(--line); border-radius: 6px; background: var(--surface); color: var(--ink); }
+.member-next { font-size: 12.5px; overflow-wrap: anywhere; }
+.member-next b { font-weight: 600; }
+.edit-row { grid-column: 2 / -1; display: grid; grid-template-columns: minmax(0, 1fr) auto auto auto; gap: 8px 10px; align-items: end; padding: 10px; margin-top: 4px; border: 1px solid var(--line); border-radius: 8px; background: var(--surface); }
+.edit-row label { display: grid; gap: 3px; font-size: 12px; color: var(--muted); }
+.edit-row input, .edit-row select { font-size: 14px; padding: 6px 8px; border: 1px solid var(--line); border-radius: 6px; background: var(--bg); color: var(--ink); min-width: 0; width: 100%; }
+.ed-actions { display: flex; gap: 8px; align-items: center; }
+.save-btn { background: var(--teal); color: #FFFFFF; border: 0; border-radius: 6px; padding: 7px 14px; font-weight: 600; cursor: pointer; }
+@media (max-width: 640px) { .edit-row { grid-template-columns: 1fr 1fr; grid-column: 1 / -1; } .edit-row .ed-title, .edit-row .ed-actions { grid-column: 1 / -1; } }
+.confirm { grid-column: 2 / -1; display: flex; gap: 10px; align-items: center; font-size: 13px; }
+.confirm .danger { color: var(--warn); font-weight: 600; }
+.empty { color: var(--muted); padding: 14px 2px; border-bottom: 1px solid var(--line); font-size: 14px; }
+
+/* Bottom panel */
+.panel { background: var(--panel); color: var(--panel-ink); padding-block: 36px 48px; }
+.panel h2 { font-family: var(--font-display); font-stretch: 90%; font-weight: 700; font-size: 22px; margin: 0 0 4px; }
+.panel .lede { color: var(--panel-muted); margin: 0 0 18px; font-size: 14px; }
+.team { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 12px; margin-bottom: 36px; }
+.member { background: var(--panel-surface); border: 1px solid var(--panel-line); border-radius: 10px; padding: 14px; display: grid; gap: 8px; }
+.member-name { font-family: var(--font-display); font-weight: 700; font-size: 17px; display: flex; align-items: center; gap: 8px; }
+.member-name .dot { width: 10px; height: 10px; border-radius: 50%; }
+.member-role { font-size: 12.5px; color: var(--panel-muted); }
+.member-count { font-family: var(--font-mono); font-size: 13px; font-variant-numeric: tabular-nums; }
+.member .bar { background: var(--panel-line); height: 6px; }
+.add { display: grid; gap: 12px; background: var(--panel-surface); border: 1px solid var(--panel-line); border-radius: 12px; padding: 18px; }
+.add-row { display: grid; grid-template-columns: minmax(0, 1fr) auto auto auto auto; gap: 10px; }
+.add label { font-size: 12px; color: var(--panel-muted); display: grid; gap: 4px; }
+.add input[type="text"], .add input[type="date"], .add select { background: var(--panel); color: var(--panel-ink); border: 1px solid var(--panel-line); border-radius: 8px; padding: 9px 10px; min-width: 0; width: 100%; }
+.add button[type="submit"] { align-self: end; background: var(--amber); color: #1B2A49; font-weight: 600; border: 0; border-radius: 8px; padding: 10px 18px; cursor: pointer; }
+.add button[disabled] { opacity: .55; cursor: default; }
+.add-note { font-size: 13px; color: var(--panel-muted); margin: 0; }
+.add-note:empty { display: none; }
+@media (max-width: 640px) {
+  .add-row { grid-template-columns: 1fr 1fr; }
+  .add-row .title-field { grid-column: 1 / -1; }
+  .add-row button { grid-column: 1 / -1; }
+  .task { grid-template-columns: auto minmax(0, 1fr); }
+  .t-side { grid-column: 2; justify-content: flex-start; }
+  .toggle { margin-left: 0; }
+}
+@media (prefers-reduced-motion: reduce) { .bar > i { transition: none; } }
+</style>
+
+<div class="wrap">
+  <header>
+    <div class="eyebrow">DSC 450 · Project 3 · Group 1</div>
+    <h1>Recycling Contamination Risk Predictor</h1>
+    <p class="sub">Shared checklist for predicting which recycling streams carry the highest contamination risk. Check off your steps as you finish them; everyone sees the same list.</p>
+    <div class="overall">
+      <div class="overall-top">
+        <div class="overall-count" id="overall-count">Loading tasks…</div>
+        <div class="next-due" id="next-due"></div>
+      </div>
+      <div class="whoami">
+        <label for="whoami">I am</label>
+        <select id="whoami"><option value="">Choose your name</option><option>Sarah</option><option>Andrea</option><option>Matt</option></select>
+      </div>
+      <div class="bar" aria-hidden="true"><i id="overall-bar"></i></div>
+    </div>
+  </header>
+
+  <div class="toolbar" id="filters" role="group" aria-label="Show tasks for"></div>
+  <div class="status" id="status" role="status"></div>
+
+  <main class="milestones" id="milestones">
+    <p class="empty">Loading the team's tasks…</p>
+  </main>
+</div>
+
+<section class="panel">
+  <div class="wrap">
+    <h2>Where the team stands</h2>
+    <p class="lede">Progress by person, across all milestones.</p>
+    <div class="team" id="team"></div>
+
+    <form class="add" id="add-form" autocomplete="off">
+      <h2 style="font-size:18px;margin:0">Add a task</h2>
+      <div class="add-row">
+        <label class="title-field" for="new-title">Task
+          <input type="text" id="new-title" maxlength="200" placeholder="e.g. Train baseline contamination classifier" required>
+        </label>
+        <label for="new-owner">Owner
+          <select id="new-owner"></select>
+        </label>
+        <label for="new-milestone">Milestone
+          <select id="new-milestone"></select>
+        </label>
+        <label for="new-due">Due date
+          <input type="date" id="new-due">
+        </label>
+        <button type="submit" id="add-btn">Add task</button>
+      </div>
+      <p class="add-note" id="add-note"></p>
+    </form>
+  </div>
+</section>
+
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+<script>
+const MILESTONES = [
+  { key: "m1", name: "Milestone 1 · Proposal", due: "2026-11-08" },
+  { key: "m2", name: "Milestone 2 · Draft report & 10 questions", due: "2026-11-15" },
+  { key: "m3", name: "Milestone 3 · Final presentation", due: "2026-11-22" },
+  { key: "other", name: "Other tasks", due: null },
+];
+const OWNERS = [
+  { key: "Sarah", label: "Sarah", role: "Data Scientist" },
+  { key: "Andrea", label: "Andrea", role: "Data Visualizer / Presenter" },
+  { key: "Matt", label: "Matt", role: "Data Wrangler" },
+  { key: "Everyone", label: "Team", role: "Shared team tasks" },
+];
+
+let db = null, user = null, myId = null, canWrite = true;
+let tasks = [], loaded = false;
+let filter = "All";
+let hideDone = false;
+let confirmId = null;
+let editId = null;
+let focusEdit = false;
+const pending = new Set();
+const names = {};
+
+try { hideDone = localStorage.getItem("hideDone") === "1"; } catch (e) {}
+
+const $ = (id) => document.getElementById(id);
+function el(tag, attrs = {}, ...kids) {
+  const n = document.createElement(tag);
+  for (const [k, v] of Object.entries(attrs)) {
+    if (k === "class") n.className = v;
+    else if (k === "text") n.textContent = v;
+    else if (k.startsWith("on")) n.addEventListener(k.slice(2), v);
+    else if (v === true) n.setAttribute(k, "");
+    else if (v !== false && v != null) n.setAttribute(k, v);
+  }
+  for (const k of kids) if (k) n.append(k);
+  return n;
+}
+function setStatus(msg) { $("status").textContent = msg || ""; }
+
+function dayDiff(iso) {
+  const [y, m, d] = iso.split("-").map(Number);
+  const due = new Date(y, m - 1, d);
+  const now = new Date(); now.setHours(0, 0, 0, 0);
+  return Math.round((due - now) / 86400000);
+}
+function fmtDate(iso) {
+  const [y, m, d] = iso.split("-").map(Number);
+  return new Date(y, m - 1, d).toLocaleDateString(undefined, { weekday: "short", month: "short", day: "numeric" });
+}
+function dueLabel(iso) {
+  const n = dayDiff(iso);
+  if (n < 0) return { text: `Was due ${fmtDate(iso)}`, soon: false };
+  if (n === 0) return { text: "Due today, 11:59 PM", soon: true };
+  if (n === 1) return { text: "Due tomorrow", soon: true };
+  return { text: `Due ${fmtDate(iso)} · ${n} days left`, soon: n <= 3 };
+}
+
+// Tasks flow by due date; undated tasks follow, in the order they were added.
+function sorted() {
+  return [...tasks].sort((a, b) => {
+    const da = a.due || "9999-12-31", dbb = b.due || "9999-12-31";
+    if (da !== dbb) return da < dbb ? -1 : 1;
+    return (a.order ?? 0) - (b.order ?? 0);
+  });
+}
+// Team tasks need a sign-off from each person; a task counts as done only when all three have checked it.
+const PEOPLE = ["Sarah", "Andrea", "Matt"];
+function isTeam(t) { return !PEOPLE.includes(t.owner); }
+function signed(t, p) { return !!(t.signoffs && t.signoffs[p] && t.signoffs[p].done); }
+// A "choice" task (like picking the dataset) lists options; it is done once one option has all three sign-offs.
+function choiceOptions(t) {
+  return Object.entries(t.options || {})
+    .filter(([, o]) => o && !o.removed)
+    .map(([id, o]) => ({ id, ...o }))
+    .sort((a, b) => (a.order ?? 0) - (b.order ?? 0));
+}
+function optSigned(o, p) { return !!(o.signoffs && o.signoffs[p] && o.signoffs[p].done); }
+function optCount(o) { return PEOPLE.filter(p => optSigned(o, p)).length; }
+function isDone(t) {
+  if (t.kind === "choice") return choiceOptions(t).some(o => optCount(o) === 3);
+  return isTeam(t) ? PEOPLE.every(p => signed(t, p)) : !!t.done;
+}
+function doneFor(t, p) {
+  if (t.kind === "choice") return choiceOptions(t).some(o => optSigned(o, p));
+  return isTeam(t) ? signed(t, p) : !!t.done;
+}
+
+function taskDueText(t) {
+  if (!t.due) return "Set due date";
+  const n = dayDiff(t.due);
+  if (!isDone(t)) {
+    if (n < 0) return `Overdue · ${fmtDate(t.due)}`;
+    if (n === 0) return "Due today";
+    if (n === 1) return "Due tomorrow";
+  }
+  return `Due ${fmtDate(t.due)}`;
+}
+function dueClass(t) {
+  if (!t.due) return " unset";
+  if (isDone(t)) return "";
+  const n = dayDiff(t.due);
+  return n < 0 ? " overdue" : (n <= 1 ? " soon" : "");
+}
+
+function renderHeader() {
+  const total = tasks.length, done = tasks.filter(isDone).length;
+  const cnt = $("overall-count");
+  cnt.textContent = "";
+  if (!loaded) { cnt.textContent = "Loading tasks…"; return; }
+  cnt.append(`${done} of ${total} done `, el("span", { text: total ? `(${Math.round(done / total * 100)}%)` : "" }));
+  $("overall-bar").style.width = total ? `${done / total * 100}%` : "0";
+  const nd = $("next-due"); nd.textContent = "";
+  const next = MILESTONES.find(m => m.due && dayDiff(m.due) >= 0 && tasks.some(t => t.milestone === m.key && !isDone(t)));
+  if (next) {
+    const left = tasks.filter(t => t.milestone === next.key && !isDone(t)).length;
+    nd.append("Next up: ", el("strong", { text: next.name.split(" · ")[0] }), ` · ${dueLabel(next.due).text} · ${left} open`);
+  }
+}
+
+function renderFilters() {
+  const f = $("filters"); f.textContent = "";
+  f.append(el("span", { class: "view-label", text: "View list:" }));
+  const opts = [{ key: "All", label: "All tasks" }, ...OWNERS];
+  for (const o of opts) {
+    const b = el("button", { type: "button", class: "chip" + (o.key === "All" ? "" : " o-" + o.key), "aria-pressed": String(filter === o.key), onclick: () => { filter = o.key; render(); } });
+    if (o.key !== "All") b.append(el("span", { class: "dot" }));
+    b.append(o.label);
+    f.append(b);
+  }
+  const cb = el("input", { type: "checkbox", id: "hide-done" });
+  cb.checked = hideDone;
+  cb.addEventListener("change", () => { hideDone = cb.checked; try { localStorage.setItem("hideDone", hideDone ? "1" : "0"); } catch (e) {} render(); });
+  f.append(el("label", { class: "toggle", for: "hide-done" }, cb, "Hide finished"));
+}
+
+function fmtShort(iso) {
+  const d = new Date(iso);
+  return isNaN(d) ? "" : d.toLocaleDateString(undefined, { month: "short", day: "numeric" });
+}
+
+function taskRow(t) {
+  const team = isTeam(t);
+  const done = isDone(t);
+  let lead;
+  if (t.kind === "choice") {
+    const n = Math.max(0, ...choiceOptions(t).map(optCount));
+    lead = el("span", { class: "sign-count" + (done ? " all" : ""), text: `${n}/3`, title: "Most sign-offs on any one dataset" });
+  } else if (team) {
+    const n = PEOPLE.filter(p => signed(t, p)).length;
+    lead = el("span", { class: "sign-count" + (done ? " all" : ""), text: `${n}/3`, title: `${n} of 3 sign-offs` });
+  } else {
+    lead = el("input", { type: "checkbox", id: "cb-" + t.id, "aria-label": t.title || "Task" });
+    lead.checked = !!t.done;
+    lead.disabled = !canWrite || pending.has(t.id);
+    lead.addEventListener("change", () => toggle(t, lead.checked));
+  }
+
+  const meta = [];
+  if (t.note) meta.push(t.note);
+  if (!team && t.done) {
+    const who = t.doneBy ? (names[t.doneBy] || "") : "";
+    const when = t.doneAt ? fmtShort(t.doneAt) : "";
+    meta.push(["Done", who && `by ${who}`, when && `on ${when}`].filter(Boolean).join(" "));
+  }
+  if (team && done) meta.push(t.kind === "choice" ? "Chosen: approved by all three" : "Approved by all three");
+
+  const body = el("div", { class: "t-body" },
+    team ? el("span", { class: "t-title", text: t.title || "Untitled task" })
+         : el("label", { class: "t-title", for: "cb-" + t.id, text: t.title || "Untitled task" }),
+    meta.length ? el("div", { class: "t-meta", text: meta.join(" · ") }) : null);
+
+  if (t.kind === "choice") {
+    body.append(choiceBlock(t));
+  } else if (team) {
+    const row = el("div", { class: "signs", role: "group", "aria-label": "Sign-offs" });
+    for (const p of PEOPLE) {
+      const id = `sg-${t.id}-${p}`;
+      const box = el("input", { type: "checkbox", id });
+      box.checked = signed(t, p);
+      box.disabled = !canWrite || pending.has(t.id + ":" + p);
+      box.addEventListener("change", () => toggleSign(t, p, box.checked));
+      const s = t.signoffs && t.signoffs[p];
+      let tip = `${p} has not signed off`;
+      if (s && s.done) {
+        const who = s.by ? (names[s.by] || "") : "";
+        const when = s.at ? fmtShort(s.at) : "";
+        tip = [`${p} signed off`, when && `on ${when}`, who && who !== p && `(checked by ${who})`].filter(Boolean).join(" ");
+      }
+      row.append(el("label", { class: "sign o-" + p, for: id, title: tip }, box, p));
+    }
+    body.append(row);
+  }
+
+  const owner = OWNERS.some(o => o.key === t.owner) ? t.owner : "Everyone";
+  const ownerLabel = OWNERS.find(o => o.key === owner).label;
+  const side = el("div", { class: "t-side" });
+  if (t.due || canWrite) side.append(el("span", { class: "due" + dueClass(t), text: taskDueText(t) }));
+  side.append(el("span", { class: "owner o-" + owner, text: ownerLabel }));
+  if (canWrite && editId !== t.id) {
+    side.append(
+      el("button", { type: "button", class: "link-btn", text: "Edit", "aria-label": `Edit ${t.title || "task"}`, onclick: () => { editId = t.id; confirmId = null; focusEdit = true; render(); } }),
+      el("button", { type: "button", class: "link-btn", text: "Remove", "aria-label": `Remove ${t.title || "task"}`, onclick: () => { confirmId = t.id; editId = null; render(); } }));
+  }
+
+  const li = el("li", { class: "task o-" + owner + (done ? " done" : "") }, lead, body, side);
+  if (editId === t.id && canWrite) li.append(editForm(t, owner));
+  if (confirmId === t.id) {
+    li.append(el("div", { class: "confirm" },
+      el("span", { text: "Remove this task for everyone?" }),
+      el("button", { type: "button", class: "link-btn danger", text: "Remove", onclick: () => removeTask(t) }),
+      el("button", { type: "button", class: "link-btn", text: "Cancel", onclick: () => { confirmId = null; render(); } })));
+  }
+  return li;
+}
+
+function renderMilestones() {
+  const root = $("milestones"); root.textContent = "";
+  if (!loaded) { root.append(el("p", { class: "empty", text: "Loading the team's tasks…" })); return; }
+  if (!tasks.length) { root.append(el("p", { class: "empty", text: "No tasks yet. Add the first one with the form at the bottom of the page." })); return; }
+  const list = sorted();
+  for (const m of MILESTONES) {
+    const all = list.filter(t => (MILESTONES.some(x => x.key === t.milestone) ? t.milestone : "other") === m.key);
+    if (!all.length && m.key === "other") continue;
+    // A person's view also shows team tasks, since each team task needs their sign-off.
+    const inView = (t) => filter === "All" || t.owner === filter || (PEOPLE.includes(filter) && isTeam(t));
+    const hidden = (t) => hideDone && (PEOPLE.includes(filter) ? doneFor(t, filter) : isDone(t));
+    const shown = all.filter(t => inView(t) && !hidden(t));
+    const doneCount = all.filter(isDone).length;
+    const meta = el("div", { class: "ms-meta" });
+    if (m.due) { const d = dueLabel(m.due); meta.append(el("span", { class: d.soon ? "soon" : "", text: d.text })); }
+    meta.append(el("span", { text: `${doneCount}/${all.length} done` }));
+    const ul = el("ul", { class: "tasks" });
+    for (const t of shown) ul.append(taskRow(t));
+    const sec = el("section", {}, el("div", { class: "ms-head" }, el("h2", { text: m.name }), meta), ul);
+    if (!shown.length) sec.append(el("p", { class: "empty", text: all.length ? "Nothing to show with the current filter." : "No tasks in this milestone yet." }));
+    root.append(sec);
+  }
+}
+
+function renderTeam() {
+  const root = $("team"); root.textContent = "";
+  for (const o of OWNERS) {
+    const person = PEOPLE.includes(o.key);
+    // A person's count includes the team tasks they still need to sign off.
+    const mine = tasks.filter(t => t.owner === o.key || (person && isTeam(t)));
+    const done = mine.filter(t => person ? doneFor(t, o.key) : isDone(t)).length;
+    const bar = el("div", { class: "bar" }, el("i"));
+    bar.firstChild.style.width = mine.length ? `${done / mine.length * 100}%` : "0";
+    const dot = el("span", { class: "dot" });
+    root.append(el("div", { class: "member o-" + o.key },
+      el("div", { class: "member-name" }, dot, o.label),
+      el("div", { class: "member-role", text: person ? `${o.role} · includes team sign-offs` : "Fully approved by all three" }),
+      bar,
+      el("div", { class: "member-count", text: loaded ? `${done} of ${mine.length} done` : "…" }),
+      memberNext(o.key, person, mine)));
+  }
+}
+
+function memberNext(key, person, mine) {
+  const box = el("div", { class: "member-next" });
+  if (!loaded) return box;
+  const next = sorted().find(t => person ? ((t.owner === key || isTeam(t)) && !doneFor(t, key)) : (t.owner === key && !isDone(t)));
+  if (!next) { box.textContent = mine.length ? "All done" : "No tasks yet"; return box; }
+  box.append(el("b", { text: "Next: " }), next.title || "Untitled task");
+  if (next.due) box.append(` · ${taskDueText(next)}`);
+  return box;
+}
+
+// Inline editor: task name, owner, and due date. Only changed fields are written,
+// so a teammate's simultaneous edit to another field is not overwritten.
+function editForm(t, owner) {
+  const tid = "ed-title-" + t.id, oid = "ed-owner-" + t.id, did = "ed-due-" + t.id;
+  const ti = el("input", { "data-keep": true, type: "text", id: tid, maxlength: "200", value: t.title || "" });
+  const os = el("select", { "data-keep": true, id: oid });
+  for (const o of OWNERS) os.append(el("option", { value: o.key, text: o.label }));
+  os.value = owner;
+  const di = el("input", { "data-keep": true, type: "date", id: did, value: t.due || "" });
+  const form = el("form", { class: "edit-row" },
+    el("label", { class: "ed-title", for: tid }, "Task name", ti),
+    el("label", { for: oid }, "Owner", os),
+    el("label", { for: did }, "Due date", di),
+    el("div", { class: "ed-actions" },
+      el("button", { type: "submit", class: "save-btn", text: "Save" }),
+      el("button", { type: "button", class: "link-btn", text: "Cancel", onclick: () => { editId = null; render(); } })));
+  form.addEventListener("submit", (ev) => { ev.preventDefault(); saveEdit(t, ti.value.trim(), os.value, di.value); });
+  form.addEventListener("keydown", (e) => { if (e.key === "Escape") { editId = null; render(); } });
+  if (focusEdit) { focusEdit = false; setTimeout(() => ti.focus(), 0); }
+  return form;
+}
+
+async function saveEdit(t, title, owner, due) {
+  if (!title) { setStatus("Give the task a name before saving."); return; }
+  const change = {};
+  if (title !== (t.title || "")) change.title = title;
+  if (owner !== t.owner) change.owner = owner;
+  if (due !== (t.due || "")) change.due = due || null;
+  editId = null; setStatus("");
+  if (Object.keys(change).length) {
+    try { await db.doc("tasks/" + t.id).update(change); } catch (e) { handleWriteError(e); }
+  }
+  render();
+}
+
+function choiceBlock(t) {
+  const wrap = el("div", { class: "choices" });
+  for (const o of choiceOptions(t)) {
+    const n = optCount(o);
+    const label = o.url
+      ? el("a", { href: o.url, target: "_blank", rel: "noopener", text: o.label || "Untitled dataset" })
+      : el("span", { text: o.label || "Untitled dataset" });
+    const head = el("div", { class: "choice-head" }, label, el("span", { class: "choice-count" + (n === 3 ? " all" : ""), text: n === 3 ? "Approved 3/3" : `${n}/3` }));
+    // WHY: a dataset can have a landing page plus a direct file link; showing both lets teammates inspect before downloading.
+    const noteEl = (o.note || o.download) ? el("div", { class: "choice-note" }, o.note || "", o.download ? el("span", {}, o.note ? " · " : "", el("a", { href: o.download, target: "_blank", rel: "noopener", text: "Direct download" })) : null) : null;
+    if (canWrite && o.writeIn) head.append(el("button", { type: "button", class: "link-btn", text: "Remove", onclick: () => removeOption(t, o) }));
+    const row = el("div", { class: "signs", role: "group", "aria-label": `Sign-offs for ${o.label || "dataset"}` });
+    for (const p of PEOPLE) {
+      const id = `op-${t.id}-${o.id}-${p}`;
+      const box = el("input", { type: "checkbox", id });
+      box.checked = optSigned(o, p);
+      box.disabled = !canWrite || pending.has(`${t.id}:${o.id}:${p}`);
+      box.addEventListener("change", () => toggleOptSign(t, o, p, box.checked));
+      row.append(el("label", { class: "sign o-" + p, for: id }, box, p));
+    }
+    wrap.append(el("div", { class: "choice" + (n === 3 ? " chosen" : "") }, head, noteEl, row));
+  }
+  if (canWrite) {
+    const wid = "writein-" + t.id;
+    const wi = el("input", { type: "text", id: wid, "data-keep": true, maxlength: "200", placeholder: "Write in another dataset (name and link)" });
+    const f = el("form", { class: "writein" },
+      el("label", { class: "sr", for: wid, text: "Write in another dataset" }), wi,
+      el("button", { type: "submit", class: "save-btn", text: "Add dataset" }));
+    f.addEventListener("submit", (ev) => { ev.preventDefault(); const v = wi.value.trim(); if (v) { wi.value = ""; addOption(t, v); } });
+    wrap.append(f);
+  }
+  return wrap;
+}
+
+async function toggleOptSign(t, o, person, on) {
+  const key = `${t.id}:${o.id}:${person}`;
+  if (pending.has(key)) return;
+  pending.add(key); setStatus("");
+  try {
+    // Nested update merges, so sign-offs on other datasets and by other people stay intact.
+    await db.doc("tasks/" + t.id).update({ options: { [o.id]: { signoffs: { [person]: on
+      ? { done: true, by: myId, at: new Date().toISOString() }
+      : { done: false, by: null, at: null } } } } });
+  } catch (e) { handleWriteError(e); }
+  pending.delete(key); render();
+}
+
+async function addOption(t, label) {
+  const id = "w" + Date.now().toString(36);
+  try { await db.doc("tasks/" + t.id).update({ options: { [id]: { label, order: Date.now(), writeIn: true, addedBy: myId } } }); }
+  catch (e) { handleWriteError(e); }
+}
+
+async function removeOption(t, o) {
+  try { await db.doc("tasks/" + t.id).update({ options: { [o.id]: { removed: true } } }); }
+  catch (e) { handleWriteError(e); }
+}
+
+async function setDue(t, value) {
+  if ((t.due || "") === value) { render(); return; }
+  try { await db.doc("tasks/" + t.id).update({ due: value || null }); } catch (e) { handleWriteError(e); }
+  render();
+}
+
+function render() {
+  // Live updates rebuild the list; keep anything a person is typing, and their cursor.
+  const kept = {};
+  document.querySelectorAll("[data-keep]").forEach(n => { kept[n.id] = n.value; });
+  const active = document.activeElement && document.activeElement.id;
+  renderHeader(); renderFilters(); renderMilestones(); renderTeam();
+  for (const [id, v] of Object.entries(kept)) { const n = document.getElementById(id); if (n) n.value = v; }
+  if (active) { const n = document.getElementById(active); if (n && n !== document.activeElement) n.focus(); }
+  resolveNames();
+}
+
+// WHY: there is no sign-in here, so the "I am" picker is the identity and the id is the name itself.
+async function resolveNames() { for (const t of tasks) { if (t.doneBy) names[t.doneBy] = t.doneBy; for (const p of PEOPLE) { const b = t.signoffs && t.signoffs[p] && t.signoffs[p].by; if (b) names[b] = b; } } }
+let resolving = false;
+async function resolveNamesOld() {
+  if (!user || resolving) return;
+  const ids = [...new Set(tasks.flatMap(t => [t.doneBy, ...PEOPLE.map(p => t.signoffs && t.signoffs[p] && t.signoffs[p].by)]).filter(Boolean))].filter(id => !(id in names));
+  if (!ids.length) return;
+  resolving = true;
+  try {
+    const ps = await user.profiles(ids);
+    let changed = false;
+    for (const id of ids) { names[id] = (ps[id] && ps[id].name) || ""; if (names[id]) changed = true; }
+    if (changed) { resolving = false; renderMilestones(); return; }
+  } catch (e) {}
+  resolving = false;
+}
+
+function handleWriteError(e) {
+  const code = e && e.code;
+  if (code === "invalid_argument" || code === "not_granted") {
+    canWrite = false; applyWriteState();
+    setStatus("You can view this list but not change it. Check the Firestore security rules.");
+  } else if (code === "quota_exceeded") {
+    setStatus("The list is full. Remove a few finished tasks, then try again.");
+  } else {
+    setStatus("That change didn't save. Check your connection and try again.");
+  }
+}
+
+async function toggle(t, done) {
+  if (pending.has(t.id)) return;
+  pending.add(t.id); setStatus("");
+  try {
+    await db.doc("tasks/" + t.id).update(done
+      ? { done: true, doneBy: myId, doneAt: new Date().toISOString() }
+      : { done: false, doneBy: null, doneAt: null });
+  } catch (e) { handleWriteError(e); }
+  pending.delete(t.id); render();
+}
+
+async function toggleSign(t, person, on) {
+  const key = t.id + ":" + person;
+  if (pending.has(key)) return;
+  pending.add(key); setStatus("");
+  try {
+    // Nested update merges, so two people signing at once don't erase each other.
+    await db.doc("tasks/" + t.id).update({ signoffs: { [person]: on
+      ? { done: true, by: myId, at: new Date().toISOString() }
+      : { done: false, by: null, at: null } } });
+  } catch (e) { handleWriteError(e); }
+  pending.delete(key); render();
+}
+
+async function removeTask(t) {
+  confirmId = null;
+  try { await db.doc("tasks/" + t.id).delete(); } catch (e) { handleWriteError(e); }
+  render();
+}
+
+function applyWriteState() {
+  const off = !canWrite || !db;
+  for (const id of ["new-title", "new-owner", "new-milestone", "new-due", "add-btn"]) $(id).disabled = off;
+  $("add-note").textContent = !db ? "Tasks can't load until the Firebase config is filled in."
+    : (!canWrite ? "You have view-only access, so you can't add tasks." : "");
+}
+
+function setupForm() {
+  const os = $("new-owner"), ms = $("new-milestone");
+  for (const o of OWNERS) os.append(el("option", { value: o.key, text: o.label }));
+  for (const m of MILESTONES) ms.append(el("option", { value: m.key, text: m.name.split(" · ")[0] }));
+  const current = MILESTONES.find(m => m.due && dayDiff(m.due) >= 0);
+  ms.value = current ? current.key : "other";
+  $("add-form").addEventListener("submit", async (ev) => {
+    ev.preventDefault();
+    const title = $("new-title").value.trim();
+    if (!title || !db || !canWrite) return;
+    $("add-btn").disabled = true; setStatus("");
+    try {
+      await db.collection("tasks").add({
+        title, owner: os.value, milestone: ms.value, order: Date.now(),
+        due: $("new-due").value || null,
+        done: false, doneBy: null, doneAt: null, createdBy: myId,
+      });
+      $("new-title").value = ""; $("new-due").value = "";
+      $("add-note").textContent = "Added to its milestone, in due-date order. Tasks without a date go at the bottom.";
+    } catch (e) { handleWriteError(e); }
+    $("add-btn").disabled = !canWrite;
+  });
+}
+
+// ---- Firebase setup ----
+// WHY: paste the config from Firebase console > Project settings > Your apps > Web app.
+const FIREBASE_CONFIG = {
+  apiKey: "PASTE_API_KEY",
+  authDomain: "PASTE_PROJECT.firebaseapp.com",
+  projectId: "PASTE_PROJECT_ID",
+  storageBucket: "PASTE_PROJECT.appspot.com",
+  messagingSenderId: "PASTE_SENDER_ID",
+  appId: "PASTE_APP_ID",
+};
+// WHY: starter tasks are written with fixed ids, so two people opening the empty list at once can't create duplicates.
+const SEED = [{"title": "Pick the dataset", "owner": "Everyone", "milestone": "m1", "due": "2026-11-02", "order": 1, "done": false, "doneBy": null, "doneAt": null, "kind": "choice", "options": {"epa_msw": {"label": "EPA MSW State Data (best pick)", "url": "https://catalog.data.gov/dataset/publicly-reported-state-municipal-solid-waste-data-version-1", "download": "https://pasteur.epa.gov/uploads/10.23719/1527730/Compiled%20State%20Public%20Waste%20Data.xlsx", "note": "Generation, recycling and disposal by state · Excel", "order": 1}, "nyc": {"label": "NYC Recycling Diversion & Capture Rates", "url": "https://catalog.data.gov/dataset/recycling-diversion-and-capture-rates", "download": "https://data.cityofnewyork.us/api/views/gaq9-z3hz/rows.csv?accessType=DOWNLOAD", "note": "Real operational data by district · CSV", "order": 2}, "wa": {"label": "Washington State Solid Waste Composition", "url": "https://data.wa.gov/api/views/iz32-gmjg/rows.json?accessType=DOWNLOAD", "note": "What is actually in the bins · JSON", "order": 3}, "epa_mat": {"label": "EPA Materials in Municipal Waste Stream 1960–2018", "url": "https://edg.epa.gov/data/PUBLIC/OLEM/Materials_Municipal_Waste_Stream_1960_2018.xlsx", "note": "National material trends · Excel", "order": 4}}, "note": "Check your name on the dataset you want; one needs all three to lock it in.", "id": "t01"}, {"title": "Pull the chosen dataset and confirm its fields", "owner": "Matt", "milestone": "m1", "due": "2026-11-04", "order": 2, "done": false, "doneBy": null, "doneAt": null, "id": "t02"}, {"title": "Draft 3–5 research questions", "owner": "Sarah", "milestone": "m1", "due": "2026-11-04", "order": 3, "done": false, "doneBy": null, "doneAt": null, "id": "t03"}, {"title": "Write data source description and limitations", "owner": "Matt", "milestone": "m1", "due": "2026-11-05", "order": 4, "done": false, "doneBy": null, "doneAt": null, "id": "t04"}, {"title": "Propose methods: target, features, model, metrics", "owner": "Sarah", "milestone": "m1", "due": "2026-11-05", "order": 5, "done": false, "doneBy": null, "doneAt": null, "id": "t05"}, {"title": "Outline the proposal and plan the visuals", "owner": "Andrea", "milestone": "m1", "due": "2026-11-05", "order": 6, "done": false, "doneBy": null, "doneAt": null, "id": "t06"}, {"title": "Write the abstract and assemble the proposal", "owner": "Andrea", "milestone": "m1", "due": "2026-11-06", "order": 7, "done": false, "doneBy": null, "doneAt": null, "id": "t07"}, {"title": "Review the proposal", "owner": "Everyone", "milestone": "m1", "due": "2026-11-07", "order": 8, "done": false, "doneBy": null, "doneAt": null, "id": "t08"}, {"title": "Submit Milestone 1", "owner": "Everyone", "milestone": "m1", "due": "2026-11-08", "order": 9, "done": false, "doneBy": null, "doneAt": null, "id": "t09"}, {"title": "Clean, merge and define the contamination target", "owner": "Matt", "milestone": "m2", "due": "2026-11-10", "order": 10, "done": false, "doneBy": null, "doneAt": null, "id": "t10"}, {"title": "Finish wrangling notebook and data dictionary", "owner": "Matt", "milestone": "m2", "due": "2026-11-11", "order": 11, "done": false, "doneBy": null, "doneAt": null, "id": "t11"}, {"title": "EDA and feature engineering", "owner": "Sarah", "milestone": "m2", "due": "2026-11-11", "order": 12, "done": false, "doneBy": null, "doneAt": null, "id": "t12"}, {"title": "Train baseline and tuned models, evaluate", "owner": "Sarah", "milestone": "m2", "due": "2026-11-12", "order": 13, "done": false, "doneBy": null, "doneAt": null, "id": "t13"}, {"title": "Write methods and results sections", "owner": "Sarah", "milestone": "m2", "due": "2026-11-13", "order": 14, "done": false, "doneBy": null, "doneAt": null, "id": "t14"}, {"title": "Build 3 quarter-page and 1 half-page illustrations", "owner": "Andrea", "milestone": "m2", "due": "2026-11-13", "order": 15, "done": false, "doneBy": null, "doneAt": null, "id": "t15"}, {"title": "Write intro, ethics and conclusion sections", "owner": "Andrea", "milestone": "m2", "due": "2026-11-13", "order": 16, "done": false, "doneBy": null, "doneAt": null, "id": "t16"}, {"title": "Write the 10 stakeholder questions and answers", "owner": "Everyone", "milestone": "m2", "due": "2026-11-13", "order": 17, "done": false, "doneBy": null, "doneAt": null, "id": "t17"}, {"title": "Review the draft report", "owner": "Everyone", "milestone": "m2", "due": "2026-11-14", "order": 18, "done": false, "doneBy": null, "doneAt": null, "id": "t18"}, {"title": "Submit Milestone 2 PDF", "owner": "Everyone", "milestone": "m2", "due": "2026-11-15", "order": 19, "done": false, "doneBy": null, "doneAt": null, "id": "t19"}, {"title": "Address draft feedback and finalize the report", "owner": "Sarah", "milestone": "m3", "due": "2026-11-18", "order": 20, "done": false, "doneBy": null, "doneAt": null, "id": "t20"}, {"title": "Clean the code repo and add README link", "owner": "Matt", "milestone": "m3", "due": "2026-11-18", "order": 21, "done": false, "doneBy": null, "doneAt": null, "id": "t21"}, {"title": "Build the slide deck", "owner": "Andrea", "milestone": "m3", "due": "2026-11-18", "order": 22, "done": false, "doneBy": null, "doneAt": null, "id": "t22"}, {"title": "Finalize the Q&A document", "owner": "Matt", "milestone": "m3", "due": "2026-11-19", "order": 23, "done": false, "doneBy": null, "doneAt": null, "id": "t23"}, {"title": "Write speaker notes and record the presentation", "owner": "Andrea", "milestone": "m3", "due": "2026-11-20", "order": 24, "done": false, "doneBy": null, "doneAt": null, "id": "t24"}, {"title": "Review the recording", "owner": "Everyone", "milestone": "m3", "due": "2026-11-21", "order": 25, "done": false, "doneBy": null, "doneAt": null, "id": "t25"}, {"title": "Complete team peer evaluations", "owner": "Everyone", "milestone": "m3", "due": "2026-11-22", "order": 26, "done": false, "doneBy": null, "doneAt": null, "id": "t26"}, {"title": "Submit all Milestone 3 deliverables", "owner": "Everyone", "milestone": "m3", "due": "2026-11-22", "order": 27, "done": false, "doneBy": null, "doneAt": null, "id": "t27"}];
+
+// WHY: a thin wrapper keeps the rest of the page unchanged. set(..., {merge:true}) deep-merges,
+// so one person's sign-off never wipes another's (Firestore's update() would replace the whole map).
+function wrap(fs) {
+  return {
+    doc: (p) => { const r = fs.doc(p); return { update: (o) => r.set(o, { merge: true }), delete: () => r.delete() }; },
+    collection: (c) => fs.collection(c),
+  };
+}
+
+async function init() {
+  setupForm(); render(); applyWriteState();
+  const who = $("whoami");
+  try { who.value = localStorage.getItem("whoami") || ""; } catch (e) {}
+  myId = who.value || null;
+  who.addEventListener("change", () => { myId = who.value || null; try { localStorage.setItem("whoami", who.value); } catch (e) {} });
+  if (!window.firebase || FIREBASE_CONFIG.apiKey.startsWith("PASTE")) {
+    loaded = true; render(); setStatus("Add your Firebase config near the bottom of index.html to load the team's tasks."); return;
+  }
+  // WHY try/catch: a bad config throws here; show a fixable message instead of a blank page.
+  try {
+    firebase.initializeApp(FIREBASE_CONFIG);
+    const fs = firebase.firestore();
+    db = wrap(fs);
+    applyWriteState();
+    let seeded = false;
+    fs.collection("tasks").onSnapshot(async (snap) => {
+      if (snap.empty && !seeded) {
+        seeded = true;
+        const b = fs.batch();
+        for (const { id, ...d } of SEED) b.set(fs.doc("tasks/" + id), d);
+        try { await b.commit(); } catch (e) { handleWriteError(e); }
+        return;
+      }
+      tasks = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+      loaded = true; render();
+    }, () => { setStatus("Live updates stopped. Check the Firestore rules, then reload the page."); });
+  } catch (e) {
+    loaded = true; render(); setStatus("Firebase didn't start. Double-check the config values.");
+  }
+}
+init();
+</script>
+
+
+</body></html>
