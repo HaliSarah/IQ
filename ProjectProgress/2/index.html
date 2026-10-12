@@ -99,6 +99,18 @@ h1 { font-family: var(--font-display); font-stretch: 85%; font-weight: 800; font
 .sign input { width: 18px; height: 18px; margin: 0; accent-color: var(--oc); cursor: pointer; }
 .sign input:checked { filter: drop-shadow(0 0 3px var(--oc)) drop-shadow(0 0 7px var(--oc)); }
 .sign input:disabled { cursor: default; }
+.choices { display: grid; gap: 8px; margin-top: 8px; }
+.choice { border: 1px solid var(--line); border-radius: 8px; padding: 10px 12px; background: var(--surface); display: grid; gap: 6px; }
+.choice.chosen { border-color: var(--c-everyone); box-shadow: 0 0 0 1px var(--c-everyone); }
+.choice-head { display: flex; flex-wrap: wrap; gap: 4px 10px; align-items: baseline; }
+.choice-head a, .choice-head span:first-child { font-weight: 600; overflow-wrap: anywhere; color: var(--ink); }
+.choice-head a { text-decoration: underline; text-underline-offset: 2px; text-decoration-color: var(--line); }
+.choice-count { font-family: var(--font-mono); font-size: 12px; color: var(--muted); }
+.choice-count.all { color: var(--c-everyone); font-weight: 600; }
+.choice .signs { margin-top: 0; }
+.writein { display: flex; gap: 8px; flex-wrap: wrap; }
+.writein input { flex: 1 1 220px; min-width: 0; font-size: 14px; padding: 7px 9px; border: 1px dashed var(--line); border-radius: 6px; background: var(--surface); color: var(--ink); }
+.sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
 .sign-count { font-family: var(--font-mono); font-size: 12px; color: var(--muted); width: 22px; text-align: center; padding-top: 2px; font-variant-numeric: tabular-nums; }
 .sign-count.all { color: var(--c-everyone); font-weight: 600; }
 .due { font-family: var(--font-mono); font-size: 12px; color: var(--muted); background: none; border: 1px solid transparent; padding: 2px 7px; border-radius: 6px; white-space: nowrap; font-variant-numeric: tabular-nums; }
@@ -218,6 +230,7 @@ let filter = "All";
 let hideDone = false;
 let confirmId = null;
 let editId = null;
+let focusEdit = false;
 const pending = new Set();
 const names = {};
 
@@ -268,8 +281,23 @@ function sorted() {
 const PEOPLE = ["Sarah", "Andrea", "Matt"];
 function isTeam(t) { return !PEOPLE.includes(t.owner); }
 function signed(t, p) { return !!(t.signoffs && t.signoffs[p] && t.signoffs[p].done); }
-function isDone(t) { return isTeam(t) ? PEOPLE.every(p => signed(t, p)) : !!t.done; }
-function doneFor(t, p) { return isTeam(t) ? signed(t, p) : !!t.done; }
+// A "choice" task (like picking the dataset) lists options; it is done once one option has all three sign-offs.
+function choiceOptions(t) {
+  return Object.entries(t.options || {})
+    .filter(([, o]) => o && !o.removed)
+    .map(([id, o]) => ({ id, ...o }))
+    .sort((a, b) => (a.order ?? 0) - (b.order ?? 0));
+}
+function optSigned(o, p) { return !!(o.signoffs && o.signoffs[p] && o.signoffs[p].done); }
+function optCount(o) { return PEOPLE.filter(p => optSigned(o, p)).length; }
+function isDone(t) {
+  if (t.kind === "choice") return choiceOptions(t).some(o => optCount(o) === 3);
+  return isTeam(t) ? PEOPLE.every(p => signed(t, p)) : !!t.done;
+}
+function doneFor(t, p) {
+  if (t.kind === "choice") return choiceOptions(t).some(o => optSigned(o, p));
+  return isTeam(t) ? signed(t, p) : !!t.done;
+}
 
 function taskDueText(t) {
   if (!t.due) return "Set due date";
@@ -328,7 +356,10 @@ function taskRow(t) {
   const team = isTeam(t);
   const done = isDone(t);
   let lead;
-  if (team) {
+  if (t.kind === "choice") {
+    const n = Math.max(0, ...choiceOptions(t).map(optCount));
+    lead = el("span", { class: "sign-count" + (done ? " all" : ""), text: `${n}/3`, title: "Most sign-offs on any one dataset" });
+  } else if (team) {
     const n = PEOPLE.filter(p => signed(t, p)).length;
     lead = el("span", { class: "sign-count" + (done ? " all" : ""), text: `${n}/3`, title: `${n} of 3 sign-offs` });
   } else {
@@ -345,14 +376,16 @@ function taskRow(t) {
     const when = t.doneAt ? fmtShort(t.doneAt) : "";
     meta.push(["Done", who && `by ${who}`, when && `on ${when}`].filter(Boolean).join(" "));
   }
-  if (team && done) meta.push("Approved by all three");
+  if (team && done) meta.push(t.kind === "choice" ? "Chosen: approved by all three" : "Approved by all three");
 
   const body = el("div", { class: "t-body" },
     team ? el("span", { class: "t-title", text: t.title || "Untitled task" })
          : el("label", { class: "t-title", for: "cb-" + t.id, text: t.title || "Untitled task" }),
     meta.length ? el("div", { class: "t-meta", text: meta.join(" · ") }) : null);
 
-  if (team) {
+  if (t.kind === "choice") {
+    body.append(choiceBlock(t));
+  } else if (team) {
     const row = el("div", { class: "signs", role: "group", "aria-label": "Sign-offs" });
     for (const p of PEOPLE) {
       const id = `sg-${t.id}-${p}`;
@@ -379,7 +412,7 @@ function taskRow(t) {
   side.append(el("span", { class: "owner o-" + owner, text: ownerLabel }));
   if (canWrite && editId !== t.id) {
     side.append(
-      el("button", { type: "button", class: "link-btn", text: "Edit", "aria-label": `Edit ${t.title || "task"}`, onclick: () => { editId = t.id; confirmId = null; render(); } }),
+      el("button", { type: "button", class: "link-btn", text: "Edit", "aria-label": `Edit ${t.title || "task"}`, onclick: () => { editId = t.id; confirmId = null; focusEdit = true; render(); } }),
       el("button", { type: "button", class: "link-btn", text: "Remove", "aria-label": `Remove ${t.title || "task"}`, onclick: () => { confirmId = t.id; editId = null; render(); } }));
   }
 
@@ -451,11 +484,11 @@ function memberNext(key, person, mine) {
 // so a teammate's simultaneous edit to another field is not overwritten.
 function editForm(t, owner) {
   const tid = "ed-title-" + t.id, oid = "ed-owner-" + t.id, did = "ed-due-" + t.id;
-  const ti = el("input", { type: "text", id: tid, maxlength: "200", value: t.title || "" });
-  const os = el("select", { id: oid });
+  const ti = el("input", { "data-keep": true, type: "text", id: tid, maxlength: "200", value: t.title || "" });
+  const os = el("select", { "data-keep": true, id: oid });
   for (const o of OWNERS) os.append(el("option", { value: o.key, text: o.label }));
   os.value = owner;
-  const di = el("input", { type: "date", id: did, value: t.due || "" });
+  const di = el("input", { "data-keep": true, type: "date", id: did, value: t.due || "" });
   const form = el("form", { class: "edit-row" },
     el("label", { class: "ed-title", for: tid }, "Task name", ti),
     el("label", { for: oid }, "Owner", os),
@@ -465,7 +498,7 @@ function editForm(t, owner) {
       el("button", { type: "button", class: "link-btn", text: "Cancel", onclick: () => { editId = null; render(); } })));
   form.addEventListener("submit", (ev) => { ev.preventDefault(); saveEdit(t, ti.value.trim(), os.value, di.value); });
   form.addEventListener("keydown", (e) => { if (e.key === "Escape") { editId = null; render(); } });
-  setTimeout(() => ti.focus(), 0);
+  if (focusEdit) { focusEdit = false; setTimeout(() => ti.focus(), 0); }
   return form;
 }
 
@@ -482,6 +515,62 @@ async function saveEdit(t, title, owner, due) {
   render();
 }
 
+function choiceBlock(t) {
+  const wrap = el("div", { class: "choices" });
+  for (const o of choiceOptions(t)) {
+    const n = optCount(o);
+    const label = o.url
+      ? el("a", { href: o.url, target: "_blank", rel: "noopener", text: o.label || "Untitled dataset" })
+      : el("span", { text: o.label || "Untitled dataset" });
+    const head = el("div", { class: "choice-head" }, label, el("span", { class: "choice-count" + (n === 3 ? " all" : ""), text: n === 3 ? "Approved 3/3" : `${n}/3` }));
+    if (canWrite && o.writeIn) head.append(el("button", { type: "button", class: "link-btn", text: "Remove", onclick: () => removeOption(t, o) }));
+    const row = el("div", { class: "signs", role: "group", "aria-label": `Sign-offs for ${o.label || "dataset"}` });
+    for (const p of PEOPLE) {
+      const id = `op-${t.id}-${o.id}-${p}`;
+      const box = el("input", { type: "checkbox", id });
+      box.checked = optSigned(o, p);
+      box.disabled = !canWrite || pending.has(`${t.id}:${o.id}:${p}`);
+      box.addEventListener("change", () => toggleOptSign(t, o, p, box.checked));
+      row.append(el("label", { class: "sign o-" + p, for: id }, box, p));
+    }
+    wrap.append(el("div", { class: "choice" + (n === 3 ? " chosen" : "") }, head, row));
+  }
+  if (canWrite) {
+    const wid = "writein-" + t.id;
+    const wi = el("input", { type: "text", id: wid, "data-keep": true, maxlength: "200", placeholder: "Write in another dataset (name and link)" });
+    const f = el("form", { class: "writein" },
+      el("label", { class: "sr", for: wid, text: "Write in another dataset" }), wi,
+      el("button", { type: "submit", class: "save-btn", text: "Add dataset" }));
+    f.addEventListener("submit", (ev) => { ev.preventDefault(); const v = wi.value.trim(); if (v) { wi.value = ""; addOption(t, v); } });
+    wrap.append(f);
+  }
+  return wrap;
+}
+
+async function toggleOptSign(t, o, person, on) {
+  const key = `${t.id}:${o.id}:${person}`;
+  if (pending.has(key)) return;
+  pending.add(key); setStatus("");
+  try {
+    // Nested update merges, so sign-offs on other datasets and by other people stay intact.
+    await db.doc("tasks/" + t.id).update({ options: { [o.id]: { signoffs: { [person]: on
+      ? { done: true, by: myId, at: new Date().toISOString() }
+      : { done: false, by: null, at: null } } } } });
+  } catch (e) { handleWriteError(e); }
+  pending.delete(key); render();
+}
+
+async function addOption(t, label) {
+  const id = "w" + Date.now().toString(36);
+  try { await db.doc("tasks/" + t.id).update({ options: { [id]: { label, order: Date.now(), writeIn: true, addedBy: myId } } }); }
+  catch (e) { handleWriteError(e); }
+}
+
+async function removeOption(t, o) {
+  try { await db.doc("tasks/" + t.id).update({ options: { [o.id]: { removed: true } } }); }
+  catch (e) { handleWriteError(e); }
+}
+
 async function setDue(t, value) {
   if ((t.due || "") === value) { render(); return; }
   try { await db.doc("tasks/" + t.id).update({ due: value || null }); } catch (e) { handleWriteError(e); }
@@ -489,7 +578,13 @@ async function setDue(t, value) {
 }
 
 function render() {
+  // Live updates rebuild the list; keep anything a person is typing, and their cursor.
+  const kept = {};
+  document.querySelectorAll("[data-keep]").forEach(n => { kept[n.id] = n.value; });
+  const active = document.activeElement && document.activeElement.id;
   renderHeader(); renderFilters(); renderMilestones(); renderTeam();
+  for (const [id, v] of Object.entries(kept)) { const n = document.getElementById(id); if (n) n.value = v; }
+  if (active) { const n = document.getElementById(active); if (n && n !== document.activeElement) n.focus(); }
   resolveNames();
 }
 
