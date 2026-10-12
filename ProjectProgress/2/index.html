@@ -1,0 +1,436 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<title>Forecast Regional Electricity Grid Demand</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@75..125,500..800&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@500&display=swap">
+<style>
+/* Layout: a light checklist up top, weight gathers at the bottom in a navy
+   panel holding team progress and the add-task form. */
+:root {
+  --navy: #1B2A49; --teal: #2E8B8B; --purple: #6A4C93; --amber: #F4A261; --mist: #E8F4F4;
+  --bg: #F3F7F8; --surface: #FFFFFF; --ink: #1B2A49; --muted: #56647D; --line: #D3E0E3;
+  --track: #DCE8EA; --panel: #1B2A49; --panel-ink: #E8F4F4; --panel-muted: #A9BACF;
+  --panel-surface: #24365C; --panel-line: #34497A;
+  --c-sarah: #FF4FA3; --c-andrea: #A35CFF; --c-matt: #2F8CFF; --c-everyone: #2E8B8B;
+  --on-sarah: #1B2A49; --on-andrea: #FFFFFF; --on-matt: #FFFFFF; --on-everyone: #FFFFFF;
+  --warn: #B4601A;
+  --font-display: "Archivo", "Arial Narrow", system-ui, sans-serif;
+  --font-body: "IBM Plex Sans", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --font-mono: "IBM Plex Mono", ui-monospace, "SFMono-Regular", Menlo, monospace;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #0E1628; --surface: #16223B; --ink: #E8F4F4; --muted: #9DACC4; --line: #263555;
+    --track: #24334F; --panel: #091022; --panel-ink: #E8F4F4; --panel-muted: #92A3BE;
+    --panel-surface: #142039; --panel-line: #2A3B62;
+    --c-everyone: #4FB8B8; --on-everyone: #0E1628;
+    --warn: #F4A261; color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #0E1628; --surface: #16223B; --ink: #E8F4F4; --muted: #9DACC4; --line: #263555;
+  --track: #24334F; --panel: #091022; --panel-ink: #E8F4F4; --panel-muted: #92A3BE;
+  --panel-surface: #142039; --panel-line: #2A3B62;
+  --c-everyone: #4FB8B8; --on-everyone: #0E1628;
+  --warn: #F4A261; color-scheme: dark;
+}
+
+* { box-sizing: border-box; }
+body { background: var(--bg); color: var(--ink); font-family: var(--font-body); font-size: 15px; line-height: 1.5; }
+.wrap { max-width: 860px; margin: 0 auto; padding-inline: 16px; }
+button, input, select { font: inherit; color: inherit; }
+:focus-visible { outline: 2px solid var(--teal); outline-offset: 2px; }
+
+/* Header */
+header { padding-block: 32px 20px; display: grid; gap: 14px; }
+.eyebrow { font-family: var(--font-mono); font-size: 12px; letter-spacing: .08em; text-transform: uppercase; color: var(--teal); }
+h1 { font-family: var(--font-display); font-stretch: 85%; font-weight: 800; font-size: clamp(28px, 6vw, 44px); line-height: 1.02; margin: 0; text-wrap: balance; letter-spacing: -.01em; }
+.sub { color: var(--muted); margin: 0; max-width: 62ch; }
+.overall { display: grid; gap: 8px; }
+.overall-top { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 6px 16px; align-items: baseline; }
+.overall-count { font-family: var(--font-display); font-weight: 700; font-size: 18px; }
+.overall-count span { color: var(--muted); font-weight: 500; font-family: var(--font-body); font-size: 14px; }
+.next-due { font-size: 14px; color: var(--muted); }
+.next-due strong { color: var(--ink); font-weight: 600; }
+.bar { height: 8px; background: var(--track); border-radius: 4px; overflow: hidden; }
+.bar > i { display: block; height: 100%; width: 0; background: var(--teal); border-radius: 4px; transition: width .4s ease; }
+
+/* Toolbar */
+.toolbar { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; padding-block: 8px 4px; }
+.chip { border: 1px solid var(--line); background: var(--surface); border-radius: 999px; padding: 5px 12px; font-size: 13px; cursor: pointer; display: inline-flex; align-items: center; gap: 6px; }
+.chip[aria-pressed="true"] { background: var(--ink); color: var(--bg); border-color: var(--ink); }
+.chip .dot { width: 8px; height: 8px; border-radius: 50%; }
+.toggle { margin-left: auto; font-size: 13px; color: var(--muted); display: inline-flex; gap: 6px; align-items: center; cursor: pointer; }
+.toggle input { accent-color: var(--teal); width: 16px; height: 16px; }
+
+.status { font-size: 14px; color: var(--warn); min-height: 0; }
+.status:empty { display: none; }
+.status { padding: 10px 12px; border: 1px solid var(--line); border-radius: 8px; background: var(--surface); margin-top: 8px; }
+
+/* Milestones */
+.milestones { display: grid; gap: 28px; padding-block: 20px 40px; }
+.ms-head { display: flex; flex-wrap: wrap; gap: 4px 14px; align-items: baseline; justify-content: space-between; border-bottom: 2px solid var(--ink); padding-bottom: 6px; }
+.ms-head h2 { font-family: var(--font-display); font-stretch: 90%; font-weight: 700; font-size: 20px; margin: 0; }
+.ms-meta { font-family: var(--font-mono); font-size: 12px; color: var(--muted); display: flex; gap: 12px; flex-wrap: wrap; font-variant-numeric: tabular-nums; }
+.ms-meta .soon { color: var(--warn); }
+.tasks { list-style: none; margin: 0; padding: 0; }
+.task { display: grid; grid-template-columns: auto minmax(0, 1fr) auto; gap: 4px 12px; align-items: start; padding: 11px 2px; border-bottom: 1px solid var(--line); }
+.task input[type="checkbox"] { width: 20px; height: 20px; margin: 1px 0 0; accent-color: var(--oc, var(--teal)); cursor: pointer; }
+.task input[type="checkbox"]:checked { filter: drop-shadow(0 0 3px var(--oc)) drop-shadow(0 0 7px var(--oc)); }
+.task input[type="checkbox"]:disabled { cursor: default; }
+.t-body { min-width: 0; display: grid; gap: 2px; }
+.t-title { overflow-wrap: anywhere; }
+.task.done .t-title { color: var(--muted); text-decoration: line-through; text-decoration-color: var(--line); }
+.t-meta { font-size: 12.5px; color: var(--muted); }
+.t-side { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; justify-content: flex-end; }
+.owner { font-size: 12px; font-weight: 600; padding: 2px 10px; border-radius: 999px; white-space: nowrap; background: var(--oc); color: var(--on); box-shadow: 0 0 10px -2px var(--oc); }
+.o-Sarah { --oc: var(--c-sarah); --on: var(--on-sarah); }
+.o-Andrea { --oc: var(--c-andrea); --on: var(--on-andrea); }
+.o-Matt { --oc: var(--c-matt); --on: var(--on-matt); }
+.o-Everyone { --oc: var(--c-everyone); --on: var(--on-everyone); }
+.view-label { font-size: 13px; font-weight: 600; color: var(--muted); }
+.chip .dot { box-shadow: 0 0 6px var(--oc); background: var(--oc); }
+.chip[aria-pressed="true"].o-Sarah, .chip[aria-pressed="true"].o-Andrea, .chip[aria-pressed="true"].o-Matt, .chip[aria-pressed="true"].o-Everyone { background: var(--oc); color: var(--on); border-color: var(--oc); box-shadow: 0 0 12px -2px var(--oc); }
+.member .bar > i { box-shadow: 0 0 8px var(--oc); background: var(--oc); }
+.member-name .dot { background: var(--oc); box-shadow: 0 0 8px var(--oc); }
+.link-btn { background: none; border: 0; padding: 2px 4px; font-size: 12.5px; color: var(--muted); cursor: pointer; text-decoration: underline; text-underline-offset: 2px; }
+.confirm { grid-column: 2 / -1; display: flex; gap: 10px; align-items: center; font-size: 13px; }
+.confirm .danger { color: var(--warn); font-weight: 600; }
+.empty { color: var(--muted); padding: 14px 2px; border-bottom: 1px solid var(--line); font-size: 14px; }
+
+/* Bottom panel */
+.panel { background: var(--panel); color: var(--panel-ink); padding-block: 36px 48px; }
+.panel h2 { font-family: var(--font-display); font-stretch: 90%; font-weight: 700; font-size: 22px; margin: 0 0 4px; }
+.panel .lede { color: var(--panel-muted); margin: 0 0 18px; font-size: 14px; }
+.team { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 12px; margin-bottom: 36px; }
+.member { background: var(--panel-surface); border: 1px solid var(--panel-line); border-radius: 10px; padding: 14px; display: grid; gap: 8px; }
+.member-name { font-family: var(--font-display); font-weight: 700; font-size: 17px; display: flex; align-items: center; gap: 8px; }
+.member-name .dot { width: 10px; height: 10px; border-radius: 50%; }
+.member-role { font-size: 12.5px; color: var(--panel-muted); }
+.member-count { font-family: var(--font-mono); font-size: 13px; font-variant-numeric: tabular-nums; }
+.member .bar { background: var(--panel-line); height: 6px; }
+.add { display: grid; gap: 12px; background: var(--panel-surface); border: 1px solid var(--panel-line); border-radius: 12px; padding: 18px; }
+.add-row { display: grid; grid-template-columns: minmax(0, 1fr) auto auto auto; gap: 10px; }
+.add label { font-size: 12px; color: var(--panel-muted); display: grid; gap: 4px; }
+.add input[type="text"], .add select { background: var(--panel); color: var(--panel-ink); border: 1px solid var(--panel-line); border-radius: 8px; padding: 9px 10px; min-width: 0; width: 100%; }
+.add button[type="submit"] { align-self: end; background: var(--amber); color: #1B2A49; font-weight: 600; border: 0; border-radius: 8px; padding: 10px 18px; cursor: pointer; }
+.add button[disabled] { opacity: .55; cursor: default; }
+.add-note { font-size: 13px; color: var(--panel-muted); margin: 0; }
+.add-note:empty { display: none; }
+@media (max-width: 640px) {
+  .add-row { grid-template-columns: 1fr 1fr; }
+  .add-row .title-field { grid-column: 1 / -1; }
+  .add-row button { grid-column: 1 / -1; }
+  .task { grid-template-columns: auto minmax(0, 1fr); }
+  .t-side { grid-column: 2; justify-content: flex-start; }
+  .toggle { margin-left: 0; }
+}
+@media (prefers-reduced-motion: reduce) { .bar > i { transition: none; } }
+</style>
+
+<div class="wrap">
+  <header>
+    <div class="eyebrow">DSC 450 · Project 2 · Group 1</div>
+    <h1>Forecast Regional Electricity Grid Demand</h1>
+    <p class="sub">Shared checklist for the ERCOT day-ahead demand forecast. Check off your steps as you finish them; everyone sees the same list.</p>
+    <div class="overall">
+      <div class="overall-top">
+        <div class="overall-count" id="overall-count">Loading tasks…</div>
+        <div class="next-due" id="next-due"></div>
+      </div>
+      <div class="bar" aria-hidden="true"><i id="overall-bar"></i></div>
+    </div>
+  </header>
+
+  <div class="toolbar" id="filters" role="group" aria-label="Show tasks for"></div>
+  <div class="status" id="status" role="status"></div>
+
+  <main class="milestones" id="milestones">
+    <p class="empty">Loading the team's tasks…</p>
+  </main>
+</div>
+
+<section class="panel">
+  <div class="wrap">
+    <h2>Where the team stands</h2>
+    <p class="lede">Progress by person, across all milestones.</p>
+    <div class="team" id="team"></div>
+
+    <form class="add" id="add-form" autocomplete="off">
+      <h2 style="font-size:18px;margin:0">Add a task</h2>
+      <div class="add-row">
+        <label class="title-field" for="new-title">Task
+          <input type="text" id="new-title" maxlength="200" placeholder="e.g. Draft speaker notes for slides 4–7" required>
+        </label>
+        <label for="new-owner">Owner
+          <select id="new-owner"></select>
+        </label>
+        <label for="new-milestone">Milestone
+          <select id="new-milestone"></select>
+        </label>
+        <button type="submit" id="add-btn">Add task</button>
+      </div>
+      <p class="add-note" id="add-note"></p>
+    </form>
+  </div>
+</section>
+
+<script>
+const MILESTONES = [
+  { key: "m1", name: "Milestone 1 · Proposal", due: "2026-10-18" },
+  { key: "m2", name: "Milestone 2 · Draft report & 10 questions", due: "2026-10-25" },
+  { key: "m3", name: "Milestone 3 · Final presentation", due: "2026-11-01" },
+  { key: "other", name: "Other tasks", due: null },
+];
+const OWNERS = [
+  { key: "Sarah", label: "Sarah", role: "Data Wrangler" },
+  { key: "Andrea", label: "Andrea", role: "Data Scientist" },
+  { key: "Matt", label: "Matt", role: "Data Visualizer / Presenter" },
+  { key: "Everyone", label: "Team", role: "Shared team tasks" },
+];
+
+let db = null, user = null, myId = null, canWrite = true;
+let tasks = [], loaded = false;
+let filter = "All";
+let hideDone = false;
+let confirmId = null;
+const pending = new Set();
+const names = {};
+
+try { hideDone = localStorage.getItem("hideDone") === "1"; } catch (e) {}
+
+const $ = (id) => document.getElementById(id);
+function el(tag, attrs = {}, ...kids) {
+  const n = document.createElement(tag);
+  for (const [k, v] of Object.entries(attrs)) {
+    if (k === "class") n.className = v;
+    else if (k === "text") n.textContent = v;
+    else if (k.startsWith("on")) n.addEventListener(k.slice(2), v);
+    else if (v === true) n.setAttribute(k, "");
+    else if (v !== false && v != null) n.setAttribute(k, v);
+  }
+  for (const k of kids) if (k) n.append(k);
+  return n;
+}
+function setStatus(msg) { $("status").textContent = msg || ""; }
+
+function dayDiff(iso) {
+  const [y, m, d] = iso.split("-").map(Number);
+  const due = new Date(y, m - 1, d);
+  const now = new Date(); now.setHours(0, 0, 0, 0);
+  return Math.round((due - now) / 86400000);
+}
+function fmtDate(iso) {
+  const [y, m, d] = iso.split("-").map(Number);
+  return new Date(y, m - 1, d).toLocaleDateString(undefined, { weekday: "short", month: "short", day: "numeric" });
+}
+function dueLabel(iso) {
+  const n = dayDiff(iso);
+  if (n < 0) return { text: `Was due ${fmtDate(iso)}`, soon: false };
+  if (n === 0) return { text: "Due today, 11:59 PM", soon: true };
+  if (n === 1) return { text: "Due tomorrow", soon: true };
+  return { text: `Due ${fmtDate(iso)} · ${n} days left`, soon: n <= 3 };
+}
+
+function sorted() { return [...tasks].sort((a, b) => (a.order ?? 0) - (b.order ?? 0)); }
+
+function renderHeader() {
+  const total = tasks.length, done = tasks.filter(t => t.done).length;
+  const cnt = $("overall-count");
+  cnt.textContent = "";
+  if (!loaded) { cnt.textContent = "Loading tasks…"; return; }
+  cnt.append(`${done} of ${total} done `, el("span", { text: total ? `(${Math.round(done / total * 100)}%)` : "" }));
+  $("overall-bar").style.width = total ? `${done / total * 100}%` : "0";
+  const nd = $("next-due"); nd.textContent = "";
+  const next = MILESTONES.find(m => m.due && dayDiff(m.due) >= 0 && tasks.some(t => t.milestone === m.key && !t.done));
+  if (next) {
+    const left = tasks.filter(t => t.milestone === next.key && !t.done).length;
+    nd.append("Next up: ", el("strong", { text: next.name.split(" · ")[0] }), ` · ${dueLabel(next.due).text} · ${left} open`);
+  }
+}
+
+function renderFilters() {
+  const f = $("filters"); f.textContent = "";
+  f.append(el("span", { class: "view-label", text: "View list:" }));
+  const opts = [{ key: "All", label: "All tasks" }, ...OWNERS];
+  for (const o of opts) {
+    const b = el("button", { type: "button", class: "chip" + (o.key === "All" ? "" : " o-" + o.key), "aria-pressed": String(filter === o.key), onclick: () => { filter = o.key; render(); } });
+    if (o.key !== "All") b.append(el("span", { class: "dot" }));
+    b.append(o.label);
+    f.append(b);
+  }
+  const cb = el("input", { type: "checkbox", id: "hide-done" });
+  cb.checked = hideDone;
+  cb.addEventListener("change", () => { hideDone = cb.checked; try { localStorage.setItem("hideDone", hideDone ? "1" : "0"); } catch (e) {} render(); });
+  f.append(el("label", { class: "toggle", for: "hide-done" }, cb, "Hide finished"));
+}
+
+function taskRow(t) {
+  const cb = el("input", { type: "checkbox", id: "cb-" + t.id, "aria-label": t.title || "Task" });
+  cb.checked = !!t.done;
+  cb.disabled = !canWrite || pending.has(t.id);
+  cb.addEventListener("change", () => toggle(t, cb.checked));
+
+  const meta = [];
+  if (t.done) {
+    const who = t.doneBy ? (names[t.doneBy] || "") : "";
+    let when = "";
+    if (t.doneAt) { const d = new Date(t.doneAt); if (!isNaN(d)) when = d.toLocaleDateString(undefined, { month: "short", day: "numeric" }); }
+    meta.push(["Done", who && `by ${who}`, when && `on ${when}`].filter(Boolean).join(" "));
+  }
+  const body = el("div", { class: "t-body" },
+    el("label", { class: "t-title", for: "cb-" + t.id, text: t.title || "Untitled task" }),
+    meta.length ? el("div", { class: "t-meta", text: meta.join(" · ") }) : null);
+
+  const owner = OWNERS.some(o => o.key === t.owner) ? t.owner : "Everyone";
+  const ownerLabel = OWNERS.find(o => o.key === owner).label;
+  const side = el("div", { class: "t-side" }, el("span", { class: "owner o-" + owner, text: ownerLabel }));
+  if (canWrite) side.append(el("button", { type: "button", class: "link-btn", text: "Remove", "aria-label": `Remove ${t.title || "task"}`, onclick: () => { confirmId = t.id; render(); } }));
+
+  const li = el("li", { class: "task o-" + owner + (t.done ? " done" : "") }, cb, body, side);
+  if (confirmId === t.id) {
+    li.append(el("div", { class: "confirm" },
+      el("span", { text: "Remove this task for everyone?" }),
+      el("button", { type: "button", class: "link-btn danger", text: "Remove", onclick: () => removeTask(t) }),
+      el("button", { type: "button", class: "link-btn", text: "Cancel", onclick: () => { confirmId = null; render(); } })));
+  }
+  return li;
+}
+
+function renderMilestones() {
+  const root = $("milestones"); root.textContent = "";
+  if (!loaded) { root.append(el("p", { class: "empty", text: "Loading the team's tasks…" })); return; }
+  if (!tasks.length) { root.append(el("p", { class: "empty", text: "No tasks yet. Add the first one with the form at the bottom of the page." })); return; }
+  const list = sorted();
+  for (const m of MILESTONES) {
+    const all = list.filter(t => (MILESTONES.some(x => x.key === t.milestone) ? t.milestone : "other") === m.key);
+    if (!all.length && m.key === "other") continue;
+    const shown = all.filter(t => (filter === "All" || t.owner === filter) && !(hideDone && t.done));
+    const doneCount = all.filter(t => t.done).length;
+    const meta = el("div", { class: "ms-meta" });
+    if (m.due) { const d = dueLabel(m.due); meta.append(el("span", { class: d.soon ? "soon" : "", text: d.text })); }
+    meta.append(el("span", { text: `${doneCount}/${all.length} done` }));
+    const ul = el("ul", { class: "tasks" });
+    for (const t of shown) ul.append(taskRow(t));
+    const sec = el("section", {}, el("div", { class: "ms-head" }, el("h2", { text: m.name }), meta), ul);
+    if (!shown.length) sec.append(el("p", { class: "empty", text: all.length ? "Nothing to show with the current filter." : "No tasks in this milestone yet." }));
+    root.append(sec);
+  }
+}
+
+function renderTeam() {
+  const root = $("team"); root.textContent = "";
+  for (const o of OWNERS) {
+    const mine = tasks.filter(t => t.owner === o.key);
+    const done = mine.filter(t => t.done).length;
+    const bar = el("div", { class: "bar" }, el("i"));
+    bar.firstChild.style.width = mine.length ? `${done / mine.length * 100}%` : "0";
+    const dot = el("span", { class: "dot" });
+    root.append(el("div", { class: "member o-" + o.key },
+      el("div", { class: "member-name" }, dot, o.label),
+      el("div", { class: "member-role", text: o.role }),
+      bar,
+      el("div", { class: "member-count", text: loaded ? `${done} of ${mine.length} done` : "…" })));
+  }
+}
+
+function render() {
+  renderHeader(); renderFilters(); renderMilestones(); renderTeam();
+  resolveNames();
+}
+
+let resolving = false;
+async function resolveNames() {
+  if (!user || resolving) return;
+  const ids = [...new Set(tasks.map(t => t.doneBy).filter(Boolean))].filter(id => !(id in names));
+  if (!ids.length) return;
+  resolving = true;
+  try {
+    const ps = await user.profiles(ids);
+    let changed = false;
+    for (const id of ids) { names[id] = (ps[id] && ps[id].name) || ""; if (names[id]) changed = true; }
+    if (changed) { resolving = false; renderMilestones(); return; }
+  } catch (e) {}
+  resolving = false;
+}
+
+function handleWriteError(e) {
+  const code = e && e.code;
+  if (code === "invalid_argument" || code === "not_granted") {
+    canWrite = false; applyWriteState();
+    setStatus("You can view this list but not change it. Ask Sarah to share it with you as an Editor.");
+  } else if (code === "quota_exceeded") {
+    setStatus("The list is full. Remove a few finished tasks, then try again.");
+  } else {
+    setStatus("That change didn't save. Check your connection and try again.");
+  }
+}
+
+async function toggle(t, done) {
+  if (pending.has(t.id)) return;
+  pending.add(t.id); setStatus("");
+  try {
+    await db.doc("tasks/" + t.id).update(done
+      ? { done: true, doneBy: myId, doneAt: new Date().toISOString() }
+      : { done: false, doneBy: null, doneAt: null });
+  } catch (e) { handleWriteError(e); }
+  pending.delete(t.id); render();
+}
+
+async function removeTask(t) {
+  confirmId = null;
+  try { await db.doc("tasks/" + t.id).delete(); } catch (e) { handleWriteError(e); }
+  render();
+}
+
+function applyWriteState() {
+  const off = !canWrite || !db;
+  for (const id of ["new-title", "new-owner", "new-milestone", "add-btn"]) $(id).disabled = off;
+  $("add-note").textContent = !db ? "Open this page on claude.ai while signed in to load and add tasks."
+    : (!canWrite ? "You have view-only access, so you can't add tasks." : "");
+}
+
+function setupForm() {
+  const os = $("new-owner"), ms = $("new-milestone");
+  for (const o of OWNERS) os.append(el("option", { value: o.key, text: o.label }));
+  for (const m of MILESTONES) ms.append(el("option", { value: m.key, text: m.name.split(" · ")[0] }));
+  const current = MILESTONES.find(m => m.due && dayDiff(m.due) >= 0);
+  ms.value = current ? current.key : "other";
+  $("add-form").addEventListener("submit", async (ev) => {
+    ev.preventDefault();
+    const title = $("new-title").value.trim();
+    if (!title || !db || !canWrite) return;
+    $("add-btn").disabled = true; setStatus("");
+    try {
+      await db.collection("tasks").add({
+        title, owner: os.value, milestone: ms.value, order: Date.now(),
+        done: false, doneBy: null, doneAt: null, createdBy: myId,
+      });
+      $("new-title").value = "";
+      $("add-note").textContent = "Added. It's at the bottom of its milestone.";
+    } catch (e) { handleWriteError(e); }
+    $("add-btn").disabled = !canWrite;
+  });
+}
+
+async function init() {
+  setupForm(); render(); applyWriteState();
+  const use = window.claude && window.claude.use;
+  if (!use) { loaded = true; render(); setStatus("Open this page on claude.ai while signed in to see the team's tasks."); return; }
+  [db, user] = await Promise.all([use("db"), use("user")]);
+  if (!db) { loaded = true; render(); applyWriteState(); setStatus("This list couldn't load here. Open it on claude.ai while signed in."); return; }
+  if (user) {
+    myId = await user.id();
+    const cw = await user.can("data.write");
+    if (cw === false) canWrite = false;
+  }
+  applyWriteState();
+  db.collection("tasks").onSnapshot(snap => {
+    tasks = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+    loaded = true; render();
+  }, () => { setStatus("Live updates stopped. Reload the page to reconnect."); });
+}
+init();
+</script>
+
+</body></html>
