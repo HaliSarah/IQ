@@ -227,6 +227,7 @@ h1 { font-family: var(--font-display); font-stretch: 85%; font-weight: 800; font
 </section>
 
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
 <script>
 const MILESTONES = [
@@ -528,7 +529,7 @@ async function saveEdit(t, title, owner, due) {
   if (due !== (t.due || "")) change.due = due || null;
   editId = null; setStatus("");
   if (Object.keys(change).length) {
-    try { await db.doc("tasks/" + t.id).update(change); } catch (e) { handleWriteError(e); }
+    try { await db.doc("p3_tasks/" + t.id).update(change); } catch (e) { handleWriteError(e); }
   }
   render();
 }
@@ -573,7 +574,7 @@ async function toggleOptSign(t, o, person, on) {
   pending.add(key); setStatus("");
   try {
     // Nested update merges, so sign-offs on other datasets and by other people stay intact.
-    await db.doc("tasks/" + t.id).update({ options: { [o.id]: { signoffs: { [person]: on
+    await db.doc("p3_tasks/" + t.id).update({ options: { [o.id]: { signoffs: { [person]: on
       ? { done: true, by: myId, at: new Date().toISOString() }
       : { done: false, by: null, at: null } } } } });
   } catch (e) { handleWriteError(e); }
@@ -582,18 +583,18 @@ async function toggleOptSign(t, o, person, on) {
 
 async function addOption(t, label) {
   const id = "w" + Date.now().toString(36);
-  try { await db.doc("tasks/" + t.id).update({ options: { [id]: { label, order: Date.now(), writeIn: true, addedBy: myId } } }); }
+  try { await db.doc("p3_tasks/" + t.id).update({ options: { [id]: { label, order: Date.now(), writeIn: true, addedBy: myId } } }); }
   catch (e) { handleWriteError(e); }
 }
 
 async function removeOption(t, o) {
-  try { await db.doc("tasks/" + t.id).update({ options: { [o.id]: { removed: true } } }); }
+  try { await db.doc("p3_tasks/" + t.id).update({ options: { [o.id]: { removed: true } } }); }
   catch (e) { handleWriteError(e); }
 }
 
 async function setDue(t, value) {
   if ((t.due || "") === value) { render(); return; }
-  try { await db.doc("tasks/" + t.id).update({ due: value || null }); } catch (e) { handleWriteError(e); }
+  try { await db.doc("p3_tasks/" + t.id).update({ due: value || null }); } catch (e) { handleWriteError(e); }
   render();
 }
 
@@ -641,7 +642,7 @@ async function toggle(t, done) {
   if (pending.has(t.id)) return;
   pending.add(t.id); setStatus("");
   try {
-    await db.doc("tasks/" + t.id).update(done
+    await db.doc("p3_tasks/" + t.id).update(done
       ? { done: true, doneBy: myId, doneAt: new Date().toISOString() }
       : { done: false, doneBy: null, doneAt: null });
   } catch (e) { handleWriteError(e); }
@@ -654,7 +655,7 @@ async function toggleSign(t, person, on) {
   pending.add(key); setStatus("");
   try {
     // Nested update merges, so two people signing at once don't erase each other.
-    await db.doc("tasks/" + t.id).update({ signoffs: { [person]: on
+    await db.doc("p3_tasks/" + t.id).update({ signoffs: { [person]: on
       ? { done: true, by: myId, at: new Date().toISOString() }
       : { done: false, by: null, at: null } } });
   } catch (e) { handleWriteError(e); }
@@ -663,7 +664,7 @@ async function toggleSign(t, person, on) {
 
 async function removeTask(t) {
   confirmId = null;
-  try { await db.doc("tasks/" + t.id).delete(); } catch (e) { handleWriteError(e); }
+  try { await db.doc("p3_tasks/" + t.id).delete(); } catch (e) { handleWriteError(e); }
   render();
 }
 
@@ -686,7 +687,7 @@ function setupForm() {
     if (!title || !db || !canWrite) return;
     $("add-btn").disabled = true; setStatus("");
     try {
-      await db.collection("tasks").add({
+      await db.collection("p3_tasks").add({
         title, owner: os.value, milestone: ms.value, order: Date.now(),
         due: $("new-due").value || null,
         done: false, doneBy: null, doneAt: null, createdBy: myId,
@@ -700,13 +701,15 @@ function setupForm() {
 
 // ---- Firebase setup ----
 // WHY: paste the config from Firebase console > Project settings > Your apps > Web app.
+// WHY it's safe in public code: Firebase web keys identify the project; the Firestore rules control access.
+// WHY p3_tasks: this Firebase project also holds the Project 2 tracker in "tasks"; a separate collection keeps the lists apart.
 const FIREBASE_CONFIG = {
-  apiKey: "PASTE_API_KEY",
-  authDomain: "PASTE_PROJECT.firebaseapp.com",
-  projectId: "PASTE_PROJECT_ID",
-  storageBucket: "PASTE_PROJECT.appspot.com",
-  messagingSenderId: "PASTE_SENDER_ID",
-  appId: "PASTE_APP_ID",
+  apiKey: "AIzaSyAt2ZJbJ4jXtOP0svgzpG7YJKxwBICRQe8",
+  authDomain: "project-2-dd4bc.firebaseapp.com",
+  projectId: "project-2-dd4bc",
+  storageBucket: "project-2-dd4bc.firebasestorage.app",
+  messagingSenderId: "472501821189",
+  appId: "1:472501821189:web:e6aeaad6f2aff2fc5b616c",
 };
 // WHY: starter tasks are written with fixed ids, so two people opening the empty list at once can't create duplicates.
 const SEED = [{"title": "Pick the dataset", "owner": "Everyone", "milestone": "m1", "due": "2026-11-02", "order": 1, "done": false, "doneBy": null, "doneAt": null, "kind": "choice", "options": {"epa_msw": {"label": "EPA MSW State Data (best pick)", "url": "https://catalog.data.gov/dataset/publicly-reported-state-municipal-solid-waste-data-version-1", "download": "https://pasteur.epa.gov/uploads/10.23719/1527730/Compiled%20State%20Public%20Waste%20Data.xlsx", "note": "Generation, recycling and disposal by state · Excel", "order": 1}, "nyc": {"label": "NYC Recycling Diversion & Capture Rates", "url": "https://catalog.data.gov/dataset/recycling-diversion-and-capture-rates", "download": "https://data.cityofnewyork.us/api/views/gaq9-z3hz/rows.csv?accessType=DOWNLOAD", "note": "Real operational data by district · CSV", "order": 2}, "wa": {"label": "Washington State Solid Waste Composition", "url": "https://data.wa.gov/api/views/iz32-gmjg/rows.json?accessType=DOWNLOAD", "note": "What is actually in the bins · JSON", "order": 3}, "epa_mat": {"label": "EPA Materials in Municipal Waste Stream 1960–2018", "url": "https://edg.epa.gov/data/PUBLIC/OLEM/Materials_Municipal_Waste_Stream_1960_2018.xlsx", "note": "National material trends · Excel", "order": 4}}, "note": "Check your name on the dataset you want; one needs all three to lock it in.", "id": "t01"}, {"title": "Pull the chosen dataset and confirm its fields", "owner": "Matt", "milestone": "m1", "due": "2026-11-04", "order": 2, "done": false, "doneBy": null, "doneAt": null, "id": "t02"}, {"title": "Draft 3–5 research questions", "owner": "Sarah", "milestone": "m1", "due": "2026-11-04", "order": 3, "done": false, "doneBy": null, "doneAt": null, "id": "t03"}, {"title": "Write data source description and limitations", "owner": "Matt", "milestone": "m1", "due": "2026-11-05", "order": 4, "done": false, "doneBy": null, "doneAt": null, "id": "t04"}, {"title": "Propose methods: target, features, model, metrics", "owner": "Sarah", "milestone": "m1", "due": "2026-11-05", "order": 5, "done": false, "doneBy": null, "doneAt": null, "id": "t05"}, {"title": "Outline the proposal and plan the visuals", "owner": "Andrea", "milestone": "m1", "due": "2026-11-05", "order": 6, "done": false, "doneBy": null, "doneAt": null, "id": "t06"}, {"title": "Write the abstract and assemble the proposal", "owner": "Andrea", "milestone": "m1", "due": "2026-11-06", "order": 7, "done": false, "doneBy": null, "doneAt": null, "id": "t07"}, {"title": "Review the proposal", "owner": "Everyone", "milestone": "m1", "due": "2026-11-07", "order": 8, "done": false, "doneBy": null, "doneAt": null, "id": "t08"}, {"title": "Submit Milestone 1", "owner": "Everyone", "milestone": "m1", "due": "2026-11-08", "order": 9, "done": false, "doneBy": null, "doneAt": null, "id": "t09"}, {"title": "Clean, merge and define the contamination target", "owner": "Matt", "milestone": "m2", "due": "2026-11-10", "order": 10, "done": false, "doneBy": null, "doneAt": null, "id": "t10"}, {"title": "Finish wrangling notebook and data dictionary", "owner": "Matt", "milestone": "m2", "due": "2026-11-11", "order": 11, "done": false, "doneBy": null, "doneAt": null, "id": "t11"}, {"title": "EDA and feature engineering", "owner": "Sarah", "milestone": "m2", "due": "2026-11-11", "order": 12, "done": false, "doneBy": null, "doneAt": null, "id": "t12"}, {"title": "Train baseline and tuned models, evaluate", "owner": "Sarah", "milestone": "m2", "due": "2026-11-12", "order": 13, "done": false, "doneBy": null, "doneAt": null, "id": "t13"}, {"title": "Write methods and results sections", "owner": "Sarah", "milestone": "m2", "due": "2026-11-13", "order": 14, "done": false, "doneBy": null, "doneAt": null, "id": "t14"}, {"title": "Build 3 quarter-page and 1 half-page illustrations", "owner": "Andrea", "milestone": "m2", "due": "2026-11-13", "order": 15, "done": false, "doneBy": null, "doneAt": null, "id": "t15"}, {"title": "Write intro, ethics and conclusion sections", "owner": "Andrea", "milestone": "m2", "due": "2026-11-13", "order": 16, "done": false, "doneBy": null, "doneAt": null, "id": "t16"}, {"title": "Write the 10 stakeholder questions and answers", "owner": "Everyone", "milestone": "m2", "due": "2026-11-13", "order": 17, "done": false, "doneBy": null, "doneAt": null, "id": "t17"}, {"title": "Review the draft report", "owner": "Everyone", "milestone": "m2", "due": "2026-11-14", "order": 18, "done": false, "doneBy": null, "doneAt": null, "id": "t18"}, {"title": "Submit Milestone 2 PDF", "owner": "Everyone", "milestone": "m2", "due": "2026-11-15", "order": 19, "done": false, "doneBy": null, "doneAt": null, "id": "t19"}, {"title": "Address draft feedback and finalize the report", "owner": "Sarah", "milestone": "m3", "due": "2026-11-18", "order": 20, "done": false, "doneBy": null, "doneAt": null, "id": "t20"}, {"title": "Clean the code repo and add README link", "owner": "Matt", "milestone": "m3", "due": "2026-11-18", "order": 21, "done": false, "doneBy": null, "doneAt": null, "id": "t21"}, {"title": "Build the slide deck", "owner": "Andrea", "milestone": "m3", "due": "2026-11-18", "order": 22, "done": false, "doneBy": null, "doneAt": null, "id": "t22"}, {"title": "Finalize the Q&A document", "owner": "Matt", "milestone": "m3", "due": "2026-11-19", "order": 23, "done": false, "doneBy": null, "doneAt": null, "id": "t23"}, {"title": "Write speaker notes and record the presentation", "owner": "Andrea", "milestone": "m3", "due": "2026-11-20", "order": 24, "done": false, "doneBy": null, "doneAt": null, "id": "t24"}, {"title": "Review the recording", "owner": "Everyone", "milestone": "m3", "due": "2026-11-21", "order": 25, "done": false, "doneBy": null, "doneAt": null, "id": "t25"}, {"title": "Complete team peer evaluations", "owner": "Everyone", "milestone": "m3", "due": "2026-11-22", "order": 26, "done": false, "doneBy": null, "doneAt": null, "id": "t26"}, {"title": "Submit all Milestone 3 deliverables", "owner": "Everyone", "milestone": "m3", "due": "2026-11-22", "order": 27, "done": false, "doneBy": null, "doneAt": null, "id": "t27"}];
@@ -727,20 +730,24 @@ async function init() {
   myId = who.value || null;
   who.addEventListener("change", () => { myId = who.value || null; try { localStorage.setItem("whoami", who.value); } catch (e) {} });
   if (!window.firebase || FIREBASE_CONFIG.apiKey.startsWith("PASTE")) {
-    loaded = true; render(); setStatus("Add your Firebase config near the bottom of index.html to load the team's tasks."); return;
+    // WHY: show the starter tasks read-only so the page is useful before Firebase is connected.
+    tasks = SEED.map(t => ({ ...t })); canWrite = false; loaded = true; applyWriteState(); render();
+    setStatus("Preview only. Add your Firebase config near the bottom of index.html to save check-offs."); return;
   }
   // WHY try/catch: a bad config throws here; show a fixable message instead of a blank page.
   try {
     firebase.initializeApp(FIREBASE_CONFIG);
+    // WHY anonymous sign-in: the rules only accept visitors who loaded the page, which blocks raw junk traffic.
+    await firebase.auth().signInAnonymously();
     const fs = firebase.firestore();
     db = wrap(fs);
     applyWriteState();
     let seeded = false;
-    fs.collection("tasks").onSnapshot(async (snap) => {
+    fs.collection("p3_tasks").onSnapshot(async (snap) => {
       if (snap.empty && !seeded) {
         seeded = true;
         const b = fs.batch();
-        for (const { id, ...d } of SEED) b.set(fs.doc("tasks/" + id), d);
+        for (const { id, ...d } of SEED) b.set(fs.doc("p3_tasks/" + id), d);
         try { await b.commit(); } catch (e) { handleWriteError(e); }
         return;
       }
@@ -748,7 +755,7 @@ async function init() {
       loaded = true; render();
     }, () => { setStatus("Live updates stopped. Check the Firestore rules, then reload the page."); });
   } catch (e) {
-    loaded = true; render(); setStatus("Firebase didn't start. Double-check the config values.");
+    loaded = true; render(); setStatus("Couldn't connect to Firebase. Check that Anonymous sign-in is on and the rules are published.");
   }
 }
 init();

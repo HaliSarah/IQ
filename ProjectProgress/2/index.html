@@ -3,7 +3,7 @@
   Title:       Forecast Regional Electricity Grid Demand: Team Tracker
   Author:      Hali Sarah Parsons
   Date:        2026-10-11
-  Modified By: Claude (GitHub Pages + Firebase version)
+  Modified By: Claude (2026-10-14: progress update for models, weather data, and new tasks)
   Description: Shared DSC 450 Project 2 checklist for Group 1. Hosted on GitHub Pages;
                tasks, sign-offs, and due dates save to Cloud Firestore so every
                teammate sees the same live list without a Claude account.
@@ -1126,6 +1126,67 @@ async function seedTasks() {
   } catch (e) { handleWriteError(e); }
 }
 
+// ---- One-time progress updates ----
+// WHY: the live list lives in Firebase, so editing SEED would not change it. Each update below
+// runs once for the whole team: a marker saved on the dataset task (t01) records that it ran,
+// so a task someone later unchecks or deletes is not put back on the next page load.
+const UPDATES = [{
+  key: "u20261014",
+  add: {
+    t41: { title: "Pull Texas weather and merge it onto the ERCOT data", owner: "Sarah", milestone: "m2", due: "2026-10-14", order: 12.5,
+      note: "Hourly temperatures for Houston, Dallas, San Antonio, Austin (Open-Meteo), population-weighted, plus heat-wave features.",
+      done: true, doneBy: "Sarah", doneAt: "2026-10-14T19:40:00-05:00" },
+    t42: { title: "Share eia930_erco_weather.csv and the weather notebook in Teams", owner: "Sarah", milestone: "m2", due: "2026-10-15", order: 12.6,
+      note: "Handoff: this replaces the old cleaned file as the team's dataset.", done: false, doneBy: null, doneAt: null },
+    t43: { title: "Export SARIMA, Prophet, and XGBoost test predictions to CSV", owner: "Andrea", milestone: "m2", due: "2026-10-16", order: 15.5,
+      note: "Handoff: Matt needs these for the July 2026 peak-week chart. No re-run needed if the predictions are still in memory.", done: false, doneBy: null, doneAt: null },
+    t44: { title: "Add weather features to XGBoost and re-score against ERCOT", owner: "Andrea", milestone: "m2", due: "2026-10-19", order: 15.6,
+      note: "Focus on XGBoost and SARIMA (team agreed). Use the lagged and 72-hour weather columns for a fair day-ahead test.", done: false, doneBy: null, doneAt: null },
+    t45: { title: "Add actual-vs-predicted charts to the modeling notebook", owner: "Andrea", milestone: "m2", due: "2026-10-19", order: 15.7,
+      note: "Easier for non-technical stakeholders than metrics alone.", done: false, doneBy: null, doneAt: null },
+    t46: { title: "Format the Milestone 1 proposal and add preliminary charts", owner: "Matt", milestone: "m1", due: "2026-10-16", order: 3.5,
+      note: "Starts from Sarah's proposal draft. No results in Milestone 1.", done: false, doneBy: null, doneAt: null },
+    t47: { title: "Build July 2026 peak-week chart: predictions vs. actual demand", owner: "Matt", milestone: "m2", due: "2026-10-21", order: 17.5,
+      note: "Needs Andrea's prediction CSV.", done: false, doneBy: null, doneAt: null },
+    t48: { title: "Document the 3-year training window and rolling 24-hour SARIMA in Milestone 2", owner: "Andrea", milestone: "m2", due: "2026-10-20", order: 19.5,
+      note: "All models trained Oct 2022 to Sep 2025 for compute reasons. The proposal stays as written.", done: false, doneBy: null, doneAt: null },
+  },
+  // WHY dot-paths: change only these fields, leaving teammates' other edits and sign-offs alone.
+  update: {
+    t13: { done: true, doneBy: "Andrea", doneAt: "2026-10-14T12:00:00-05:00" },
+    t14: { done: true, doneBy: "Andrea", doneAt: "2026-10-14T12:00:00-05:00",
+      note: "Done. Trained on 3 years (Oct 2022 to Sep 2025); SARIMA uses rolling 24-hour forecasts." },
+    t15: { done: true, doneBy: "Andrea", doneAt: "2026-10-14T12:00:00-05:00",
+      note: "Done. MAPE: ERCOT 2.0%, XGBoost 4.5%, SARIMA 4.9%, baseline 7.5%, Prophet 8.1%." },
+    t16: { done: true, doneBy: "Matt", doneAt: "2026-10-14T12:00:00-05:00",
+      note: "Done: visualization notebook with 15 figures." },
+    "t01": { "options.o2": { label: "Open-Meteo historical weather: hourly temperatures for Houston, Dallas, San Antonio, Austin (second source, merged onto ERCOT)",
+      url: "https://open-meteo.com/en/docs/historical-weather-api", order: 2 } },
+  },
+}];
+
+let applying = false;
+// WHY: runs after the live list loads; skips any update already marked done on t01.
+async function applyUpdates() {
+  const anchor = tasks.find(t => t.id === "t01");
+  if (applying || !anchor || !canWrite) return;
+  const pendingUpdates = UPDATES.filter(u => !(anchor.migrations && anchor.migrations[u.key]));
+  if (!pendingUpdates.length) return;
+  applying = true;
+  // WHY try/catch: a failed update should report through the page, not break the tracker.
+  try {
+    const batch = writeBatch(fs);
+    const have = new Set(tasks.map(t => t.id));
+    for (const u of pendingUpdates) {
+      for (const [id, data] of Object.entries(u.add)) if (!have.has(id)) batch.set(taskRef(id), data);
+      for (const [id, data] of Object.entries(u.update)) if (have.has(id)) batch.update(taskRef(id), data);
+      batch.update(taskRef("t01"), { [`migrations.${u.key}`]: true });
+    }
+    await batch.commit();
+  } catch (e) { handleWriteError(e); }
+  applying = false;
+}
+
 // WHY: one place builds a task's document path, so every write targets the same collection.
 function taskRef(id) { return doc(fs, "tasks", id); }
 
@@ -1152,6 +1213,7 @@ async function init() {
   onSnapshot(collection(fs, "tasks"), snap => {
     tasks = snap.docs.map(d => ({ id: d.id, ...d.data() }));
     loaded = true; render();
+    applyUpdates();
   }, (e) => { handleWriteError(e); });
 }
 init();
