@@ -1,25 +1,27 @@
-
 <!DOCTYPE html>
+<!--
+  Title:       IQ Email Brand — Branded Email Sender
+  Author:      Hali Sarah Parsons
+  Date:        2026-10-16
+  Modified By: Claude (Anthropic)
+  Description: Internal BackEnd tool for sending branded I.Q. Productionz emails via EmailJS.
+               Adds a formatting toolbar (bold, italic, bulleted list, numbered list) and a
+               greeting picker (default "Salutations", presets, custom or none). Kept out of search engines on purpose (noindex, no SEO tags).
+-->
 <html lang="en">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>IQ Email Brand — I.Q. Productionz</title>
-<meta name="description" content="Internal I.Q. Productionz tool.">
-  <link rel="canonical" href="https://iqproductionz.com/BackEnd/BrandedEmail">
-  <meta property="og:title" content="IQ Email Brand — I.Q. Productionz">
-  <meta property="og:description" content="I.Q. Productionz — Entertainment & Metaphysical Health. Houston, Texas.">
-  <meta property="og:type" content="website">
-  <meta property="og:image" content="https://static.wixstatic.com/media/b63ec4_d6fad9165f744284a4b90915a9fbbbc5~mv2.jpg">
-  <meta property="og:url" content="https://iqproductionz.com/BackEnd/BrandedEmail">
-  <meta name="twitter:card" content="summary_large_image">
-  <meta name="twitter:title" content="IQ Email Brand — I.Q. Productionz">
-  <meta name="twitter:description" content="I.Q. Productionz — Entertainment & Metaphysical Health. Houston, Texas.">
-  <meta name="twitter:image" content="https://static.wixstatic.com/media/b63ec4_d6fad9165f744284a4b90915a9fbbbc5~mv2.jpg">
   <meta name="robots" content="noindex, nofollow">
 <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700&family=Raleway:wght@300;400;500;600&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
-<script>window.addEventListener('load', function(){ emailjs.init('3vNjQbWmqzzOO6IK-'); });</script>
+<script>
+  // WHY a constant + init right away: the key must exist even if you click Send before the
+  // page finishes loading. Each send also passes it, so it can never be missing.
+  const EJS_PUBLIC_KEY = '3vNjQbWmqzzOO6IK-';
+  if(window.emailjs) emailjs.init({ publicKey: EJS_PUBLIC_KEY });
+</script>
 <style>
 :root {
   --bg:      #333333;
@@ -114,6 +116,25 @@ textarea.inp{resize:vertical;min-height:200px;line-height:1.7;}
 .status.ok{background:rgba(74,140,98,0.2);color:#a8d5b8;border:1px solid rgba(74,140,98,0.4);display:block;}
 .status.err{background:rgba(192,57,43,0.15);color:#e8a89e;border:1px solid rgba(192,57,43,0.3);display:block;}
 
+
+
+/* GREETING PICKER */
+.greet-row{display:flex;gap:10px;flex-wrap:wrap;}
+.greet-row .inp{flex:1;min-width:160px;}
+.greet-preview{font-family:'Cinzel',serif;font-size:15px;color:var(--white);margin-top:8px;}
+.greet-preview span{font-family:'Raleway',sans-serif;font-size:10px;letter-spacing:2px;color:var(--muted);text-transform:uppercase;margin-right:8px;}
+
+/* FORMAT TOOLBAR */
+.fmt-note{background:#3a3528;border-left:3px solid var(--gold);border-radius:var(--radius);padding:10px 14px;font-size:12px;line-height:1.7;color:var(--white);margin-bottom:8px;}
+.fmt-note strong{color:var(--gold);}
+.fmt-flash{font-size:12px;color:var(--gold-lt);min-height:18px;margin-top:6px;}
+
+.fmt-bar{display:flex;gap:6px;flex-wrap:wrap;align-items:center;margin-bottom:8px;}
+.fmt-btn{background:var(--bg);color:var(--white);border:1px solid var(--border);border-radius:6px;padding:7px 12px;font-family:'Raleway',sans-serif;font-size:13px;cursor:pointer;min-width:38px;transition:all .2s;}
+.fmt-btn:hover{border-color:var(--gold);color:var(--gold-lt);}
+.fmt-btn:focus-visible{outline:2px solid var(--gold);outline-offset:2px;}
+.fmt-tip{font-size:11px;color:var(--muted);font-style:italic;margin-left:6px;}
+
 /* PREVIEW */
 #preview-frame{width:100%;height:620px;border:1px solid var(--border);border-radius:var(--radius);margin-top:14px;display:none;background:white;}
 
@@ -206,6 +227,27 @@ textarea.inp{resize:vertical;min-height:200px;line-height:1.7;}
       </div>
     </div>
     <div class="field">
+      <label class="lbl" for="greetingSelect">Greeting</label>
+      <div class="greet-row">
+        <select class="inp" id="greetingSelect">
+          <option value="Salutations" selected>Salutations (default)</option>
+          <option value="Dear">Dear</option>
+          <option value="Hi">Hi</option>
+          <option value="Hello">Hello</option>
+          <option value="Hey">Hey</option>
+          <option value="Good morning">Good morning</option>
+          <option value="Good afternoon">Good afternoon</option>
+          <option value="Good evening">Good evening</option>
+          <option value="Greetings">Greetings</option>
+          <option value="Congratulations">Congratulations</option>
+          <option value="__custom">Custom…</option>
+          <option value="__none">No greeting</option>
+        </select>
+        <input type="text" class="inp" id="greetingCustom" placeholder="Type your greeting, e.g. Welcome aboard" hidden>
+      </div>
+      <div class="greet-preview" id="greetingPreview"><span>Opens with</span>Salutations,</div>
+    </div>
+    <div class="field">
       <label class="lbl">Subject Line *</label>
       <input type="text" class="inp" id="emailSubject" value="Your Website Project — I.Q. Productionz">
     </div>
@@ -214,8 +256,16 @@ textarea.inp{resize:vertical;min-height:200px;line-height:1.7;}
   <div class="card">
     <h2>Message Body</h2>
     <div class="field">
+      <div class="fmt-note"><strong>How to format:</strong> highlight the text you want to change, then click <b>B</b>, <i>I</i>, • List or 1. List. For a list, highlight every line that belongs in it; each line becomes one item.</div>
+      <div class="fmt-bar" role="toolbar" aria-label="Text formatting">
+        <button type="button" class="fmt-btn" onmousedown="event.preventDefault()" onclick="wrapSelection('b')" title="Bold (Ctrl/Cmd+B)"><b>B</b></button>
+        <button type="button" class="fmt-btn" onmousedown="event.preventDefault()" onclick="wrapSelection('i')" title="Italic (Ctrl/Cmd+I)"><i>I</i></button>
+        <button type="button" class="fmt-btn" onmousedown="event.preventDefault()" onclick="makeList('ul')" title="Bulleted list">• List</button>
+        <button type="button" class="fmt-btn" onmousedown="event.preventDefault()" onclick="makeList('ol')" title="Numbered list">1. List</button>
+      </div>
       <textarea class="inp" id="messageBody" placeholder="Type your message here. Plain text or basic HTML both work.&#10;&#10;Line breaks are preserved automatically.&#10;&#10;Use #BUTTON on its own line to insert a call-to-action button.&#10;&#10;Example:&#10;Here's a summary of your website project details and next steps..."></textarea>
-      <div class="hint">Plain text is fine — line breaks become paragraphs automatically. You can also use basic HTML tags like &lt;b&gt;, &lt;a href=""&gt;, etc.</div>
+      <div class="hint">Plain text is fine — line breaks are kept automatically. Use the toolbar above for bold, italic and lists, or type basic HTML yourself.</div>
+      <div class="fmt-flash" id="fmtFlash" aria-live="polite"></div>
     </div>
 
     <div class="builder-box">
@@ -465,6 +515,102 @@ function loadTemplate(key){
   showStatus('ok','Template loaded — customize it before sending!');
 }
 
+// ── GREETING ──
+const DEFAULT_GREETING = 'Salutations';
+// Returns the chosen greeting. WHY one function: preview, test and real sends must match.
+function getGreeting(){
+  const sel = document.getElementById('greetingSelect').value;
+  if(sel === '__none') return '';
+  if(sel === '__custom') return document.getElementById('greetingCustom').value.trim() || DEFAULT_GREETING;
+  return sel;
+}
+// Full opening line, e.g. "Salutations Marcus," or "Salutations," when no name is given.
+function greetingLine(name){
+  const g = getGreeting();
+  if(!g) return '';
+  return name ? g + ' ' + name + ',' : g + ',';
+}
+// WHY escape: names are typed text and must not break the page or email HTML.
+function escHtml(v){ return String(v).replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c])); }
+function updateGreetingPreview(){
+  const line = greetingLine(document.getElementById('clientName').value.trim());
+  document.getElementById('greetingPreview').innerHTML = '<span>Opens with</span>' +
+    (line ? escHtml(line) : '<em style="color:#A9A9A9;font-family:Raleway,sans-serif;font-size:12px;">(no greeting, starts with your message)</em>');
+}
+window.addEventListener('load', function(){
+  // WHY live preview: shows the exact opening line before sending.
+  document.getElementById('clientName').addEventListener('input', updateGreetingPreview);
+  document.getElementById('greetingCustom').addEventListener('input', updateGreetingPreview);
+  document.getElementById('greetingSelect').addEventListener('change', function(){
+    const c = document.getElementById('greetingCustom');
+    c.hidden = this.value !== '__custom';
+    if(!c.hidden) c.focus();
+    updateGreetingPreview();
+  });
+  updateGreetingPreview();
+});
+
+// ── FORMAT TOOLBAR ──
+// Wraps the highlighted text in <b> or <i>. WHY HTML tags: the message box already passes
+// basic HTML straight into the email, so this needs no extra conversion step.
+// With nothing highlighted, it inserts an empty pair and puts the cursor inside it.
+function wrapSelection(tag){
+  const ta = document.getElementById('messageBody');
+  const s = ta.selectionStart, e = ta.selectionEnd;
+  const sel = ta.value.slice(s, e);
+  // WHY require a highlight: clicking with nothing selected looked like the button did nothing.
+  if(!sel){ flashFmt('Highlight the text first, then click ' + (tag === 'b' ? 'B' : 'I') + '.'); return; }
+  const open = '<' + tag + '>', close = '</' + tag + '>';
+  ta.value = ta.value.slice(0, s) + open + sel + close + ta.value.slice(e);
+  ta.focus();
+  // WHY reposition: keeps typing flow natural — inside the tags if empty, after them if not.
+  const pos = s + open.length + sel.length + close.length;
+  ta.selectionStart = ta.selectionEnd = pos;
+  flashFmt((tag === 'b' ? 'Bold' : 'Italic') + ' added.');
+}
+
+// Turns the highlighted lines into a bulleted (ul) or numbered (ol) list.
+// WHY one line of HTML: the email builder turns every line break into <br>, which would
+// add blank gaps between list items. WHY inline styles: most email apps strip <style> blocks.
+function makeList(type){
+  const ta = document.getElementById('messageBody');
+  let s = ta.selectionStart, e = ta.selectionEnd;
+  if(s === e){ flashFmt('Highlight the lines for your list first, then click ' + (type === 'ol' ? '1. List' : '• List') + '.'); return; }
+  // WHY expand to full lines: a highlight that starts mid-line should still take the whole line.
+  s = ta.value.lastIndexOf('\n', s - 1) + 1;
+  const nl = ta.value.indexOf('\n', e > s ? e - 1 : e);
+  e = nl === -1 ? ta.value.length : nl;
+  const lines = ta.value.slice(s, e).split('\n')
+    .map(l => l.replace(/^\s*([•✦\-*]|\d+[.)])\s*/, '').trim())  // drop typed bullets/numbers
+    .filter(Boolean);
+  const items = lines.length ? lines : ['List item'];
+  const html = '<' + type + ' style="margin:0 0 14px 22px;padding:0;">' +
+    items.map(l => '<li style="margin:0 0 6px;">' + l + '</li>').join('') +
+    '</' + type + '>';
+  ta.value = ta.value.slice(0, s) + html + ta.value.slice(e);
+  ta.focus();
+  ta.selectionStart = ta.selectionEnd = s + html.length;
+  flashFmt((type === 'ol' ? 'Numbered' : 'Bulleted') + ' list added (' + items.length + ' items).');
+}
+
+// Short confirmation under the box. WHY: the box shows code, so people need a visible "it worked"; use Preview in Window to see the final look.
+let fmtTimer;
+function flashFmt(msg){
+  const el = document.getElementById('fmtFlash');
+  el.textContent = msg;
+  clearTimeout(fmtTimer);
+  fmtTimer = setTimeout(() => { el.textContent = ''; }, 4000);
+}
+
+// Keyboard shortcuts. WHY: Ctrl/Cmd+B and +I are what people expect from any editor.
+window.addEventListener('load', function(){
+  document.getElementById('messageBody').addEventListener('keydown', function(ev){
+    if(!(ev.ctrlKey || ev.metaKey)) return;
+    const k = ev.key.toLowerCase();
+    if(k === 'b' || k === 'i'){ ev.preventDefault(); wrapSelection(k); }
+  });
+});
+
 // ── HYPERLINK BUILDER ──
 function insertHyperlink(){
   const text = document.getElementById('linkText').value.trim();
@@ -527,7 +673,8 @@ function buildEmailHtml(clientName, rawContent){
 
   // Undo escaping for real HTML tags users may have typed (we allow <a>, <b>, <strong>, <em>, <u>)
   body = rawContent; // Use raw – let basic HTML pass through for power users
-  body = body.replace(/\n/g,'<br>');
+  // WHY: a line break right after a list adds an extra blank gap in the email.
+  body = body.replace(/\n/g,'<br>').replace(/(<\/(?:ol|ul)>)<br>/g,'$1');
 
   // Process #BUTTON:text|url
   body = body.replace(/#BUTTON:([^|]+)\|([^\n<]+)/g, (_, btnTxt, btnUrl) =>
@@ -580,8 +727,8 @@ body{margin:0;padding:0;background:#3a3a3a;font-family:'Raleway',Arial,sans-seri
   <img src="https://iqproductionz.com/Content/Images/Main/IQ-noglow_Updated.avif" alt="I.Q. Productionz">
 </div>
 <div class="email-body">
-  <p class="greeting">${clientName ? 'Salutations ' + clientName + ',' : 'Salutations,'}</p>
-  <div class="gold-line"></div>
+  ${greetingLine(clientName) ? `<p class="greeting">${escHtml(greetingLine(clientName))}</p>
+  <div class="gold-line"></div>` : ''}
   <div class="content">${body}</div>
   <div class="sig-block">
     <div class="sig-name">${sigName}</div>
@@ -654,14 +801,14 @@ async function sendEmail(mode){
       fileClone.name = 'my_file';
       frm.appendChild(fileClone);
       document.body.appendChild(frm);
-      const result = await emailjs.sendForm(EJS_SERVICE, templateId, frm);
+      const result = await emailjs.sendForm(EJS_SERVICE, templateId, frm, { publicKey: EJS_PUBLIC_KEY });
       document.body.removeChild(frm);
       return result;
     } else {
       return await emailjs.send(EJS_SERVICE, templateId, {
         to_email: toEmail, to_name: nameFor, subject: subj,
         message: msgHtml, reply_to: replyTo, from_name: fromName
-      });
+      }, { publicKey: EJS_PUBLIC_KEY });
     }
   }
 
@@ -718,5 +865,3 @@ function clearAttach() {
 </script>
 </body>
 </html>
-
-```

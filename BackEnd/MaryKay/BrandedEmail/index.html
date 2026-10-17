@@ -1,21 +1,20 @@
 <!DOCTYPE html>
+<!--
+  Title:       Branded Email Sender — Mary Kay
+  Author:      Hali Sarah Parsons
+  Date:        2026-10-16
+  Modified By: Claude
+  Description: Internal BackEnd tool for sending any branded Mary Kay business email
+               (follow-ups, recommendations, thank-yous, event invites) through EmailJS.
+               Greeting defaults to "Dear" and can be changed per email. Signature is unchanged.
+               Kept out of search engines on purpose (noindex, no SEO tags).
+-->
 <html lang="en">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>PersonalJS — Personal Reply Sender</title>
-<meta name="description" content="Internal I.Q. Productionz tool.">
-  <link rel="canonical" href="https://iqproductionz.com/BackEnd/MaryKay/BrandedEmail">
-  <meta property="og:title" content="PersonalJS — Personal Reply Sender">
-  <meta property="og:description" content="I.Q. Productionz — Entertainment & Metaphysical Health. Houston, Texas.">
-  <meta property="og:type" content="website">
-  <meta property="og:image" content="https://static.wixstatic.com/media/b63ec4_d6fad9165f744284a4b90915a9fbbbc5~mv2.jpg">
-  <meta property="og:url" content="https://iqproductionz.com/BackEnd/MaryKay/BrandedEmail">
-  <meta name="twitter:card" content="summary_large_image">
-  <meta name="twitter:title" content="PersonalJS — Personal Reply Sender">
-  <meta name="twitter:description" content="I.Q. Productionz — Entertainment & Metaphysical Health. Houston, Texas.">
-  <meta name="twitter:image" content="https://static.wixstatic.com/media/b63ec4_d6fad9165f744284a4b90915a9fbbbc5~mv2.jpg">
-  <meta name="robots" content="noindex, nofollow">
+<title>Branded Email — Mary Kay | BackEnd</title>
+<meta name="robots" content="noindex, nofollow">
 <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;1,300;1,400&family=Jost:wght@300;400;500;600&display=swap" rel="stylesheet">
 <style>
@@ -23,7 +22,18 @@
 *{box-sizing:border-box;margin:0;padding:0;}
 body{font-family:'Jost',sans-serif;background:#fdf6f8;min-height:100vh;padding:24px;}
 .card{background:white;border-radius:16px;padding:40px;max-width:720px;margin:0 auto;box-shadow:0 4px 40px rgba(232,80,122,0.10);}
-h1{font-family:'Cormorant Garamond',serif;font-size:2rem;color:var(--dark);margin-bottom:4px;}
+h1{font-family:'Cormorant Garamond',serif;font-size:2.2rem;font-weight:400;margin-bottom:4px;
+  /* WHY gradient text: matches the pink-to-blush "Mary Kay" lettering on the public pages */
+  background:linear-gradient(100deg,var(--pink-dark) 0%,var(--pink) 45%,#f6a9c3 100%);
+  -webkit-background-clip:text;background-clip:text;color:var(--pink);-webkit-text-fill-color:transparent;}
+.topbar{background:linear-gradient(90deg,#3a0f2a 0%,#5a1840 55%,#c93a62 100%);border-bottom:2px solid var(--gold);
+  padding:10px 18px;display:flex;justify-content:space-between;align-items:center;gap:10px;position:sticky;top:0;z-index:1000;
+  margin:-24px -24px 24px;box-shadow:0 2px 14px rgba(58,15,42,.25);}
+.topbar-title{font-family:'Jost',sans-serif;font-size:10px;letter-spacing:2.5px;color:#fbd3e0;text-transform:uppercase;}
+.topbar-title strong{color:#ead5a8;font-weight:600;}
+.topbar-home{font-family:'Jost',sans-serif;padding:7px 16px;border:1px solid rgba(234,213,168,.7);border-radius:50px;color:#ead5a8;
+  font-size:10px;letter-spacing:1.5px;text-decoration:none;text-transform:uppercase;white-space:nowrap;transition:all .2s;}
+.topbar-home:hover{background:#ead5a8;color:#3a0f2a;}
 .sub{font-size:13px;color:var(--gray);margin-bottom:28px;line-height:1.7;}
 .field{margin-bottom:16px;}
 .lbl{font-size:10px;letter-spacing:2px;color:var(--gold);text-transform:uppercase;display:block;margin-bottom:6px;}
@@ -39,13 +49,21 @@ textarea.inp{resize:vertical;min-height:220px;line-height:1.7;}
 .btn-test{background:linear-gradient(135deg,var(--gold),#a88040);color:white;border:none;}
 .btn-test:hover{transform:translateY(-2px);box-shadow:0 6px 20px rgba(201,169,110,0.4);}
 .divider{border:none;border-top:1px solid #f0e8eb;margin:24px 0;}
-.note{background:#fff8f0;border-left:3px solid var(--gold);padding:14px 18px;border-radius:8px;font-size:12px;color:var(--dark);line-height:1.9;margin-bottom:24px;}
-.note code{background:#f0e8eb;padding:2px 6px;border-radius:4px;font-size:11px;}
 .status{font-size:13px;margin-top:14px;padding:12px 16px;border-radius:8px;display:none;text-align:center;}
 .status.ok{background:#f0fff4;color:#2d6a4f;border:1px solid #b7e4c7;display:block;}
 .status.err{background:#fff0f0;color:#c62828;border:1px solid #ffcdd2;display:block;}
 .btn-row{display:flex;gap:10px;flex-wrap:wrap;margin-top:20px;}
 .btn-row .btn{flex:1;min-width:140px;}
+/* Greeting picker */
+.greet-row{display:flex;gap:10px;flex-wrap:wrap;align-items:flex-start;}
+.greet-row .inp{flex:1;min-width:160px;}
+.greet-preview{font-family:'Cormorant Garamond',Georgia,serif;font-size:20px;color:var(--dark);margin-top:8px;}
+.greet-preview span{font-size:10px;font-family:'Jost',sans-serif;letter-spacing:2px;color:var(--gray);text-transform:uppercase;margin-right:8px;}
+/* Formatting toolbar */
+.fmt-bar{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:6px;}
+.fmt-bar button{min-width:38px;height:34px;padding:0 10px;border:1.5px solid #e8d5db;border-radius:8px;background:#fff;color:var(--dark);font-family:'Jost',sans-serif;font-size:13px;cursor:pointer;transition:all .2s;}
+.fmt-bar button:hover{border-color:var(--pink);color:var(--pink);background:#fff5f8;}
+.fmt-bar .sep{width:1px;background:#f0e8eb;margin:4px 2px;}
 /* Button builder */
 .btn-builder{background:#fff5f8;border:1.5px dashed #e8d5db;border-radius:10px;padding:16px 18px;margin-top:10px;}
 .btn-builder-row{display:flex;gap:10px;flex-wrap:wrap;align-items:flex-end;}
@@ -53,55 +71,102 @@ textarea.inp{resize:vertical;min-height:220px;line-height:1.7;}
 .btn-builder input{width:100%;padding:9px 12px;border:1.5px solid #e8d5db;border-radius:8px;font-family:'Jost',sans-serif;font-size:13px;outline:none;}
 .btn-builder input:focus{border-color:var(--pink);}
 .btn-builder .add-btn{background:var(--pink);color:white;border:none;padding:9px 18px;border-radius:8px;font-family:'Jost',sans-serif;font-size:12px;font-weight:600;cursor:pointer;white-space:nowrap;}
-/* Preview iframe */
-#preview-frame{width:100%;height:600px;border:1px solid #e8d5db;border-radius:12px;margin-top:12px;display:none;}
 @media(max-width:480px){.card{padding:24px 18px;}.btn-row{flex-direction:column;}}
 </style>
 </head>
 <body>
-<div style="background:#454545;border-bottom:1px solid #2e2b24;padding:10px 18px;display:flex;justify-content:space-between;align-items:center;position:sticky;top:0;z-index:1000;">
-  <span style="font-family:'Cinzel',Georgia,serif;font-size:10px;letter-spacing:2px;color:#A9A9A9;text-transform:uppercase;"><strong style="color:#c98a2e;">BackEnd</strong> · Mary Kay · Branded Email</span>
-  <a href="../../" style="font-family:'Cinzel',Georgia,serif;padding:7px 16px;border:1px solid #7a5218;border-radius:6px;color:#e0a84a;font-size:10px;letter-spacing:1.5px;text-decoration:none;text-transform:uppercase;">↩ BackEnd Home</a>
+<!-- WHY: top bar restyled from the generic BackEnd grey to the Mary Kay plum/pink/gold palette -->
+<div class="topbar">
+  <span class="topbar-title"><strong>BackEnd</strong> · Mary Kay · Branded Email</span>
+  <a class="topbar-home" href="../../">↩ BackEnd Home</a>
 </div>
 <div class="card">
 
-  <h1>Personal Reply Sender</h1>
-  <p class="sub">Send a branded, formatted recommendation email to a client. Use the test button to preview in your inbox before sending.</p>
+  <h1>Branded Email Sender</h1>
+  <p class="sub">Send a branded Mary Kay email to a client: follow-ups, recommendations, thank-yous, invites or any business message. Use the test button to preview in your inbox before sending.</p>
 
-  <!-- ─── SETUP NOTE ─────────────────────────────── -->
-  <div class="note">
-    <strong style="color:var(--gold);">EmailJS Template Setup</strong> — your template only needs:<br>
-    <code>to_email</code> &nbsp;<code>subject</code> &nbsp;<code>{{{message}}}</code> (triple braces = HTML)<br>
-    Based on your screenshot this is already configured correctly in template <code>template_z5qi34i</code>.
-    <br><br>
-    <strong style="color:var(--gold);">Editing the email HTML</strong> — look for these comment markers in the JS below:<br>
-    <code>&lt;!-- PUT CLIENT NAME HERE --&gt;</code> &nbsp;
-    <code>&lt;!-- PUT RECOMMENDATIONS HERE --&gt;</code> &nbsp;
-    <code>&lt;!-- BUTTON CODE --&gt;</code>
+  <!-- ─── SENDER ────────────────────────────────── -->
+  <div class="field">
+    <label class="lbl" for="send-as">Send Mail As *</label>
+    <input type="email" class="inp" id="send-as" value="sistahaymarykay@gmail.com">
+    <div class="hint">Replies, your test emails, your sent copy and the signature all use this address.</div>
   </div>
 
   <!-- ─── CLIENT INFO ───────────────────────────── -->
   <div style="display:flex;gap:14px;flex-wrap:wrap;">
     <div class="field" style="flex:1;min-width:180px;">
-      <label class="lbl">Client Email *</label>
+      <label class="lbl" for="client-email">Client Email *</label>
       <input type="email" class="inp" id="client-email" placeholder="client@email.com">
     </div>
     <div class="field" style="flex:1;min-width:140px;">
-      <label class="lbl">Client First Name *</label>
+      <label class="lbl" for="client-name">Client First Name *</label>
       <input type="text" class="inp" id="client-name" placeholder="e.g. Jessica">
     </div>
   </div>
 
+  <!-- ─── GREETING ──────────────────────────────── -->
   <div class="field">
-    <label class="lbl">Email Subject *</label>
-    <input type="text" class="inp" id="email-subject" value="Your Personalized Mary Kay Recommendations ✨">
+    <label class="lbl" for="greeting-select">Greeting</label>
+    <div class="greet-row">
+      <select class="inp" id="greeting-select">
+        <option value="Dear" selected>Dear (default)</option>
+        <option value="Hi">Hi</option>
+        <option value="Hello">Hello</option>
+        <option value="Hey">Hey</option>
+        <option value="Good morning">Good morning</option>
+        <option value="Good afternoon">Good afternoon</option>
+        <option value="Good evening">Good evening</option>
+        <option value="Greetings">Greetings</option>
+        <option value="Welcome">Welcome</option>
+        <option value="Thank you">Thank you</option>
+        <option value="Happy Birthday">Happy Birthday</option>
+        <option value="Congratulations">Congratulations</option>
+        <option value="__custom">Custom…</option>
+        <option value="__none">No greeting</option>
+      </select>
+      <input type="text" class="inp" id="greeting-custom" placeholder="Type your greeting, e.g. Hey there" hidden>
+    </div>
+    <div class="greet-preview" id="greeting-preview"><span>Opens with</span>Dear Jessica,</div>
   </div>
 
-  <!-- ─── RECOMMENDATIONS ───────────────────────── -->
   <div class="field">
-    <label class="lbl">Your Recommendations *</label>
-    <textarea class="inp" id="recommendations" placeholder="Type or paste your recommendations here. Plain text or basic HTML both work.&#10;&#10;Use #BUTTON to add a button — see the button builder below.&#10;&#10;Example:&#10;Based on your concerns, I recommend starting with the TimeWise® Miracle Set..."></textarea>
-    <div class="hint">Plain text is fine — line breaks are preserved automatically. You can also paste HTML. Use <strong>#BUTTON</strong> on its own line to insert a button (build it below).</div>
+    <label class="lbl" for="email-subject">Email Subject *</label>
+    <input type="text" class="inp" id="email-subject" value="A Note From Your Mary Kay Beauty Consultant ✨">
+  </div>
+
+  <div class="field">
+    <label class="lbl" for="header-tagline">Header Tagline</label>
+    <input type="text" class="inp" id="header-tagline" value="Independent Beauty Consultant" list="tagline-ideas">
+    <datalist id="tagline-ideas">
+      <option value="Independent Beauty Consultant">
+      <option value="Thank You!">
+      <option value="Your Order Update">
+      <option value="You're Invited">
+      <option value="Your Personalized Recommendations">
+      <option value="Welcome to the Team">
+      <option value="Just Checking In">
+    </datalist>
+    <div class="hint">Small line under "Mary Kay" in the pink email header, click the box for ideas or type your own</div>
+  </div>
+
+  <!-- ─── MESSAGE ───────────────────────────────── -->
+  <div class="field">
+    <label class="lbl" for="message">Your Message *</label>
+    <div class="hint" style="margin:0 0 8px;font-style:normal;color:var(--dark);">
+      <strong style="color:var(--pink);">How to format:</strong> highlight the text you want to change, then click a button.
+      For lists, highlight all the lines you want in the list (one item per line) and click <b>• List</b> or <b>1. List</b>.
+      The tags you see (like &lt;strong&gt;) turn into real formatting in the email. Click <b>Preview</b> to check it.
+    </div>
+    <div class="fmt-bar" role="toolbar" aria-label="Text formatting">
+      <button type="button" onclick="wrapSel('strong')" title="Bold (Ctrl/Cmd+B)"><b>B</b></button>
+      <button type="button" onclick="wrapSel('em')" title="Italic (Ctrl/Cmd+I)"><i style="font-family:Georgia,serif;">I</i></button>
+      <button type="button" onclick="wrapSel('u')" title="Underline (Ctrl/Cmd+U)"><u>U</u></button>
+      <span class="sep"></span>
+      <button type="button" onclick="listify('bullet')" title="Bulleted list">• List</button>
+      <button type="button" onclick="listify('number')" title="Numbered list">1. List</button>
+    </div>
+    <textarea class="inp" id="message" placeholder="Type or paste your message here. Plain text or basic HTML both work.&#10;&#10;Use #BUTTON to add a button — see the button builder below.&#10;&#10;Example:&#10;Thank you so much for your order! It's on its way..."></textarea>
+    <div class="hint">Plain text is fine; line breaks are preserved automatically. You can also type "- " or "1. " at the start of lines to make lists. Use <strong>#BUTTON</strong> on its own line to insert a button (build it below).</div>
   </div>
 
   <!-- ─── HYPERLINK BUILDER ───────────────────────── -->
@@ -145,11 +210,10 @@ textarea.inp{resize:vertical;min-height:220px;line-height:1.7;}
   </div>
 
   <div id="status-msg" class="status"></div>
-  <iframe id="preview-frame" title="Email Preview"></iframe>
 
   <hr class="divider">
   <p style="font-size:11px;color:var(--gray);text-align:center;line-height:1.7;">
-    Service: <strong>MaryKay</strong> &nbsp;·&nbsp; Reply-to: <strong>sistahaymarykay@gmail.com</strong>
+    Service: <strong>MaryKay</strong> &nbsp;·&nbsp; Reply-to: <strong id="reply-to-label">sistahaymarykay@gmail.com</strong>
   </p>
 
 </div>
@@ -159,63 +223,201 @@ textarea.inp{resize:vertical;min-height:220px;line-height:1.7;}
 const EJS_PUBLIC_KEY   = 'zmLo4nV99WWp2KjiR';
 const EJS_SERVICE_ID   = 'MaryKay';
 const CONSULTANT_EMAIL = 'sistahaymarykay@gmail.com';
-const PERSONALJS_URL   = 'https://iqproductionz.com/BackEnd/MaryKay/BrandedEmail/';
+const SENDER_URL       = 'https://iqproductionz.com/BackEnd/MaryKay/BrandedEmail/';
+const EJS_TEMPLATE_ID  = 'template_z5qi34i'; // EmailJS template: to_email, subject, {{{message}}}
+const DEFAULT_GREETING = 'Dear';
 
-const EJS_TEMPLATE_PERSONAL = 'template_z5qi34i'; // personal reply template ID
+// Address the email goes out as. WHY a function: every send, copy and the signature read the same
+// field, and a blank or mistyped box falls back to the main Mary Kay inbox instead of breaking sends.
+function senderEmail(){
+  const v = (document.getElementById('send-as').value || '').trim();
+  return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v) ? v : CONSULTANT_EMAIL;
+}
 
 window.addEventListener('load', function(){
+  // WHY guard: if the EmailJS CDN is blocked, the form still loads so drafts aren't lost.
   if(window.emailjs) emailjs.init({ publicKey: EJS_PUBLIC_KEY });
-  // Pre-load client name + email — URL params first, then sessionStorage fallback
+  // Pre-load client name + email: URL params first, then sessionStorage fallback.
+  // WHY try/catch: sessionStorage throws in private windows or when storage is blocked.
   const params = new URLSearchParams(window.location.search);
   const pName  = params.get('name')  || (()=>{try{return sessionStorage.getItem('mk_client_name');}catch(e){return '';}})();
   const pEmail = params.get('email') || (()=>{try{return sessionStorage.getItem('mk_client_email');}catch(e){return '';}})();
   if(pName)  document.getElementById('client-name').value  = decodeURIComponent(pName);
   if(pEmail) document.getElementById('client-email').value = decodeURIComponent(pEmail);
+
+  // WHY live preview: shows exactly how the opening line will read before sending.
+  ['greeting-select','greeting-custom','client-name'].forEach(function(id){
+    document.getElementById(id).addEventListener('input', updateGreetingPreview);
+  });
+  document.getElementById('greeting-select').addEventListener('change', function(){
+    const custom = document.getElementById('greeting-custom');
+    custom.hidden = this.value !== '__custom';
+    if(!custom.hidden) custom.focus();
+    updateGreetingPreview();
+  });
+  updateGreetingPreview();
+  // WHY: footer shows the live reply-to so you can confirm it at a glance before sending
+  document.getElementById('send-as').addEventListener('input', function(){
+    document.getElementById('reply-to-label').textContent = senderEmail();
+  });
 });
 
-// ─── BUTTON BUILDER ───────────────────────────────────
+// ─── GREETING ─────────────────────────────────────────
+// Returns the chosen greeting word(s). WHY a function: preview, test send and real send
+// must all use the same rule, including the custom and "no greeting" choices.
+function getGreeting(){
+  const sel = document.getElementById('greeting-select').value;
+  if(sel === '__none') return '';
+  if(sel === '__custom') return document.getElementById('greeting-custom').value.trim() || DEFAULT_GREETING;
+  return sel;
+}
+
+// Builds the full opening line, e.g. "Dear Jessica,". Returns '' when no greeting is chosen.
+function greetingLine(clientName){
+  const g = getGreeting();
+  if(!g) return '';
+  return g + ' ' + clientName + ',';
+}
+
+function updateGreetingPreview(){
+  const name = document.getElementById('client-name').value.trim() || 'Jessica';
+  const line = greetingLine(name);
+  document.getElementById('greeting-preview').innerHTML =
+    '<span>Opens with</span>' + (line ? escapeHtml(line) : '<em style="color:#8a7a80;">(no greeting, starts with your message)</em>');
+}
+
+// WHY escape: names and greetings are typed text and must not break the email HTML.
+function escapeHtml(s){
+  return String(s).replace(/[&<>"]/g, function(c){ return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]; });
+}
+
+// ─── FORMATTING TOOLBAR ───────────────────────────────
+// Wraps the highlighted text in a tag (strong / em / u). WHY tags instead of a rich editor:
+// the message stays a simple textarea that works everywhere, and email apps all support these tags.
+function wrapSel(tag){
+  const ta = document.getElementById('message');
+  const s = ta.selectionStart, e = ta.selectionEnd;
+  const sel = ta.value.slice(s, e) || 'text';
+  const open = '<' + tag + '>', close = '</' + tag + '>';
+  ta.value = ta.value.slice(0, s) + open + sel + close + ta.value.slice(e);
+  // WHY reselect: lets you stack formats (e.g. bold + italic) with a second click
+  ta.focus();
+  ta.setSelectionRange(s + open.length, s + open.length + sel.length);
+}
+
+// Turns the highlighted lines into a list, one item per line, wrapped in <ol>/<ul> + <li> tags.
+// WHY visible tags: matches how Bold/Italic work, so you can see the change happen, and it
+// survives even when the message also contains pasted HTML.
+function listify(kind){
+  const ta = document.getElementById('message');
+  const v = ta.value;
+  if(ta.selectionStart === ta.selectionEnd){
+    showStatus('err', 'Highlight the lines you want in the list first (one item per line), then click the list button.');
+    return;
+  }
+  // WHY expand to whole lines: a partial selection should still convert every line it touches
+  const s = v.lastIndexOf('\n', ta.selectionStart - 1) + 1;
+  let e = v.indexOf('\n', ta.selectionEnd); if(e === -1) e = v.length;
+  const tag = kind === 'number' ? 'ol' : 'ul';
+  const items = v.slice(s, e).split('\n')
+    // WHY strip: removes old list tags and any typed "1." / "-" so numbers aren't doubled
+    .map(function(l){ return l.replace(/<\/?(ol|ul|li)>/gi, '').replace(/^\s*(?:[-*•]|\d+[.)])\s+/, '').trim(); })
+    .filter(Boolean)
+    .map(function(l){ return '  <li>' + l + '</li>'; });
+  if(!items.length) return;
+  const out = '<' + tag + '>\n' + items.join('\n') + '\n</' + tag + '>';
+  ta.value = v.slice(0, s) + out + v.slice(e);
+  ta.focus();
+  ta.setSelectionRange(s, s + out.length);
+  showStatus('ok', (kind === 'number' ? 'Numbered' : 'Bulleted') + ' list added. Use Preview to see how it looks.');
+}
+
+// WHY shortcuts: matches the muscle memory of every other editor
+document.addEventListener('keydown', function(ev){
+  if(ev.target.id !== 'message' || !(ev.metaKey || ev.ctrlKey)) return;
+  const map = { b:'strong', i:'em', u:'u' };
+  const tag = map[ev.key.toLowerCase()];
+  if(tag){ ev.preventDefault(); wrapSel(tag); }
+});
+
+// Converts **bold** and *italic* typed by hand. WHY: covers anyone used to typing Markdown.
+function inlineMarkdown(s){
+  return s.replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
+          .replace(/(^|[^*])\*([^*\s][^*]*?)\*(?!\*)/g, '$1<em>$2</em>');
+}
+
+// ─── LINK & BUTTON BUILDERS ───────────────────────────
+// Inserts a styled link at the cursor, or wraps selected text.
+// WHY wrap selection: lets you highlight existing words and turn them into a link.
 function insertHyperlink(){
   const text = document.getElementById('link-text').value.trim();
   const url  = document.getElementById('link-url').value.trim();
-  if(!text || !url){ alert('Please enter both link text and a URL.'); return; }
-  const ta  = document.getElementById('recommendations');
-  const insert = '<a href="' + url + '" target="_blank" style="color:#e8507a;text-decoration:none;font-weight:500;">' + text + '</a>';
+  if(!text || !url){ showStatus('err', 'Please enter both link text and a URL.'); return; }
+  const ta  = document.getElementById('message');
   const start = ta.selectionStart;
   const end   = ta.selectionEnd;
-  // If text is selected in textarea, wrap it; otherwise insert at cursor
   const selected = ta.value.slice(start, end);
-  const replacement = selected
-    ? '<a href="' + url + '" target="_blank" style="color:#e8507a;text-decoration:none;font-weight:500;">' + selected + '</a>'
-    : insert;
+  const replacement = '<a href="' + url + '" target="_blank" style="color:#e8507a;text-decoration:none;font-weight:500;">' + (selected || text) + '</a>';
   ta.value = ta.value.slice(0, start) + replacement + ta.value.slice(end);
   ta.focus();
-  // Clear fields
   document.getElementById('link-text').value = '';
   document.getElementById('link-url').value = '';
 }
 
+// Adds a #BUTTON marker line. WHY a marker instead of HTML: keeps the message readable
+// while typing; it is converted to a styled button when the email is built.
 function insertButton(){
   const text = document.getElementById('btn-text').value.trim();
   const link = document.getElementById('btn-link').value.trim();
-  if(!text || !link){ alert('Please enter both button text and a link.'); return; }
-  const ta = document.getElementById('recommendations');
+  if(!text || !link){ showStatus('err', 'Please enter both button text and a link.'); return; }
+  const ta = document.getElementById('message');
   const insert = '\n#BUTTON ' + text + ' | ' + link + '\n';
   const pos = ta.selectionStart;
   ta.value = ta.value.slice(0, pos) + insert + ta.value.slice(pos);
-  // Clear fields
   document.getElementById('btn-text').value = '';
   document.getElementById('btn-link').value = '';
 }
 
-// ─── BUILD EMAIL HTML ─────────────────────────────────
-function buildEmailHtml(clientName, rawContent, clientEmail){
-  // Process #BUTTON markers in the content
-  // Format: #BUTTON Button Text | https://link.com
-  let body = rawContent.trim();
+// ─── PINK LINKS ───────────────────────────────────────
+const LINK_STYLE = 'color:#e8507a;text-decoration:underline;font-weight:500;';
 
-  // Convert #BUTTON lines to HTML buttons
+// Makes every link in the message pink. WHY: Gmail, Outlook and Apple Mail paint links blue
+// unless each <a> carries its own inline color, and they also auto-link bare URLs/emails in blue.
+// So we (1) turn bare URLs and emails into styled links ourselves and (2) force the color on
+// any pasted <a> that doesn't set one.
+function pinkLinks(html){
+  // WHY split on tags: only plain text gets auto-linked, never text inside an existing tag or link
+  let inLink = false;
+  html = html.split(/(<[^>]+>)/g).map(function(part){
+    if(part.charAt(0) === '<'){
+      if(/^<a[\s>]/i.test(part)) inLink = true;
+      if(/^<\/a>/i.test(part))  inLink = false;
+      return part;
+    }
+    if(inLink) return part;
+    return part
+      .replace(/\b(https?:\/\/[^\s<]+[^\s<.,;:!?)\]])/g, '<a href="$1" target="_blank" style="' + LINK_STYLE + '">$1</a>')
+      .replace(/(^|[^\w.\/:@-])([\w.+-]+@[\w-]+\.[\w.-]*\w)/g, '$1<a href="mailto:$2" style="' + LINK_STYLE + '">$2</a>');
+  }).join('');
+  // WHY: pasted links with no style (or a style without a color) still need the pink
+  return html.replace(/<a\b([^>]*)>/gi, function(tag, attrs){
+    if(/style\s*=\s*"[^"]*color\s*:/i.test(attrs)) return tag;
+    if(/style\s*=\s*"/i.test(attrs)) return '<a' + attrs.replace(/style\s*=\s*"/i, 'style="' + LINK_STYLE) + '>';
+    return '<a' + attrs + ' style="' + LINK_STYLE + '">';
+  });
+}
+
+// ─── BUILD EMAIL HTML ─────────────────────────────────
+// Wraps the message in the branded layout. WHY inline styles: most email apps strip
+// <style> blocks, so the critical look is set on each element.
+function buildEmailHtml(clientName, rawContent){
+  let body = rawContent.trim();
+  // WHY check first: once #BUTTON lines become <div> buttons, the text would look like HTML
+  // and every line break would be lost. Decide on the original text instead.
+  const isPlain = !/<(p|div|br|table)[\s>\/]/i.test(body);
+
+  // Convert "#BUTTON Text | https://link" lines into pink pill buttons.
   body = body.replace(/^#BUTTON\s+([^|]+)\|\s*(.+)$/gm, function(_, btnText, btnUrl){
-    // <!-- BUTTON CODE -->
     return '<div style="text-align:center;margin:20px 0;">' +
       '<a href="' + btnUrl.trim() + '" target="_blank" ' +
       'style="display:inline-block;background:linear-gradient(135deg,#e8507a,#c93a62);' +
@@ -225,19 +427,47 @@ function buildEmailHtml(clientName, rawContent, clientEmail){
       btnText.trim() + '</a></div>';
   });
 
-  // Convert plain text line breaks to paragraphs (if not already HTML)
-  if(!body.includes('<p') && !body.includes('<div') && !body.includes('<br')){
-    body = body.split('\n').map(function(l){
-      l = l.trim();
-      if(!l) return '';
-      if(l.startsWith('<div')) return l; // already HTML (button)
-      return '<p style="font-size:14px;color:#3d2530;line-height:1.9;margin:0 0 14px;">' + l + '</p>';
-    }).join('\n');
+  // WHY only for plain text: pasted HTML already has its own structure.
+  if(isPlain){
+    // WHY group lines: consecutive "- " or "1. " lines must become one <ul>/<ol>, not separate paragraphs.
+    const P  = 'font-size:14px;color:#3d2530;line-height:1.9;margin:0 0 14px;';
+    const LS = 'font-size:14px;color:#3d2530;line-height:1.8;margin:0 0 16px;padding-left:22px;';
+    const LI = 'margin:0 0 6px;';
+    const out = []; let list = null;
+    function closeList(){ if(list){ out.push('<' + list.tag + ' style="' + LS + '">' + list.items.join('') + '</' + list.tag + '>'); list = null; } }
+    body.split('\n').forEach(function(raw){
+      const l = raw.trim();
+      // WHY: list tags from the toolbar — open/close a styled list and pass items through
+      const openTag = l.match(/^<(ol|ul)>$/i);
+      if(openTag){ closeList(); list = { tag: openTag[1].toLowerCase(), items: [] }; return; }
+      if(/^<\/(ol|ul)>$/i.test(l)){ closeList(); return; }
+      const li = l.match(/^<li>(.*)<\/li>$/i);
+      if(li){
+        if(!list) list = { tag: 'ul', items: [] };
+        list.items.push('<li style="' + LI + '">' + inlineMarkdown(li[1]) + '</li>');
+        return;
+      }
+      const b = l.match(/^[-*•]\s+(.*)$/);
+      const n = l.match(/^\d+[.)]\s+(.*)$/);
+      if(b || n){
+        const tag = b ? 'ul' : 'ol';
+        if(!list || list.tag !== tag){ closeList(); list = { tag: tag, items: [] }; }
+        list.items.push('<li style="' + LI + '">' + inlineMarkdown((b || n)[1]) + '</li>');
+        return;
+      }
+      closeList();
+      if(!l) return;
+      if(l.startsWith('<div')) { out.push(l); return; } // already a button
+      out.push('<p style="' + P + '">' + inlineMarkdown(l) + '</p>');
+    });
+    closeList();
+    body = out.join('\n');
   }
 
-  // <!-- PUT CLIENT NAME HERE --> — clientName is injected below
-  // <!-- PUT CLIENT EMAIL HERE --> — clientEmail is injected in the consultant copy
-  // <!-- PUT RECOMMENDATIONS HERE --> — body is injected below
+  body = pinkLinks(body);
+
+  const tagline = document.getElementById('header-tagline').value.trim();
+  const opener  = greetingLine(clientName);
 
   return '<!DOCTYPE html><html><head><meta charset="UTF-8">' +
   '<style>' +
@@ -248,120 +478,112 @@ function buildEmailHtml(clientName, rawContent, clientEmail){
   '.hdr p{margin:6px 0 0;font-size:12px;color:rgba(255,255,255,0.85);letter-spacing:2px;text-transform:uppercase;}' +
   '.body{padding:32px 40px;}' +
   '.divider{width:40px;height:1px;background:linear-gradient(90deg,#e8507a,#c9a96e);margin:0 0 22px;}' +
-  '.recs{background:#fff5f8;border-left:3px solid #e8507a;padding:20px 24px;border-radius:10px;margin:24px 0;}' +
   '.ftr{background:#fce4ec;padding:18px 40px;text-align:center;font-size:11px;color:#a06070;letter-spacing:1px;}' +
   '.ftr a{color:#e8507a;}' +
   '@media(max-width:600px){.body{padding:24px 20px;}.hdr{padding:24px 20px;}}' +
   '</style></head>' +
   '<body><div style="padding:24px 16px;background:#fdf6f8;">' +
   '<div class="wrap">' +
-  '<div class="hdr"><h1>Mary Kay</h1><p>Your Personalized Recommendations</p></div>' +
+  '<div class="hdr"><h1>Mary Kay</h1>' + (tagline ? '<p>' + escapeHtml(tagline) + '</p>' : '') + '</div>' +
   '<div class="body">' +
-  // <!-- PUT CLIENT NAME HERE -->
-  '<p style="font-family:\'Cormorant Garamond\',Georgia,serif;font-size:26px;color:#2a1a20;font-weight:300;margin:0 0 6px;">Dear ' + clientName + ',</p>' +
-  '<div class="divider"></div>' +
-  '<p style="font-size:14px;color:#3d2530;line-height:1.9;margin:0 0 20px;">Thank you for your patience! After reviewing your assessment and personal message, here are my personalized recommendations just for you:</p>' +
-  // <!-- PUT RECOMMENDATIONS HERE -->
-  '<div class="recs">' + body + '</div>' +
+  (opener
+    ? '<p style="font-family:\'Cormorant Garamond\',Georgia,serif;font-size:26px;color:#2a1a20;font-weight:300;margin:0 0 6px;">' + escapeHtml(opener) + '</p>' +
+      '<div class="divider"></div>'
+    : '') +
+  '<div>' + body + '</div>' +
   '<p style="font-size:13px;color:#8a7a80;line-height:1.9;margin:20px 0;">As always, I&rsquo;m here to answer any questions along the way. Don&rsquo;t hesitate to reach out!</p>' +
   '<div style="border-top:1px solid #f0e8eb;margin-top:32px;padding-top:24px;">' +
   '<p style="font-family:\'Cormorant Garamond\',Georgia,serif;font-size:20px;color:#6b3fa0;font-weight:400;margin:0 0 2px;font-style:italic;">Skin-cerely yours,</p>' +
   '<p style="font-family:\'Cormorant Garamond\',Georgia,serif;font-size:17px;color:#2a1a20;margin:0 0 10px;">Hali Sarah Parsons</p>' +
   '<p style="font-size:11px;color:#b09090;margin:0 0 2px;letter-spacing:1px;text-transform:uppercase;">Mary Kay Independent Beauty Consultant</p>' +
-  '<p style="font-size:11px;color:#b09090;margin:0 0 2px;"><a href="mailto:sistahaymarykay@gmail.com" style="color:#e8507a;text-decoration:none;font-weight:500;">sistahaymarykay@gmail.com</a></p>' +
+  '<p style="font-size:11px;color:#b09090;margin:0 0 2px;"><a href="mailto:' + escapeHtml(senderEmail()) + '" style="color:#e8507a;text-decoration:none;font-weight:500;">' + escapeHtml(senderEmail()) + '</a></p>' +
   '<p style="font-size:11px;color:#b09090;margin:0;"><a href="https://www.marykay.com/sistahay/en/ibcprofile" target="_blank" style="color:#e8507a;text-decoration:none;font-weight:500;">marykay.com/sistahay</a></p>' +
   '</div>' +
   '</div>' +
-  '<div class="ftr">Mary Kay Independent Beauty Consultant<br><a href="mailto:sistahaymarykay@gmail.com">sistahaymarykay@gmail.com</a></div>' +
+  '<div class="ftr">Mary Kay Independent Beauty Consultant<br><a href="mailto:' + escapeHtml(senderEmail()) + '" style="color:#e8507a;text-decoration:underline;">' + escapeHtml(senderEmail()) + '</a></div>' +
   '</div></div></body></html>';
 }
 
-// Consultant copy: same but adds client email and link to PersonalJS
+// Your copy: same email plus a banner showing who it went to.
+// WHY: gives you a record in your inbox and a one-click way back to this tool.
 function buildConsultantCopy(clientName, clientEmail, rawContent){
-  const clientHtml = buildEmailHtml(clientName, rawContent, clientEmail);
-  // Inject client info banner after .hdr
+  const clientHtml = buildEmailHtml(clientName, rawContent);
   const banner =
     '<div style="background:#fff8f0;border-left:3px solid #c9a96e;padding:12px 40px;font-size:12px;color:#3d2530;line-height:1.8;">' +
-    // <!-- PUT CLIENT EMAIL HERE -->
-    '<strong style="color:#c9a96e;">Sent to:</strong> ' + clientName + ' &lt;<a href="mailto:' + clientEmail + '" style="color:#e8507a;text-decoration:none;">' + clientEmail + '</a>&gt;' +
-    '<br><a href="' + PERSONALJS_URL + '" target="_blank" style="color:#e8507a;font-size:11px;text-decoration:none;font-weight:500;">\u2192 Open PersonalJS to send another reply</a>' +
+    '<strong style="color:#c9a96e;">Sent to:</strong> ' + escapeHtml(clientName) + ' &lt;<a href="mailto:' + clientEmail + '" style="color:#e8507a;text-decoration:none;">' + escapeHtml(clientEmail) + '</a>&gt;' +
+    '<br><a href="' + SENDER_URL + '" target="_blank" style="color:#e8507a;font-size:11px;text-decoration:none;font-weight:500;">→ Open Branded Email to send another</a>' +
     '</div>';
   return clientHtml.replace('<div class="body">', banner + '<div class="body">');
 }
 
 // ─── PREVIEW ──────────────────────────────────────────
+// Opens the finished email in a new window. WHY a window: shows the real width and fonts.
 function previewEmail(){
-  const clientName  = document.getElementById('client-name').value.trim() || 'Client';
-  const clientEmail = document.getElementById('client-email').value.trim() || 'client@email.com';
-  const recs        = document.getElementById('recommendations').value.trim() || '(Your recommendations will appear here)';
-  const html        = buildEmailHtml(clientName, recs, clientEmail);
-
-  // Open in new window for full render
+  const clientName = document.getElementById('client-name').value.trim() || 'Client';
+  const msg        = document.getElementById('message').value.trim() || '(Your message will appear here)';
+  const html       = buildEmailHtml(clientName, msg);
   const win = window.open('', '_blank', 'width=700,height=800,scrollbars=yes');
+  if(!win){ showStatus('err', 'Your browser blocked the preview window. Allow pop-ups for this page and try again.'); return; }
   win.document.write(html);
   win.document.close();
 }
 
 // ─── SEND ─────────────────────────────────────────────
+// Sends a test to you, or the real email to the client plus a copy to you.
 async function sendEmail(mode){
-  const templateId  = EJS_TEMPLATE_PERSONAL;
   const clientEmail = document.getElementById('client-email').value.trim();
   const clientName  = document.getElementById('client-name').value.trim();
   const subject     = document.getElementById('email-subject').value.trim();
-  const recs        = document.getElementById('recommendations').value.trim();
+  const msg         = document.getElementById('message').value.trim();
 
-  if(!templateId){ showStatus('err', 'Please enter your EmailJS Template ID at the top.'); return; }
   if(mode === 'client'){
     if(!clientEmail || !clientEmail.includes('@')){ showStatus('err', 'Please enter a valid client email.'); return; }
     if(!clientName){ showStatus('err', 'Please enter the client\'s first name.'); return; }
   }
-  if(!recs){ showStatus('err', 'Please enter your recommendations.'); return; }
+  if(!subject){ showStatus('err', 'Please enter an email subject.'); return; }
+  if(!msg){ showStatus('err', 'Please enter your message.'); return; }
 
-  const sendTo   = mode === 'test' ? CONSULTANT_EMAIL : clientEmail;
-  const nameFor  = mode === 'test' ? 'Hali Sarah (TEST)' : clientName;
+  const from     = senderEmail();
+  const sendTo   = mode === 'test' ? from : clientEmail;
+  // WHY use the client's name in tests when filled in: the test shows the real greeting.
+  const nameFor  = mode === 'test' ? (clientName || 'Hali Sarah') : clientName;
   const subjectL = mode === 'test' ? '[TEST] ' + subject : subject;
 
   const btn = document.getElementById(mode === 'test' ? 'test-btn' : 'send-btn');
-  btn.textContent = 'Sending\u2026'; btn.disabled = true;
+  btn.textContent = 'Sending…'; btn.disabled = true;
 
-  const html = mode === 'test'
-    ? buildEmailHtml(nameFor, recs, CONSULTANT_EMAIL)
-    : buildEmailHtml(clientName, recs, clientEmail);
+  const html = buildEmailHtml(nameFor, msg);
 
-  // Consultant BCC copy (only on real sends)
+  // WHY try/catch: EmailJS rejects on network or quota errors; show the reason and re-enable the button.
   try {
-    await emailjs.send(EJS_SERVICE_ID, templateId, {
+    await emailjs.send(EJS_SERVICE_ID, EJS_TEMPLATE_ID, {
       to_email:  sendTo,
       subject:   subjectL,
       message:   html,
-      reply_to:  CONSULTANT_EMAIL,
+      reply_to:  from,
+      from_email: from,
       name:      'Hali Sarah Parsons'
     });
 
-    // Send consultant copy on real send
     if(mode === 'client'){
-      const consultantHtml = buildConsultantCopy(clientName, clientEmail, recs);
-      await emailjs.send(EJS_SERVICE_ID, templateId, {
-        to_email:  CONSULTANT_EMAIL,
-        subject:   'SENT: ' + subject + ' \u2192 ' + clientName,
-        message:   consultantHtml,
+      await emailjs.send(EJS_SERVICE_ID, EJS_TEMPLATE_ID, {
+        to_email:  from,
+        subject:   'SENT: ' + subject + ' → ' + clientName,
+        message:   buildConsultantCopy(clientName, clientEmail, msg),
         reply_to:  clientEmail,
         name:      'Hali Sarah Parsons'
       });
     }
 
-    const msg = mode === 'test'
-      ? '\u2713 Test email sent to ' + CONSULTANT_EMAIL + '! Check your inbox to verify formatting.'
-      : '\u2713 Email sent to ' + clientName + ' (' + clientEmail + ')! A copy was sent to your inbox.';
-    showStatus('ok', msg);
-    btn.textContent = mode === 'test' ? 'Send Test to Me' : 'Send to Client \u2192';
-    btn.disabled = false;
+    showStatus('ok', mode === 'test'
+      ? '✓ Test email sent to ' + from + '. Check your inbox to verify formatting.'
+      : '✓ Email sent to ' + clientName + ' (' + clientEmail + '). A copy was sent to your inbox.');
   } catch(e){
     console.error(e);
     showStatus('err', 'Send failed: ' + (e.text || e.message || JSON.stringify(e)));
-    btn.textContent = mode === 'test' ? 'Send Test to Me' : 'Send to Client \u2192';
-    btn.disabled = false;
   }
+  btn.textContent = mode === 'test' ? 'Send Test to Me' : 'Send to Client →';
+  btn.disabled = false;
 }
 
 function showStatus(type, msg){

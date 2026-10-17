@@ -16,9 +16,31 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Genuinely Free QR Code Generator — Static & Dynamic | I.Q. Productionz</title>
-
+<meta name="description" content="Genuinely free QR codes — no tricks, no last-minute signup, no hidden fees. Active 7+ years and not going anywhere. Download SVG QR codes with artistic dot shapes, gradients, and logo overlays. Static or dynamic with redirect control and scan tracking. Houston, TX.">
 <meta name="keywords" content="free SVG QR code, SVG QR code download, QR code car decal, QR code vehicle wrap, QR code billboard, print ready QR code, high resolution QR code, custom QR code generator, unique QR code design, artistic QR code, QR code with logo, gradient QR code, heart QR code, star QR code, emoji QR code, dynamic QR code, static QR code, free QR code generator, no monthly fee QR code, Houston Texas">
-
+<link rel="canonical" href="https://iqproductionz.com/QRCode/">
+<meta property="og:title" content="Genuinely Free QR Code Generator — Static & Dynamic | I.Q. Productionz">
+<meta property="og:description" content="Genuinely free SVG QR codes — no tricks, no last-minute signup. Active 7+ years and not going anywhere. Print-ready for car decals, vehicle wraps, and billboards. Custom shapes, gradients, emoji dots, logo overlays. Dynamic with redirect + tracking.">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://iqproductionz.com/QRCode/">
+<meta property="og:image" content="https://iqproductionz.com/Content/Images/Main/QRCode-og-share.jpg">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="QR Codes as unique as your brand — I.Q. Productionz QR Code Generator">
+<!-- WHY a fixed 1200x630 image instead of a GIF or per-device asset: Open
+     Graph/Twitter Card previews have no "pick an image for this device"
+     mechanism -- every platform (iMessage, Slack, FB, X, LinkedIn) fetches
+     ONE static image at crawl time and does its own scaling/cropping to fit
+     whatever card size that surface uses. GIFs almost universally render as
+     a frozen first frame in these preview cards, so animation would just be
+     wasted file weight. 1200x630 is the de-facto safe size every major
+     platform's preview crop is built around, so this one file already looks
+     correct across phones, desktop, and chat apps -- that's what "fits the
+     screen depending on device" actually means for a share card. -->
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Genuinely Free QR Code Generator — Static & Dynamic | I.Q. Productionz">
+<meta name="twitter:description" content="Genuinely free SVG QR codes — no tricks, no last-minute signup. Custom shapes, gradients, emoji dots, logo overlays. Dynamic with redirect + tracking.">
+<meta name="twitter:image" content="https://iqproductionz.com/Content/Images/Main/QRCode-og-share.jpg">
 <script type="application/ld+json">{"@context":"https://schema.org","@type":"SoftwareApplication","name":"I.Q. Productionz QR Code Platform","url":"https://iqproductionz.com/QRCode/","description":"Genuinely free SVG QR code generator — no tricks, no last-minute signup. Active 7+ years and not going anywhere. Download print-ready SVG files for car decals, vehicle wraps, and billboards. Custom dot shapes, emoji characters, multi-color gradients, logo overlays. Dynamic QR codes with redirect control and scan analytics. No monthly subscription. Houston, TX.","applicationCategory":"BusinessApplication","operatingSystem":"Web","offers":[{"@type":"Offer","name":"Static QR Code","price":"0","priceCurrency":"USD"},{"@type":"Offer","name":"Change Dynamic Redirect","price":"25","priceCurrency":"USD"},{"@type":"Offer","name":"View Scan Statistics","price":"5","priceCurrency":"USD"}],"provider":{"@type":"Organization","name":"I.Q. Productionz","url":"https://iqproductionz.com"}}</script>
 
 <!-- Firebase -->
@@ -417,20 +439,6 @@ footer a{color:var(--muted);}footer a:hover{color:var(--white);}
   .design-grid{grid-template-columns:1fr;}
 }
 </style>
-  <!-- SEO:start (written by seo_wire.py; search data only, nothing visible) -->
-  <meta name="description" content="Genuinely free QR codes — no tricks, no last-minute signup, no hidden fees. Active 7+ years and not going anywhere. Download SVG QR codes with artistic dot…">
-  <link rel="canonical" href="https://iqproductionz.com/QRCode/">
-  <meta property="og:type" content="website">
-  <meta property="og:site_name" content="I.Q. Productionz">
-  <meta property="og:title" content="Genuinely Free QR Code Generator — Static &amp; Dynamic | I.Q. Productionz">
-  <meta property="og:description" content="Genuinely free QR codes — no tricks, no last-minute signup, no hidden fees. Active 7+ years and not going anywhere. Download SVG QR codes with artistic dot…">
-  <meta property="og:url" content="https://iqproductionz.com/QRCode/">
-  <meta property="og:image" content="https://iqproductionz.com/Content/Images/Main/IQ-noglow_Updated.avif">
-  <meta name="twitter:card" content="summary_large_image">
-  <meta name="twitter:title" content="Genuinely Free QR Code Generator — Static &amp; Dynamic | I.Q. Productionz">
-  <meta name="twitter:description" content="Genuinely free QR codes — no tricks, no last-minute signup, no hidden fees. Active 7+ years and not going anywhere. Download SVG QR codes with artistic dot…">
-  <meta name="twitter:image" content="https://iqproductionz.com/Content/Images/Main/IQ-noglow_Updated.avif">
-  <!-- SEO:end -->
 </head>
 <body>
 
@@ -502,7 +510,7 @@ footer a{color:var(--muted);}footer a:hover{color:var(--white);}
     <div id="panel-static" style="display:none;">
       <div class="gen-card">
         <div class="field">
-          <label>URL or Text to Encode</label>
+          <label>URL or Text to Encode <a href="javascript:void(0)" onclick="refreshStaticDesign()" style="font-style:italic;text-transform:uppercase;font-size:.66rem;font-weight:700;letter-spacing:.3px;margin-left:6px;">↻ Refresh Design</a></label>
           <input type="text" id="s-url" placeholder="https://yourwebsite.com or any text">
         </div>
 
@@ -759,6 +767,7 @@ footer a{color:var(--muted);}footer a:hover{color:var(--white);}
                 <label style="display:flex;align-items:center;cursor:pointer;margin-top:8px;"><input type="checkbox" id="g4-gradient" onchange="scheduleLivePreview('s')" style="width:14px;height:14px;min-width:14px;flex:0 0 14px;margin:0 7px 0 0;padding:0;vertical-align:middle;">Gradient</label>
               </div>
             </div>
+
 
             <!-- ASYMMETRIC CORNERS — Hali: "the check mark should go right
                  above the corner style ... three tabs would show up ...
@@ -1036,7 +1045,7 @@ footer a{color:var(--muted);}footer a:hover{color:var(--white);}
     <div id="panel-dynamic">
       <div class="gen-card">
         <div class="field">
-          <label>QR Code Name (for your dashboard)</label>
+          <label>QR Code Name (for your dashboard) <a href="javascript:void(0)" onclick="refreshDynamicDesign()" style="font-style:italic;text-transform:uppercase;font-size:.66rem;font-weight:700;letter-spacing:.3px;margin-left:6px;">↻ Refresh Design</a></label>
           <input type="text" id="d-name" placeholder="e.g. Restaurant Menu, Event Flyer">
         </div>
         <div class="field">
@@ -1524,7 +1533,7 @@ footer a{color:var(--muted);}footer a:hover{color:var(--white);}
     <p id="confirm-modal-msg" style="font-size:.92rem;line-height:1.6;margin:14px 0 22px;"></p>
     <div style="display:flex;gap:10px;">
       <button class="act-btn" style="flex:1;" onclick="resolveConfirm(false)">Cancel</button>
-      <button class="act-btn act-btn-danger" style="flex:1;" onclick="resolveConfirm(true)">Delete</button>
+      <button class="act-btn act-btn-danger" style="flex:1;" id="confirm-modal-btn" onclick="resolveConfirm(true)">Delete</button>
     </div>
   </div>
 </div>
@@ -1962,6 +1971,58 @@ window._cv = 'home';
 // it just has to live outside the object literal since a `var` statement
 // can't be a property inside one.
 var CLASSY_PAD = 1;
+// WHY a factory instead of 4 near-duplicate draw functions: Hali -- "I saw
+// a qrcode with the outer corners rounded square and the top right
+// pointed... I would like to offer this with the option to change
+// orientation so the user can pick which corner gets the point." Four
+// SEPARATE Overall Shape options (below, one per corner) is what actually
+// lets her pick the corner directly in the same picker she already uses
+// for every other Overall Shape -- no new orientation control to build --
+// and this one function generates all four so the rounding math (same
+// "round 3 of 4 vertices toward their neighbors, leave one a sharp
+// lineTo" technique the diamond/parallelogram shapes above already use)
+// only has to be written once. WHY these 4 are added straight onto SHAPES
+// after the flatten below, not as a SHAPE_GROUPS category of their own:
+// Hali only ever described this as a QR's OUTER silhouette (an Overall
+// Shape), not a per-dot module -- SHAPE_GROUPS entries all surface in the
+// tiny per-dot Dot Type grid too, where a corner-pointed square is both
+// illegible at module scale and not what she asked for (same reasoning
+// custom_char's own direct SHAPES.custom_char=... assignment, further
+// down, already established for a shape that's frame/picker-only).
+function makeRoundedPointSquareDraw(pointCorner) {
+  return function(c, x, y, s) {
+    var tl=[x,y], tr=[x+s,y], br=[x+s,y+s], bl=[x,y+s];
+    // WHY rt=.16 here and not the diamond shape's .22/.3: this shape's whole
+    // point (literally) is the CONTRAST between the one sharp corner and the
+    // other three rounded ones -- Hali: "i dont see the outter corner shape
+    // we built." At .3 (what this started as) the rounding was so heavy
+    // that all 4 corners read as "basically a circle" at picker-tile size,
+    // and the one real 90-degree corner was too small a kink to notice --
+    // all 4 of the TL/TR/BR/BL tiles looked identical. .16 keeps the other
+    // three corners clearly rounded while leaving enough straight edge next
+    // to the sharp corner that it reads as an actual point, not a rounding
+    // error.
+    var order=[tl,tr,br,bl], names=['tl','tr','br','bl'], rt=.16;
+    c.beginPath();
+    for (var i=0;i<4;i++){
+      var v=order[i], prev=order[(i+3)%4], next=order[(i+1)%4];
+      if (names[i]===pointCorner) {
+        // WHY a plain lineTo straight to the real vertex, not an arc: this
+        // corner reads as "pointed" purely by CONTRAST with the other 3
+        // being rounded -- it's the square's ordinary sharp 90-degree
+        // corner, untouched.
+        if (i===0) c.moveTo(v[0],v[1]); else c.lineTo(v[0],v[1]);
+      } else {
+        var pin=[v[0]+(prev[0]-v[0])*rt, v[1]+(prev[1]-v[1])*rt];
+        var pout=[v[0]+(next[0]-v[0])*rt, v[1]+(next[1]-v[1])*rt];
+        if (i===0) c.moveTo(pin[0],pin[1]); else c.lineTo(pin[0],pin[1]);
+        c.quadraticCurveTo(v[0],v[1],pout[0],pout[1]);
+      }
+    }
+    c.closePath();
+    c.fill();
+  };
+}
 var SHAPE_GROUPS = {
   "Basic": {
     // WHY the neighbors-aware inset: Hali -- "can you fix the squares as
@@ -2324,6 +2385,7 @@ var SHAPE_GROUPS = {
     }},
     apple: { label:"🍎", draw:function(c,x,y,s){drawSVG(c,x,y,s,'M35.69,17.287c0.886-2.038,2.054-5.391,3.493-7.735 c1.194-1.946,3.365-6.216,5.739-2.495c-1.006,1.868-2.985,2.512-4.242,4.242c-1.945,2.678-3.175,6.058-3.493,10.479 c4.889-0.494,7.415-2.613,12.975-1.996c9.531,1.059,14.204,9.783,14.222,19.461c0.024,13.391-8.009,28.807-17.715,31.688 c-3.587,1.064-6.829-1.188-10.229-1.248c-4.405-0.078-8.074,2.765-12.725,0.499c-8.06-3.926-15.446-18.485-15.469-30.938 c-0.026-14.5,11.761-24.107,26.947-17.216c0.687-1.602,0.885-4.058-0.998-4.74c-0.962-0.349-2.893,0.292-3.743,0.25 C22.316,17.132,16.212,9.849,15.979,0.57c0.183-0.233,0.454-0.378,0.749-0.499c9.5-0.435,16.526,3.913,18.214,11.228 C35.372,13.167,34.369,15.577,35.69,17.287z',0.0,0.0,72.0,72.0);} },
     crescent: { label:"🌙", draw:function(c,x,y,s){drawSVG(c,x,y,s,'M39.683,0.414c-0.517,2.011-2.921,2.838-4.292,4.292 c-2.95,3.129-5,7.151-5.365,12.16c-0.856,11.763,8.291,22.5,21.996,21.459c6.098-0.463,11.403-4.264,14.307-8.405 c1.029-1.468,1.449-3.394,2.861-4.649c1.42,1.337,1.762,3.906,1.967,6.438c0.694,8.58-1.225,15.79-4.113,21.101 C60.174,65.44,43.636,74.825,26.271,69.978C10.729,65.639-1.465,51.812,0.162,31.708c0.426-5.262,2.304-10.092,4.292-13.591 C8.346,11.266,14.698,5.508,22.515,2.381c3.818-1.528,8.216-2.504,13.77-2.504C37.502-0.123,38.984-0.443,39.683,0.414z',0.0,0.0,72.0,72.0);} },
+    bolt: { label:"⚡", draw:function(c,x,y,s){drawSVG(c,x,y,s,'M69.224,47.329c-7.061-5.181-20.804-8.366-23.195-14.94 C54.526,26.136,63.351,20.972,72,15.223V0H47.188 C31.595,10.184,15.123,20.349,2.961,31.965c7.431,4.81,18.655,8.488,23.699,14.01C18.101,53.439,8.887,58.706,0,65.071V72h3.827 c8.377-2.376,17.098-5.962,25.601-8.895C43.402,58.287,58.833,54.617,69.224,47.329z',0.0,0.0,72.0,72.0);} },
   },
   "Symbols": {
     // WHY swapped to a traced SVG path instead of the old hand-built two-
@@ -2389,6 +2451,7 @@ var SHAPE_GROUPS = {
     pumpkin: { label:"😊", draw:function(c,x,y,s){ drawSVGLayered(c,x,y,s,"M0.988,43.72c0-0.389,0-0.777,0-1.166c0.518-7.123,3.986-13.199,8.163-18.659 c4.91-6.416,11.096-13.574,22.449-12.828c1.087-2.63,0.206-7.347,0.583-9.913c1.623,0.224,4.145-0.452,4.374,1.166 c2.331-4.59,11.562-4.628,11.37,2.333c-0.998,1.903-6.568,2.098-7.872,0.292c0.145-1.582,3.807-0.951,3.499-2.041 c-2.453-1.435-4.837,1.337-5.54,3.499c0.638,1.695,1.791,2.874,2.624,4.373c10.276,0.076,16.092,4.383,20.7,9.913 c5.493,6.592,10.624,15.538,9.621,24.782c-1.132,10.421-13.239,22.231-24.49,24.198c-6.775,1.185-15.367-0.294-22.449-1.75 C10.861,65.215,2.743,57.896,0.988,43.72z M41.513,35.557c4.421,0.614,9.66-0.434,12.536-2.332 c-1.992-4.908-5.09-8.71-10.204-10.496C44.024,27.063,42.906,31.901,41.513,35.557z M26.644,23.895 c-3.473,3.136-5.557,7.66-6.706,13.12c3.653,0.713,8.27-0.07,11.37-0.875C29.191,32.621,28.517,27.658,26.644,23.895z M32.766,39.347c1.15,3.648,5.911,4.562,6.706,0C37.211,38.876,35.117,39.176,32.766,39.347z M45.886,48.093 c-0.173,0.604,0.36,1.916-0.291,2.041c-1.185,0.371-2.571,0.54-4.082,0.583c0.007-0.687-0.502-0.858-0.292-1.749 c-3.053,0.153-5.985,0.429-9.329,0.292c-0.167,0.512,0.353,1.713-0.292,1.749c-0.858,0.335-3.175-0.031-4.082-0.583 c-0.536-0.412,0.457-1.416-0.292-2.041c-5.472-0.554-9.248-2.803-13.12-4.956c0.61,5.812,5.461,9.887,10.787,11.953 c0.511-0.752,0.119-2.408,1.166-2.624c1.498-0.04,2.873,0.043,3.791,0.583c0.451,0.737-0.36,2.227-0.292,3.499 c5.5,0.949,12.251,0.643,16.91-0.875c-0.155-1.107-0.91-1.616-0.874-2.915c1.157-0.592,2.416-1.082,4.081-1.166 c0.474,0.498,0.883,1.061,0.875,2.04c5.006-2.089,7.531-6.656,8.746-12.536c-0.373-0.016-0.403-0.374-0.875-0.292 C55.315,44.5,50.92,46.616,45.886,48.093z","M43.845,22.729c5.114,1.786,8.212,5.588,10.204,10.496 c-2.876,1.898-8.115,2.946-12.536,2.332C42.906,31.901,44.024,27.063,43.845,22.729z M31.309,36.14c-3.101,0.805-7.717,1.588-11.37,0.875 c1.149-5.459,3.233-9.984,6.706-13.12C28.517,27.658,29.191,32.621,31.309,36.14z M39.472,39.347c-0.795,4.562-5.556,3.648-6.706,0 C35.117,39.176,37.211,38.876,39.472,39.347z M58.422,41.096c0.472-0.082,0.502,0.276,0.875,0.292 c-1.215,5.88-3.74,10.447-8.746,12.536c0.008-0.979-0.401-1.542-0.875-2.04c-1.665,0.084-2.924,0.574-4.081,1.166 c-0.036,1.299,0.719,1.808,0.874,2.915c-4.658,1.518-11.41,1.824-16.91,0.875c-0.068-1.272,0.743-2.762,0.292-3.499 c-0.917-0.54-2.292-0.623-3.791-0.583c-1.047,0.216-0.655,1.872-1.166,2.624c-5.326-2.066-10.177-6.142-10.787-11.953 c3.872,2.153,7.647,4.402,13.12,4.956c0.749,0.625-0.244,1.629,0.292,2.041c0.906,0.552,3.223,0.918,4.082,0.583 c0.644-0.036,0.124-1.237,0.292-1.749c3.344,0.137,6.276-0.139,9.329-0.292c-0.21,0.891,0.299,1.062,0.292,1.749 c1.511-0.043,2.897-0.212,4.082-0.583c0.651-0.125,0.118-1.437,0.291-2.041C50.92,46.616,55.315,44.5,58.422,41.096z",0,0,72,72); }},
     spump: { label:"😈", draw:function(c,x,y,s){ drawSVGLayered(c,x,y,s,"M36.489,0.272c1.295-0.413,0.796,0.967,0.881,1.764 c5.669-2.45,11.351,1.703,12.345,6.76c-1.086,0.971-3.647,0.467-5.584,0.588c0.274-1.195,2.386-0.553,2.351-2.058 c-2.417-2.743-7.748-0.243-9.699,1.176c0,1.273,0,2.547,0,3.821c21.784-2.68,27.588,10.619,34.681,22.63 c1.961,24.84-15.202,38.506-38.502,36.738C21.203,70.799,12.48,65.014,6.511,57.584c-8.43-10.491-7.875-24.019,0.294-34.681 c5.173-6.752,11.866-11.512,24.688-10.581c0.505-3.218,0.688-6.757,0.881-10.287C34.018,1.72,35.132,0.875,36.489,0.272z M41.191,33.484c0.77,4.031,4.017,5.584,9.111,5.291c4.816-1.192,6.521-9.596,3.232-13.814 C51.231,29.612,46.329,31.666,41.191,33.484z M17.973,34.366c1.215,5.917,13.356,6.364,13.52-0.882 c-6.468-0.292-8.996-4.524-12.05-8.229C18.065,27.404,17.787,30.653,17.973,34.366z M36.783,38.187 c-1.796,0.068-2.602,3.665-2.939,6.172c1.804-0.155,4.255,0.336,5.584-0.294C38.977,41.675,38.527,39.283,36.783,38.187z M56.769,46.416c-0.823-1.039-1.395-2.329-2.646-2.939c-1.138,2.978-2.28,5.949-4.702,7.642c0.046-2.201-1.193-3.117-2.352-4.114 c-1.843,2.971-4.84,6.311-7.642,7.348c-1.252-1.785-2.402-3.672-3.233-5.879c-2.527,1.588-3.907,4.322-6.76,5.585 c-1.79-2.031-2.447-5.194-4.115-7.348c-2.607,0.82-4.248,2.609-6.76,3.526c-2.295-2.211-2.474-6.539-3.527-9.993 c-3.702,1.203-2.666,9.863-0.588,12.051c0.385-0.889,1.319-1.229,2.646-1.176c0.41,2.039,1.868,3.03,2.057,5.29 c1.534-0.228,2.646-1.815,4.703-1.47c2.351,0.396,3.282,3.285,4.115,5.291c1.886-0.979,3.231-3.471,5.29-3.233 c2.143,0.247,1.884,2.933,3.821,4.115c1.628-1.604,2.585-3.881,5.29-4.409c1.173,0.787,1.808,2.11,2.351,3.527 c2.062-1.661,2.767-4.68,5.291-5.878c0.799,0.964,1.108,2.418,1.176,4.114c2.384-0.751,1.698-4.571,3.232-6.172 c1.626,0.138,2.824,0.702,3.821,1.47c3.229-2.194,3.797-11.412,0.294-13.813C58.268,42.429,57.839,44.742,56.769,46.416z",null,0,0,72,72); }},
     drip_skull: { label:"💀", draw:function(c,x,y,s){ drawSVGLayered(c,x,y,s,"M69.507,40.639c-0.948,0-1.896,0-2.844,0c0,1.327,0,2.654,0,3.981 c-1.711,0.573-1.008-1.268-1.138-2.275c-2.771,0.263-4.554,1.513-3.981,5.119c-1.002-3.029-4.894-6.448-7.962-3.981 c0.866,4.885,0.126,11.963-1.138,16.494c-2.732-1.817-1.785-7.314-3.981-9.669c-1.054,1.79-1.216,4.472-1.138,7.394 c-2.165-0.868-0.939-5.127-3.412-5.688c-1.318,2.475-0.197,7.387-0.569,10.807c-0.709-1.376-2.193-1.978-1.706-4.55 c-1.489,3.25,0.471,9.949-1.706,12.513c-2.602-4.413-0.753-13.276-3.413-17.632c-1.231,0.665,0.077,3.868-1.707,3.981 c-2.107-0.737-1.153-4.534-3.981-4.55c-1.306,1.159-0.206,4.723-0.569,6.825c-1.444-2.158-3.225-3.979-4.55-6.257 c-1.323,4.176-0.193,10.803-0.569,15.925c-3.817-5.282-1.091-17.108-6.256-21.044c-0.528-2.234,1.978-1.435,1.138-3.981 c-2.924-3.328-5.457,1.108-7.394,2.275c0-0.758,0-1.517,0-2.275c-1.97,1.443,1.176,8.001-1.706,8.532 C9.36,46.374,7.735,40.226,2.962,37.227c2.124-2.042,0.56-4.877-1.137-6.257c2.05-4.932,0.252-9.679-1.707-13.65 C8.033-5.535,55.992-4.188,71.213,11.063c2.415,5.97-3.536,12.522,0,17.631C69.466,31.498,70.415,36.997,69.507,40.639z M19.456,28.126c-0.921-0.975-0.529-3.263-2.844-2.844c-1.571-0.244-0.534,2.121-1.706,2.275c-1.074-2.303-3.383-0.327-5.119,0 c-3.635,13.325,21.561,11.791,22.182,1.707c-1.564-2.419-5.568-4.9-7.962-1.707c-0.145-1.941-1.217-2.954-3.413-2.844 C19.472,25.108,20.734,27.887,19.456,28.126z M41.638,28.695c-1.521,14.582,34.107,4.588,15.925-2.844 c-0.189,2.274,0.731,5.66-1.706,5.688c-0.169-2.675,0.492-6.179-1.706-6.825c-1.286,0.23,0.3,3.333-2.275,2.275 c-0.842-0.105-0.521-1.374-0.568-2.275C45.312,23.904,45.98,31.001,41.638,28.695z M35.95,38.363 c-0.488-1.786,1.33-5.879-1.707-5.119c-1.046,4.839-5.951,3.786-3.981,11.375c1.651,0.737,4.036,0.737,5.688,0 c0.327-1-0.688-3.342,0.569-3.413c1.126,0.77,2.212,1.58,1.707,3.981c8.734-0.321,2.012-10.634-0.569-13.081 C35.351,32.456,37.52,37.279,35.95,38.363z",null,0,0,72,72); }},
+    lips: { label:"💋", draw:function(c,x,y,s){drawSVG(c,x,y,s,'M45.083,2.388c8.784,1.125,7.427,10.632,10.219,16.71 c4.639-0.188,7.613-2.387,13.836-0.655c5.456,15.43-12.391,42.274,2.989,51.438C43.801,72.59,5.188,71.554,0.249,39.45 c-1.79-11.63,6.514-26.311-0.2-39.368C13.196,7.691,32.266,6.787,45.083,2.388z M54.663,46.58 c-1.551-10.696-20.322-7.16-19.785-19.583c-2.935,0.798-9.863-3.235-9.935,1.025C26.938,39.579,45.014,47.333,54.663,46.58z',0.0,0.0,72.0,72.0);} },
     xskull: { label:"☠", draw:function(c,x,y,s){ drawSVGLayered(c,x,y,s,"M16.364,33.61c-5.478-3.622-15.895,0.284-14.893-8.903 c0.375-3.439,4.379-4.222,4.654-8.902C14.327,16.352,15.733,24.545,16.364,33.61z M66.629,15.805c1.893,5.289,7.445,10.495,1.861,15.71 c-4.545-0.051-9.178-0.202-11.635,2.095C56.334,25.516,58.625,16.052,66.629,15.805z M20.553,50.367c1.145,2.282-0.751,5.634,1.396,7.331 c-5.875,2.816-6.547,11.486-15.358,10.998C5.7,64.143-0.214,59.399,4.264,55.081C11.229,55.237,16.677,53.687,20.553,50.367z M51.734,50.367c4.404,2.901,9.508,5.014,16.756,4.714 c4.441,4.279-1.348,9.161-2.328,13.615c-8.014,1.517-9.023-8.45-15.357-10.474C52.27,55.757,51.816,54.029,51.734,50.367z M41.031,54.558c0.285,0.726,1.791,0.079,1.861,1.047 c0.02,1.339-0.346,0.639-0.932,0.524c0.148,1.214-0.074,2.01-0.465,2.618C40.43,58.31,40.223,55.529,41.031,54.558z M34.98,55.604c2.043,0.67,0.405,5.479,0.931,7.855 C34.746,61.994,33.985,57.815,34.98,55.604z M37.307,63.46c-1.125-2.047-0.629-5.244,0-7.855 C39.449,57.019,37.469,61.312,37.307,63.46z M38.703,55.604c1.744-0.041,1.588,2.054,1.861,3.666c-0.619,0-1.24,0-1.861,0 C38.703,58.048,38.703,56.826,38.703,55.604z M40.564,59.271c1.414,0.646-0.504,1.801,0,3.143 c-1.016-0.078-0.998-1.32-0.93-2.619C40.176,59.879,40.463,59.678,40.564,59.271z M51.734,21.042c-0.988,0.808-0.197,3.619-1.395,4.19 c3.869,2.279,1.77,11.274,5.584,13.615c-0.682,6.563-4.137,10.009-10.705,9.95c-1.014,1.095,0.232,1.494,0,3.142 c-5.012,4.37-10.032,4.382-14.892,2.095c-0.573,0.229-0.956,0.67-0.931,1.571c-0.938-1.361,1.577-3.143-1.861-3.142 c-0.148-1.216,0.075-2.011,0.465-2.619c-5.063-1.984-10.877-3.121-11.17-10.473c3.599-2.584,1.537-11.538,5.585-13.616 c-0.414-1.28-1.084-2.271-0.931-4.189c-0.618,4.962-3.03,9.862-3.258,13.615c-0.805-3.231-1.667-5.753-1.862-7.855 C13.186-7.042,59.021-8.642,56.389,26.802c-0.193,2.621-1.262,4.706-1.396,8.378C53.844,30.538,51.555,27.18,51.734,21.042z M33.584,34.657c-0.581-4.461-6.76-6.002-11.17-3.142c-2.166,3.041-1.684,10.011,1.396,11.521 C29.084,42.723,34.237,39.668,33.584,34.657z M49.873,42.513c2.307-2.492,2.441-9.11,0-11.521 C35.507,25.3,37.492,45.902,49.873,42.513z M34.515,49.844c1.706-1.58,1.833-7.701,0.931-10.473 C33.437,40.795,30.646,48.21,34.515,49.844z M37.773,49.844c4.527-1.005,1.818-9.739-0.931-10.473 C36.794,43.265,36.708,47.202,37.773,49.844z M31.257,54.558c2.258,1.134-0.106,3.819,0,5.76 c-1.17-1.128-2.589-1.974-2.792-4.188c1.51,0.046,1.502,1.801,2.327,2.618C31.28,58.46,30.392,55.71,31.257,54.558z M41.961,60.317c-1.137-1.655,1.539-3.484,2.328-4.713 c-0.467-0.721-0.768,0.223-1.396-1.047C46.213,53.582,43.572,59.298,41.961,60.317z M34.515,59.794c0.265,1.694-0.141,2.634-0.931,3.142 c1.88,1.215,3.272,0.344,5.585,0.524c-0.18-1.37-1.492-1.464-0.932-3.666c1.824-0.482,0.338,2.762,1.396,3.142 c3.514-3.03,7.887-7.88,7.912-13.092c0.199-1.171,2.293-0.212,3.258-0.523c0.164,11.007-4.193,16.928-9.773,21.471 C26.347,73.27,22.549,60.972,21.949,49.32c1.086,0,2.172,0,3.258,0c-0.698,5.894,4.745,9.289,6.981,13.615 C34.28,63.37,32.703,59.675,34.515,59.794z M33.119,55.604c1.769-0.42,0.592,2.477,0.931,3.666c-0.621,0-1.241,0-1.862,0 c0.946,0.382,1.333,2.214,0.465,3.143C30.882,60.582,32.471,57.654,33.119,55.604z","M73.609-2c0.775,23.74,0.775,51.146,0,74.886 C73.609,47.924,73.609,22.962,73.609-2z M23.811,43.036c-3.08-1.51-3.562-8.48-1.396-11.521 c4.41-2.86,10.589-1.319,11.17,3.142C34.237,39.668,29.084,42.723,23.811,43.036z M49.873,30.992c2.441,2.411,2.307,9.029,0,11.521 C37.492,45.902,35.507,25.3,49.873,30.992z M35.446,39.371c0.902,2.771,0.775,8.893-0.931,10.473 C30.646,48.21,33.437,40.795,35.446,39.371z M36.842,39.371c2.75,0.733,5.458,9.468,0.931,10.473 C36.708,47.202,36.794,43.265,36.842,39.371z",0,0,72,72); }},
   },
   "Social Media": {
@@ -2462,6 +2525,12 @@ SHAPES.custom_char = { label:'✎', draw:(c,x,y,s,chars)=>{
   var ch = chars && chars.length ? chars[Math.floor(Math.random()*chars.length)] : '★';
   drawChar(c,x,y,s,ch);
 }};
+// WHY added here, not inside SHAPE_GROUPS: see makeRoundedPointSquareDraw's
+// own WHY above -- these are Overall Shape (frame) options only.
+SHAPES.round_point_tl = { label:'◰', draw: makeRoundedPointSquareDraw('tl') };
+SHAPES.round_point_tr = { label:'◱', draw: makeRoundedPointSquareDraw('tr') };
+SHAPES.round_point_br = { label:'◲', draw: makeRoundedPointSquareDraw('br') };
+SHAPES.round_point_bl = { label:'◳', draw: makeRoundedPointSquareDraw('bl') };
 
 // WHY an explicit allowlist, not a property on every shape def: Hali --
 // "join dots up to four that get grouped together and spread the design
@@ -2860,11 +2929,42 @@ var FINDER_RING_SHAPES = {
     // "point" toward the center of the code).
     roundRectPath(ctx, cx-r, cy-r, r*2, r*2, [0, 0, r, 0]);
     ctx.fill();
-  }
+  },
+  // WHY four point_* keys here: Hali -- "I saw a qrcode with the outer
+  // corners rounded square and the top right pointed. i would like to offer
+  // this with the option to change orientation so that the user can pick
+  // which corner gets the point." The "corners" in this app are the finder
+  // eyes and "outer" is their ring, so this belongs in the Corner Style picker.
+  // An earlier pass added it to Overall Shape instead (round_point_* below),
+  // which only clips the edge of the whole code, so she never saw it on
+  // the eyes. Four keys, one per corner, means clicking a tile IS choosing
+  // the orientation. Save/load, Random Corner Styles and the per-corner
+  // (asymmetric) picker all loop over FINDER_RING_SHAPES' keys, so they
+  // pick these up with nothing else to wire.
+  point_tl: makePointedRingShape(0),
+  point_tr: makePointedRingShape(1),
+  point_br: makePointedRingShape(2),
+  point_bl: makePointedRingShape(3)
 };
 
+// WHY a factory: the four point_* shapes differ only in which corner stays
+// sharp. The other three corners use the same 0.46 rounding as 'rounded', so
+// the style reads as "the Rounded eye with one corner pulled to a point",
+// which is the look she described. cornerIdx order matches roundRectPath's
+// radii array: 0=TL, 1=TR, 2=BR, 3=BL.
+function makePointedRingShape(cornerIdx) {
+  return function(ctx, cx, cy, r, color) {
+    ctx.fillStyle = color;
+    var radii = [r*0.46, r*0.46, r*0.46, r*0.46];
+    radii[cornerIdx] = 0;
+    roundRectPath(ctx, cx-r, cy-r, r*2, r*2, radii);
+    ctx.fill();
+  };
+}
+
 var FINDER_STYLE_LABELS = {
-  square: 'Square', rounded: 'Rounded', circle: 'Circle', diamond: 'Diamond', teardrop: 'Teardrop'
+  square: 'Square', rounded: 'Rounded', circle: 'Circle', diamond: 'Diamond', teardrop: 'Teardrop',
+  point_tl: 'Point TL', point_tr: 'Point TR', point_br: 'Point BR', point_bl: 'Point BL'
 };
 
 // WHY a shared path builder: both rounded() and teardrop() need an
@@ -3110,7 +3210,16 @@ var FRAME_SHAPE_OPTIONS = [
   { key:'hexagon', label:'Hexagon' },
   { key:'octagon', label:'Octagon' },
   { key:'star5',   label:'Star' },
-  { key:'heart',   label:'Heart' }
+  { key:'heart',   label:'Heart' },
+  // WHY 4 separate tiles instead of 1 shape + a separate orientation
+  // control: Hali -- "offer this with the option to change orientation so
+  // the user can pick which corner gets the point." Clicking the tile for
+  // the corner she wants IS picking the orientation -- same picker, same
+  // one click, no second control to add or keep in sync.
+  { key:'round_point_tl', label:'Rounded · Point TL' },
+  { key:'round_point_tr', label:'Rounded · Point TR' },
+  { key:'round_point_br', label:'Rounded · Point BR' },
+  { key:'round_point_bl', label:'Rounded · Point BL' }
 ];
 
 // WHY its own lightweight builder instead of reusing buildShapePickerFor:
@@ -8515,6 +8624,18 @@ function applyDesignSettings(prefix, design) {
 // code's design" mode (routed here from the paid Change Design flow — see
 // enterDesignEditMode) instead of its normal "create a new code" mode.
 var _editingQR = null;
+// WHY _pendingDynamicCreate: Hali -- "I made a QR code and clicked continue,
+// said I already had an account, signed in, and it brought me to my QR
+// codes but didn't add the one I just made." createDynamic()'s auth gate
+// used to just pop the sign-in modal and bail -- doSignIn/doSignUp always
+// dropped the user straight on the dashboard afterward with zero memory a
+// create was ever in progress, so the code she'd just designed was silently
+// thrown away. This flag marks "a create got interrupted by sign-in"; it's
+// read (and cleared) by doSignIn/doSignUp the instant auth succeeds, which
+// re-calls createDynamic() for her -- by then window._user is set, so it
+// falls through to the real save using the Dynamic tab's still-intact form
+// fields (opening the auth modal never touched them).
+var _pendingDynamicCreate = false;
 
 function resetDynamicForm() {
   _editingQR = null;
@@ -8529,39 +8650,38 @@ function resetDynamicForm() {
   if (note) note.textContent = 'Account required — sign in or sign up to continue.';
 }
 
-// WHY a full reset for BOTH tabs, not just resetDynamicForm's name/url
-// fields: Hali -- "when a user is on the my codes page and hits the
-// generator in the header, the generator should be blank on return." The
-// generator can be left dirty two ways -- ordinary design tweaking before
-// navigating away, or the paid "Change Design" flow pre-filling a SAVED
-// code's whole look (see enterDesignEditMode) -- and resetDynamicForm
-// alone never touched any design setting (color, shapes, logo, finder
-// corners, frame, etc.), only the name/URL/editing-lock fields. Routing
-// the actual design reset through applyDesignSettings(prefix,
-// _defaultDesignSettings[prefix]) (see that snapshot's own WHY, captured
-// once at page load before any user edit) reuses the exact same restore
-// path already proven correct for a saved design — every field it knows
-// how to put back gets put back to its true default, with nothing here to
-// keep in sync by hand as new design controls get added later.
-function resetGeneratorForm() {
-  resetDynamicForm();
-  var sUrlEl = document.getElementById('s-url'); if (sUrlEl) sUrlEl.value = '';
-  if (_defaultDesignSettings.s) applyDesignSettings('s', _defaultDesignSettings.s);
-  if (_defaultDesignSettings.d) applyDesignSettings('d', _defaultDesignSettings.d);
-}
-
-// WHY a dedicated nav handler instead of just adding the reset to the
-// header button's existing inline onclick unconditionally: Hali scoped
-// this to "on the my codes page and hits the generator in the header" --
-// clicking Generator while you're already ON the generator (mid-design)
-// shouldn't ever wipe out what you're working on, only the My Codes ->
-// Generator hop should. window._cv (set by showView) still holds the
-// PREVIOUS view at the moment this fires, right up until showView('home')
-// below overwrites it.
+// WHY this no longer auto-resets on the My Codes -> Generator hop: Hali
+// originally asked for that (see git history / this function's old WHY),
+// but then hit a case where a design never actually saved (a sign-in hiccup
+// mid-create) and going back to the generator to try again wiped the whole
+// thing -- "that's a big problem... we don't want that." A design in
+// progress now only ever clears when SHE asks for it, via the "Refresh
+// Design" link next to the name (Dynamic) / URL (Static) field -- see
+// refreshDynamicDesign/refreshStaticDesign just below, which reuse the
+// exact same applyDesignSettings(prefix, _defaultDesignSettings[prefix])
+// restore path this function used to run automatically.
 function navToGenerator() {
-  if (window._cv === 'dashboard') resetGeneratorForm();
   showView('home');
   setTimeout(function(){ document.querySelector('.tab-row').scrollIntoView({behavior:'smooth',block:'start'}); }, 100);
+}
+
+// WHY confirmed, not instant: both are genuinely destructive (every shape,
+// color, logo, frame choice on that tab is gone, no undo) and now live
+// right next to a field she's actively typing in, so a stray click needs a
+// real "are you sure" rather than nuking a design by accident. Each resets
+// ONLY its own tab -- Static and Dynamic designs are independent, so
+// clearing one should never touch whatever's sitting on the other.
+async function refreshStaticDesign(){
+  if(!(await brandedConfirm('Clear everything on the Static tab and start over?','Refresh'))) return;
+  var sUrlEl = document.getElementById('s-url'); if (sUrlEl) sUrlEl.value = '';
+  if (_defaultDesignSettings.s) applyDesignSettings('s', _defaultDesignSettings.s);
+  toast('Static design reset.','ok');
+}
+async function refreshDynamicDesign(){
+  if(!(await brandedConfirm('Clear everything on the Dynamic tab and start over?','Refresh'))) return;
+  resetDynamicForm();
+  if (_defaultDesignSettings.d) applyDesignSettings('d', _defaultDesignSettings.d);
+  toast('Dynamic design reset.','ok');
 }
 
 // WHY this is the destination for "Change Design" after payment, per Hali's
@@ -8593,7 +8713,7 @@ function enterDesignEditMode(data) {
 }
 
 async function createDynamic() {
-  if(!window._user){openAuthModal();return;}
+  if(!window._user){_pendingDynamicCreate=true;openAuthModal();return;}
   var name=document.getElementById('d-name').value.trim();
   var url=document.getElementById('d-url').value.trim();
   if(!name||!url){toast('Enter a name and destination URL.','err');return;}
@@ -8952,6 +9072,19 @@ async function buildDashSVG(slug,url,design) {
       var radius=w/2;
       var d='M '+x+','+y+' L '+(x+w)+','+y+' L '+(x+w)+','+(y+w-radius)
         +' A '+radius+','+radius+' 0 0 1 '+(x+w-radius)+','+(y+w)+' L '+x+','+(y+w)+' Z';
+      return '<path d="'+d+'" fill="'+color+'"/>';
+    }
+    if (/^point_(tl|tr|br|bl)$/.test(shape)) {
+      // WHY a hand-built path: same reason as teardrop above. <rect rx> can't
+      // leave one corner sharp. Radius is w*0.23 (half-width * 0.46), matching
+      // the canvas makePointedRingShape so the SVG matches the PNG.
+      var sharp = shape.slice(6), q = w*0.23;
+      var rTL = sharp==='tl'?0:q, rTR = sharp==='tr'?0:q, rBR = sharp==='br'?0:q, rBL = sharp==='bl'?0:q;
+      var d='M '+(x+rTL)+','+y
+        +' L '+(x+w-rTR)+','+y+(rTR?' A '+rTR+','+rTR+' 0 0 1 '+(x+w)+','+(y+rTR):'')
+        +' L '+(x+w)+','+(y+w-rBR)+(rBR?' A '+rBR+','+rBR+' 0 0 1 '+(x+w-rBR)+','+(y+w):'')
+        +' L '+(x+rBL)+','+(y+w)+(rBL?' A '+rBL+','+rBL+' 0 0 1 '+x+','+(y+w-rBL):'')
+        +' L '+x+','+(y+rTL)+(rTL?' A '+rTL+','+rTL+' 0 0 1 '+(x+rTL)+','+y:'')+' Z';
       return '<path d="'+d+'" fill="'+color+'"/>';
     }
     // square (default)
@@ -9678,10 +9811,17 @@ async function doSignIn(){
     var usnap2=await withAuthTimeout(fb.getDoc(fb.doc(fb.db,'users',uid)));
     if(!usnap2.exists()){showErr('Account not found.');return;}
     var email=usnap2.data().email;
-    await withAuthTimeout(fb.signInWithEmailAndPassword(fb.auth,email,pass));
+    var cred=await withAuthTimeout(fb.signInWithEmailAndPassword(fb.auth,email,pass));
+    // WHY set window._user here instead of waiting on onAuthStateChanged:
+    // that listener fires asynchronously, a tick or more after this await
+    // resolves -- see _pendingDynamicCreate's own WHY just below, since
+    // resuming createDynamic() right here needs window._user populated
+    // synchronously, not whenever the listener happens to catch up.
+    window._user=cred.user;
     _loginAttempts = 0;
     document.getElementById('forgot-link').style.display = 'none';
-    closeModal('auth-modal');showView('dashboard');
+    closeModal('auth-modal');
+    if(_pendingDynamicCreate){_pendingDynamicCreate=false;createDynamic();}else{showView('dashboard');}
   }catch(e){
     _loginAttempts++;
     showErr(e.message);
@@ -9698,7 +9838,13 @@ async function doSignUp(){
   var cred=await withAuthTimeout(fb.createUserWithEmailAndPassword(fb.auth,email,pass));
   await withAuthTimeout(fb.setDoc(fb.doc(fb.db,'users',cred.user.uid),{email,username,created:Date.now()}));
   await withAuthTimeout(fb.setDoc(fb.doc(fb.db,'usernames',username),{uid:cred.user.uid}));
-  closeModal('auth-modal');showView('dashboard');toast('Welcome! Your account is ready.','ok');
+  // WHY set window._user here, and branch on _pendingDynamicCreate exactly
+  // like doSignIn does: see _pendingDynamicCreate's own WHY -- sign-UP can
+  // interrupt an in-progress create exactly the same way sign-in does (the
+  // auth modal doesn't care which tab she lands on).
+  window._user=cred.user;
+  closeModal('auth-modal');
+  if(_pendingDynamicCreate){_pendingDynamicCreate=false;createDynamic();}else{showView('dashboard');toast('Welcome! Your account is ready.','ok');}
     // WHY: welcome email confirms signup and lists benefits so user knows what they unlocked
     try {
       await emailjs.send('service_75wx6fk','template_nnmxioq',{
@@ -9735,9 +9881,15 @@ function closeModal(id){document.getElementById(id).classList.remove('open');}
 // same branded #confirm-modal every "are you sure" uses, and resolves once
 // the person picks Cancel or the destructive action.
 var _confirmResolve = null;
-function brandedConfirm(message){
+// WHY an optional confirmLabel (defaults to 'Delete'): refreshStaticDesign/
+// refreshDynamicDesign below reuse this same modal for a non-delete "are
+// you sure", where a button that says "Delete" would be actively
+// misleading about what it's about to do.
+function brandedConfirm(message, confirmLabel){
   return new Promise(function(resolve){
     document.getElementById('confirm-modal-msg').textContent = message;
+    var btn = document.getElementById('confirm-modal-btn');
+    if (btn) btn.textContent = confirmLabel || 'Delete';
     _confirmResolve = resolve;
     openModal('confirm-modal');
   });
