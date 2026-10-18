@@ -1,0 +1,9 @@
+{
+  // Tells Cloudflare Workers to serve static files from the dist folder
+  // instead of looking for a Worker script to run
+  "name": "iqproductionz",
+  "compatibility_date": "2024-01-01",
+  "assets": {
+    "directory": "./dist"
+  }
+}
