@@ -1,0 +1,13 @@
+# Title: .assetsignore
+# Author: Hali Sarah Parsons
+# Date: 2026-10-19
+# Modified By: Claude
+# Description: Files Cloudflare should NOT publish as pages.
+# WHY: these are repo/config files, not part of the website.
+wrangler.jsonc
+.assetsignore
+.git
+.github
+node_modules
+dist
+README.md
