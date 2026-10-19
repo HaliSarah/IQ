@@ -92,10 +92,37 @@
   onAuthStateChanged(auth,user=>{
     window._user=user||null;
     window._isTestAccount=false;
+    // WHY a plain synchronous email check, not another async Firestore read
+    // like _isTestAccount just below: the admin flag only depends on which
+    // account is signed in (ADMIN_EMAIL, see its own WHY), nothing stored
+    // server-side, so there's no doc to wait on.
+    // WHY .trim().toLowerCase() on both sides, not a plain ===: Hali signed
+    // in as herself but never saw the Admin Tools / Upload Shape button --
+    // Firebase Auth preserves whatever casing an email was typed with at
+    // signup (sign-IN is case-insensitive for matching the account, but the
+    // returned user.email is not normalized), so an account created with
+    // even one capital letter (autocapitalize on a phone keyboard is the
+    // common way this happens unnoticed) would never match this exact
+    // hardcoded lowercase constant. This makes the admin check match the
+    // way Firebase itself treats the address, not a byte-for-byte string.
+    window._isAdmin = !!(user && user.email && user.email.trim().toLowerCase() === window.ADMIN_EMAIL.toLowerCase());
     if(user){
       getDoc(doc(db,'users',user.uid)).then(function(snap){
         window._isTestAccount = snap.exists() && snap.data().username===window.TEST_USERNAME;
+        // WHY injected here, not only from the Admin tool's own page: ANY
+        // signed-in user (not just Hali) needs their own previously-assigned
+        // custom shapes to show up in their Dot Type / Inner Dot Style
+        // pickers -- see injectCustomShapesForUser's own WHY.
+        if (snap.exists() && typeof window.injectCustomShapesForUser === 'function') {
+          window.injectCustomShapesForUser(snap.data().customShapes);
+        }
       }).catch(function(){ window._isTestAccount=false; });
+    } else if (typeof window.clearCustomShapesForUser === 'function') {
+      // Signed out: drop whatever the previous account's custom shapes
+      // injected, same reasoning as clearCustomShapesForUser's own WHY --
+      // otherwise a second, different account signing in on the same page
+      // load (no full reload) could still see the FIRST account's shapes.
+      window.clearCustomShapesForUser();
     }
     renderNav();if(window._cv==='dashboard')showDashboard();
   });
@@ -450,6 +477,11 @@ footer a{color:var(--muted);}footer a:hover{color:var(--white);}
   <div id="nav-right">
     <button class="nav-btn" onclick="navToGenerator()">Generator</button>
     <button class="nav-btn" id="nav-dash" style="display:none" onclick="requireAuth('dashboard')">My Codes</button>
+    <!-- WHY display:none here too, re-set every renderNav() call like
+         nav-dash above: only shows for window._isAdmin (ADMIN_EMAIL) --
+         see renderNav's own WHY. This is a convenience hide, not the real
+         security boundary (see ADMIN_EMAIL's WHY). -->
+    <button class="nav-btn" id="nav-admin" style="display:none" onclick="requireAuth('admin-shapes')">Upload Shape</button>
     <button class="nav-btn" id="nav-signin" onclick="openAuthModal('signin')">Sign In</button>
     <button class="nav-btn primary" id="nav-signup" onclick="openAuthModal('signup')">Get Started — Free</button>
     <button class="nav-btn" id="nav-signout" style="display:none" onclick="doSignOut()">Sign Out</button>
@@ -510,7 +542,7 @@ footer a{color:var(--muted);}footer a:hover{color:var(--white);}
     <div id="panel-static" style="display:none;">
       <div class="gen-card">
         <div class="field">
-          <label>URL or Text to Encode <a href="javascript:void(0)" onclick="refreshStaticDesign()" style="font-style:italic;text-transform:uppercase;font-size:.66rem;font-weight:700;letter-spacing:.3px;margin-left:6px;">↻ Refresh Design</a></label>
+          <label>URL or Text to Encode <a href="javascript:void(0)" onclick="refreshStaticDesign()" style="font-style:italic;text-transform:uppercase;font-size:.66rem;font-weight:700;letter-spacing:.3px;margin-left:6px;">↻ Refresh Design</a> <a href="javascript:void(0)" onclick="undoDesign('s')" id="s-undo-link" title="Undo the last design change" style="font-style:italic;text-transform:uppercase;font-size:.66rem;font-weight:700;letter-spacing:.3px;margin-left:6px;opacity:.35;pointer-events:none;">↩ Undo</a></label>
           <input type="text" id="s-url" placeholder="https://yourwebsite.com or any text">
         </div>
 
@@ -606,6 +638,37 @@ footer a{color:var(--muted);}footer a:hover{color:var(--white);}
                 <div class="char-preview-note" id="s-char-note">Select characters above to use them as one of your dot types.</div>
               </div>
               <div class="shape-grid" id="shape-grid"></div>
+              <!-- CRESCENT ORIENTATION — Hali: "make the cresent have a drop
+                   down for oriantation and sho the cut out option for each
+                   four directions," then "it should be top right, top left,
+                   bottom right, bottom left ... need to be able to select
+                   all of them if we wanted to have them randomly all
+                   together." Multi-select tiles, not a single-value
+                   dropdown anymore -- toggling more than one on is exactly
+                   what makes several crescents in the same design pick
+                   different corners at random (see
+                   _activeCrescentOrientation's WHY). ONE shared setting
+                   (_crescentOrientation[prefix]) feeds this row AND the
+                   twin row under Inner Dot Style below -- "I need it also
+                   for the inner dots" reads as "this control needs to reach
+                   crescent wherever it shows up," not a second independent
+                   setting, so picking an orientation here also governs any
+                   finder eye currently set to Crescent, and vice versa.
+                   Only shown while Crescent is actually in play somewhere
+                   (see syncCrescentOrientationTiles/isCrescentInUse). -->
+              <div id="s-crescent-orientation-row" class="stretch-dir-row" style="display:none;margin-top:8px;flex-wrap:wrap;gap:6px;">
+                <span style="width:100%;font-size:.76rem;color:var(--muted);">Orientation (pick one or more — multiple mix randomly):</span>
+                <button type="button" class="vary-dot-btn crescent-orient-btn" data-orient="tr" data-label="↗ Top Right" onclick="toggleCrescentOrientation('s','tr')" style="padding:6px 12px;font-size:.72rem;">↗ Top Right</button>
+                <button type="button" class="vary-dot-btn crescent-orient-btn" data-orient="br" data-label="↘ Bottom Right" onclick="toggleCrescentOrientation('s','br')" style="padding:6px 12px;font-size:.72rem;">↘ Bottom Right</button>
+                <button type="button" class="vary-dot-btn crescent-orient-btn" data-orient="bl" data-label="↙ Bottom Left" onclick="toggleCrescentOrientation('s','bl')" style="padding:6px 12px;font-size:.72rem;">↙ Bottom Left</button>
+                <button type="button" class="vary-dot-btn crescent-orient-btn" data-orient="tl" data-label="↖ Top Left" onclick="toggleCrescentOrientation('s','tl')" style="padding:6px 12px;font-size:.72rem;">↖ Top Left</button>
+              </div>
+              <!-- REFLECT — Hali: crow/digital dog/Santa/witch hat/pumpkins/
+                   music notes/bolt get a simple mirror toggle (see
+                   REFLECTABLE_SHAPE_KEYS/syncShapeReflectButtons). Only
+                   lists whichever of those are actually picked as a Dot
+                   Type right now. -->
+              <div id="s-shape-reflect-row" class="stretch-dir-row" style="display:none;margin-top:8px;flex-wrap:wrap;gap:6px;"></div>
               <!-- DOT SIZE (Stretch / Vary) — Hali: "join dots up to four
                    that get grouped together and spread the design bigger,"
                    then "keep the shape in tact and dont stretch it ... sit
@@ -892,6 +955,19 @@ footer a{color:var(--muted);}footer a:hover{color:var(--white);}
               <label>Inner Dot Style</label>
               <div class="shape-grid" id="finder-dot-style-grid"></div>
               <p style="font-size:.66rem;color:var(--muted);margin-top:4px;"><strong style="color:var(--gold2);">⚠ = Caution</strong> — shapes marked with this symbol below can scan less reliably as a corner eye on some devices (still fine as a regular dot). Worth a real test scan before you commit to one.</p>
+              <!-- Twin of s-crescent-orientation-row above the main Dot Type
+                   grid -- same shared setting, see that row's own WHY.
+                   Shown only when THIS context (the finder eye, or the
+                   active corner's own override under Asymmetric Corners)
+                   is actually set to Crescent. -->
+              <div id="s-finder-crescent-orientation-row" class="stretch-dir-row" style="display:none;margin-top:8px;flex-wrap:wrap;gap:6px;">
+                <span style="width:100%;font-size:.76rem;color:var(--muted);">Orientation (pick one or more — multiple mix randomly):</span>
+                <button type="button" class="vary-dot-btn crescent-orient-btn" data-orient="tr" data-label="↗ Top Right" onclick="toggleCrescentOrientation('s','tr','finder')" style="padding:6px 12px;font-size:.72rem;">↗ Top Right</button>
+                <button type="button" class="vary-dot-btn crescent-orient-btn" data-orient="br" data-label="↘ Bottom Right" onclick="toggleCrescentOrientation('s','br','finder')" style="padding:6px 12px;font-size:.72rem;">↘ Bottom Right</button>
+                <button type="button" class="vary-dot-btn crescent-orient-btn" data-orient="bl" data-label="↙ Bottom Left" onclick="toggleCrescentOrientation('s','bl','finder')" style="padding:6px 12px;font-size:.72rem;">↙ Bottom Left</button>
+                <button type="button" class="vary-dot-btn crescent-orient-btn" data-orient="tl" data-label="↖ Top Left" onclick="toggleCrescentOrientation('s','tl','finder')" style="padding:6px 12px;font-size:.72rem;">↖ Top Left</button>
+              </div>
+              <div id="s-finder-shape-reflect-row" class="stretch-dir-row" style="display:none;margin-top:8px;flex-wrap:wrap;gap:6px;"></div>
               <div class="grad-toggle" style="margin-top:10px;flex-wrap:wrap;">
                 <button id="c-finder-inner-mode-solid" class="active" onclick="setFinderColorMode('inner','solid','s')">Solid</button>
                 <button id="c-finder-inner-mode-grad2" onclick="setFinderColorMode('inner','grad2','s')">2-color</button>
@@ -1045,7 +1121,7 @@ footer a{color:var(--muted);}footer a:hover{color:var(--white);}
     <div id="panel-dynamic">
       <div class="gen-card">
         <div class="field">
-          <label>QR Code Name (for your dashboard) <a href="javascript:void(0)" onclick="refreshDynamicDesign()" style="font-style:italic;text-transform:uppercase;font-size:.66rem;font-weight:700;letter-spacing:.3px;margin-left:6px;">↻ Refresh Design</a></label>
+          <label>QR Code Name (for your dashboard) <a href="javascript:void(0)" onclick="refreshDynamicDesign()" style="font-style:italic;text-transform:uppercase;font-size:.66rem;font-weight:700;letter-spacing:.3px;margin-left:6px;">↻ Refresh Design</a> <a href="javascript:void(0)" onclick="undoDesign('d')" id="d-undo-link" title="Undo the last design change" style="font-style:italic;text-transform:uppercase;font-size:.66rem;font-weight:700;letter-spacing:.3px;margin-left:6px;opacity:.35;pointer-events:none;">↩ Undo</a></label>
           <input type="text" id="d-name" placeholder="e.g. Restaurant Menu, Event Flyer">
         </div>
         <div class="field">
@@ -1144,6 +1220,16 @@ footer a{color:var(--muted);}footer a:hover{color:var(--white);}
                 <div class="char-preview-note" id="d-char-note">Select characters above to use them as one of your dot types.</div>
               </div>
               <div class="shape-grid" id="d-shape-grid"></div>
+              <!-- CRESCENT ORIENTATION — same control as the Static tab's own
+                   s-crescent-orientation-row; see its WHY there. -->
+              <div id="d-crescent-orientation-row" class="stretch-dir-row" style="display:none;margin-top:8px;flex-wrap:wrap;gap:6px;">
+                <span style="width:100%;font-size:.76rem;color:var(--muted);">Orientation (pick one or more — multiple mix randomly):</span>
+                <button type="button" class="vary-dot-btn crescent-orient-btn" data-orient="tr" data-label="↗ Top Right" onclick="toggleCrescentOrientation('d','tr')" style="padding:6px 12px;font-size:.72rem;">↗ Top Right</button>
+                <button type="button" class="vary-dot-btn crescent-orient-btn" data-orient="br" data-label="↘ Bottom Right" onclick="toggleCrescentOrientation('d','br')" style="padding:6px 12px;font-size:.72rem;">↘ Bottom Right</button>
+                <button type="button" class="vary-dot-btn crescent-orient-btn" data-orient="bl" data-label="↙ Bottom Left" onclick="toggleCrescentOrientation('d','bl')" style="padding:6px 12px;font-size:.72rem;">↙ Bottom Left</button>
+                <button type="button" class="vary-dot-btn crescent-orient-btn" data-orient="tl" data-label="↖ Top Left" onclick="toggleCrescentOrientation('d','tl')" style="padding:6px 12px;font-size:.72rem;">↖ Top Left</button>
+              </div>
+              <div id="d-shape-reflect-row" class="stretch-dir-row" style="display:none;margin-top:8px;flex-wrap:wrap;gap:6px;"></div>
               <!-- DOT SIZE (Stretch / Vary) — mirrors the Static tab's; see its WHY. -->
               <div class="stretch-dir-row" style="display:flex;flex-wrap:wrap;align-items:center;margin-top:8px;font-size:.76rem;color:var(--muted);">
                 <span style="margin-right:12px;">Stretch Direction:</span>
@@ -1320,6 +1406,16 @@ footer a{color:var(--muted);}footer a:hover{color:var(--white);}
               <label>Inner Dot Style</label>
               <div class="shape-grid" id="d-finder-dot-style-grid"></div>
               <p style="font-size:.66rem;color:var(--muted);margin-top:4px;"><strong style="color:var(--gold2);">⚠ = Caution</strong> — shapes marked with this symbol below can scan less reliably as a corner eye on some devices (still fine as a regular dot). Worth a real test scan before you commit to one.</p>
+              <!-- Mirrors s-finder-crescent-orientation-row; see its WHY
+                   there. -->
+              <div id="d-finder-crescent-orientation-row" class="stretch-dir-row" style="display:none;margin-top:8px;flex-wrap:wrap;gap:6px;">
+                <span style="width:100%;font-size:.76rem;color:var(--muted);">Orientation (pick one or more — multiple mix randomly):</span>
+                <button type="button" class="vary-dot-btn crescent-orient-btn" data-orient="tr" data-label="↗ Top Right" onclick="toggleCrescentOrientation('d','tr','finder')" style="padding:6px 12px;font-size:.72rem;">↗ Top Right</button>
+                <button type="button" class="vary-dot-btn crescent-orient-btn" data-orient="br" data-label="↘ Bottom Right" onclick="toggleCrescentOrientation('d','br','finder')" style="padding:6px 12px;font-size:.72rem;">↘ Bottom Right</button>
+                <button type="button" class="vary-dot-btn crescent-orient-btn" data-orient="bl" data-label="↙ Bottom Left" onclick="toggleCrescentOrientation('d','bl','finder')" style="padding:6px 12px;font-size:.72rem;">↙ Bottom Left</button>
+                <button type="button" class="vary-dot-btn crescent-orient-btn" data-orient="tl" data-label="↖ Top Left" onclick="toggleCrescentOrientation('d','tl','finder')" style="padding:6px 12px;font-size:.72rem;">↖ Top Left</button>
+              </div>
+              <div id="d-finder-shape-reflect-row" class="stretch-dir-row" style="display:none;margin-top:8px;flex-wrap:wrap;gap:6px;"></div>
               <div class="grad-toggle" style="margin-top:10px;flex-wrap:wrap;">
                 <button id="d-c-finder-inner-mode-solid" class="active" onclick="setFinderColorMode('inner','solid','d')">Solid</button>
                 <button id="d-c-finder-inner-mode-grad2" onclick="setFinderColorMode('inner','grad2','d')">2-color</button>
@@ -1433,7 +1529,19 @@ footer a{color:var(--muted);}footer a:hover{color:var(--white);}
         <h2>My QR Codes</h2>
         <p style="font-size:.82rem;color:var(--muted);margin-top:4px;" id="dash-email"></p>
       </div>
-      <button class="nav-btn primary" onclick="showView('home');switchTab('dynamic')">+ New Dynamic Code</button>
+      <!-- WHY reset here, unlike the passive dashboard-back navigation
+           (navToGenerator's WHY -- Hali asked for THAT one to stop
+           auto-wiping after it ate a design mid-sign-in-hiccup): this
+           button is an explicit "I want a NEW one" click, not a drive-by
+           tab switch, so whatever's still sitting in the Dynamic editor
+           from a previous code (or a previous "Change Design" edit) must
+           not leak into the next one. resetDynamicForm() alone only
+           clears name/url/_editingQR -- it leaves shapes/colors/frame
+           exactly as a prior "Change Design" edit left them (see
+           enterDesignEditMode's applyDesignSettings call) -- so this also
+           restores the design controls to default, same combo
+           refreshDynamicDesign uses for its own "start over" button. -->
+      <button class="nav-btn primary" onclick="resetDynamicForm();if(_defaultDesignSettings.d)applyDesignSettings('d',_defaultDesignSettings.d);showView('home');switchTab('dynamic')">+ New Dynamic Code</button>
     </div>
     <!-- WHY this toolbar: the per-card checkboxes exist for bulk CSV export,
          bulk stats, and bulk delete — checking one includes that code's data
@@ -1449,6 +1557,80 @@ footer a{color:var(--muted);}footer a:hover{color:var(--white);}
     </div>
     <p style="font-size:.74rem;color:var(--muted);margin:-10px 0 16px;">Check codes below to include them in CSV export, bulk stats, or bulk delete.</p>
     <div id="qr-list"><div class="empty-state"><p>No QR codes yet.</p></div></div>
+  </div>
+</div>
+
+<!-- ADMIN: CUSTOM SHAPE ASSIGNMENT — Hali -- "you privately assigning a
+     shape to a specific client's account ... I design the SVG, you add a
+     small admin tool visible only to your account where you pick a user
+     (by email) and a shape gets saved to just their account. No payment
+     plumbing needed, no SVG-security concerns since only you're feeding it
+     in." Only reachable via the Admin nav button, which only renderNav()
+     shows for ADMIN_EMAIL -- see that var's own WHY for why the REAL
+     access control still has to live in a Firestore Security Rule, not
+     here. renderAdminShapesView() below re-checks window._isAdmin itself
+     too, as a second layer in case this view is ever reached another way. -->
+<div class="view" id="view-admin-shapes">
+  <div class="section" style="padding-bottom:48px;">
+    <h2 class="section-title">Custom Shape Assignment</h2>
+    <p class="section-sub">Look up a client by the email on their account, then paste in the path data for a shape you've designed for them. It only ever shows up in THAT account's Dot Type and Inner Dot Style pickers — no one else sees it.</p>
+
+    <div id="admin-not-authorized" style="display:none;">
+      <p style="color:var(--red);">Not authorized.</p>
+    </div>
+
+    <div id="admin-shapes-body">
+      <div class="field">
+        <label>Client's account email</label>
+        <input type="text" id="admin-lookup-email" placeholder="client@example.com" onkeydown="if(event.key==='Enter'){event.preventDefault();adminLookupUserByEmail();}">
+      </div>
+      <button class="nav-btn primary" onclick="adminLookupUserByEmail()">Look Up Account</button>
+
+      <div id="admin-lookup-result" style="margin-top:22px;"></div>
+
+      <!-- WHY hidden until a lookup actually finds an account: there's no
+           uid to save a shape to otherwise -- see adminAssignShape's own
+           guard. -->
+      <div id="admin-assign-form" style="display:none;margin-top:28px;border-top:1px solid var(--line);padding-top:22px;">
+        <h3 style="font-family:Cinzel,serif;font-size:1rem;margin-bottom:14px;">Assign a New Shape</h3>
+        <div class="field">
+          <label>Shape key (short, no spaces — e.g. client_star)</label>
+          <input type="text" id="admin-shape-key" placeholder="client_star">
+        </div>
+        <div class="field">
+          <label>Label (a short glyph/text shown on the tile, e.g. ★)</label>
+          <input type="text" id="admin-shape-label" placeholder="★">
+        </div>
+        <div class="field">
+          <label>Upload an SVG file for this shape</label>
+          <input type="file" id="admin-shape-file" accept=".svg,image/svg+xml" onchange="adminHandleShapeFileUpload(event)">
+          <p style="font-size:.68rem;color:var(--muted);margin-top:4px;">Expects one &lt;path&gt; element -- a single flat silhouette, one color, exported (or "flatten"/"expand") from your design tool so it's a single real path, not multiple overlapping shapes or a group. This fills in the path data and viewBox below automatically; you can still edit either field by hand before assigning, or skip the upload and paste path data directly.</p>
+        </div>
+        <div class="field">
+          <label>SVG path data (the d="..." value, same as you've been pasting me)</label>
+          <textarea id="admin-shape-d" rows="4" placeholder="M36.182,0 L27.454,29.455 ..." oninput="adminPreviewShape()"></textarea>
+        </div>
+        <div style="display:flex;gap:14px;">
+          <div class="field" style="flex:1;">
+            <label>viewBox width</label>
+            <input type="number" id="admin-shape-vbw" value="72" oninput="adminPreviewShape()">
+          </div>
+          <div class="field" style="flex:1;">
+            <label>viewBox height</label>
+            <input type="number" id="admin-shape-vbh" value="72" oninput="adminPreviewShape()">
+          </div>
+          <div class="field" style="flex:0 0 72px;">
+            <label>Preview</label>
+            <canvas id="admin-shape-preview" width="56" height="56" style="background:#f0ece3;border-radius:6px;"></canvas>
+          </div>
+        </div>
+        <button class="nav-btn primary" onclick="adminAssignShape()">Assign Shape to This Account</button>
+      </div>
+    </div>
+
+    <p style="font-size:.7rem;color:var(--muted);margin-top:36px;border-top:1px solid var(--line);padding-top:16px;">
+      TODO (security): this page only hides itself from everyone but your own account client-side. The real lock needs to be a Firestore Security Rule restricting writes to users/{uid}.customShapes to requests where request.auth.token.email == "halisarahparsons@gmail.com" — without that rule, anyone signed in could in theory call the same save function from their browser console. Add that rule in the Firebase console before relying on this for anything sensitive.
+    </p>
   </div>
 </div>
 
@@ -1616,6 +1798,18 @@ var BASE_REDIRECT = 'https://iqproductionz.com/QRCode/Account/?slug=';
 // already-authenticated account" flag, and nobody else can sign in as this
 // account without its password.
 var TEST_USERNAME = 'ntn';
+// WHY a single hardcoded email, not a Firestore "role" field: Hali -- "you
+// privately assigning a shape to a specific client's account ... an admin
+// tool visible only to your account." There's exactly one admin (her), so
+// a role system would be more moving parts for no real benefit. This is
+// visible in page source like TEST_USERNAME above -- same tradeoff, same
+// reasoning: it only ever hides/shows the Admin nav button and this tool's
+// view client-side, it is NOT the real security boundary. The real
+// boundary has to be a Firestore Security Rule restricting writes to the
+// customShapes field to this exact email (see injectCustomShapesForUser's
+// WHY and adminAssignShape's own note) -- this file can't enforce that
+// server-side on its own.
+var ADMIN_EMAIL = 'halisarahparsons@gmail.com';
 
 // WHY: defer Stripe init until window fully loaded so Stripe.js is available
 var stripe = null;
@@ -1851,6 +2045,77 @@ var _qrModuleRenderMode = false; // true only while drawing actual QR modules; s
 // a single sampled color the way a small per-module/per-filler-dot shape
 // needs to be.
 var _activeGradient = null;
+// WHY a second "live, render-time" global alongside the per-tab
+// _crescentOrientation{s,d} object (declared with its setter further down):
+// the crescent's draw() function, like every SHAPES.* draw(), is shared
+// code with no idea which tab (static or dynamic) is currently rendering --
+// same reasoning as _activeGradient just above. renderQRCore sets this once
+// per render, right after resolveRenderSettings, from whichever tab's own
+// _crescentOrientation[prefix] (or a saved design's own crescentOrientation
+// field) applies to THIS render. WHY an ARRAY now, not one key: Hali -- "we
+// need to be able to select all of them if we wanted to have them randomly
+// all together." Each individual crescent (whether a real module or a
+// finder eye -- the draw function has no idea which) picks its OWN random
+// entry from this pool every time it draws, the same "genuine mix" idea
+// _selectedShape's multi-select already uses for Dot Type.
+var _activeCrescentOrientation = ['tr'];
+// WHY these 4 angles, keyed by diagonal CORNER (tr/br/bl/tl) rather than the
+// cardinal right/down/left/up this shipped with originally: Hali -- "it
+// should be top right, top left, bottom right, bottom left." The artwork's
+// own native, un-rotated cutout already opens toward the top-right (see
+// crescent's own WHY below) -- the 4 rotation angles below never changed,
+// only what they're actually called, so every design saved under the old
+// right/down/left/up keys still migrates correctly (see
+// CRESCENT_ORIENTATION_MIGRATE below).
+var CRESCENT_ORIENTATION_ANGLES = { tr: 0, br: Math.PI/2, bl: Math.PI, tl: -Math.PI/2 };
+// WHY this map: a design saved before the rename (crescentOrientation as a
+// single 'right'/'down'/'left'/'up' string) needs to keep rendering with the
+// exact same rotation it always had -- these are the same angles under their
+// old names, one-to-one.
+var CRESCENT_ORIENTATION_MIGRATE = { right:'tr', down:'br', left:'bl', up:'tl' };
+// WHY this list, not just crescent: Hali -- "the lips should have the same
+// orientation options as the crescent moon...right triangle...classy...
+// parallelogram," and separately asked lightning get "right, left, up and
+// down" rotation using its own notch as the direction indicator -- the
+// exact same 4-way rotate-about-cell-center mechanism. Every shape here
+// shares ONE live pool/UI (_activeCrescentOrientation, _crescentOrientation,
+// toggleCrescentOrientation, etc. -- still named after crescent since that's
+// where they started, but no longer crescent-only): picking an orientation
+// applies to whichever of these shapes are actually selected right now.
+var ORIENTABLE_SHAPES = ['crescent','lips','right_triangle','classy','parallelogram','lightning'];
+// WHY one shared helper instead of repeating the save/rotate/restore dance
+// in 5 different draw() functions: every ORIENTABLE_SHAPES entry rotates
+// its own fixed artwork by one of the same 4 angles, about its own cell's
+// center, picking randomly from whatever pool is live -- see crescent's own
+// draw() (now just a thin caller of this) for the original WHY on random-
+// pool-not-single-key and on why a 90-degree rotation about a SQUARE cell's
+// center never pushes a shape outside that cell.
+function drawOriented(c, x, y, s, fn) {
+  var pool = (_activeCrescentOrientation && _activeCrescentOrientation.length) ? _activeCrescentOrientation : ['tr'];
+  var pick = pool[Math.floor(Math.random()*pool.length)];
+  var ang = CRESCENT_ORIENTATION_ANGLES[pick] || 0;
+  if (ang) { c.save(); c.translate(x+s/2,y+s/2); c.rotate(ang); c.translate(-(x+s/2),-(y+s/2)); }
+  fn();
+  if (ang) c.restore();
+}
+// WHY a separate flag per shape key (not an orientation-style pool): Hali --
+// "they should have...a reflect image button" -- one simple on/off mirror,
+// not a mix-of-several-directions pick like crescent's orientation. Shared
+// across every context a shape's draw() is called from (main dot, finder
+// eye, quarter/half region, frame filler) since there's only one flag per
+// shape, not a per-context one -- see _activeShapeReflect's own WHY.
+var REFLECTABLE_SHAPE_KEYS = ['crow','detail_dog','santa','witch_hat','pumpkin','spump','snote','dnote','bolt'];
+// WHY live, render-time globals set once per render (same "shared code has
+// no idea which tab/design is rendering" reasoning as _activeGradient and
+// _activeCrescentOrientation): read by drawReflectable below, written by
+// renderQRCore right alongside _activeCrescentOrientation.
+var _activeShapeReflect = {};
+function drawReflectable(c, key, x, y, s, fn) {
+  var flip = _activeShapeReflect && _activeShapeReflect[key];
+  if (flip) { c.save(); c.translate(x+s/2,y+s/2); c.scale(-1,1); c.translate(-(x+s/2),-(y+s/2)); }
+  fn();
+  if (flip) c.restore();
+}
 // WHY the optional g.ox/g.oy subtraction: added so this same function can
 // sample a gradient scoped to just ONE finder's own small box (its own
 // origin + size) instead of only ever the whole-canvas body gradient — see
@@ -2184,7 +2449,23 @@ var SHAPE_GROUPS = {
       if (tlCut && brCut) {
         var h = s/2;
         d = 'M '+x+' '+y+' v '+h+' a '+h+' '+h+', 0, 0, 0, '+h+' '+h+' h '+h+' v '+(-h)+' a '+h+' '+h+', 0, 0, 0, '+(-h)+' '+(-h);
-        angleDeg = 90;
+        // WHY the orientation pool here, not the forced-by-neighbors branch
+        // below: Hali -- "the classy should have the same options as the
+        // crescent moon," but classy ALSO auto-picks its own corner shape
+        // from real neighboring dots (tlCut/brCut above) -- per her answer
+        // ("no preference"), the manual pick only takes over the one case
+        // that has nothing neighbor-forced to begin with: an isolated dot
+        // (no neighbor on either diagonal-ish side), where the OLD code
+        // just hardcoded 90 degrees arbitrarily. WHY +90 base, not using
+        // CRESCENT_ORIENTATION_ANGLES raw: this shape's own "unrotated"
+        // angle was always 90 (not 0 like every other orientable shape), so
+        // offsetting from 90 keeps the default pool (['tr'], angle 0) at
+        // the exact same 90-degree look an existing design already has,
+        // while the other 3 picks still reach 3 other genuinely different
+        // rotations.
+        var pool = (_activeCrescentOrientation && _activeCrescentOrientation.length) ? _activeCrescentOrientation : ['tr'];
+        var pick = pool[Math.floor(Math.random()*pool.length)];
+        angleDeg = 90 + (CRESCENT_ORIENTATION_ANGLES[pick] || 0) * 180/Math.PI;
       } else {
         d = 'M '+x+' '+y+' v '+s+' h '+s+' a '+s+' '+s+', 0, 0, 0, '+(-s)+' '+(-s);
         angleDeg = tlCut ? 270 : 90;
@@ -2250,7 +2531,13 @@ var SHAPE_GROUPS = {
     // at bottom-left); the Vary grouping path draws its own 3 mirrored/
     // rotated orientations (still one real shape per cell) to match
     // whichever corner of a bigger group is actually missing.
-    right_triangle:{ label:"◣", draw:function(c,x,y,s){ c.beginPath();c.moveTo(x,y);c.lineTo(x,y+s);c.lineTo(x+s,y+s);c.closePath();c.fill(); }},
+    // WHY wrapped in drawOriented (the single-cell default only -- the Vary
+    // grouping path's own 3 mirrored/rotated draws above are untouched):
+    // Hali -- "the half triangle...the right triangle...should have those
+    // same options like the crescent moon." Default pool ['tr'] is angle 0,
+    // so an existing design with no orientation saved keeps the exact same
+    // right-angle-at-bottom-left look it always had.
+    right_triangle:{ label:"◣", draw:function(c,x,y,s){ drawOriented(c,x,y,s,function(){ c.beginPath();c.moveTo(x,y);c.lineTo(x,y+s);c.lineTo(x+s,y+s);c.closePath();c.fill(); }); }},
     hexagon:       { label:"⬣", draw:function(c,x,y,s){ var r=s*.577,cx=x+s*.5,cy=y+s*.5;c.beginPath();for(var i=0;i<6;i++){var a=Math.PI/3*i-Math.PI/6;i?c.lineTo(cx+r*Math.cos(a),cy+r*Math.sin(a)):c.moveTo(cx+r*Math.cos(a),cy+r*Math.sin(a));}c.closePath();c.fill(); }},
     pentagon:      { label:"⬟", draw:function(c,x,y,s){ var r=s*.62,cx=x+s*.5,cy=y+s*.52;c.beginPath();for(var i=0;i<5;i++){var a=Math.PI*2/5*i-Math.PI/2;i?c.lineTo(cx+r*Math.cos(a),cy+r*Math.sin(a)):c.moveTo(cx+r*Math.cos(a),cy+r*Math.sin(a));}c.closePath();c.fill(); }},
     octagon:       { label:"⬢", draw:function(c,x,y,s){ var r=s*.541,cx=x+s*.5,cy=y+s*.5;c.beginPath();for(var i=0;i<8;i++){var a=Math.PI/4*i;i?c.lineTo(cx+r*Math.cos(a),cy+r*Math.sin(a)):c.moveTo(cx+r*Math.cos(a),cy+r*Math.sin(a));}c.closePath();c.fill(); }},
@@ -2261,20 +2548,26 @@ var SHAPE_GROUPS = {
     // top-left and bottom-right) corners. Only the two acute ones get
     // rounded (same quadratic-curve-at-the-vertex technique as the
     // diamond above); the two obtuse ones stay plain sharp lineTo joins.
+    // WHY wrapped in drawOriented: Hali -- "the parallelogram should have
+    // the same options as the crescent moon." Default pool ['tr'] is angle
+    // 0, so an existing design with no orientation saved keeps this exact
+    // unrotated look.
     parallelogram: { label:"▱", draw:function(c,x,y,s){
-      var A=[x+s*.14,y], B=[x+s,y], C=[x+s*.86,y+s], D=[x,y+s];
-      var rt=.22;
-      function roundPt(v,prev,next){ return { inPt:[v[0]+(prev[0]-v[0])*rt, v[1]+(prev[1]-v[1])*rt], outPt:[v[0]+(next[0]-v[0])*rt, v[1]+(next[1]-v[1])*rt] }; }
-      var rB = roundPt(B,A,C), rD = roundPt(D,C,A);
-      c.beginPath();
-      c.moveTo(A[0],A[1]);
-      c.lineTo(rB.inPt[0], rB.inPt[1]);
-      c.quadraticCurveTo(B[0],B[1], rB.outPt[0], rB.outPt[1]);
-      c.lineTo(C[0],C[1]);
-      c.lineTo(rD.inPt[0], rD.inPt[1]);
-      c.quadraticCurveTo(D[0],D[1], rD.outPt[0], rD.outPt[1]);
-      c.closePath();
-      c.fill();
+      drawOriented(c,x,y,s,function(){
+        var A=[x+s*.14,y], B=[x+s,y], C=[x+s*.86,y+s], D=[x,y+s];
+        var rt=.22;
+        function roundPt(v,prev,next){ return { inPt:[v[0]+(prev[0]-v[0])*rt, v[1]+(prev[1]-v[1])*rt], outPt:[v[0]+(next[0]-v[0])*rt, v[1]+(next[1]-v[1])*rt] }; }
+        var rB = roundPt(B,A,C), rD = roundPt(D,C,A);
+        c.beginPath();
+        c.moveTo(A[0],A[1]);
+        c.lineTo(rB.inPt[0], rB.inPt[1]);
+        c.quadraticCurveTo(B[0],B[1], rB.outPt[0], rB.outPt[1]);
+        c.lineTo(C[0],C[1]);
+        c.lineTo(rD.inPt[0], rD.inPt[1]);
+        c.quadraticCurveTo(D[0],D[1], rD.outPt[0], rD.outPt[1]);
+        c.closePath();
+        c.fill();
+      });
     }},
     cross:         { label:"✚", draw:function(c,x,y,s){ var t=s*.46,g=(s-t)/2;c.fillRect(x+g,y,t,s);c.fillRect(x,y+g,s,t); }},
     x_mark:        { label:"✖", draw:function(c,x,y,s){ if (_activeGradient) c.fillStyle = gradientColorAt(x+s/2, y+s/2); c.save();c.translate(x+s/2,y+s/2);c.rotate(Math.PI/4);var t=s*.46,l=s*.52;c.fillRect(-t/2,-l,t,l*2);c.fillRect(-l,-t/2,l*2,t);c.restore(); }},
@@ -2284,17 +2577,27 @@ var SHAPE_GROUPS = {
     // cut in (apex pointing right, into the square); both right corners
     // are chamfered off. Net result reads as a simple stylized bolt/flag
     // silhouette at QR-module scale.
+    // WHY wrapped in drawOriented now: Hali -- "the one called lightning
+    // gets right, left, up and down using the triangular cut out shape as
+    // the arrow direction indicator" -- the concave notch cut into the left
+    // side below ("c.lineTo(x+s*.35, y+s*.5)") IS that indicator; rotating
+    // the whole path the same way crescent does points it whichever of the
+    // 4 directions is picked. Default pool ['tr'] is angle 0, so an
+    // existing design with no orientation saved keeps this exact unrotated
+    // look.
     lightning: { label:"⚡", draw:function(c,x,y,s){
-      c.beginPath();
-      c.moveTo(x, y);                          // top-left
-      c.lineTo(x+s*.65, y);                    // top edge to start of TR corner cut
-      c.lineTo(x+s, y+s*.35);                  // TR corner cut
-      c.lineTo(x+s, y+s*.65);                  // shortened right edge
-      c.lineTo(x+s*.65, y+s);                  // BR corner cut
-      c.lineTo(x, y+s);                        // bottom edge to bottom-left
-      c.lineTo(x+s*.35, y+s*.5);                // notch apex -- concave cut into the left side
-      c.closePath();
-      c.fill();
+      drawOriented(c,x,y,s,function(){
+        c.beginPath();
+        c.moveTo(x, y);                          // top-left
+        c.lineTo(x+s*.65, y);                    // top edge to start of TR corner cut
+        c.lineTo(x+s, y+s*.35);                  // TR corner cut
+        c.lineTo(x+s, y+s*.65);                  // shortened right edge
+        c.lineTo(x+s*.65, y+s);                  // BR corner cut
+        c.lineTo(x, y+s);                        // bottom edge to bottom-left
+        c.lineTo(x+s*.35, y+s*.5);                // notch apex -- concave cut into the left side
+        c.closePath();
+        c.fill();
+      });
     }},
   },
   "Stars & Flowers": {
@@ -2384,8 +2687,37 @@ var SHAPE_GROUPS = {
       }
     }},
     apple: { label:"🍎", draw:function(c,x,y,s){drawSVG(c,x,y,s,'M35.69,17.287c0.886-2.038,2.054-5.391,3.493-7.735 c1.194-1.946,3.365-6.216,5.739-2.495c-1.006,1.868-2.985,2.512-4.242,4.242c-1.945,2.678-3.175,6.058-3.493,10.479 c4.889-0.494,7.415-2.613,12.975-1.996c9.531,1.059,14.204,9.783,14.222,19.461c0.024,13.391-8.009,28.807-17.715,31.688 c-3.587,1.064-6.829-1.188-10.229-1.248c-4.405-0.078-8.074,2.765-12.725,0.499c-8.06-3.926-15.446-18.485-15.469-30.938 c-0.026-14.5,11.761-24.107,26.947-17.216c0.687-1.602,0.885-4.058-0.998-4.74c-0.962-0.349-2.893,0.292-3.743,0.25 C22.316,17.132,16.212,9.849,15.979,0.57c0.183-0.233,0.454-0.378,0.749-0.499c9.5-0.435,16.526,3.913,18.214,11.228 C35.372,13.167,34.369,15.577,35.69,17.287z',0.0,0.0,72.0,72.0);} },
-    crescent: { label:"🌙", draw:function(c,x,y,s){drawSVG(c,x,y,s,'M39.683,0.414c-0.517,2.011-2.921,2.838-4.292,4.292 c-2.95,3.129-5,7.151-5.365,12.16c-0.856,11.763,8.291,22.5,21.996,21.459c6.098-0.463,11.403-4.264,14.307-8.405 c1.029-1.468,1.449-3.394,2.861-4.649c1.42,1.337,1.762,3.906,1.967,6.438c0.694,8.58-1.225,15.79-4.113,21.101 C60.174,65.44,43.636,74.825,26.271,69.978C10.729,65.639-1.465,51.812,0.162,31.708c0.426-5.262,2.304-10.092,4.292-13.591 C8.346,11.266,14.698,5.508,22.515,2.381c3.818-1.528,8.216-2.504,13.77-2.504C37.502-0.123,38.984-0.443,39.683,0.414z',0.0,0.0,72.0,72.0);} },
-    bolt: { label:"⚡", draw:function(c,x,y,s){drawSVG(c,x,y,s,'M69.224,47.329c-7.061-5.181-20.804-8.366-23.195-14.94 C54.526,26.136,63.351,20.972,72,15.223V0H47.188 C31.595,10.184,15.123,20.349,2.961,31.965c7.431,4.81,18.655,8.488,23.699,14.01C18.101,53.439,8.887,58.706,0,65.071V72h3.827 c8.377-2.376,17.098-5.962,25.601-8.895C43.402,58.287,58.833,54.617,69.224,47.329z',0.0,0.0,72.0,72.0);} },
+    // WHY the rotate wrapper around drawSVG instead of 4 separate path
+    // strings: Hali -- "make the cresent have a drop down for oriantation
+    // and sho the cut out option for each four directions," then "it should
+    // be top right, top left, bottom right, bottom left." The source
+    // artwork's own cutout already opens toward the TOP-RIGHT un-rotated --
+    // that's what the 'tr' key (angle 0) in CRESCENT_ORIENTATION_ANGLES is
+    // -- and drawSVG always maps its SQUARE 0-72/0-72 source space onto the
+    // SQUARE s×s cell, so a 90-degree-increment rotation around the cell's
+    // own center never pushes the shape outside its cell -- one real path,
+    // rotated, is exactly as correct as 4 separate paths would be, with no
+    // risk of the 4 ever drifting out of sync with each other. WHY a random
+    // pick from a POOL (not one key): Hali -- "we need to be able to select
+    // all of them if we wanted to have them randomly all together" -- same
+    // reasoning _selectedShape's own multi-select mix uses, just one level
+    // deeper (which ORIENTATION this one shape instance gets, not which
+    // shape). Every real module AND every finder eye calls this same draw()
+    // once per instance, so each one independently rolls its own pick --
+    // see _activeCrescentOrientation's WHY for how the live pool reaches here.
+    crescent: { label:"🌙", draw:function(c,x,y,s){
+      drawOriented(c,x,y,s,function(){
+        drawSVG(c,x,y,s,'M39.683,0.414c-0.517,2.011-2.921,2.838-4.292,4.292 c-2.95,3.129-5,7.151-5.365,12.16c-0.856,11.763,8.291,22.5,21.996,21.459c6.098-0.463,11.403-4.264,14.307-8.405 c1.029-1.468,1.449-3.394,2.861-4.649c1.42,1.337,1.762,3.906,1.967,6.438c0.694,8.58-1.225,15.79-4.113,21.101 C60.174,65.44,43.636,74.825,26.271,69.978C10.729,65.639-1.465,51.812,0.162,31.708c0.426-5.262,2.304-10.092,4.292-13.591 C8.346,11.266,14.698,5.508,22.515,2.381c3.818-1.528,8.216-2.504,13.77-2.504C37.502-0.123,38.984-0.443,39.683,0.414z',0.0,0.0,72.0,72.0);
+      });
+    } },
+    // WHY wrapped in drawReflectable: Hali -- "lightning bolt...the one
+    // called bolt just gets mirror option" (as opposed to lightning's full
+    // 4-way rotation above -- see REFLECTABLE_SHAPE_KEYS).
+    bolt: { label:"⚡", draw:function(c,x,y,s){
+      drawReflectable(c,'bolt',x,y,s,function(){
+        drawSVG(c,x,y,s,'M69.224,47.329c-7.061-5.181-20.804-8.366-23.195-14.94 C54.526,26.136,63.351,20.972,72,15.223V0H47.188 C31.595,10.184,15.123,20.349,2.961,31.965c7.431,4.81,18.655,8.488,23.699,14.01C18.101,53.439,8.887,58.706,0,65.071V72h3.827 c8.377-2.376,17.098-5.962,25.601-8.895C43.402,58.287,58.833,54.617,69.224,47.329z',0.0,0.0,72.0,72.0);
+      });
+    } },
   },
   "Symbols": {
     // WHY swapped to a traced SVG path instead of the old hand-built two-
@@ -2436,22 +2768,50 @@ var SHAPE_GROUPS = {
     // primitives. WHY the key is renamed, not just re-pointed: "replace"
     // means snote takes music_note's old slot/behavior entirely -- nothing
     // in the UI should still say "music_note" once this ships.
-    snote: { label:"♪", draw:function(c,x,y,s){ drawSVG(c,x,y,s,"M53.506,26.04c8.729,2.741,12.857,16.326,9.002,26.442c-1.688,4.425-5.852,6.216-6.189,10.127 c5.939-0.255,10.822-6.421,12.941-11.252c6.361-14.51-4.346-31.556-10.129-40.508c-0.648-2.973,0.762-5.379,0-7.313 c-0.602-1.532-4.9-3.752-6.75-3.375c-1.803,0.367-2.057,3.291-2.814,5.064c-4.857,11.381-6.801,28.928-12.377,40.508 c-4.506,0.36-6.769-2.217-11.251-2.813c-11.57-1.538-25.015,3.63-25.88,12.939c-0.861,9.253,7.954,14.928,18.566,15.754 c-0.64,0.119,6.554,0.485,8.733,0.323C48.482,70.365,45.736,42.286,53.506,26.04z",0,0,72,72); }},
+    // WHY wrapped in drawReflectable: Hali -- "music notes...reflect image
+    // button" (see REFLECTABLE_SHAPE_KEYS).
+    snote: { label:"♪", draw:function(c,x,y,s){ drawReflectable(c,'snote',x,y,s,function(){ drawSVG(c,x,y,s,"M53.506,26.04c8.729,2.741,12.857,16.326,9.002,26.442c-1.688,4.425-5.852,6.216-6.189,10.127 c5.939-0.255,10.822-6.421,12.941-11.252c6.361-14.51-4.346-31.556-10.129-40.508c-0.648-2.973,0.762-5.379,0-7.313 c-0.602-1.532-4.9-3.752-6.75-3.375c-1.803,0.367-2.057,3.291-2.814,5.064c-4.857,11.381-6.801,28.928-12.377,40.508 c-4.506,0.36-6.769-2.217-11.251-2.813c-11.57-1.538-25.015,3.63-25.88,12.939c-0.861,9.253,7.954,14.928,18.566,15.754 c-0.64,0.119,6.554,0.485,8.733,0.323C48.482,70.365,45.736,42.286,53.506,26.04z",0,0,72,72); }); }},
     // WHY a second, new shape rather than a variant of snote: Hali asked to
     // "add dnote" alongside the snote swap -- a separate beamed-pair note,
     // same drawSVG treatment as snote right above it.
-    dnote: { label:"♫", draw:function(c,x,y,s){ drawSVG(c,x,y,s,"M32.311,66.273c0-11.054,0-22.109,0-33.165c11.038-3.635,22.133-7.216,33.734-10.292c0,7.814,0,15.63,0,23.443 c-7.601-3.593-22.065-1.698-22.299,6.29c-0.322,11.003,23.711,11.476,28.019,2.287c0-7.368,0-17.094,0-28.018 c0-8.733,1.096-27.076-2.861-26.874c-13.187,0.674-30.2,6.772-41.739,12.58c-1.294,13.763-0.222,29.892-0.571,44.599 c-8.387-2.797-22.127-1.102-22.299,6.862c-0.106,4.896,4.832,7.612,11.435,8.005c-0.113,0.036,5.309,0.316,7.059,0.094 C26.933,71.56,30.406,69.481,32.311,66.273z",0,0,72,72); }},
+    // WHY wrapped in drawReflectable: same as snote above.
+    dnote: { label:"♫", draw:function(c,x,y,s){ drawReflectable(c,'dnote',x,y,s,function(){ drawSVG(c,x,y,s,"M32.311,66.273c0-11.054,0-22.109,0-33.165c11.038-3.635,22.133-7.216,33.734-10.292c0,7.814,0,15.63,0,23.443 c-7.601-3.593-22.065-1.698-22.299,6.29c-0.322,11.003,23.711,11.476,28.019,2.287c0-7.368,0-17.094,0-28.018 c0-8.733,1.096-27.076-2.861-26.874c-13.187,0.674-30.2,6.772-41.739,12.58c-1.294,13.763-0.222,29.892-0.571,44.599 c-8.387-2.797-22.127-1.102-22.299,6.862c-0.106,4.896,4.832,7.612,11.435,8.005c-0.113,0.036,5.309,0.316,7.059,0.094 C26.933,71.56,30.406,69.481,32.311,66.273z",0,0,72,72); }); }},
+    // WHY converted from a <polygon points="..."> to a plain "M ... L ... Z"
+    // path string, nothing else changed: Hali's supplied file -- "i think it
+    // registered as two halfs thet need to join" -- was a single real
+    // 8-point zigzag crown outline the whole time (one closed shape, not two
+    // pieces); drawSVG's drawing engine (new Path2D(d)) only understands
+    // path "d" syntax, not SVG's separate <polygon> element/attribute, so
+    // the earlier attempt had nothing to actually parse and render -- not a
+    // shape that genuinely needed splitting and rejoining. Same drawSVG
+    // treatment and 0,0-72,72 box as every other icon-pack shape here.
+    crown: { label:"♛", draw:function(c,x,y,s){ drawSVG(c,x,y,s,"M36.182,0 L27.454,29.455 L0,13.273 L11.827,72 L36.16,72 L60.871,72 L72,13.487 L44.909,29.455 Z",0,0,72,72); }},
   },
   "Holiday & Seasonal": {
-    witch_hat: { label:"🎃", draw:function(c,x,y,s){ drawSVGLayered(c,x,y,s,"M57.357,12.927c-2.659,2.855-9.451,1.578-12.666,3.877 c1.484,10.492,4.646,19.307,6.721,29.208c3.802,0.823,7.583,1.321,11.891,2.327c3.43,0.8,8.407,2.1,8.53,5.687 c0.161,4.704-8.043,5.869-12.666,6.979c-9.204,2.209-17.483,3.428-29.209,2.844c-5.231-0.261-11.959-1.502-17.318-2.326 c-5.782-0.89-12.483-2.057-12.666-6.721c-0.283-7.246,13.653-6.618,19.387-8.53c2.143-6.533,4.393-13.919,7.754-21.455 c3.302-7.4,7.861-19.741,18.869-17.06c1.846,0.45,3.925,1.592,5.945,2.327C54.042,10.852,56.92,11.005,57.357,12.927z",null,0,0,72,72); }},
-    santa: { label:"🎅", draw:function(c,x,y,s){ drawSVGLayered(c,x,y,s,"M60.636,19.789c3.742,0.099,5.989,2.76,5.673,5.964 c-0.254,2.575-2.64,4.977-6.108,4.582c-2.622-0.299-5.12-2.864-4.364-6.4c0.146-0.681,0.534-1.318,0.945-1.891 c-1.247-1.322-2.823-2.316-4.509-3.2c0.506,1.632,1.092,4.433,0,6.109c-0.344,0.528-0.807,0.774-1.164,1.236 c0.401,2.156,0.827,4.095,1.091,6.327c0.085,0.714-0.003,1.559,0.219,2.182c0.219,0.614,1.046,0.963,1.454,1.455 c0.479,0.577,1.226,1.492,1.455,2.255c0.492,1.637-0.265,3.198-1.601,4.072c2.806,3.338,2.79,10.116,0,13.527 c-0.886,1.084-2.146,1.784-3.345,2.474c-0.658,4.276-2.905,7.109-6.909,7.927c-0.492,0.101-1.263,0.034-1.818,0.291 c-0.552,0.254-0.811,1.196-1.236,1.745c-1.154,1.488-3.228,3.042-5.6,3.273c-4.543,0.443-7.493-2.062-8.946-5.164 c-5.508-0.237-8.182-3.309-9.091-8.146c-2.453-1.198-4.418-3.44-5.091-6.618c-0.76-3.586,0.27-7.102,1.963-9.236 c-0.999-0.754-2.15-1.773-1.673-3.709c0.43-1.742,2.402-2.861,2.982-4.364c0.538-1.394,0.481-3.07,0.655-4.437 c0.189-1.492,0.354-2.81,0.727-4.291c-0.826-0.443-1.55-0.832-2.036-1.6c-0.896-1.414-1.079-3.79-0.509-5.746 c0.675-2.317,2.512-3.665,4-4.654c1.382-3.926,3.802-6.989,6.909-9.309c3.303-2.466,6.965-3.986,11.927-4.582 c3.207-0.385,6.728,0.796,9.091,1.891C53.283,5.251,57.646,12.254,60.636,19.789z M38.745,26.625 c-0.951,0.075-2.857,0.985-2.691,2.037c0.179,1.133,2.157,0.382,3.2,0.436c1.202,0.062,1.782,0.742,2.837,0.509 C42.635,27.887,40.748,26.468,38.745,26.625z M22.163,29.534c0.902,0.436,1.89-0.256,2.909-0.291c1.123-0.039,2.325,0.634,3.2,0 C28.539,25.773,21.775,26.394,22.163,29.534z M28.927,36.516c-0.045,1.362,1.811,1.99,3.273,2.037 c1.786,0.058,3.958-1.169,2.545-2.909c-0.502-0.619-1.896-1.022-3.346-0.8C30.314,35.01,28.962,35.442,28.927,36.516z","M42.091,29.607c-1.055,0.233-1.635-0.447-2.837-0.509 c-1.043-0.054-3.021,0.697-3.2-0.436c-0.167-1.051,1.74-1.962,2.691-2.037C40.748,26.468,42.635,27.887,42.091,29.607z M28.272,29.243c-0.875,0.634-2.077-0.039-3.2,0 c-1.019,0.035-2.007,0.727-2.909,0.291C21.775,26.394,28.539,25.773,28.272,29.243z M31.399,34.843c1.45-0.222,2.843,0.182,3.346,0.8 c1.413,1.74-0.759,2.967-2.545,2.909c-1.462-0.047-3.318-0.675-3.273-2.037C28.962,35.442,30.314,35.01,31.399,34.843z",0,0,72,72); }},
+    // WHY wrapped in drawReflectable: Hali -- "witch hat...reflect image
+    // button" (see REFLECTABLE_SHAPE_KEYS).
+    witch_hat: { label:"🎃", draw:function(c,x,y,s){ drawReflectable(c,'witch_hat',x,y,s,function(){ drawSVGLayered(c,x,y,s,"M57.357,12.927c-2.659,2.855-9.451,1.578-12.666,3.877 c1.484,10.492,4.646,19.307,6.721,29.208c3.802,0.823,7.583,1.321,11.891,2.327c3.43,0.8,8.407,2.1,8.53,5.687 c0.161,4.704-8.043,5.869-12.666,6.979c-9.204,2.209-17.483,3.428-29.209,2.844c-5.231-0.261-11.959-1.502-17.318-2.326 c-5.782-0.89-12.483-2.057-12.666-6.721c-0.283-7.246,13.653-6.618,19.387-8.53c2.143-6.533,4.393-13.919,7.754-21.455 c3.302-7.4,7.861-19.741,18.869-17.06c1.846,0.45,3.925,1.592,5.945,2.327C54.042,10.852,56.92,11.005,57.357,12.927z",null,0,0,72,72); }); }},
+    // WHY wrapped in drawReflectable: Hali -- "Santa...reflect image button"
+    // (see REFLECTABLE_SHAPE_KEYS).
+    santa: { label:"🎅", draw:function(c,x,y,s){ drawReflectable(c,'santa',x,y,s,function(){ drawSVGLayered(c,x,y,s,"M60.636,19.789c3.742,0.099,5.989,2.76,5.673,5.964 c-0.254,2.575-2.64,4.977-6.108,4.582c-2.622-0.299-5.12-2.864-4.364-6.4c0.146-0.681,0.534-1.318,0.945-1.891 c-1.247-1.322-2.823-2.316-4.509-3.2c0.506,1.632,1.092,4.433,0,6.109c-0.344,0.528-0.807,0.774-1.164,1.236 c0.401,2.156,0.827,4.095,1.091,6.327c0.085,0.714-0.003,1.559,0.219,2.182c0.219,0.614,1.046,0.963,1.454,1.455 c0.479,0.577,1.226,1.492,1.455,2.255c0.492,1.637-0.265,3.198-1.601,4.072c2.806,3.338,2.79,10.116,0,13.527 c-0.886,1.084-2.146,1.784-3.345,2.474c-0.658,4.276-2.905,7.109-6.909,7.927c-0.492,0.101-1.263,0.034-1.818,0.291 c-0.552,0.254-0.811,1.196-1.236,1.745c-1.154,1.488-3.228,3.042-5.6,3.273c-4.543,0.443-7.493-2.062-8.946-5.164 c-5.508-0.237-8.182-3.309-9.091-8.146c-2.453-1.198-4.418-3.44-5.091-6.618c-0.76-3.586,0.27-7.102,1.963-9.236 c-0.999-0.754-2.15-1.773-1.673-3.709c0.43-1.742,2.402-2.861,2.982-4.364c0.538-1.394,0.481-3.07,0.655-4.437 c0.189-1.492,0.354-2.81,0.727-4.291c-0.826-0.443-1.55-0.832-2.036-1.6c-0.896-1.414-1.079-3.79-0.509-5.746 c0.675-2.317,2.512-3.665,4-4.654c1.382-3.926,3.802-6.989,6.909-9.309c3.303-2.466,6.965-3.986,11.927-4.582 c3.207-0.385,6.728,0.796,9.091,1.891C53.283,5.251,57.646,12.254,60.636,19.789z M38.745,26.625 c-0.951,0.075-2.857,0.985-2.691,2.037c0.179,1.133,2.157,0.382,3.2,0.436c1.202,0.062,1.782,0.742,2.837,0.509 C42.635,27.887,40.748,26.468,38.745,26.625z M22.163,29.534c0.902,0.436,1.89-0.256,2.909-0.291c1.123-0.039,2.325,0.634,3.2,0 C28.539,25.773,21.775,26.394,22.163,29.534z M28.927,36.516c-0.045,1.362,1.811,1.99,3.273,2.037 c1.786,0.058,3.958-1.169,2.545-2.909c-0.502-0.619-1.896-1.022-3.346-0.8C30.314,35.01,28.962,35.442,28.927,36.516z","M42.091,29.607c-1.055,0.233-1.635-0.447-2.837-0.509 c-1.043-0.054-3.021,0.697-3.2-0.436c-0.167-1.051,1.74-1.962,2.691-2.037C40.748,26.468,42.635,27.887,42.091,29.607z M28.272,29.243c-0.875,0.634-2.077-0.039-3.2,0 c-1.019,0.035-2.007,0.727-2.909,0.291C21.775,26.394,28.539,25.773,28.272,29.243z M31.399,34.843c1.45-0.222,2.843,0.182,3.346,0.8 c1.413,1.74-0.759,2.967-2.545,2.909c-1.462-0.047-3.318-0.675-3.273-2.037C28.962,35.442,30.314,35.01,31.399,34.843z",0,0,72,72); }); }},
     xmas_tree: { label:"🎄", draw:function(c,x,y,s){ drawSVGLayered(c,x,y,s,"M51.897,20.319c-1.589,0-3.177,0-4.766,0c3.445,4.179,7.196,8.052,10.865,12.008 c-2.243,0.871-6.087,0.141-8.959,0.38c4.528,5.002,9.912,9.149,14.295,14.296c-3.685,0-7.37,0-11.055,0 c4.809,5.547,10.692,10.021,15.63,15.438c-8.831,0.445-18.489,0.063-27.638,0.191c-0.123,3.054,0.248,6.601-0.191,9.339 c-2.81-0.112-6.078,0.234-8.577-0.19c0-2.986,0-5.972,0-8.959c-8.832-0.444-18.488-0.063-27.638-0.189 c4.923-5.561,11.022-9.945,16.011-15.439c-3.304-0.445-7.433-0.064-11.056-0.19c4.307-5.224,9.894-9.168,14.296-14.296 c-2.923,0-5.845,0-8.768,0c1.099-2.233,3.282-4.109,5.146-6.099c1.892-2.02,3.92-3.972,5.528-6.099 c-1.307-0.536-3.827,0.142-5.146-0.381c5.476-6.787,10.759-13.766,16.392-20.395c0.162-0.035,0.18,0.075,0.19,0.191 c3.997,4.956,7.875,9.911,11.818,15.058C49.578,16.683,51.012,18.343,51.897,20.319z",null,0,0,72,72); }},
     snowman: { label:"⛄", draw:function(c,x,y,s){ drawSVGLayered(c,x,y,s,"M44.786,0.426c0.164,0.466-0.028,3.977-0.201,5.44 c-4.852,0.605-11.261,0.573-16.121,0c-0.195-1.747-0.295-4.457-0.202-5.844C33.208,0.282,40.178-0.501,44.786,0.426z M44.585,6.471c0,0.672,0,1.343,0,2.015c-5.09,0.653-11.037,0.683-16.121,0 c0-0.672,0-1.343,0-2.015C33.563,6.999,39.485,6.999,44.585,6.471z M44.585,10.299c1.983-0.118,4.448-0.765,6.045-0.604 c-1.036,1.315-3.703,0.999-5.844,1.209c1.028,1.757,2.517,3.659,2.217,6.247c-0.254,2.19-1.851,3.716-3.225,4.836 c2.345,1.35,4.755,2.634,6.247,4.836c3.643-2.268,6.951-4.871,10.68-7.053c0.53-2.021,1.455-3.649,2.015-5.642 c0.526,0.078,1.105,0.104,1.411,0.403c-0.398,1.08-0.673,2.283-1.209,3.224c1.616,0.335,2.988-2.997,4.836-1.813 c-0.609,1.607-2.572,1.861-3.627,3.022c0.766,0.554,2.733-0.48,3.425,0c0.281,2.045-4.228,1.07-5.843,1.612 c-1.78,0.597-3.867,2.448-5.643,3.627c-1.93,1.282-3.632,2.735-5.239,3.829c2.922,4.874-0.11,11.192-3.627,13.299 c6.456,2.937,12.737,9.846,9.471,19.345C49.153,78.177,9.933,74.173,16.374,50.197c2.23-3.815,5.204-6.887,9.471-8.665 c-3.165-2.271-6.413-8.233-3.627-13.299c-2.971-2.185-6.782-5.468-10.277-7.456c-0.142-0.081-0.819-0.352-1.008-0.403 c-1.618-0.437-4.712,0.709-5.642-1.209c0.69-0.863,2.374,0.148,3.627,0c-0.838-1.312-2.529-1.77-3.627-2.821 c1.383-2.023,3.115,1.416,4.836,1.612c-0.429-1.048-0.731-2.225-1.209-3.224c0.016-0.656,0.913-0.43,1.41-0.604 c0.628,1.857,1.439,3.531,2.015,5.44c3.412,2.499,7.136,4.686,10.479,7.254c1.886-1.808,3.713-3.675,6.448-4.635 c-1.319-1.368-2.573-2.8-3.224-4.836c-0.181-3.069,1.04-4.736,2.418-6.247c-1.856-0.629-5.029,0.059-6.045-1.411 c1.664-0.253,4.63,0.8,6.448,0.403c0.068-0.404-0.041-0.63-0.403-0.604c3.903-0.272,11.515,0.243,15.717-0.201 C45.016,9.15,43.972,9.998,44.585,10.299z M31.084,13.725c0.713-0.109,0.495,0.713,1.209,0.604c0.318-0.354,0.925-0.418,1.007-1.008 C32.499,12.644,31.478,12.597,31.084,13.725z M39.748,13.725c0.748,0.625,1.912,0.813,2.217-0.403 C41.13,12.479,40.244,12.789,39.748,13.725z M36.323,17.957c0.792-0.536,1.441-1.887,1.209-2.821 c-0.482-0.122-0.919-0.29-1.612-0.201C35.324,15.95,36.117,17.094,36.323,17.957z M43.174,17.957 c-1.414,0.971-2.803,2.506-5.037,2.821c-3.596,0.507-6.368-1.074-8.262-2.821C31.722,22.312,41.354,22.407,43.174,17.957z M36.122,27.83c0.782,0.043,1.264-0.213,1.411-0.806C37.01,25.796,34.86,26.814,36.122,27.83z M35.92,33.271 c0.917,0.111,1.502-0.11,1.612-0.806C37.043,31.409,35.07,31.947,35.92,33.271z M35.92,38.712c0.917,0.11,1.502-0.11,1.612-0.807 C37.043,36.85,35.07,37.388,35.92,38.712z","M33.3,13.322c-0.082,0.589-0.689,0.654-1.007,1.008 c-0.714,0.109-0.496-0.714-1.209-0.604C31.478,12.597,32.499,12.644,33.3,13.322z M41.965,13.322c-0.305,1.217-1.469,1.028-2.217,0.403 C40.244,12.789,41.13,12.479,41.965,13.322z M35.92,14.934c0.693-0.088,1.13,0.08,1.612,0.201 c0.231,0.935-0.418,2.286-1.209,2.821C36.117,17.094,35.324,15.95,35.92,14.934z M29.875,17.957c1.894,1.747,4.667,3.328,8.262,2.821 c2.234-0.315,3.623-1.85,5.037-2.821C41.354,22.407,31.722,22.312,29.875,17.957z M37.532,27.024c-0.146,0.592-0.628,0.849-1.411,0.806 C34.86,26.814,37.01,25.796,37.532,27.024z M37.532,32.465c-0.11,0.696-0.695,0.917-1.612,0.806 C35.07,31.947,37.043,31.409,37.532,32.465z M37.532,37.905c-0.11,0.696-0.695,0.917-1.612,0.807 C35.07,37.388,37.043,36.85,37.532,37.905z",0,0,72,72); }},
     halo_cat: { label:"🐈‍⬛", draw:function(c,x,y,s){ drawSVGLayered(c,x,y,s,"M54.722-0.034c2.808,0.644,4.786,2.116,6.539,3.814 c0.743-0.25-0.38-0.852,0-1.635c2.856,1.05,4.464,3.347,5.177,6.539c0.596-0.04,0.586-0.687,0.545-1.362 c2.191,1.533,2.784,4.664,2.726,8.446c0.35,0.762,0.562-0.858,1.362-0.545c0.559,11.095-4.086,16.985-8.992,22.614 c0.357,4.801-2.732,9.308-1.635,13.896c0.326,1.362,1.718,2.284,1.907,3.542c0.256,1.691-0.791,4.926-1.362,7.629 c-1.135,5.372-2.303,10.565-9.264,8.174c-0.839-2.42,0.555-4.621,3.27-4.359c1.99-5.044,2.522-12.683-2.18-14.985 c1.676,6.584-1.504,12.039-2.452,17.71c-1.372,1.913-5.304,2.861-8.174,1.635c-0.788-1.668,0.268-3.192,1.09-4.087 c0.817,0,1.635,0,2.452,0c2.358-4.091,3.528-13.398-0.817-16.075c-1.729-4.87,0.117-12.539-3.542-14.986 c-2.343-1.567-5.243-0.789-6.539,0c-3.9,2.374-2.936,7.833-2.997,12.261c-0.031,2.228-1.086,5.883-1.635,9.264 c-0.975,6.002-1.59,9.598-3.814,13.623c-2.017,0.424-5.763,1.298-6.539-0.817c0.213-0.877,0.374-1.807,0.817-2.452 c0.606-0.394,1.314-0.685,2.452-0.545c1.599-4.955,1.648-13.461-1.09-17.165c-2.318,6.4-1.212,16.226-4.904,21.252 c-2.116,0.165-4.929,0.711-6.267-0.545c-0.008-2.369,1.032-3.69,3.542-3.542c0.612-6.161,0.484-13.92-1.09-18.8 c-4.96-0.943-5.918-5.89-12.806-4.904c0.429-1.206,2.076-1.194,3.27-1.635c-0.143-1.674-2.561-1.072-3.814-1.635 c0.249-0.842,1.275-0.905,2.18-1.09c2.109-5.647,0.561-9.25,0.545-16.348c3.17,0.826,5.118,2.875,7.357,4.632 c2.424-0.209,4.516-0.751,7.356-0.545c1.371-3.988,2.538-8.179,5.449-10.626c-0.171-0.555-1.377-0.076-1.09-1.09 c1.571-1.153,3.034-2.415,4.904-3.27c-0.279-0.901-2.233-0.128-2.18-1.362c2.038-0.686,4.105-1.343,6.267-1.907 c0.833-0.504-1.201-0.408-0.817-1.362c1.933-0.437,4.943-0.915,7.084-0.272c0.237-1.146-0.905-0.912-1.362-1.362 c11.834-1.369,18.787,6.81,22.342,15.531c1.85,2.874,2.253,7.192,2.997,11.171c2.75-3.014,1.543-10.026,0-13.351 c0.363,0,0.727,0,1.09,0c-0.956-2.677-2.698-4.567-4.087-6.812c0.727,0,1.453,0,2.18,0c-1.554-2.169-3.632-3.815-4.904-6.267 c0.999-0.09,1.515,0.303,2.18,0.545C56.827,4.037,54.979,2.797,54.722-0.034z M21.209,27.757c2.296,0.156,3.334,1.569,5.177,2.18 c-0.032-2.484,0.535-4.37,0.545-6.812C24.659,24.305,22.027,25.124,21.209,27.757z M12.763,39.746 c-0.044-1.409-0.558-2.349-1.635-2.726c-0.416,0.855-0.27,2.274-1.635,2.181c-0.259-1.389-0.259-2.154,0-3.542 c-0.653-0.165-1.243-0.392-2.18-0.272C5.927,38.899,9.369,40.98,12.763,39.746z M21.209,35.659 c0.034,1.445,0.664,2.877-0.545,3.542c-0.533-0.648-0.527-1.835-1.09-2.453c-0.906,0.637-1.402,1.685-1.907,2.725 c3.002,1.583,6.671-0.242,6.267-3.815C23.258,35.421,21.821,35.126,21.209,35.659z","M26.931,23.125c-0.01,2.441-0.577,4.328-0.545,6.812 c-1.842-0.61-2.881-2.024-5.177-2.18C22.027,25.124,24.659,24.305,26.931,23.125z M7.313,35.386c0.937-0.119,1.527,0.107,2.18,0.272 c-0.259,1.388-0.259,2.154,0,3.542c1.365,0.094,1.219-1.325,1.635-2.181c1.077,0.377,1.59,1.316,1.635,2.726 C9.369,40.98,5.927,38.899,7.313,35.386z M23.934,35.659c0.405,3.573-3.265,5.398-6.267,3.815 c0.505-1.04,1.001-2.088,1.907-2.725c0.562,0.618,0.557,1.804,1.09,2.453c1.208-0.665,0.579-2.098,0.545-3.542 C21.821,35.126,23.258,35.421,23.934,35.659z",0,0,72,72); }},
-    pumpkin: { label:"😊", draw:function(c,x,y,s){ drawSVGLayered(c,x,y,s,"M0.988,43.72c0-0.389,0-0.777,0-1.166c0.518-7.123,3.986-13.199,8.163-18.659 c4.91-6.416,11.096-13.574,22.449-12.828c1.087-2.63,0.206-7.347,0.583-9.913c1.623,0.224,4.145-0.452,4.374,1.166 c2.331-4.59,11.562-4.628,11.37,2.333c-0.998,1.903-6.568,2.098-7.872,0.292c0.145-1.582,3.807-0.951,3.499-2.041 c-2.453-1.435-4.837,1.337-5.54,3.499c0.638,1.695,1.791,2.874,2.624,4.373c10.276,0.076,16.092,4.383,20.7,9.913 c5.493,6.592,10.624,15.538,9.621,24.782c-1.132,10.421-13.239,22.231-24.49,24.198c-6.775,1.185-15.367-0.294-22.449-1.75 C10.861,65.215,2.743,57.896,0.988,43.72z M41.513,35.557c4.421,0.614,9.66-0.434,12.536-2.332 c-1.992-4.908-5.09-8.71-10.204-10.496C44.024,27.063,42.906,31.901,41.513,35.557z M26.644,23.895 c-3.473,3.136-5.557,7.66-6.706,13.12c3.653,0.713,8.27-0.07,11.37-0.875C29.191,32.621,28.517,27.658,26.644,23.895z M32.766,39.347c1.15,3.648,5.911,4.562,6.706,0C37.211,38.876,35.117,39.176,32.766,39.347z M45.886,48.093 c-0.173,0.604,0.36,1.916-0.291,2.041c-1.185,0.371-2.571,0.54-4.082,0.583c0.007-0.687-0.502-0.858-0.292-1.749 c-3.053,0.153-5.985,0.429-9.329,0.292c-0.167,0.512,0.353,1.713-0.292,1.749c-0.858,0.335-3.175-0.031-4.082-0.583 c-0.536-0.412,0.457-1.416-0.292-2.041c-5.472-0.554-9.248-2.803-13.12-4.956c0.61,5.812,5.461,9.887,10.787,11.953 c0.511-0.752,0.119-2.408,1.166-2.624c1.498-0.04,2.873,0.043,3.791,0.583c0.451,0.737-0.36,2.227-0.292,3.499 c5.5,0.949,12.251,0.643,16.91-0.875c-0.155-1.107-0.91-1.616-0.874-2.915c1.157-0.592,2.416-1.082,4.081-1.166 c0.474,0.498,0.883,1.061,0.875,2.04c5.006-2.089,7.531-6.656,8.746-12.536c-0.373-0.016-0.403-0.374-0.875-0.292 C55.315,44.5,50.92,46.616,45.886,48.093z","M43.845,22.729c5.114,1.786,8.212,5.588,10.204,10.496 c-2.876,1.898-8.115,2.946-12.536,2.332C42.906,31.901,44.024,27.063,43.845,22.729z M31.309,36.14c-3.101,0.805-7.717,1.588-11.37,0.875 c1.149-5.459,3.233-9.984,6.706-13.12C28.517,27.658,29.191,32.621,31.309,36.14z M39.472,39.347c-0.795,4.562-5.556,3.648-6.706,0 C35.117,39.176,37.211,38.876,39.472,39.347z M58.422,41.096c0.472-0.082,0.502,0.276,0.875,0.292 c-1.215,5.88-3.74,10.447-8.746,12.536c0.008-0.979-0.401-1.542-0.875-2.04c-1.665,0.084-2.924,0.574-4.081,1.166 c-0.036,1.299,0.719,1.808,0.874,2.915c-4.658,1.518-11.41,1.824-16.91,0.875c-0.068-1.272,0.743-2.762,0.292-3.499 c-0.917-0.54-2.292-0.623-3.791-0.583c-1.047,0.216-0.655,1.872-1.166,2.624c-5.326-2.066-10.177-6.142-10.787-11.953 c3.872,2.153,7.647,4.402,13.12,4.956c0.749,0.625-0.244,1.629,0.292,2.041c0.906,0.552,3.223,0.918,4.082,0.583 c0.644-0.036,0.124-1.237,0.292-1.749c3.344,0.137,6.276-0.139,9.329-0.292c-0.21,0.891,0.299,1.062,0.292,1.749 c1.511-0.043,2.897-0.212,4.082-0.583c0.651-0.125,0.118-1.437,0.291-2.041C50.92,46.616,55.315,44.5,58.422,41.096z",0,0,72,72); }},
-    spump: { label:"😈", draw:function(c,x,y,s){ drawSVGLayered(c,x,y,s,"M36.489,0.272c1.295-0.413,0.796,0.967,0.881,1.764 c5.669-2.45,11.351,1.703,12.345,6.76c-1.086,0.971-3.647,0.467-5.584,0.588c0.274-1.195,2.386-0.553,2.351-2.058 c-2.417-2.743-7.748-0.243-9.699,1.176c0,1.273,0,2.547,0,3.821c21.784-2.68,27.588,10.619,34.681,22.63 c1.961,24.84-15.202,38.506-38.502,36.738C21.203,70.799,12.48,65.014,6.511,57.584c-8.43-10.491-7.875-24.019,0.294-34.681 c5.173-6.752,11.866-11.512,24.688-10.581c0.505-3.218,0.688-6.757,0.881-10.287C34.018,1.72,35.132,0.875,36.489,0.272z M41.191,33.484c0.77,4.031,4.017,5.584,9.111,5.291c4.816-1.192,6.521-9.596,3.232-13.814 C51.231,29.612,46.329,31.666,41.191,33.484z M17.973,34.366c1.215,5.917,13.356,6.364,13.52-0.882 c-6.468-0.292-8.996-4.524-12.05-8.229C18.065,27.404,17.787,30.653,17.973,34.366z M36.783,38.187 c-1.796,0.068-2.602,3.665-2.939,6.172c1.804-0.155,4.255,0.336,5.584-0.294C38.977,41.675,38.527,39.283,36.783,38.187z M56.769,46.416c-0.823-1.039-1.395-2.329-2.646-2.939c-1.138,2.978-2.28,5.949-4.702,7.642c0.046-2.201-1.193-3.117-2.352-4.114 c-1.843,2.971-4.84,6.311-7.642,7.348c-1.252-1.785-2.402-3.672-3.233-5.879c-2.527,1.588-3.907,4.322-6.76,5.585 c-1.79-2.031-2.447-5.194-4.115-7.348c-2.607,0.82-4.248,2.609-6.76,3.526c-2.295-2.211-2.474-6.539-3.527-9.993 c-3.702,1.203-2.666,9.863-0.588,12.051c0.385-0.889,1.319-1.229,2.646-1.176c0.41,2.039,1.868,3.03,2.057,5.29 c1.534-0.228,2.646-1.815,4.703-1.47c2.351,0.396,3.282,3.285,4.115,5.291c1.886-0.979,3.231-3.471,5.29-3.233 c2.143,0.247,1.884,2.933,3.821,4.115c1.628-1.604,2.585-3.881,5.29-4.409c1.173,0.787,1.808,2.11,2.351,3.527 c2.062-1.661,2.767-4.68,5.291-5.878c0.799,0.964,1.108,2.418,1.176,4.114c2.384-0.751,1.698-4.571,3.232-6.172 c1.626,0.138,2.824,0.702,3.821,1.47c3.229-2.194,3.797-11.412,0.294-13.813C58.268,42.429,57.839,44.742,56.769,46.416z",null,0,0,72,72); }},
+    // WHY wrapped in drawReflectable: Hali -- "pumpkins...reflect image
+    // button" (see REFLECTABLE_SHAPE_KEYS -- both pumpkin and spump get it).
+    pumpkin: { label:"😊", draw:function(c,x,y,s){ drawReflectable(c,'pumpkin',x,y,s,function(){ drawSVGLayered(c,x,y,s,"M0.988,43.72c0-0.389,0-0.777,0-1.166c0.518-7.123,3.986-13.199,8.163-18.659 c4.91-6.416,11.096-13.574,22.449-12.828c1.087-2.63,0.206-7.347,0.583-9.913c1.623,0.224,4.145-0.452,4.374,1.166 c2.331-4.59,11.562-4.628,11.37,2.333c-0.998,1.903-6.568,2.098-7.872,0.292c0.145-1.582,3.807-0.951,3.499-2.041 c-2.453-1.435-4.837,1.337-5.54,3.499c0.638,1.695,1.791,2.874,2.624,4.373c10.276,0.076,16.092,4.383,20.7,9.913 c5.493,6.592,10.624,15.538,9.621,24.782c-1.132,10.421-13.239,22.231-24.49,24.198c-6.775,1.185-15.367-0.294-22.449-1.75 C10.861,65.215,2.743,57.896,0.988,43.72z M41.513,35.557c4.421,0.614,9.66-0.434,12.536-2.332 c-1.992-4.908-5.09-8.71-10.204-10.496C44.024,27.063,42.906,31.901,41.513,35.557z M26.644,23.895 c-3.473,3.136-5.557,7.66-6.706,13.12c3.653,0.713,8.27-0.07,11.37-0.875C29.191,32.621,28.517,27.658,26.644,23.895z M32.766,39.347c1.15,3.648,5.911,4.562,6.706,0C37.211,38.876,35.117,39.176,32.766,39.347z M45.886,48.093 c-0.173,0.604,0.36,1.916-0.291,2.041c-1.185,0.371-2.571,0.54-4.082,0.583c0.007-0.687-0.502-0.858-0.292-1.749 c-3.053,0.153-5.985,0.429-9.329,0.292c-0.167,0.512,0.353,1.713-0.292,1.749c-0.858,0.335-3.175-0.031-4.082-0.583 c-0.536-0.412,0.457-1.416-0.292-2.041c-5.472-0.554-9.248-2.803-13.12-4.956c0.61,5.812,5.461,9.887,10.787,11.953 c0.511-0.752,0.119-2.408,1.166-2.624c1.498-0.04,2.873,0.043,3.791,0.583c0.451,0.737-0.36,2.227-0.292,3.499 c5.5,0.949,12.251,0.643,16.91-0.875c-0.155-1.107-0.91-1.616-0.874-2.915c1.157-0.592,2.416-1.082,4.081-1.166 c0.474,0.498,0.883,1.061,0.875,2.04c5.006-2.089,7.531-6.656,8.746-12.536c-0.373-0.016-0.403-0.374-0.875-0.292 C55.315,44.5,50.92,46.616,45.886,48.093z","M43.845,22.729c5.114,1.786,8.212,5.588,10.204,10.496 c-2.876,1.898-8.115,2.946-12.536,2.332C42.906,31.901,44.024,27.063,43.845,22.729z M31.309,36.14c-3.101,0.805-7.717,1.588-11.37,0.875 c1.149-5.459,3.233-9.984,6.706-13.12C28.517,27.658,29.191,32.621,31.309,36.14z M39.472,39.347c-0.795,4.562-5.556,3.648-6.706,0 C35.117,39.176,37.211,38.876,39.472,39.347z M58.422,41.096c0.472-0.082,0.502,0.276,0.875,0.292 c-1.215,5.88-3.74,10.447-8.746,12.536c0.008-0.979-0.401-1.542-0.875-2.04c-1.665,0.084-2.924,0.574-4.081,1.166 c-0.036,1.299,0.719,1.808,0.874,2.915c-4.658,1.518-11.41,1.824-16.91,0.875c-0.068-1.272,0.743-2.762,0.292-3.499 c-0.917-0.54-2.292-0.623-3.791-0.583c-1.047,0.216-0.655,1.872-1.166,2.624c-5.326-2.066-10.177-6.142-10.787-11.953 c3.872,2.153,7.647,4.402,13.12,4.956c0.749,0.625-0.244,1.629,0.292,2.041c0.906,0.552,3.223,0.918,4.082,0.583 c0.644-0.036,0.124-1.237,0.292-1.749c3.344,0.137,6.276-0.139,9.329-0.292c-0.21,0.891,0.299,1.062,0.292,1.749 c1.511-0.043,2.897-0.212,4.082-0.583c0.651-0.125,0.118-1.437,0.291-2.041C50.92,46.616,55.315,44.5,58.422,41.096z",0,0,72,72); }); }},
+    // WHY wrapped in drawReflectable: see pumpkin's own WHY just above.
+    spump: { label:"😈", draw:function(c,x,y,s){ drawReflectable(c,'spump',x,y,s,function(){ drawSVGLayered(c,x,y,s,"M36.489,0.272c1.295-0.413,0.796,0.967,0.881,1.764 c5.669-2.45,11.351,1.703,12.345,6.76c-1.086,0.971-3.647,0.467-5.584,0.588c0.274-1.195,2.386-0.553,2.351-2.058 c-2.417-2.743-7.748-0.243-9.699,1.176c0,1.273,0,2.547,0,3.821c21.784-2.68,27.588,10.619,34.681,22.63 c1.961,24.84-15.202,38.506-38.502,36.738C21.203,70.799,12.48,65.014,6.511,57.584c-8.43-10.491-7.875-24.019,0.294-34.681 c5.173-6.752,11.866-11.512,24.688-10.581c0.505-3.218,0.688-6.757,0.881-10.287C34.018,1.72,35.132,0.875,36.489,0.272z M41.191,33.484c0.77,4.031,4.017,5.584,9.111,5.291c4.816-1.192,6.521-9.596,3.232-13.814 C51.231,29.612,46.329,31.666,41.191,33.484z M17.973,34.366c1.215,5.917,13.356,6.364,13.52-0.882 c-6.468-0.292-8.996-4.524-12.05-8.229C18.065,27.404,17.787,30.653,17.973,34.366z M36.783,38.187 c-1.796,0.068-2.602,3.665-2.939,6.172c1.804-0.155,4.255,0.336,5.584-0.294C38.977,41.675,38.527,39.283,36.783,38.187z M56.769,46.416c-0.823-1.039-1.395-2.329-2.646-2.939c-1.138,2.978-2.28,5.949-4.702,7.642c0.046-2.201-1.193-3.117-2.352-4.114 c-1.843,2.971-4.84,6.311-7.642,7.348c-1.252-1.785-2.402-3.672-3.233-5.879c-2.527,1.588-3.907,4.322-6.76,5.585 c-1.79-2.031-2.447-5.194-4.115-7.348c-2.607,0.82-4.248,2.609-6.76,3.526c-2.295-2.211-2.474-6.539-3.527-9.993 c-3.702,1.203-2.666,9.863-0.588,12.051c0.385-0.889,1.319-1.229,2.646-1.176c0.41,2.039,1.868,3.03,2.057,5.29 c1.534-0.228,2.646-1.815,4.703-1.47c2.351,0.396,3.282,3.285,4.115,5.291c1.886-0.979,3.231-3.471,5.29-3.233 c2.143,0.247,1.884,2.933,3.821,4.115c1.628-1.604,2.585-3.881,5.29-4.409c1.173,0.787,1.808,2.11,2.351,3.527 c2.062-1.661,2.767-4.68,5.291-5.878c0.799,0.964,1.108,2.418,1.176,4.114c2.384-0.751,1.698-4.571,3.232-6.172 c1.626,0.138,2.824,0.702,3.821,1.47c3.229-2.194,3.797-11.412,0.294-13.813C58.268,42.429,57.839,44.742,56.769,46.416z",null,0,0,72,72); }); }},
     drip_skull: { label:"💀", draw:function(c,x,y,s){ drawSVGLayered(c,x,y,s,"M69.507,40.639c-0.948,0-1.896,0-2.844,0c0,1.327,0,2.654,0,3.981 c-1.711,0.573-1.008-1.268-1.138-2.275c-2.771,0.263-4.554,1.513-3.981,5.119c-1.002-3.029-4.894-6.448-7.962-3.981 c0.866,4.885,0.126,11.963-1.138,16.494c-2.732-1.817-1.785-7.314-3.981-9.669c-1.054,1.79-1.216,4.472-1.138,7.394 c-2.165-0.868-0.939-5.127-3.412-5.688c-1.318,2.475-0.197,7.387-0.569,10.807c-0.709-1.376-2.193-1.978-1.706-4.55 c-1.489,3.25,0.471,9.949-1.706,12.513c-2.602-4.413-0.753-13.276-3.413-17.632c-1.231,0.665,0.077,3.868-1.707,3.981 c-2.107-0.737-1.153-4.534-3.981-4.55c-1.306,1.159-0.206,4.723-0.569,6.825c-1.444-2.158-3.225-3.979-4.55-6.257 c-1.323,4.176-0.193,10.803-0.569,15.925c-3.817-5.282-1.091-17.108-6.256-21.044c-0.528-2.234,1.978-1.435,1.138-3.981 c-2.924-3.328-5.457,1.108-7.394,2.275c0-0.758,0-1.517,0-2.275c-1.97,1.443,1.176,8.001-1.706,8.532 C9.36,46.374,7.735,40.226,2.962,37.227c2.124-2.042,0.56-4.877-1.137-6.257c2.05-4.932,0.252-9.679-1.707-13.65 C8.033-5.535,55.992-4.188,71.213,11.063c2.415,5.97-3.536,12.522,0,17.631C69.466,31.498,70.415,36.997,69.507,40.639z M19.456,28.126c-0.921-0.975-0.529-3.263-2.844-2.844c-1.571-0.244-0.534,2.121-1.706,2.275c-1.074-2.303-3.383-0.327-5.119,0 c-3.635,13.325,21.561,11.791,22.182,1.707c-1.564-2.419-5.568-4.9-7.962-1.707c-0.145-1.941-1.217-2.954-3.413-2.844 C19.472,25.108,20.734,27.887,19.456,28.126z M41.638,28.695c-1.521,14.582,34.107,4.588,15.925-2.844 c-0.189,2.274,0.731,5.66-1.706,5.688c-0.169-2.675,0.492-6.179-1.706-6.825c-1.286,0.23,0.3,3.333-2.275,2.275 c-0.842-0.105-0.521-1.374-0.568-2.275C45.312,23.904,45.98,31.001,41.638,28.695z M35.95,38.363 c-0.488-1.786,1.33-5.879-1.707-5.119c-1.046,4.839-5.951,3.786-3.981,11.375c1.651,0.737,4.036,0.737,5.688,0 c0.327-1-0.688-3.342,0.569-3.413c1.126,0.77,2.212,1.58,1.707,3.981c8.734-0.321,2.012-10.634-0.569-13.081 C35.351,32.456,37.52,37.279,35.95,38.363z",null,0,0,72,72); }},
-    lips: { label:"💋", draw:function(c,x,y,s){drawSVG(c,x,y,s,'M45.083,2.388c8.784,1.125,7.427,10.632,10.219,16.71 c4.639-0.188,7.613-2.387,13.836-0.655c5.456,15.43-12.391,42.274,2.989,51.438C43.801,72.59,5.188,71.554,0.249,39.45 c-1.79-11.63,6.514-26.311-0.2-39.368C13.196,7.691,32.266,6.787,45.083,2.388z M54.663,46.58 c-1.551-10.696-20.322-7.16-19.785-19.583c-2.935,0.798-9.863-3.235-9.935,1.025C26.938,39.579,45.014,47.333,54.663,46.58z',0.0,0.0,72.0,72.0);} },
+    // WHY wrapped in drawOriented: Hali -- "the lips should have the same
+    // orientation options as the crescent moon." Default pool ['tr'] is
+    // angle 0, so an existing design with no orientation saved keeps this
+    // exact unrotated look.
+    lips: { label:"💋", draw:function(c,x,y,s){
+      drawOriented(c,x,y,s,function(){
+        drawSVG(c,x,y,s,'M45.083,2.388c8.784,1.125,7.427,10.632,10.219,16.71 c4.639-0.188,7.613-2.387,13.836-0.655c5.456,15.43-12.391,42.274,2.989,51.438C43.801,72.59,5.188,71.554,0.249,39.45 c-1.79-11.63,6.514-26.311-0.2-39.368C13.196,7.691,32.266,6.787,45.083,2.388z M54.663,46.58 c-1.551-10.696-20.322-7.16-19.785-19.583c-2.935,0.798-9.863-3.235-9.935,1.025C26.938,39.579,45.014,47.333,54.663,46.58z',0.0,0.0,72.0,72.0);
+      });
+    } },
     xskull: { label:"☠", draw:function(c,x,y,s){ drawSVGLayered(c,x,y,s,"M16.364,33.61c-5.478-3.622-15.895,0.284-14.893-8.903 c0.375-3.439,4.379-4.222,4.654-8.902C14.327,16.352,15.733,24.545,16.364,33.61z M66.629,15.805c1.893,5.289,7.445,10.495,1.861,15.71 c-4.545-0.051-9.178-0.202-11.635,2.095C56.334,25.516,58.625,16.052,66.629,15.805z M20.553,50.367c1.145,2.282-0.751,5.634,1.396,7.331 c-5.875,2.816-6.547,11.486-15.358,10.998C5.7,64.143-0.214,59.399,4.264,55.081C11.229,55.237,16.677,53.687,20.553,50.367z M51.734,50.367c4.404,2.901,9.508,5.014,16.756,4.714 c4.441,4.279-1.348,9.161-2.328,13.615c-8.014,1.517-9.023-8.45-15.357-10.474C52.27,55.757,51.816,54.029,51.734,50.367z M41.031,54.558c0.285,0.726,1.791,0.079,1.861,1.047 c0.02,1.339-0.346,0.639-0.932,0.524c0.148,1.214-0.074,2.01-0.465,2.618C40.43,58.31,40.223,55.529,41.031,54.558z M34.98,55.604c2.043,0.67,0.405,5.479,0.931,7.855 C34.746,61.994,33.985,57.815,34.98,55.604z M37.307,63.46c-1.125-2.047-0.629-5.244,0-7.855 C39.449,57.019,37.469,61.312,37.307,63.46z M38.703,55.604c1.744-0.041,1.588,2.054,1.861,3.666c-0.619,0-1.24,0-1.861,0 C38.703,58.048,38.703,56.826,38.703,55.604z M40.564,59.271c1.414,0.646-0.504,1.801,0,3.143 c-1.016-0.078-0.998-1.32-0.93-2.619C40.176,59.879,40.463,59.678,40.564,59.271z M51.734,21.042c-0.988,0.808-0.197,3.619-1.395,4.19 c3.869,2.279,1.77,11.274,5.584,13.615c-0.682,6.563-4.137,10.009-10.705,9.95c-1.014,1.095,0.232,1.494,0,3.142 c-5.012,4.37-10.032,4.382-14.892,2.095c-0.573,0.229-0.956,0.67-0.931,1.571c-0.938-1.361,1.577-3.143-1.861-3.142 c-0.148-1.216,0.075-2.011,0.465-2.619c-5.063-1.984-10.877-3.121-11.17-10.473c3.599-2.584,1.537-11.538,5.585-13.616 c-0.414-1.28-1.084-2.271-0.931-4.189c-0.618,4.962-3.03,9.862-3.258,13.615c-0.805-3.231-1.667-5.753-1.862-7.855 C13.186-7.042,59.021-8.642,56.389,26.802c-0.193,2.621-1.262,4.706-1.396,8.378C53.844,30.538,51.555,27.18,51.734,21.042z M33.584,34.657c-0.581-4.461-6.76-6.002-11.17-3.142c-2.166,3.041-1.684,10.011,1.396,11.521 C29.084,42.723,34.237,39.668,33.584,34.657z M49.873,42.513c2.307-2.492,2.441-9.11,0-11.521 C35.507,25.3,37.492,45.902,49.873,42.513z M34.515,49.844c1.706-1.58,1.833-7.701,0.931-10.473 C33.437,40.795,30.646,48.21,34.515,49.844z M37.773,49.844c4.527-1.005,1.818-9.739-0.931-10.473 C36.794,43.265,36.708,47.202,37.773,49.844z M31.257,54.558c2.258,1.134-0.106,3.819,0,5.76 c-1.17-1.128-2.589-1.974-2.792-4.188c1.51,0.046,1.502,1.801,2.327,2.618C31.28,58.46,30.392,55.71,31.257,54.558z M41.961,60.317c-1.137-1.655,1.539-3.484,2.328-4.713 c-0.467-0.721-0.768,0.223-1.396-1.047C46.213,53.582,43.572,59.298,41.961,60.317z M34.515,59.794c0.265,1.694-0.141,2.634-0.931,3.142 c1.88,1.215,3.272,0.344,5.585,0.524c-0.18-1.37-1.492-1.464-0.932-3.666c1.824-0.482,0.338,2.762,1.396,3.142 c3.514-3.03,7.887-7.88,7.912-13.092c0.199-1.171,2.293-0.212,3.258-0.523c0.164,11.007-4.193,16.928-9.773,21.471 C26.347,73.27,22.549,60.972,21.949,49.32c1.086,0,2.172,0,3.258,0c-0.698,5.894,4.745,9.289,6.981,13.615 C34.28,63.37,32.703,59.675,34.515,59.794z M33.119,55.604c1.769-0.42,0.592,2.477,0.931,3.666c-0.621,0-1.241,0-1.862,0 c0.946,0.382,1.333,2.214,0.465,3.143C30.882,60.582,32.471,57.654,33.119,55.604z","M73.609-2c0.775,23.74,0.775,51.146,0,74.886 C73.609,47.924,73.609,22.962,73.609-2z M23.811,43.036c-3.08-1.51-3.562-8.48-1.396-11.521 c4.41-2.86,10.589-1.319,11.17,3.142C34.237,39.668,29.084,42.723,23.811,43.036z M49.873,30.992c2.441,2.411,2.307,9.029,0,11.521 C37.492,45.902,35.507,25.3,49.873,30.992z M35.446,39.371c0.902,2.771,0.775,8.893-0.931,10.473 C30.646,48.21,33.437,40.795,35.446,39.371z M36.842,39.371c2.75,0.733,5.458,9.468,0.931,10.473 C36.708,47.202,36.794,43.265,36.842,39.371z",0,0,72,72); }},
   },
   "Social Media": {
@@ -2501,9 +2861,14 @@ var SHAPE_GROUPS = {
       c.restore();
     } },
     cat_head: { label:"🐱", draw:function(c,x,y,s){ drawSVGParts(c,x,y,s,"M25.871,13.329c5.503-2.237,14.539-2.437,19.996,0 c2.812-2.516,4.945-5.075,8.123-8.123c2.009-1.927,6.256-6.683,10.623-5.312c4.034,1.267,4.046,10.26,3.749,15.622 c-0.333,6.005-2.586,12.472-1.875,18.433c0.451,3.784,2.438,6.003,2.812,10.623c0.518,6.388-1.246,12.86-4.686,16.559 c-4.467,4.801-11.565,4.457-19.371,7.186c-3.267,1.142-5.797,3.554-10.31,3.125c-4.105-0.391-6.153-2.804-9.686-3.75 c-5.625-1.506-10.516-1.408-14.372-3.749C4.172,59.875,0.715,49.101,3.688,38.636c0.385-1.354,1.631-2.677,1.875-4.374 c0.884-6.159-1.524-12.17-1.875-17.809C3.393,11.708,3.479,0.218,7.75-0.105C16.014-0.732,20.495,8.701,25.871,13.329z M43.679,47.384c5.456,0.236,12.712-0.401,11.248-8.123C48.723,38.3,42.933,40.362,43.679,47.384z M18.685,39.886 c-1.246,7.702,5.124,7.79,11.248,8.123C30.919,40.935,24.345,38.246,18.685,39.886z M31.807,58.319 c1.179,1.008,3.078,1.296,3.749,2.812c0.606,0.644-0.031,2.53,1.562,2.187c0.993-2.651,3.45-3.839,5.312-5.623 c-0.463-0.059-0.287-0.755-0.312-1.25C39.702,55.633,30.583,54.509,31.807,58.319z",null,0,0,72,72); }},
-    crow: { label:"🐦‍⬛", draw:function(c,x,y,s){ drawSVGParts(c,x,y,s,"M27.309,53.857c2.069,2.215,3.806,1.873,6.2,3.358 c0.136,5.819-2.207,9.16-4.908,12.142c-1.002-1.332-3.332-0.849-4.909-1.033C22.134,62.714,27.415,59.712,27.309,53.857z M15.685,69.615c-1.253,0.613-1.181,0.979-2.583,1.292 c0.266-1.284,1.698-1.401,2.325-2.325c8.23,2.585,9.133-12.723,5.683-17.566c-0.637,0.034-1.245,0.039-1.55-0.258 c-0.864,0.468,1.216,1.504,0.517,1.808c-1.089,0.192-2.798,0.094-4.133-1.291c-0.065,0.926,0.776,0.946,0.775,1.808 c-3.376-2.229-5.731-7.07-6.2-12.657C10.113,35.591,7.642,33.717,7.16,28.8c-0.501-5.11,2.353-6.518,4.908-9.558 c2.704-0.477,2.491-2.37,3.358-4.65c1.118-2.94,3.701-7.287,5.683-9.559c2.341-2.684,4.899-5.222,11.108-4.391 c1.24,0.166,2.088,1.034,3.617,1.292c5.191,0.874,9.434-0.438,11.625,4.133c-6.204,1.785-12.719,0.88-12.917,8.008 c-0.06,2.149,0.961,3.234,0.775,5.942c5.18,5.081,8.571,14.869,8.267,22.991c-0.657,0.626-1.26-0.258-1.809-0.517 c3.131,7.116,11.778,8.716,17.309,13.433c-3.347,5.122-14.969,6.406-21.441,3.101c-2.673,2.148-3.745,5.899-4.909,9.558 c1.681,0.217,2.298-0.629,3.358-1.033c1.461,0.348,2.587,1.029,2.325,3.1c-1.009-0.196-0.715-1.696-2.066-1.55 c-0.894-0.032-0.377,1.346-1.033,1.55c-1.935-0.211-5.504-0.751-6.458,0.775c-1.134-0.925-3.958-1.612-5.167-0.259 c-0.641-0.134-0.92-0.629-1.292-1.033c-1.517-0.14-1.718,1.038-2.841,1.292C20.79,69.721,16.236,71.542,15.685,69.615z M23.692,68.324c1.577,0.185,3.906-0.299,4.909,1.033c2.702-2.981,5.044-6.322,4.908-12.142c-2.395-1.485-4.131-1.144-6.2-3.358 C27.415,59.712,22.134,62.714,23.692,68.324z",null,0,0,72,72); }},
+    // WHY wrapped in drawReflectable: Hali -- "crow...reflect image button"
+    // (see REFLECTABLE_SHAPE_KEYS).
+    crow: { label:"🐦‍⬛", draw:function(c,x,y,s){ drawReflectable(c,'crow',x,y,s,function(){ drawSVGParts(c,x,y,s,"M27.309,53.857c2.069,2.215,3.806,1.873,6.2,3.358 c0.136,5.819-2.207,9.16-4.908,12.142c-1.002-1.332-3.332-0.849-4.909-1.033C22.134,62.714,27.415,59.712,27.309,53.857z M15.685,69.615c-1.253,0.613-1.181,0.979-2.583,1.292 c0.266-1.284,1.698-1.401,2.325-2.325c8.23,2.585,9.133-12.723,5.683-17.566c-0.637,0.034-1.245,0.039-1.55-0.258 c-0.864,0.468,1.216,1.504,0.517,1.808c-1.089,0.192-2.798,0.094-4.133-1.291c-0.065,0.926,0.776,0.946,0.775,1.808 c-3.376-2.229-5.731-7.07-6.2-12.657C10.113,35.591,7.642,33.717,7.16,28.8c-0.501-5.11,2.353-6.518,4.908-9.558 c2.704-0.477,2.491-2.37,3.358-4.65c1.118-2.94,3.701-7.287,5.683-9.559c2.341-2.684,4.899-5.222,11.108-4.391 c1.24,0.166,2.088,1.034,3.617,1.292c5.191,0.874,9.434-0.438,11.625,4.133c-6.204,1.785-12.719,0.88-12.917,8.008 c-0.06,2.149,0.961,3.234,0.775,5.942c5.18,5.081,8.571,14.869,8.267,22.991c-0.657,0.626-1.26-0.258-1.809-0.517 c3.131,7.116,11.778,8.716,17.309,13.433c-3.347,5.122-14.969,6.406-21.441,3.101c-2.673,2.148-3.745,5.899-4.909,9.558 c1.681,0.217,2.298-0.629,3.358-1.033c1.461,0.348,2.587,1.029,2.325,3.1c-1.009-0.196-0.715-1.696-2.066-1.55 c-0.894-0.032-0.377,1.346-1.033,1.55c-1.935-0.211-5.504-0.751-6.458,0.775c-1.134-0.925-3.958-1.612-5.167-0.259 c-0.641-0.134-0.92-0.629-1.292-1.033c-1.517-0.14-1.718,1.038-2.841,1.292C20.79,69.721,16.236,71.542,15.685,69.615z M23.692,68.324c1.577,0.185,3.906-0.299,4.909,1.033c2.702-2.981,5.044-6.322,4.908-12.142c-2.395-1.485-4.131-1.144-6.2-3.358 C27.415,59.712,22.134,62.714,23.692,68.324z",null,0,0,72,72); }); }},
     dcat_head: { label:"🐈", draw:function(c,x,y,s){ drawSVGParts(c,x,y,s,"M35.952,50.755c1.281-0.436,2.068-2.417,3.947-1.535 c0.188,1.43-1.037,1.447-1.973,1.754c-0.027,1.547-0.904,3.035-2.632,2.193c-0.009-1.965-1.612-2.336-2.631-3.289 C32.867,47.699,35.688,49.662,35.952,50.755z M22.137,51.413c0.339,2.634-2.952,1.296-3.508,0.438 C19.571,51.478,20.8,51.392,22.137,51.413z M43.188,57.991c-0.817,4.647-13.004,4.688-13.814,0 c3.144,0.22,4.943-0.904,6.797-1.974C38.256,56.93,39.895,58.288,43.188,57.991z M58.318,55.798c-3.729,1.437-0.167,2.769,1.974,4.824 c1.592,1.529,2.587,2.834,3.069,3.947c-2.168-2.51-4.772-4.583-7.455-6.578c-0.958,0.212-1.212,1.127-1.974,1.535 c1.449,2.57,3.525,4.515,4.386,7.674c-1.566-2.381-2.904-4.989-5.044-6.797c-2.446,2.633-5.04,4.969-8.99,7.235 c-2.196,1.261-5.808,3.491-7.894,3.509c-2.684,0.023-7.452-3.356-9.429-4.604c-3.145-1.986-5.429-3.817-7.675-6.14 c-2.413,1.46-3.092,4.655-5.043,6.578c1.183-2.764,2.454-5.44,4.386-7.455c-0.405-0.546-0.663-1.238-1.315-1.535 c-3.287,1.684-5.758,4.183-8.113,6.797c1.181-2.912,4.45-5.636,7.455-7.455c-0.698-0.472-1.109-1.229-1.973-1.535 c-4.009,1.619-7.087,4.17-10.306,6.579c2.664-2.965,5.779-5.478,9.648-7.236c-2.034-3.844-8.53,1.326-11.622,2.192 c2.606-2.071,5.674-3.682,9.429-4.604c-0.509-0.88-1.125-1.652-1.535-2.632c-2.61-0.182-5.377,1.335-8.113,1.755 C4.34,50.572,7,49.798,9.858,49.22c-1.074-3.604-3.481-5.874-5.701-8.332c0.332-0.663,0.962,0.182,1.535,0 c-0.488-1.34-2.213-1.441-2.631-2.851c0.687-0.045,1.61,0.147,1.974-0.22c-0.538-0.412-1.714-0.186-2.193-0.658 c1.898-1.534,4.589-2.958,4.824-5.701c0.26-3.027-3.804-11.131-4.166-16.446C3.093,9.06,3.459,4.536,5.472,0.321 c9.805,1.524,14.547,8.111,20.174,13.814c4.557-1.516,9.131-2.583,14.691-1.754c2.275,0.339,5.171,1.934,6.579,1.754 c1.504-0.192,2.994-2.981,4.166-4.386c4.021-4.819,9.097-7.97,16.227-9.429c3.178,6.826,2.088,15.015,0.219,21.708 c-0.799,2.864-2.119,5.626-2.412,7.894c-0.512,3.966,2.016,5.172,4.167,7.017c-0.327,0.623-1.291,0.609-2.193,0.658 c0.327,0.622,1.291,0.609,2.193,0.657c-0.354,1.255-1.653,1.563-2.412,2.412c0.332,0.663,0.962-0.182,1.535,0 c-1.871,2.807-4.379,4.977-5.702,8.333c2.403,1.032,5.417,1.454,7.675,2.631c-2.492,0.152-4.913-1.664-8.113-1.535 c-0.514,0.655-0.868,1.471-1.315,2.193c3.005,1.673,6.578,2.777,9.21,4.824c-2.782-0.801-6.124-2.939-9.648-3.729 c-0.984,0.186-1.232,1.107-1.754,1.755c3.608,1.873,6.723,4.241,9.429,7.017c-0.123,0.635-0.342-0.336-0.658-0.22 C64.828,59.521,61.601,57.632,58.318,55.798z M9.2,2.952c3.638,2.721,6.884,5.834,8.771,10.306 c-1.08-0.386-2.219-1.869-3.289-1.535c1.975,1.167,3.424,2.861,4.604,4.824c-1.627-1.005-3.39-3.04-5.482-2.851 c2.018,0.981,4.448,2.714,5.043,4.386c-1.592-0.37-4.248-1.807-5.701-0.877c1.807,0.167,3.405,0.542,4.167,1.754 c-1.665-0.185-4.21-0.572-5.263,0.438c1.714-0.033,3.423-0.061,4.385,0.658c-1.925,0.194-3.904,0.335-5.043,1.315 c0.811,0.14,2.185-0.284,2.631,0.219c-1.065,0.616-2.354,1.008-3.07,1.974c0.723,0.194,1.096-1.074,1.535-0.438 c-1.044,1.297-2.921,2.924-2.851,4.604c0.181-0.278,0.768-1.25,1.096-0.658c-0.624,1.352-1.631,3.482-1.315,5.043 c1.01-2.791,2.751-4.85,4.824-6.578c-1.275,0.117-2.105,1.835-2.851,1.754c0.606-1.513,1.899-2.34,3.07-3.289 c-1.383,0.152-1.869,1.201-3.07,1.535c1.156-1.841,3.349-2.645,5.921-3.07c-0.392-0.267-1.276-0.04-1.535-0.439 c1.231-0.561,3.459,0.126,4.386-0.219c-0.935-0.527-2.357-0.566-3.07-1.315c1.883-0.271,3.59,0.791,4.605,0.658 c-0.598-0.577-2.424-1.077-2.193-1.754c0.876,0.367,1.599,0.887,2.412,1.316C20.063,12.721,15.319,5.114,9.2,2.952z M50.862,20.714c0.838-0.192,1.772-1.435,2.412-1.096c-0.4,0.769-1.421,0.917-1.754,1.754c0.997-0.178,2.194-1.307,3.289-0.658 c-0.901,0.415-2.063,0.567-2.631,1.315c1.7-0.387,3.857-0.688,5.263,0.219c-0.663,0.068-1.706-0.243-1.755,0.439 c2.421,0.137,3.866,1.25,5.263,2.412c-1.252,0.077-2.159-1.342-3.069-0.877c1.384,0.665,3.358,1.901,3.289,3.289 c-1.074-0.972-2.235-1.858-3.728-2.412c2.592,1.72,4.612,4.012,5.92,7.017c-0.233-2.251-1.11-3.859-1.754-5.701 c0.865,0.085,1.009,0.892,1.535,1.315c-0.174-2.021-2.304-3.25-2.632-4.385c0.674,0.057,0.986,0.476,1.535,0.658 c-0.819-1.52-2.943-1.734-4.386-2.631c1.173-0.143,2.919,0.288,3.728-0.219c-1.374-0.819-3.646-0.738-5.481-1.096 c1.191-0.708,3.324-0.477,4.824-0.877c-1.418-0.645-3.964-0.259-5.263-0.438c0.871-1.102,2.878-1.069,3.946-1.973 c-2.308-0.114-4.313,1.238-5.701,1.315c1.178-2.112,3.301-3.277,5.263-4.605c-2.263,0.37-4.146,2.285-5.481,2.851 c0.927-1.997,2.702-3.145,4.166-4.604c-1.283,0.182-2.531,1.557-3.289,1.535c1.933-4.354,5.835-7.906,8.771-10.525 C56.581,6.259,52.534,12.299,50.862,20.714z M44.504,24.88c0.074,2.015,0.765,3.721,1.096,5.921 c0.568-1.481,1.986-3.274,1.974-4.605c-0.68,0.928-0.926,2.29-1.974,2.851c-0.693-3.376-1.087-7.983,1.316-9.868 c0.119,0.319-0.257,1.133,0.219,1.097c0.136-1.18,0.731-1.9,1.315-2.631c0.192,0.934-0.671,1.945,0,2.631 c0.422-3.453,2.599-6.318,3.29-8.771C49.836,15.953,44.278,18.763,44.504,24.88z M28.058,22.907 c-0.461-3.762-3.771-6.154-5.482-8.552c-0.654-0.917-1.065-2.584-1.754-2.193c1.787,2.379,2.613,5.72,3.728,8.771 c0.365-1.34-0.957-2.749,0-3.289c0.25,1.139,0.631,2.147,1.097,3.07c0.291-0.82-0.654-1.516,0-1.974 c2.017,1.675,2.302,7.185,1.096,10.087c-0.602-0.787-1.046-1.731-1.754-2.412c0.676,1.883,1.701,3.416,2.631,5.043 C26.846,28.142,28.403,25.719,28.058,22.907z M31.347,14.574c3.175-0.462,7.261,0.035,10.086-0.219 C38.433,13.893,34,13.511,31.347,14.574z M32.224,27.511c0.489-0.973,0.536-2.388,1.315-3.07c0.54,2.356-0.312,5.052-0.219,6.798 c1.713-2.762,1.228-8.107-0.658-10.306c-0.048,0.861,0.62,2.145,0,2.851c-0.721-1.544-1.006-3.526-2.193-4.605 C31.517,21.494,31.934,24.439,32.224,27.511z M39.898,24.003c-0.239-1.261,0.249-1.886-0.219-2.851 c-1.404,2.292-2.031,7.721-0.22,10.087c-0.255-1.866-0.818-4.587-0.219-6.579c0.764,0.698,0.62,2.304,1.535,2.851 c-0.514-2.759,0.704-6.316,1.096-8.113C40.845,20.563,40.667,22.579,39.898,24.003z M46.916,30.582 c1.245-0.436,2.387-0.976,3.289-1.754c-0.611-0.082-1.335,0.835-1.755,0.219c0.64-0.899,2.118-2.117,2.193-2.851 C49.227,27.483,47.714,28.675,46.916,30.582z M25.865,31.02c-0.928-1.778-2.618-3.958-4.167-4.386 c0.899,0.782,1.862,1.5,2.412,2.631c-0.654-0.016-1.419-1.049-1.754-0.658C23.553,29.385,24.534,30.377,25.865,31.02z M30.47,33.651c-0.076-2.558-0.76-3.819-0.877-5.482C28.733,29.884,29.304,32.655,30.47,33.651z M42.092,34.309 c0.853-1.444,2.127-4.35,0.657-6.14c-0.051,1.074,0.387,1.66,0.22,2.851c-0.592-0.066-0.394-0.922-0.877-1.097 C42.421,31.574,41.939,33.174,42.092,34.309z M16.875,32.774c0.667,0.138,1.889-0.281,2.193,0.219 c-0.876,0.44-2.457,0.175-3.289,0.658c3.785,0.813,6.171-1.385,9.429-0.877c4.71,0.733,4.607,5.464,6.359,9.429 C34.657,33.529,24.255,29.694,16.875,32.774z M41.872,35.625c-0.447,0.383-0.43-0.163-0.877,0.219 c-0.735,1.846-0.538,4.958,0.438,6.359c0.869-6.129,2.855-10.09,8.771-9.429c1.796,0.201,4.289,1.889,5.92,0.658 c-0.898-0.052-1.793-0.108-2.412-0.439c0.03-0.628,1.506,0.19,1.535-0.438C50.238,30.74,43.841,31.88,41.872,35.625z M28.716,38.037c0.411-1.576-0.414-2.348-1.316-3.07c1.713,7.285-8.631,3.411-4.385-0.877 C16.334,37.125,27.385,43.135,28.716,38.037z M47.354,35.405c0.932,0.201,0.937-0.525,0.877-1.315c-0.293,0-0.585,0-0.877,0 C47.286,34.603,46.925,34.996,47.354,35.405z M47.793,39.571c-1.758,0.024-2.588-2.391-3.07-4.385 c-3.929,6.134,7.757,5.942,7.236,0.877c-0.098-0.948-0.896-1.566-1.974-1.974C50.579,36.636,49.683,39.545,47.793,39.571z M24.549,35.186c0.246,0.046,0.341,0.244,0.438,0.438c0.781,0.05,1.146-0.315,1.097-1.096 C25.547,34.055,24.462,34.365,24.549,35.186z M27.619,41.765c-1.61,0.843-4.607,0.153-5.92,0.219c1.671,1.015,5.564,0.684,6.579,0 c-0.227,0.577-0.87,0.739-1.097,1.316c0.959,0.001,1.379-1.682,1.974-1.316c0.184,0.783-1.116,1.204-0.658,1.535 c0.545-0.537,1.018-1.604,1.535-0.438c0.095-1.337-0.099-2.387-0.877-2.851c-4.328,2.325-8.089-0.382-9.429-3.289 c-0.305-0.663,0.06-2.453-1.535-2.193c-0.365,2.487,2.834,4.417,1.974,5.262C21.619,41.587,25.118,41.922,27.619,41.765z M53.274,38.914c-0.192,0.406-1.034,1.285-1.315,0.877c1.569-1.136,1.967-3.442,3.07-5.043c-0.678,0.054-1.24,0.222-1.755,0.438 c-0.372,4.837-5.133,6.7-10.087,5.043c-0.516,0.564-0.95,1.777-0.219,2.412c0.357-1.382,1.198,1.322,1.754,0.438 c-0.453-0.288-1.48-1.136-1.096-1.535c0.551,0.479,1.658,1.549,2.411,1.097c-0.527-0.422-1.414-0.486-1.534-1.315 C47.687,42.846,52.596,41.127,53.274,38.914z M49.547,49.22c-0.424-0.26-1.939-1.432-1.754-0.877 c0.376,0.282,0.862,0.453,0.877,1.097c-0.184,0.548-1.714-0.252-1.535,0.657c2.672-0.922,2.402,0.615,2.851,2.412 c-0.595,0.136-1.74-0.278-1.974,0.22c0.411,0.32,1.453,0.009,1.755,0.438c-0.073,0.512-0.225,0.944-0.658,1.097 c-0.135-0.064-0.844-0.546-0.877,0c0.259,0.105,0.497,0.233,0.657,0.438c-1.979,3.085-11.068,4.009-12.279-0.438 c1.689-1.966,3.879-3.43,4.605-6.359c-0.796-0.211-0.185,0.985-0.878,0.877c-1.872-1.45-4.556,0.815-6.797-0.658 c-0.786-0.055-0.803,0.659-1.535,0.658c-0.379-0.133,0.017-1.04-0.438-1.097c-0.17,3.034,3.119,4.474,4.385,6.798 c-0.833,3.671-9.364,3.477-10.745,1.097c-0.971,0.094-1.388-0.366-1.535-1.097c0.358,0.16,0.954-0.436,0.438-0.438 c-0.545,0.672-1.216-0.378-1.096-1.097c0.679,0.022,1.216-0.099,1.535-0.438c-0.524-0.134-1.591,0.275-1.754-0.219 c0.677-1.382-0.139-1.589,0.877-2.632c0.898-0.228,1.793,0.676,2.412,0c-0.833-0.044-1.56-0.194-2.193-0.438 c0.192-0.685,1.034-0.72,1.315-1.315c-1.034,0.062-1.296,0.896-2.192,1.097c-3.188-0.833-8.688,0.647-10.087-1.974 c0.439,0.089,1.626,0.543,1.974,0c-1.759-1.093-3.379-2.322-4.605-3.947c1.069-0.256,2.353,0.412,2.851,0 c-1.354-0.911-2.77-1.762-3.508-3.289c0.753-0.124,1.341-0.413,1.754-0.877c-0.411,0.049-1.453,0.565-1.754,0 c1.299-0.75,3.199-2.061,3.289-3.29c-0.939,1.035-2.661,1.287-3.947,1.974c0.328,0.037,0.809-0.079,0.877,0.219 c-0.567,0.895-1.99,0.934-2.851,1.535c1.366,0.826,2.784,1.601,3.728,2.851c-0.364,0.367-1.287,0.175-1.974,0.219 c1.034,1.451,2.675,2.296,3.509,3.947c-0.675,0.005-1.662-0.807-1.974-0.438c0.988,0.985,2.413,1.534,3.07,2.851 c-0.321,0.002-1.794-0.083-1.096,0.22c3.563-0.319,7.606-0.275,10.525,0.657c-0.317,0.341-0.292,1.023-0.658,1.315 c-3.935,1.013-5.586-0.86-8.333-1.096c0.751,0.711,2.06,0.863,2.631,1.754c-0.544-0.033-0.91,0.113-1.096,0.438 c1.813-0.513,3.378,0.181,4.385,1.097c-4.214,1.381-0.097,0.294,2.412,0c0.126,0.458,0.544,0.626,0.438,1.315 c-0.95,0.439-2.177,0.601-2.851,1.315c0.973-0.415,2.164-0.614,3.07-1.096c1.049,1.947,3.344,2.649,5.701,3.289 c1.442,5.786,14.536,5.51,15.788-0.22c1.758-0.143,2.853-0.948,4.166-1.535c1.884,0.312,3.158,2.395,4.386,2.632 c-1.129-1.21-2.659-2.019-3.947-3.07c0.365-0.439,0.589-1.019,1.316-1.096c1.562,0.633,3.608,1.943,5.043,1.973 c-1.718-0.84-3.481-1.634-5.263-2.411c0.445-0.141,0.145-1.025,0.658-1.097c2.298,0.042,4.358,1.486,6.14,1.315 c-1.208-0.546-2.875-0.634-3.728-1.535c0.755-0.194,1.617-0.282,1.754-1.096c-1.146,0.169-4.291,2.729-4.166-0.438 c2.898-0.121,5.924,0.799,8.113,0.657c-0.694-0.329-1.738-0.309-2.412-0.657c0.749-0.859,2.432-0.785,3.069-1.755 c-3.469,0.578-4.745,2.365-8.99,1.315c0.234-0.818-0.544-0.625-0.438-1.315c2.705-0.877,7.913-0.419,10.307-0.877 c-2.843,0.109,2.104-2.193,1.973-3.069c-0.748,0.055-1.053,0.554-1.973,0.438c0.954-1.531,2.716-2.255,3.728-3.729 c-0.596-0.136-1.74,0.278-1.974-0.219c0.841-1.352,2.548-1.838,3.509-3.07c-1.412-0.415-2.984-0.67-3.729-1.754 c0.328-0.037,0.81,0.078,0.877-0.22c-1.215-0.465-2.394-0.968-3.289-1.754c0.469,1.943,2.504,2.321,3.509,3.728 c-0.385,0.061-1.094-0.617-1.315,0c0.521,0.356,1.261,0.493,1.754,0.877c-0.752,1.368-2.441,1.799-3.289,3.07 c1.017,0.229,1.898-0.404,2.412,0c-1.156,1.621-2.884,2.672-4.386,3.947c0.796,0.267,1.731-0.438,1.974,0 C58.534,49.729,52.954,48.388,49.547,49.22z M50.644,42.203c-1.404,0.492-3.757-0.06-4.824,0.219 C47.266,42.827,49.525,43.179,50.644,42.203z M25.646,63.254c0.12-0.319-0.256-1.134,0.219-1.097 c1.255,1.596,2.517,3.184,4.385,4.166c0.107-0.691-0.395-0.774-0.219-1.535c1.091,0.666,2.146,2.529,3.289,2.412 c-0.192-0.198-0.628-1.237-0.219-1.315c1.39,0.876,2.072,2.46,3.509,3.289c0.593-1.525,1.765-2.474,3.07-3.289 c0.021,0.68-0.269,1.048-0.438,1.535c1.418-0.482,1.934-1.867,3.289-2.412c0.12,0.318-0.257,1.134,0.219,1.097 c1.585-1.12,2.787-2.623,4.167-3.947c-0.07,0.509,0.035,0.842,0.219,1.097c1.606-1.026,3.535-2.896,3.509-4.824 c-0.611,1.582-1.685,2.701-3.07,3.508c0.155-0.812-0.374-0.94-0.219-1.754c-1.421,1.138-1.888,3.229-3.728,3.947 c-0.131-0.454,0.271-1.44-0.22-1.535c-0.83,1.362-1.688,2.697-3.289,3.289c-0.126-0.386,0.265-1.288-0.22-1.315 c-0.659,0.656-1.056,1.575-2.192,1.754c0.098-0.431,0.813-1.355,0.22-1.754c-0.465,1.07-0.888,2.183-1.755,2.851 c-0.529-1.006-1.043-2.027-1.754-2.851c-0.34,0.869,0.829,1.34,0.219,1.754c-0.79-0.452-1.184-1.302-1.974-1.754 c-0.473,0.186,0.082,1.397-0.438,1.535c-1.214-0.906-2.066-2.174-3.07-3.289c-0.422,0.259,0.478,1.388-0.438,1.534 c-1.226-1.26-2.25-2.721-3.29-4.166c-0.503,0.229,0.104,1.565-0.438,1.754c-1.558-0.78-2.146-2.531-3.508-3.508 C22.398,60.508,23.605,62.298,25.646,63.254z","M31.566,42.203c-1.752-3.965-1.649-8.696-6.359-9.429 c-3.257-0.507-5.644,1.691-9.429,0.877c0.833-0.483,2.413-0.218,3.289-0.658c-0.304-0.5-1.526-0.082-2.193-0.219 C24.255,29.694,34.657,33.529,31.566,42.203z M26.084,34.528c0.05,0.781-0.315,1.146-1.097,1.096 c-0.097-0.195-0.192-0.392-0.438-0.438C24.462,34.365,25.547,34.055,26.084,34.528z M45.819,42.422c1.067-0.278,3.42,0.273,4.824-0.219 C49.525,43.179,47.266,42.827,45.819,42.422z M50.644,26.196c-0.075,0.733-1.554,1.952-2.193,2.851 c0.42,0.616,1.144-0.301,1.755-0.219c-0.902,0.779-2.044,1.319-3.289,1.754C47.714,28.675,49.227,27.483,50.644,26.196z M42.092,29.923c0.483,0.174,0.285,1.031,0.877,1.097 c0.167-1.19-0.271-1.776-0.22-2.851c1.47,1.79,0.195,4.696-0.657,6.14C41.939,33.174,42.421,31.574,42.092,29.923z",0,0,72,72); }},
-    detail_dog: { label:"🐕", draw:function(c,x,y,s){ drawSVGParts(c,x,y,s,"M54.788,16.725c-1.128,5.428,3.584,7.29,7.565,9.835 c1.217,0.778,2.711,1.628,4.54,2.648c1.549,0.863,3.76,1.933,3.972,3.215c0.472,2.862-2.642,3.898-3.594,5.674 c-0.413,0.771-0.304,1.787-0.567,2.459c-0.709,1.811-2.364,4.611-3.972,5.296c-1.007,0.429-1.782-0.006-3.026,0.379 c-1.168,0.36-1.594,1.355-2.648,1.513c-2.145,0.32-3.228-1.504-5.485-1.513c-1.397-0.006-2.727,1.005-3.594,0.945 c-2.502-0.171-2.673-3.607-4.917-4.161c-3.853-0.951-7.31,2.871-7.566,5.863c-0.132,0.7,0.299,0.836,0.946,0.757 c-0.891,2.325-1.562,4.869-2.459,7.188c2.253-2.35,3.287-5.918,4.729-9.079c0.329-0.959-0.821-0.439-0.757-1.135 c0.954-1.793,5.039-3.071,6.62-0.945c-6.074,2.872-3.726,14.36-3.404,21.751c-1.018-2.513-1.67-5.391-2.459-8.133 c-1.309,2.69-1.628,7.287-1.135,11.159c-1.718-0.808-3.603-1.667-5.296-2.648c-1.438-0.833-3.649-1.966-4.54-3.215 c-1.267-1.777-0.975-4.433-1.892-6.81c-0.767-1.988-1.995-3.48-2.458-5.674c-0.857-4.058-0.725-9.443-0.757-14.753 c-3.352,8.794-3.972,24.372,1.513,31.208c-8.625-2.219-14.952-6.736-15.131-17.401c-1.674,3.496-2.826,7.515-3.026,12.483 c-3.14,0.454-5.05,2.138-6.998,3.783c-0.041-4.745,2.73-8.063,4.729-12.105c4.819-9.745,7.462-21.34,13.24-30.073 c-0.362-2.925-5.292-5.295-5.296-8.511c-0.003-2.474,5.709-6.359,7.566-7.755c1.498-1.126,2.915-1.929,4.539-3.026 c1.775-1.198,3.39-3.067,6.053-2.837c1.955,0.168,4.082,1.553,6.053,1.891c5.048,0.868,8.544,1.333,11.537,3.972 c1.384,1.22,2.135,2.838,3.405,4.35C51.933,14.65,53.839,15.237,54.788,16.725z M29.254,13.888 c-0.033-2.793,2.044-5.144,0.567-7.565c-1.728,2.03-3.521,2.985-3.594,5.674c-0.091,3.37,3.553,6.068,2.081,9.457 C32.419,20.305,29.288,16.802,29.254,13.888z M33.982,23.534c-0.274,4.418-1.849,9.823-4.917,10.024 c-1.737,0.114-3.607-1.701-4.918-2.837c-1.596-1.383-2.951-2.524-3.972-3.783c-2.481-3.059-2.918-8.001-6.431-8.89 c3.852,4.092,5.131,10.757,10.403,13.429c-0.916,7.428,4.659,11.594,6.809,17.212c1.635-6.541-4.07-8.709-4.35-14.564 c5.546,2.298,8.2-4.628,8.511-9.268c0.232-3.457-0.722-7.213-0.189-10.781c0.272-1.825,1.217-3.107,0.946-4.54 C33.343,13.206,34.325,18.019,33.982,23.534z M20.932,22.588c1.35-3.576,0.858-7.503-0.378-10.781 C16.704,14.205,19.974,19.484,20.932,22.588z M44.007,18.995c0.812,2.97,5.788,1.778,7.755,3.594 c-0.729-1.54-1.441-3.098-1.892-4.917C47.6,16.441,45.846,18.576,44.007,18.995z M64.623,34.315c0.396,1.696,3.073,0.728,3.783,0 c-0.108-0.333,0.229-1.111-0.189-1.135C67.792,34.334,65.925,35.191,64.623,34.315z M62.921,42.448 c0.199-0.01,0.149-0.242-0.188-0.189c-3.259,3.478-9.93,2.343-14.375,0.757C52.179,45.626,59.941,46.23,62.921,42.448z M50.249,44.15c-1.562,0.006-3.206,0.537-4.161-0.378C46.034,45.438,49.928,45.638,50.249,44.15z M49.682,18.238c-0.145,0.825,0.233,1.752,0,2.081 c-1.695,0.494-3.543,0.349-4.351-0.946C46.146,18.329,48.256,16.97,49.682,18.238z M48.546,18.995 c0.301-0.282,0.277-1.078-0.378-0.946C47.868,18.332,47.892,19.127,48.546,18.995z","M28.308,21.454c1.472-3.389-2.171-6.087-2.081-9.457 c0.073-2.689,1.866-3.645,3.594-5.674c1.477,2.421-0.6,4.772-0.567,7.565C29.288,16.802,32.419,20.305,28.308,21.454z M35.874,9.538c0.271,1.433-0.673,2.714-0.946,4.54 c-0.533,3.568,0.421,7.324,0.189,10.781c-0.311,4.64-2.965,11.566-8.511,9.268c0.28,5.855,5.985,8.023,4.35,14.564 c-2.15-5.618-7.725-9.784-6.809-17.212c-5.272-2.672-6.551-9.337-10.403-13.429c3.513,0.889,3.95,5.832,6.431,8.89 c1.021,1.258,2.376,2.4,3.972,3.783c1.311,1.136,3.181,2.951,4.918,2.837c3.069-0.202,4.643-5.606,4.917-10.024 C34.325,18.019,33.343,13.206,35.874,9.538z M20.553,11.807c1.237,3.278,1.728,7.206,0.378,10.781 C19.974,19.484,16.704,14.205,20.553,11.807z M49.87,17.671c0.45,1.819,1.162,3.377,1.892,4.917 c-1.967-1.816-6.942-0.624-7.755-3.594C45.846,18.576,47.6,16.441,49.87,17.671z M45.331,19.373c0.808,1.295,2.655,1.44,4.351,0.946 c0.233-0.329-0.145-1.256,0-2.081C48.256,16.97,46.146,18.329,45.331,19.373z M48.168,18.049c0.655-0.132,0.679,0.664,0.378,0.946 C47.892,19.127,47.868,18.332,48.168,18.049z M68.217,33.181c0.418,0.023,0.081,0.802,0.189,1.135 c-0.71,0.728-3.388,1.696-3.783,0C65.925,35.191,67.792,34.334,68.217,33.181z M46.088,43.772c0.955,0.915,2.6,0.384,4.161,0.378 C49.928,45.638,46.034,45.438,46.088,43.772z M48.357,43.016c4.445,1.586,11.116,2.721,14.375-0.757 c0.338-0.053,0.388,0.18,0.188,0.189C59.941,46.23,52.179,45.626,48.357,43.016z",0,0,72,72); }},
+    // WHY wrapped in drawReflectable: Hali -- "digital dog...reflect image
+    // button" (see REFLECTABLE_SHAPE_KEYS -- this is the only dog shape,
+    // so "digital dog" is this one).
+    detail_dog: { label:"🐕", draw:function(c,x,y,s){ drawReflectable(c,'detail_dog',x,y,s,function(){ drawSVGParts(c,x,y,s,"M54.788,16.725c-1.128,5.428,3.584,7.29,7.565,9.835 c1.217,0.778,2.711,1.628,4.54,2.648c1.549,0.863,3.76,1.933,3.972,3.215c0.472,2.862-2.642,3.898-3.594,5.674 c-0.413,0.771-0.304,1.787-0.567,2.459c-0.709,1.811-2.364,4.611-3.972,5.296c-1.007,0.429-1.782-0.006-3.026,0.379 c-1.168,0.36-1.594,1.355-2.648,1.513c-2.145,0.32-3.228-1.504-5.485-1.513c-1.397-0.006-2.727,1.005-3.594,0.945 c-2.502-0.171-2.673-3.607-4.917-4.161c-3.853-0.951-7.31,2.871-7.566,5.863c-0.132,0.7,0.299,0.836,0.946,0.757 c-0.891,2.325-1.562,4.869-2.459,7.188c2.253-2.35,3.287-5.918,4.729-9.079c0.329-0.959-0.821-0.439-0.757-1.135 c0.954-1.793,5.039-3.071,6.62-0.945c-6.074,2.872-3.726,14.36-3.404,21.751c-1.018-2.513-1.67-5.391-2.459-8.133 c-1.309,2.69-1.628,7.287-1.135,11.159c-1.718-0.808-3.603-1.667-5.296-2.648c-1.438-0.833-3.649-1.966-4.54-3.215 c-1.267-1.777-0.975-4.433-1.892-6.81c-0.767-1.988-1.995-3.48-2.458-5.674c-0.857-4.058-0.725-9.443-0.757-14.753 c-3.352,8.794-3.972,24.372,1.513,31.208c-8.625-2.219-14.952-6.736-15.131-17.401c-1.674,3.496-2.826,7.515-3.026,12.483 c-3.14,0.454-5.05,2.138-6.998,3.783c-0.041-4.745,2.73-8.063,4.729-12.105c4.819-9.745,7.462-21.34,13.24-30.073 c-0.362-2.925-5.292-5.295-5.296-8.511c-0.003-2.474,5.709-6.359,7.566-7.755c1.498-1.126,2.915-1.929,4.539-3.026 c1.775-1.198,3.39-3.067,6.053-2.837c1.955,0.168,4.082,1.553,6.053,1.891c5.048,0.868,8.544,1.333,11.537,3.972 c1.384,1.22,2.135,2.838,3.405,4.35C51.933,14.65,53.839,15.237,54.788,16.725z M29.254,13.888 c-0.033-2.793,2.044-5.144,0.567-7.565c-1.728,2.03-3.521,2.985-3.594,5.674c-0.091,3.37,3.553,6.068,2.081,9.457 C32.419,20.305,29.288,16.802,29.254,13.888z M33.982,23.534c-0.274,4.418-1.849,9.823-4.917,10.024 c-1.737,0.114-3.607-1.701-4.918-2.837c-1.596-1.383-2.951-2.524-3.972-3.783c-2.481-3.059-2.918-8.001-6.431-8.89 c3.852,4.092,5.131,10.757,10.403,13.429c-0.916,7.428,4.659,11.594,6.809,17.212c1.635-6.541-4.07-8.709-4.35-14.564 c5.546,2.298,8.2-4.628,8.511-9.268c0.232-3.457-0.722-7.213-0.189-10.781c0.272-1.825,1.217-3.107,0.946-4.54 C33.343,13.206,34.325,18.019,33.982,23.534z M20.932,22.588c1.35-3.576,0.858-7.503-0.378-10.781 C16.704,14.205,19.974,19.484,20.932,22.588z M44.007,18.995c0.812,2.97,5.788,1.778,7.755,3.594 c-0.729-1.54-1.441-3.098-1.892-4.917C47.6,16.441,45.846,18.576,44.007,18.995z M64.623,34.315c0.396,1.696,3.073,0.728,3.783,0 c-0.108-0.333,0.229-1.111-0.189-1.135C67.792,34.334,65.925,35.191,64.623,34.315z M62.921,42.448 c0.199-0.01,0.149-0.242-0.188-0.189c-3.259,3.478-9.93,2.343-14.375,0.757C52.179,45.626,59.941,46.23,62.921,42.448z M50.249,44.15c-1.562,0.006-3.206,0.537-4.161-0.378C46.034,45.438,49.928,45.638,50.249,44.15z M49.682,18.238c-0.145,0.825,0.233,1.752,0,2.081 c-1.695,0.494-3.543,0.349-4.351-0.946C46.146,18.329,48.256,16.97,49.682,18.238z M48.546,18.995 c0.301-0.282,0.277-1.078-0.378-0.946C47.868,18.332,47.892,19.127,48.546,18.995z","M28.308,21.454c1.472-3.389-2.171-6.087-2.081-9.457 c0.073-2.689,1.866-3.645,3.594-5.674c1.477,2.421-0.6,4.772-0.567,7.565C29.288,16.802,32.419,20.305,28.308,21.454z M35.874,9.538c0.271,1.433-0.673,2.714-0.946,4.54 c-0.533,3.568,0.421,7.324,0.189,10.781c-0.311,4.64-2.965,11.566-8.511,9.268c0.28,5.855,5.985,8.023,4.35,14.564 c-2.15-5.618-7.725-9.784-6.809-17.212c-5.272-2.672-6.551-9.337-10.403-13.429c3.513,0.889,3.95,5.832,6.431,8.89 c1.021,1.258,2.376,2.4,3.972,3.783c1.311,1.136,3.181,2.951,4.918,2.837c3.069-0.202,4.643-5.606,4.917-10.024 C34.325,18.019,33.343,13.206,35.874,9.538z M20.553,11.807c1.237,3.278,1.728,7.206,0.378,10.781 C19.974,19.484,16.704,14.205,20.553,11.807z M49.87,17.671c0.45,1.819,1.162,3.377,1.892,4.917 c-1.967-1.816-6.942-0.624-7.755-3.594C45.846,18.576,47.6,16.441,49.87,17.671z M45.331,19.373c0.808,1.295,2.655,1.44,4.351,0.946 c0.233-0.329-0.145-1.256,0-2.081C48.256,16.97,46.146,18.329,45.331,19.373z M48.168,18.049c0.655-0.132,0.679,0.664,0.378,0.946 C47.892,19.127,47.868,18.332,48.168,18.049z M68.217,33.181c0.418,0.023,0.081,0.802,0.189,1.135 c-0.71,0.728-3.388,1.696-3.783,0C65.925,35.191,67.792,34.334,68.217,33.181z M46.088,43.772c0.955,0.915,2.6,0.384,4.161,0.378 C49.928,45.638,46.034,45.438,46.088,43.772z M48.357,43.016c4.445,1.586,11.116,2.721,14.375-0.757 c0.338-0.053,0.388,0.18,0.188,0.189C59.941,46.23,52.179,45.626,48.357,43.016z",0,0,72,72); }); }},
     fish: { label:"🐟", draw:function(c,x,y,s){ drawSVGParts(c,x,y,s,"M37.482,0.37c5.961,2.845,9.161,8.451,11.538,14.879 c-2.649,0.018-4.14-1.123-6.983-0.911C40.682,9.519,38.854,5.172,37.482,0.37z M58.131,21.93c-0.53,3.08-2.707,6.247-3.341,10.628 c-1.13,7.819,1.077,16.272,3.341,21.256c-2.814,2.854-7.656,3.681-11.539,5.466c-18.979,1.062-25.627-10.204-34.01-19.737 C8.455,42.803,5.288,47.025,0.74,49.866c0.617-4.264,4.523-7.709,4.555-11.843c0.031-4.111-3.778-7.435-4.555-11.539 c0.971-0.554,2.449,0.983,2.733,2.126c3.476,1.989,5.705,5.227,8.806,7.591c2.965-2.5,5.232-5.7,7.592-8.806 c3.042-1.715,4.937-4.578,8.199-6.073c0.231-0.478,0.963-0.454,0.911-1.214c1.854-0.575,3.859-1,4.858-2.429 C42.98,15.311,52.737,17.781,58.131,21.93z M59.952,23.145c2.947,2.853,14.314,10.326,11.235,17.612 c-1.994,4.719-7.349,8.891-10.932,12.146C54.539,46.63,54.789,29.832,59.952,23.145z M62.989,37.72c0.304,0,0.607,0,0.911,0 c1.891-1.329,1.104-4.522-0.607-5.466C61.792,32.816,60.79,37.043,62.989,37.72z M46.896,61.102c-1.96,4.619-4.891,8.268-9.413,10.324 c0.854-3.498,2.153-6.552,3.34-9.717C43.166,61.825,45.297,61.729,46.896,61.102z","M63.293,32.254c1.712,0.943,2.498,4.137,0.607,5.466 c-0.304,0-0.607,0-0.911,0C60.79,37.043,61.792,32.816,63.293,32.254z",0,0,72,72); }},
     puppy: { label:"🐶", draw:function(c,x,y,s){ drawSVGParts(c,x,y,s,"M59.357,61.183c-0.707-1.62-2.608-2.045-3.49-3.491 c0.024-15.297,0.236-30.782-4.364-41.455c-3.329,2.691-0.162,7.669,0.437,11.782c1.059,7.273,3.026,19.377,1.31,28.364 c-1.45,7.588-8.631,12.104-15.71,14.4c-0.514-3.223-0.859-11.252,0-15.71c2.566-3.474,6.066-4.959,6.109-9.163 c0.091-8.778-14.127-10.011-15.272-1.31c-0.739,5.609,3.715,7.067,6.109,10.473c0,5.236,0,10.473,0,15.71 c-8.381-1.364-11.847-7.645-15.709-13.527c0.011-10.261-0.248-21.079,1.309-30.11c0.652-3.783,3.175-7.996,0.873-10.909 c-2.608,2.271-2.864,6.646-3.491,10.473c-1.437,8.775-1.397,20.052-1.309,30.981c-0.905,1.567-2.948,1.998-3.927,3.491 C5.94,53.84-3.919,44.41,1.321,31.073c1.393-3.545,4.816-7.31,7.854-11.345c6.461-8.584,11.632-16.452,24-17.891 c5.997-0.698,15.677,2.285,19.2,5.236c5.665,4.746,17.133,19.744,19.2,27.491C74.536,45.658,65.701,54.412,59.357,61.183z M29.249,30.637c1.023-1.482,1.023-3.754,0-5.236c-0.727,0-1.455,0-2.182,0C24.854,26.413,25.224,32.014,29.249,30.637z M44.958,30.637c1.625-0.753,1.604-4.036,0.437-5.236c-0.873,0-1.746,0-2.619,0C41.458,26.888,41.337,31.562,44.958,30.637z",null,0,0,72,72); }},
   },
@@ -2944,7 +3309,19 @@ var FINDER_RING_SHAPES = {
   point_tl: makePointedRingShape(0),
   point_tr: makePointedRingShape(1),
   point_br: makePointedRingShape(2),
-  point_bl: makePointedRingShape(3)
+  point_bl: makePointedRingShape(3),
+  // WHY 3 new keys, not replacing 'teardrop' above: Hali -- "the teardrop
+  // outer corner shape can have the same option as the point" -- Point's
+  // own "same option" is 4 separate keys, one per corner, with clicking a
+  // tile BEING the orientation pick (see point_tl's own WHY) -- so this
+  // mirrors that exactly for teardrop. 'teardrop' above is already the
+  // bottom-right-rounded version and stays exactly as-is for every design
+  // that already saved it; these 3 just add the other 3 corners as their
+  // own tiles rather than turning 'teardrop' into a 4th point_* needing a
+  // migration.
+  teardrop_tl: makeTeardropRingShape(0),
+  teardrop_tr: makeTeardropRingShape(1),
+  teardrop_bl: makeTeardropRingShape(3)
 };
 
 // WHY a factory: the four point_* shapes differ only in which corner stays
@@ -2961,10 +3338,26 @@ function makePointedRingShape(cornerIdx) {
     ctx.fill();
   };
 }
+// WHY the mirror-image factory of makePointedRingShape (one corner rounded
+// to the FULL radius, the other three left sharp, instead of three rounded
+// and one sharp): this is literally how the existing 'teardrop' above is
+// built -- see its own WHY -- just generalized to any one of the 4 corners
+// instead of hardcoding BR. cornerIdx order matches roundRectPath's radii
+// array: 0=TL, 1=TR, 2=BR, 3=BL (2 is what plain 'teardrop' already uses).
+function makeTeardropRingShape(cornerIdx) {
+  return function(ctx, cx, cy, r, color) {
+    ctx.fillStyle = color;
+    var radii = [0, 0, 0, 0];
+    radii[cornerIdx] = r;
+    roundRectPath(ctx, cx-r, cy-r, r*2, r*2, radii);
+    ctx.fill();
+  };
+}
 
 var FINDER_STYLE_LABELS = {
-  square: 'Square', rounded: 'Rounded', circle: 'Circle', diamond: 'Diamond', teardrop: 'Teardrop',
-  point_tl: 'Point TL', point_tr: 'Point TR', point_br: 'Point BR', point_bl: 'Point BL'
+  square: 'Square', rounded: 'Rounded', circle: 'Circle', diamond: 'Diamond', teardrop: 'Teardrop BR',
+  point_tl: 'Point TL', point_tr: 'Point TR', point_br: 'Point BR', point_bl: 'Point BL',
+  teardrop_tl: 'Teardrop TL', teardrop_tr: 'Teardrop TR', teardrop_bl: 'Teardrop BL'
 };
 
 // WHY a shared path builder: both rounded() and teardrop() need an
@@ -3185,6 +3578,45 @@ function buildInnerDotPickerFor(gridId, prefix, onSelect) {
     });
     grid.appendChild(row);
   });
+  // WHY a trailing tile built here instead of inside the SHAPE_GROUPS loop
+  // above: Hali -- "the character windows to choose letters and numbers"
+  // for inner dots. 'custom_char' is deliberately kept OUT of SHAPE_GROUPS
+  // (see its own WHY, next to round_point_* -- added straight onto SHAPES
+  // after the flatten loop specifically so grid pickers that iterate
+  // SHAPE_GROUPS never show it as a plain tile), so the main Dot Type grid
+  // never got one either -- there, picking any letter in the 🔤 accordion
+  // IS what turns it on (see syncCustomCharShape's WHY). The Inner Dot
+  // Style grid needs an explicit, directly-clickable tile instead, same as
+  // Quarter/Half's region dropdowns already have (see
+  // buildRegionShapeOptions' WHY) -- clicking it both picks the shape AND
+  // (via the onSelect callbacks below) jumps straight to the shared 🔤
+  // picker retargeted at _finderChars so she can immediately choose what it
+  // draws.
+  var charHeader = document.createElement('div');
+  charHeader.style.cssText='width:100%;font-family:Cinzel,serif;font-size:.6rem;letter-spacing:.1em;color:var(--muted);margin:8px 0 4px;text-transform:uppercase;';
+  charHeader.textContent = 'Characters';
+  grid.appendChild(charHeader);
+  var charRow = document.createElement('div');
+  charRow.style.cssText='display:flex;flex-wrap:wrap;gap:5px;margin-bottom:4px;';
+  var charBtn = document.createElement('div');
+  charBtn.className = 'shape-opt';
+  charBtn.title = 'Letters / Numbers — opens the picker below to choose which';
+  charBtn.dataset.finderKey = 'custom_char';
+  var charCv = document.createElement('canvas');
+  charCv.width = 56; charCv.height = 56;
+  var charCctx = charCv.getContext('2d');
+  charCctx.fillStyle = '#f0ece3';
+  _qrModuleRenderMode = true;
+  SHAPES.custom_char.draw(charCctx, 0, 0, 56, []);
+  _qrModuleRenderMode = false;
+  charBtn.appendChild(charCv);
+  charBtn.onclick = function(){
+    grid.querySelectorAll('.shape-opt').forEach(function(b){ b.classList.remove('selected'); });
+    charBtn.classList.add('selected');
+    onSelect('custom_char');
+  };
+  charRow.appendChild(charBtn);
+  grid.appendChild(charRow);
 }
 
 function setFinderGridSelection(gridId, key) {
@@ -3833,6 +4265,15 @@ var _quarterChars = { q1:[], q2:[], q3:[], q4:[] };
 var _quarterCharsD = { q1:[], q2:[], q3:[], q4:[] };
 var _halfChars = { left:[], right:[] };
 var _halfCharsD = { left:[], right:[] };
+// WHY a separate pool again, same reasoning as quarterChars/halfChars just
+// above: Hali -- "the other thing we're missing for inner dots is the
+// character windows to choose letters and numbers." The finder eye's own
+// Characters pick (buildInnerDotPickerFor's trailing tile) needs its own
+// letters/numbers, independent of the main body's _selectedChars -- a
+// design can want "1,2,3" as the body's dots and a totally different "A"
+// as the eye, and merging them into one shared pool would make that
+// impossible the same way the original un-split quarterChars/halfChars did.
+var _finderChars = { s: [], d: [] };
 // WHY one retargetable accordion per tab instead of building 6 separate
 // full character grids (one per quadrant/side, x2 tabs = 12): the existing
 // 🔤 Characters picker already has every letter/number/symbol as its own
@@ -3852,11 +4293,12 @@ var _charEditTarget = { s:'main', d:'main' };
 function getCharPool(prefix, target) {
   target = target || _charEditTarget[prefix] || 'main';
   if (target === 'main') return _selectedChars[prefix];
+  if (target === 'finder') return _finderChars[prefix];
   if (target === 'left' || target === 'right') return (prefix==='s' ? _halfChars : _halfCharsD)[target];
   return (prefix==='s' ? _quarterChars : _quarterCharsD)[target]; // q1-q4
 }
 function charTargetLabel(target) {
-  return { main:'the main Dot Type picker', q1:'Q1 (top-left)', q2:'Q2 (top-right)', q3:'Q3 (bottom-left)', q4:'Q4 (bottom-right)', left:'Half — Left side', right:'Half — Right side' }[target] || target;
+  return { main:'the main Dot Type picker', finder:'the Inner Dot Style (finder eye)', q1:'Q1 (top-left)', q2:'Q2 (top-right)', q3:'Q3 (bottom-left)', q4:'Q4 (bottom-right)', left:'Half — Left side', right:'Half — Right side' }[target] || target;
 }
 // WHY emoji get their own tracked list instead of folding into
 // _selectedChars: a full-color emoji glyph can't be recolored and isn't a
@@ -4648,14 +5090,22 @@ var _defaultDesignSettings = { s: null, d: null };
 
 document.addEventListener('DOMContentLoaded', function() {
   // WHY: DOM must be ready before getElementById calls can find elements
-  buildShapePickerFor('shape-grid', null, 's', _selectedShape, function(){ scheduleLivePreview('s'); syncDotSizeButtons('s'); });
-  buildShapePickerFor('d-shape-grid', null, 'd', _selectedShapeD, function(){ scheduleLivePreview('d'); syncDotSizeButtons('d'); });
+  buildShapePickerFor('shape-grid', null, 's', _selectedShape, function(){ scheduleLivePreview('s'); syncDotSizeButtons('s'); syncCrescentOrientationTiles('s'); syncShapeReflectButtons('s'); });
+  buildShapePickerFor('d-shape-grid', null, 'd', _selectedShapeD, function(){ scheduleLivePreview('d'); syncDotSizeButtons('d'); syncCrescentOrientationTiles('d'); syncShapeReflectButtons('d'); });
   populateQuarterSelects('s');
   populateQuarterSelects('d');
   populateHalfSelects('s');
   populateHalfSelects('d');
   syncShapeDistButtons('s');
   syncShapeDistButtons('d');
+  // WHY needed at load, not just on click: without this the tiles paint
+  // with no .active state at all (not even the ['tr'] default) until the
+  // first click or design load triggers a sync -- same reasoning as the
+  // syncShapeDistButtons calls just above.
+  syncCrescentOrientationTiles('s');
+  syncCrescentOrientationTiles('d');
+  syncShapeReflectButtons('s');
+  syncShapeReflectButtons('d');
   // WHY branch into a per-corner override when Asymmetric Corners is on:
   // these are the SAME Corner Style / Inner Dot Style grids that have
   // always existed -- Asymmetric Corners reuses them rather than building
@@ -4672,14 +5122,29 @@ document.addEventListener('DOMContentLoaded', function() {
     else _finderStyleD = key;
     scheduleLivePreview('d');
   });
+  // WHY syncCrescentOrientationTiles + the 'custom_char' branch added here:
+  // Hali -- "I need it also for the inner dots" (Crescent Orientation) and
+  // "the character windows to choose letters and numbers" (for inner dots)
+  // -- both land on THIS same onSelect, since it's the one place a pick
+  // actually becomes the finder eye's shape (global or per-corner). Picking
+  // Crescent re-checks the orientation row's visibility; picking the
+  // trailing Characters tile (see buildInnerDotPickerFor's own WHY) opens
+  // the shared 🔤 picker retargeted at _finderChars, same as a Quarter/Half
+  // region picking 'custom_char' already does via revealCharPicker.
   buildInnerDotPickerFor('finder-dot-style-grid', 's', function(key){
     if (_asymmetricCorners.s) _finderDotStyleCorner.s[_activeCornerEdit.s] = key;
     else _finderDotStyle = key;
+    syncCrescentOrientationTiles('s');
+    syncShapeReflectButtons('s');
+    if (key === 'custom_char') revealCharPicker('s', 'finder');
     scheduleLivePreview('s');
   });
   buildInnerDotPickerFor('d-finder-dot-style-grid', 'd', function(key){
     if (_asymmetricCorners.d) _finderDotStyleCorner.d[_activeCornerEdit.d] = key;
     else _finderDotStyleD = key;
+    syncCrescentOrientationTiles('d');
+    syncShapeReflectButtons('d');
+    if (key === 'custom_char') revealCharPicker('d', 'finder');
     scheduleLivePreview('d');
   });
   buildFrameShapePickerFor('frame-shape-grid', 's', function(key){ _frameShape=key; updateEmojiFrameStatus('s'); scheduleLivePreview('s'); });
@@ -4822,6 +5287,17 @@ var _activeCornerEdit = { s: 'tl', d: 'tl' };
 // defaulting each corner to 0 (no size change).
 var _finderStyleCorner = { s: {tl:null,tr:null,bl:null}, d: {tl:null,tr:null,bl:null} };
 var _finderDotStyleCorner = { s: {tl:null,tr:null,bl:null}, d: {tl:null,tr:null,bl:null} };
+// WHY a per-corner override here too, same null="inherit" shape: Hali --
+// "the cresent in the inner dot should be all uniform unless aysemetric is
+// clicked and they are choosing specifically for each corner." Without
+// this, every corner's Inner Dot Style orientation was ALWAYS the one
+// shared _crescentOrientation pool, with no way to give Corner 2 a
+// different orientation than Corner 1 even with Asymmetric Corners on --
+// this is what setActiveCornerEdit's own crescent tiles should actually
+// write to while that toggle is on (see toggleCrescentOrientation's WHY).
+// null means "no override yet, inherit the shared pool," exactly like
+// _finderDotStyleCorner above.
+var _crescentOrientationCorner = { s: {tl:null,tr:null,bl:null}, d: {tl:null,tr:null,bl:null} };
 var _finderCornerSize = { s: {tl:0,tr:0,bl:0}, d: {tl:0,tr:0,bl:0} };
 var _randomCornerSizing = { s:false, d:false };
 // WHY a per-corner COLOR override too, same null="inherit" shape as
@@ -4880,6 +5356,12 @@ function syncAsymmetricCornersUI(prefix) {
       applyFinderColorSnapshot('inner', prefix, getEffFinderColorSnapshot('inner', prefix, null));
     }
   }
+  // WHY here too: turning Asymmetric Corners off can change whether the
+  // finder eye currently resolves to Crescent (it now reads the shared
+  // global Inner Dot Style instead of whichever corner was active) -- the
+  // Inner Dot Style orientation row needs re-checking either way.
+  syncCrescentOrientationTiles(prefix);
+  syncShapeReflectButtons(prefix);
 }
 
 // WHY re-point the grids + slider here, not inside the tab buttons' onclick
@@ -4911,6 +5393,12 @@ function setActiveCornerEdit(prefix, corner) {
     applyFinderColorSnapshot('outer', prefix, getEffFinderColorSnapshot('outer', prefix, corner));
     applyFinderColorSnapshot('inner', prefix, getEffFinderColorSnapshot('inner', prefix, corner));
   }
+  // WHY here too: switching which corner tab is active can change whether
+  // THAT corner's own Inner Dot Style override resolves to Crescent, so
+  // the orientation row's visibility has to be re-checked on every tab
+  // switch, not just when a style is actually picked.
+  syncCrescentOrientationTiles(prefix);
+  syncShapeReflectButtons(prefix);
 }
 
 // WHY corner can be null here (called that way from syncAsymmetricCornersUI's
@@ -5055,6 +5543,194 @@ function setStretchDir(prefix, axis, checked) {
   prefix = prefix || 's';
   _stretchDir[prefix][axis] = !!checked;
   if (typeof scheduleLivePreview==='function') scheduleLivePreview(prefix);
+}
+
+// WHY a per-tab ARRAY now, not the single string this shipped with: Hali --
+// "it should be top right, top left, bottom right, bottom left...we need to
+// be able to select all of them if we wanted to have them randomly all
+// together." ['tr'] is the crescent artwork's own native, un-rotated corner
+// (see CRESCENT_ORIENTATION_ANGLES' WHY) -- same single-entry default as
+// before, just in the new shape, so every live default still reproduces the
+// exact same look it always has.
+var _crescentOrientation = { s: ['tr'], d: ['tr'] };
+// WHY a lookup table instead of inlining this everywhere it's needed
+// (resolveRenderSettings' saved-design branch, applyDesignSettings): a
+// design saved before this existed has crescentOrientation as either
+// nothing at all, an old single cardinal string ('right' etc, pre-rename),
+// or (going forward) the new array -- one function so every reader
+// normalizes it exactly the same way, never silently drifting apart.
+function normalizeCrescentOrientation(value) {
+  if (Array.isArray(value) && value.length) return value;
+  if (typeof value === 'string' && value) return [ CRESCENT_ORIENTATION_MIGRATE[value] || value ];
+  return ['tr'];
+}
+// WHY a 3rd 'context' param now: Hali -- "the cresent in the inner dot
+// should be all uniform unless aysemetric is clicked and they are choosing
+// specifically for each corner." The main Dot Type row always edits the one
+// shared pool (context left undefined). The Inner Dot Style row passes
+// 'finder' -- while Asymmetric Corners is OFF that still means the shared
+// pool (so every corner stays uniform, see renderQRCore's finder pass), but
+// once it's ON, a finder-row click edits ONLY the currently-active corner's
+// own override (_crescentOrientationCorner), same per-corner-override shape
+// _finderDotStyleCorner already uses. First edit for a corner starts from a
+// COPY of the shared pool (not empty), so toggling one orientation off
+// there doesn't suddenly leave that corner with zero.
+function toggleCrescentOrientation(prefix, key, context) {
+  prefix = prefix || 's';
+  var perCorner = context === 'finder' && _asymmetricCorners[prefix];
+  var corner = perCorner ? _activeCornerEdit[prefix] : null;
+  var cornerStore = perCorner ? _crescentOrientationCorner[prefix] : null;
+  if (perCorner && !cornerStore[corner]) cornerStore[corner] = _crescentOrientation[prefix].slice();
+  var arr = perCorner ? cornerStore[corner] : _crescentOrientation[prefix];
+  // WHY single-select only here, for the Inner Dot Style's own orientation
+  // (context 'finder') -- unlike the main Dot Type row just below, which
+  // stays multi-select/toggle: Hali -- "for inner dots only allow one
+  // orientation to be selected for corners." Each finder eye is drawn
+  // exactly ONCE per render, so multiple picked orientations there don't
+  // create visual variety the way they do across many body dots -- they
+  // just give pinCrescentForFinder (see its own WHY) more than one option
+  // to randomly re-roll BETWEEN separate render calls (the live preview,
+  // the floating zoom lens, and the final Generate/download render each
+  // call renderQRCore independently) -- so the exact same corner could
+  // show a different orientation in each one. Replacing the whole
+  // selection instead of toggling it keeps exactly one orientation active
+  // here at all times, so every render of that eye is identical.
+  if (context === 'finder') {
+    arr.length = 0;
+    arr.push(key);
+    syncCrescentOrientationTiles(prefix);
+    if (typeof scheduleLivePreview==='function') scheduleLivePreview(prefix);
+    return;
+  }
+  var idx = arr.indexOf(key);
+  if (idx > -1) {
+    if (arr.length === 1) { if (typeof toast==='function') toast('Pick at least one orientation.','err'); return; }
+    arr.splice(idx, 1);
+  } else {
+    arr.push(key);
+  }
+  syncCrescentOrientationTiles(prefix);
+  if (typeof scheduleLivePreview==='function') scheduleLivePreview(prefix);
+}
+// WHY two independent visibility checks instead of one: a design can use
+// Crescent as a regular Dot Type without it being the finder eye's shape
+// too, or the other way around -- each row should only show when ITS OWN
+// context actually draws a crescent. The 'finder' check mirrors
+// buildInnerDotPickerFor's own onSelect branching for Asymmetric Corners:
+// when corners are split, only the corner currently being edited matters.
+function isCrescentInUse(prefix, context) {
+  prefix = prefix || 's';
+  // WHY ORIENTABLE_SHAPES.indexOf, not === 'crescent': Hali asked lips,
+  // right_triangle, classy, parallelogram and lightning to all get "the
+  // same options as the crescent moon" -- see ORIENTABLE_SHAPES' own WHY.
+  // Name kept (isCrescentInUse, not renamed) since this started as
+  // crescent-only and every caller already knows it by this name.
+  if (context === 'finder') {
+    if (_asymmetricCorners[prefix]) {
+      return ORIENTABLE_SHAPES.indexOf(_finderDotStyleCorner[prefix][_activeCornerEdit[prefix]]) > -1;
+    }
+    return ORIENTABLE_SHAPES.indexOf(prefix==='s' ? _finderDotStyle : _finderDotStyleD) > -1;
+  }
+  var shapesArr = prefix==='s' ? _selectedShape : _selectedShapeD;
+  return shapesArr.some(function(k){ return ORIENTABLE_SHAPES.indexOf(k) > -1; });
+}
+// WHY a lookup function instead of inlining this in syncCrescentOrientationTiles
+// AND renderQRCore's finder pass: both need the exact same "which pool
+// applies right now" answer -- the active corner's own override while
+// Asymmetric Corners is on and that corner has one, the shared pool
+// otherwise -- and they must never compute it two different ways.
+function effectiveCrescentOrientation(prefix, context) {
+  prefix = prefix || 's';
+  if (context === 'finder' && _asymmetricCorners[prefix]) {
+    var override = _crescentOrientationCorner[prefix][_activeCornerEdit[prefix]];
+    if (override && override.length) return override;
+  }
+  return _crescentOrientation[prefix];
+}
+// WHY one function re-syncing BOTH rows every call, not two separate
+// functions: a toggle click, shape pick, finder pick, corner-tab switch, or
+// design load can change either row's own pool, visibility, or both, so
+// both get re-checked together every time, same reasoning as
+// syncDotSizeButtons only showing Choose Variation while Vary is active.
+function syncCrescentOrientationTiles(prefix) {
+  prefix = prefix || 's';
+  [
+    { rowId: prefix==='s' ? 's-crescent-orientation-row' : 'd-crescent-orientation-row', visible: isCrescentInUse(prefix, 'main'), picked: effectiveCrescentOrientation(prefix, 'main') },
+    { rowId: prefix==='s' ? 's-finder-crescent-orientation-row' : 'd-finder-crescent-orientation-row', visible: isCrescentInUse(prefix, 'finder'), picked: effectiveCrescentOrientation(prefix, 'finder') }
+  ].forEach(function(cfg){
+    var row = document.getElementById(cfg.rowId);
+    if (!row) return;
+    row.style.display = cfg.visible ? 'flex' : 'none';
+    row.querySelectorAll('.crescent-orient-btn').forEach(function(btn){
+      // WHY .active, not .selected: these ARE .vary-dot-btn tiles (same
+      // class the Stretch/Vary/Random-distribution buttons use) -- .active
+      // is the class its own CSS already highlights (box-shadow ring), and
+      // reusing it keeps one visual language for every toggle button in
+      // this UI instead of inventing a second state class just for these.
+      btn.classList.toggle('active', cfg.picked.indexOf(btn.dataset.orient) > -1);
+    });
+  });
+}
+
+// WHY a per-tab {shapeKey: bool} object, not an array like
+// _crescentOrientation: this is one simple on/off flag per shape (Hali --
+// "a reflect image button"), not a multi-pick pool -- see
+// REFLECTABLE_SHAPE_KEYS' own WHY. Missing/undefined for a key means "not
+// reflected", same as every other boolean-flag default in this file.
+var _shapeReflect = { s: {}, d: {} };
+function toggleShapeReflect(prefix, key) {
+  prefix = prefix || 's';
+  _shapeReflect[prefix][key] = !_shapeReflect[prefix][key];
+  syncShapeReflectButtons(prefix);
+  if (typeof scheduleLivePreview==='function') scheduleLivePreview(prefix);
+}
+// WHY an optional context ('main'/'finder'), same shape as isCrescentInUse:
+// the main Dot Type row should only list reflectable shapes actually picked
+// as a body dot type; the Inner Dot Style row should only list whichever
+// one is currently the finder eye (global, or the active corner's own
+// override under Asymmetric Corners). The underlying flag is still ONE
+// shared value per shape key either way -- toggling it from either row
+// affects every place that shape draws.
+function shapeReflectKeysInUse(prefix, context) {
+  prefix = prefix || 's';
+  var set = {};
+  if (context !== 'finder') {
+    (prefix==='s' ? _selectedShape : _selectedShapeD).forEach(function(k){ set[k] = 1; });
+  }
+  if (context !== 'main') {
+    if (_asymmetricCorners[prefix]) {
+      var corner = _finderDotStyleCorner[prefix];
+      var globalFinder = prefix==='s' ? _finderDotStyle : _finderDotStyleD;
+      ['tl','tr','bl'].forEach(function(c){ set[corner[c] || globalFinder] = 1; });
+    } else {
+      set[prefix==='s' ? _finderDotStyle : _finderDotStyleD] = 1;
+    }
+  }
+  return REFLECTABLE_SHAPE_KEYS.filter(function(k){ return set[k]; });
+}
+// WHY rebuilding the row's HTML every call instead of toggling .active on
+// static buttons (like syncCrescentOrientationTiles does): the crescent
+// orientation row always shows the same fixed 4 tiles, but which reflect
+// toggles should even APPEAR here changes with which reflectable shapes are
+// currently selected -- there's no fixed button set to just show/hide.
+function syncShapeReflectButtons(prefix) {
+  prefix = prefix || 's';
+  [
+    { rowId: prefix==='s' ? 's-shape-reflect-row' : 'd-shape-reflect-row', context: 'main' },
+    { rowId: prefix==='s' ? 's-finder-shape-reflect-row' : 'd-finder-shape-reflect-row', context: 'finder' }
+  ].forEach(function(cfg){
+    var row = document.getElementById(cfg.rowId);
+    if (!row) return;
+    var keys = shapeReflectKeysInUse(prefix, cfg.context);
+    if (!keys.length) { row.style.display = 'none'; row.innerHTML = ''; return; }
+    row.style.display = 'flex';
+    row.innerHTML = '<span style="width:100%;font-size:.76rem;color:var(--muted);">Reflect (mirror horizontally):</span>' +
+      keys.map(function(k){
+        var label = (SHAPES[k] && SHAPES[k].label) || '';
+        var on = !!_shapeReflect[prefix][k];
+        return '<button type="button" class="vary-dot-btn shape-reflect-btn'+(on?' active':'')+'" onclick="toggleShapeReflect(\''+prefix+'\',\''+k+'\')" style="padding:6px 12px;font-size:.72rem;">'+escapeHtml(label)+' Reflect</button>';
+      }).join('');
+  });
 }
 
 // WHY a per-tab string, same gradient-direction value set the body/finder
@@ -5710,6 +6386,28 @@ function resolveRenderSettings(prefix) {
     return {
       shape: shapesArr[0], // WHY kept too: a couple of call sites (e.g. FRAME_SHAPE_OPTIONS preview swatches) only ever want "a" representative shape, not the full mix
       shapes: shapesArr,
+      // WHY normalizeCrescentOrientation, not a plain fallback: a design
+      // saved before Crescent Orientation existed has no field at all; one
+      // saved under the original cardinal-string version has an old
+      // 'right'/'down'/'left'/'up' value; one saved since the multi-select
+      // rename has an array -- this maps all three to today's array shape
+      // (see its own WHY), so an old saved design keeps rendering exactly
+      // as it did either way.
+      crescentOrientation: normalizeCrescentOrientation(d.crescentOrientation),
+      // WHY null-per-corner, same inherit shape as finderDotStyleCorner just
+      // below: a design saved before per-corner crescent orientation existed
+      // has no field at all -- null means "no override, use the shared pool
+      // above," so an old design (or any corner she's never specifically
+      // touched) keeps looking uniform exactly as intended.
+      crescentOrientationCorner: {
+        tl: (d.crescentOrientationCorner && Array.isArray(d.crescentOrientationCorner.tl) && d.crescentOrientationCorner.tl.length) ? d.crescentOrientationCorner.tl : null,
+        tr: (d.crescentOrientationCorner && Array.isArray(d.crescentOrientationCorner.tr) && d.crescentOrientationCorner.tr.length) ? d.crescentOrientationCorner.tr : null,
+        bl: (d.crescentOrientationCorner && Array.isArray(d.crescentOrientationCorner.bl) && d.crescentOrientationCorner.bl.length) ? d.crescentOrientationCorner.bl : null
+      },
+      // WHY default {}: a design saved before the Reflect toggle existed
+      // has no field at all -- an empty object means every shape's flag
+      // reads as falsy (not reflected), exactly how it always rendered.
+      shapeReflect: (d.shapeReflect && typeof d.shapeReflect === 'object') ? d.shapeReflect : {},
       colorMode: d.colorMode || 'solid',
       finderStyle: d.finderStyle || 'square',
       // WHY fall back to finderStyle, not 'square': a design saved before
@@ -5839,6 +6537,14 @@ function resolveRenderSettings(prefix) {
       // time it's loaded — on the dashboard thumbnail, a paid download, or
       // re-opening Redesign — not just in the same live session it was built in.
       chars: Array.isArray(d.chars) ? d.chars : [],
+      // WHY a SEPARATE pool, same reasoning as quarterChars/halfChars not
+      // sharing _selectedChars: Hali -- "the character windows to choose
+      // letters and numbers" for inner dots. A design saved before this
+      // existed has no field at all, so it falls back empty -- the finder
+      // eye just shows the ★ placeholder (see SHAPES.custom_char) exactly
+      // as it would have with nothing chosen, nothing silently inherits
+      // the main body's own letters/numbers.
+      finderChars: Array.isArray(d.finderChars) ? d.finderChars : [],
       emoji: Array.isArray(d.emoji) ? d.emoji : [],
       // WHY fall back to the original fixed look (1.4x / 65%): a design
       // saved before these sliders existed has neither field, and should
@@ -5926,6 +6632,9 @@ function resolveRenderSettings(prefix) {
   return {
     shape: liveShapes[0] || 'square',
     shapes: liveShapes,
+    crescentOrientation: _crescentOrientation[prefix],
+    crescentOrientationCorner: { tl: _crescentOrientationCorner[prefix].tl, tr: _crescentOrientationCorner[prefix].tr, bl: _crescentOrientationCorner[prefix].bl },
+    shapeReflect: _shapeReflect[prefix] || {},
     colorMode: prefix==='s' ? _colorMode : _colorModeD,
     finderStyle: prefix==='s' ? _finderStyle : _finderStyleD,
     finderDotStyle: prefix==='s' ? _finderDotStyle : _finderDotStyleD,
@@ -5947,6 +6656,7 @@ function resolveRenderSettings(prefix) {
     halfChars: prefix==='s' ? _halfChars : _halfCharsD,
     frameScatter: !!(document.getElementById(prefix+'-frame-scatter') && document.getElementById(prefix+'-frame-scatter').checked),
     chars: _selectedChars[prefix] || [],
+    finderChars: _finderChars[prefix] || [],
     emoji: _selectedEmoji[prefix] || [],
     emojiSize: _emojiSize[prefix],
     emojiDensity: _emojiDensity[prefix],
@@ -6597,23 +7307,75 @@ function drawFrame(ctx, size, innerX0, innerY0, innerX1, innerY1, cellSize, fg, 
   // random cells at the real pattern's rough density makes the border
   // actually look like QR-style scatter instead of a solid mass.
   var FILLER_DENSITY = 0.5;
-  // WHY a hairline buffer (0.1 modules) instead of a literal 0, even
-  // though Hali asked for NO visible outline at all ("the random dots
-  // that fill that in should scatter within that band so it is clean"):
-  // I tried a true 0 first and re-ran it through the scan-reliability
-  // test harness (scan_test_7frames.py) before shipping anything, same
-  // as every other qz change in this file -- at 0 the classic QR
-  // detector's pass rate dropped from 25/28 to 18/28 across the 7 frame
-  // shapes x 4 sizes (the aruco detector barely moved: 28/28 -> 27/28).
-  // At 0.1 modules it's back to 25/28 classic + 28/28 aruco -- identical
-  // to the previous 0.5-module setting -- while being roughly a tenth
-  // the width of what was there before: at normal render sizes that's a
-  // fraction of a pixel, well under what the eye reads as a border, so
-  // it still delivers the "clean, no outline" look. A true 0 is one
-  // character away (set qz to 0) if ever wanted despite the lower
-  // measured scan reliability.
-  var qz = cellSize * 0.1;
-  var qzX0 = innerX0-qz, qzY0 = innerY0-qz, qzX1 = innerX1+qz, qzY1 = innerY1+qz;
+  // WHY a literal 0, not the earlier cellSize*0.1 buffer: once the filler
+  // grid's phase was locked to the real QR's own module grid (see
+  // originX/originY's WHY below), the two edges that already landed on
+  // that phase butted up against the real QR with zero gap and looked
+  // right to Hali -- so she asked for ALL edges that tight, not just the
+  // two that happened to fall that way before the fix. This DOES cost
+  // some classic-detector scan reliability vs. the old 0.1-module
+  // buffer (measured via scan_test_7frames.py) -- a known, accepted
+  // tradeoff, not an oversight; raise it toward cellSize*0.1 again if
+  // scan reports ever come back from real-world prints.
+  //
+  // WHY a tiny FLOOR_EPS matters even at qz=0 (see the overlap check
+  // just below, not here): innerX0/innerY0/innerX1/innerY1 come out of
+  // a ternary+binary search (computeFrameInnerBox), so a boundary that
+  // is "supposed to" land exactly on a cellSize multiple actually lands
+  // a few ULPs off it (measured: ~3e-14px), and which SIDE of zero that
+  // tiny noise falls on is effectively a coin flip per render. A plain
+  // `fx+cellSize > qzX0` overlap test treats "touching" and "overlapping
+  // by 1px" identically -- all-or-nothing, no partial exclusion -- so
+  // whichever way that coin flip lands, the adjacent filler cell either
+  // draws flush (noise landed positive) or gets thrown out ENTIRELY,
+  // pushing the visible gap out by a full cellSize (noise landed
+  // negative). That's what made a bare qz=0 look fine on some
+  // sides/sizes/shapes and randomly gapped on others. FLOOR_EPS shrinks
+  // the exclusion box by a hair -- far above the ~1e-13 noise floor, far
+  // below anything an eye or a print head resolves -- so "touching with
+  // ~0 overlap" reliably reads as OUTSIDE the exclusion zone (cell
+  // drawn, flush) no matter which way the noise falls, while a cell
+  // that's actually overlapping the real QR box by more than a hair is
+  // still correctly excluded.
+  var qz = 0;
+  var FLOOR_EPS = 0.01;
+  var qzX0 = innerX0-qz+FLOOR_EPS, qzY0 = innerY0-qz+FLOOR_EPS, qzX1 = innerX1+qz-FLOOR_EPS, qzY1 = innerY1+qz-FLOOR_EPS;
+  // WHY a SEPARATE, wider check (BOUNDARY_RING) that flags cells for
+  // shrinking instead of excluding them: a real-world test (classic
+  // decoders, not just the aruco-style one) showed that ink touching the
+  // real QR's quiet zone with literally zero gap breaks scanning almost
+  // completely (measured 0/28 across 7 frame shapes x 4 sizes), but
+  // excluding the whole first ring of filler cells (any qz>0, even a
+  // tiny one -- this check is all-or-nothing per cell, no partial
+  // exclusion) jumps straight to a FULL cellSize gap, which is what Hali
+  // is now asking to shrink. The middle ground: don't exclude this ring,
+  // just draw it SMALLER and centered in its own cell (see the shrink
+  // applied at each single-cell draw site below) -- that opens a real,
+  // if much thinner, blank margin right where it matters without losing
+  // the whole ring. BOUNDARY_RING is intentionally wider than the real
+  // box (by one cellSize) so this also blocks Stretch/Vary from grouping
+  // a full-size block across that ring -- a grouped shape can't be
+  // individually shrunk without looking broken, so those cells fall back
+  // to single-cell draws instead (see canGroup/fRectOkV below).
+  var BOUNDARY_RING0X = innerX0 - cellSize, BOUNDARY_RING0Y = innerY0 - cellSize;
+  var BOUNDARY_RING1X = innerX1 + cellSize, BOUNDARY_RING1Y = innerY1 + cellSize;
+  function isBoundaryRing(fx, fy) {
+    return (fx+cellSize > qzX0 && fx < qzX1 && fy+cellSize > BOUNDARY_RING0Y && fy < BOUNDARY_RING1Y)
+        || (fy+cellSize > qzY0 && fy < qzY1 && fx+cellSize > BOUNDARY_RING0X && fx < BOUNDARY_RING1X);
+  }
+  // WHY 0.62, found by testing against scan_test_7frames.py, not
+  // guessed: at a literal 0 (no shrink at all) the classic detector
+  // failed almost everything (0/28 shape/size combos); at 0.62 it's
+  // back to 23/28 (vs. 25/28 for the old full-cellSize gap this
+  // replaces) with the aruco-style detector basically unaffected either
+  // way (25/28 here vs 27-28/28 before) -- close enough to the original
+  // reliability that it's worth the much tighter look.
+  var BOUNDARY_SHRINK = 0.62;
+  function shrinkBoundaryCell(fx, fy, s) {
+    var ns = s * BOUNDARY_SHRINK;
+    var off = (s - ns) / 2;
+    return { x: fx + off, y: fy + off, s: ns };
+  }
   var fillerKeys = (moduleShapeKeys && moduleShapeKeys.length) ? moduleShapeKeys : ['dot'];
   var emojiList = emoji || [];
   // WHY these come in as params now (was a fixed 0.65 share / 1.4x size):
@@ -6637,13 +7399,32 @@ function drawFrame(ctx, size, innerX0, innerY0, innerX1, innerY1, cellSize, fg, 
   // (see the qz skip just below) -- a scanner's sample grid never reaches
   // them, so there's no gap-exposes-background risk to guard against, and
   // any shape can group freely under either mode.
-  var fCols = Math.ceil((size - 2*strokeW) / cellSize);
-  var fRows = fCols;
+  // WHY phase-align the filler grid to the real QR's own module grid
+  // (innerX0/innerY0), instead of anchoring it at the canvas's fixed
+  // strokeW inset like every fx/fy below used to: Hali -- "the right side
+  // and bottom side... lines up very well... whereas the left and top,
+  // there is still a gap." strokeW is just a tiny fixed inset near the
+  // canvas edge, with no relationship to where the real QR box actually
+  // sits -- so the filler grid's phase relative to the real grid was
+  // essentially arbitrary, and the leftover sub-cellSize remainder from
+  // however many whole filler cells fit between that anchor and the quiet
+  // zone landed wherever it landed: tight against the real QR on one side,
+  // a whole extra cellSize looser on the other, EVERY render, not just
+  // sometimes (hence "any QR code"). originX/originY are the closest point
+  // to strokeW that's an exact cellSize multiple away from innerX0/innerY0
+  // -- so every filler cell falls on the SAME grid lines the real modules
+  // use, extended outward in both directions, and the gap against the
+  // quiet zone comes out identical on every side.
+  var originX = innerX0 - Math.ceil((innerX0 - strokeW) / cellSize) * cellSize;
+  var originY = innerY0 - Math.ceil((innerY0 - strokeW) / cellSize) * cellSize;
+  var fCols = Math.ceil((size - strokeW - originX) / cellSize);
+  var fRows = Math.ceil((size - strokeW - originY) / cellSize);
   var fillerOn = []; // true = eligible, density-rolled, still needs its shape drawn (grouped or single)
-  for (var fr = 0; fr < fRows; fr++) fillerOn.push(new Array(fCols).fill(false));
+  var fillerBoundary = []; // true = this cell touches the real QR box -- draw shrunk+alone, see shrinkBoundaryCell's WHY
+  for (var fr = 0; fr < fRows; fr++) { fillerOn.push(new Array(fCols).fill(false)); fillerBoundary.push(new Array(fCols).fill(false)); }
   for (var fr = 0; fr < fRows; fr++) {
     for (var fc = 0; fc < fCols; fc++) {
-      var fx = strokeW + fc*cellSize, fy = strokeW + fr*cellSize;
+      var fx = originX + fc*cellSize, fy = originY + fr*cellSize;
       if (fx >= size-strokeW || fy >= size-strokeW) continue;
       if (fx+cellSize > qzX0 && fx < qzX1 && fy+cellSize > qzY0 && fy < qzY1) continue; // inside the real QR box + quiet zone — never touch it
       if (!maskHasPoint(mask, size, fx+cellSize/2, fy+cellSize/2)) continue; // outside the silhouette
@@ -6659,6 +7440,7 @@ function drawFrame(ctx, size, innerX0, innerY0, innerX1, innerY1, cellSize, fg, 
         drawEmoji(dctx, ecx-eSize/2, ecy-eSize/2, eSize, emojiList[Math.floor(Math.random()*emojiList.length)]);
       } else {
         fillerOn[fr][fc] = true;
+        fillerBoundary[fr][fc] = isBoundaryRing(fx, fy);
       }
     }
   }
@@ -6670,25 +7452,38 @@ function drawFrame(ctx, size, innerX0, innerY0, innerX1, innerY1, cellSize, fg, 
     var fUsed = [];
     for (var sur=0; sur<fRows; sur++) fUsed.push(new Array(fCols).fill(false));
     function fCellOk(r,c) { return r>=0 && r<fRows && c>=0 && c<fCols && !fUsed[r][c] && !!fillerOn[r][c]; }
+    // WHY a separate "ok to GROW a group into" check: a boundary-ring
+    // cell gets shrunk+centered when drawn alone (see shrinkBoundaryCell's
+    // WHY) -- a shape can't be shrunk like that once it's merged into a
+    // multi-cell block, so a group is never allowed to start on, or
+    // extend into, one of these cells. It still gets its own single-cell
+    // draw, just never absorbed into a bigger shape.
+    function fCellOkGrow(r,c) { return fCellOk(r,c) && !fillerBoundary[r][c]; }
     for (var sgrow=0; sgrow<fRows; sgrow++) {
       for (var sgcol=0; sgcol<fCols; sgcol++) {
         if (!fCellOk(sgrow,sgcol)) continue;
         var sgKey = pickRegionAwareShape(sgrow, sgcol, fRows, fCols, fillerKeys, dist, quarterShapes, halfShapes, frameScatter);
         var sgChars = pickCharsForRegion(sgKey, sgrow, sgcol, fRows, fCols, dist, quarterChars, halfChars, chars, frameScatter);
         var sgw=1, sgh=1;
-        if (fCellOk(sgrow,sgcol+1) && fCellOk(sgrow+1,sgcol) && fCellOk(sgrow+1,sgcol+1)) { sgw=2; sgh=2; }
-        else if (stretchH && fCellOk(sgrow,sgcol+1) && fCellOk(sgrow,sgcol+2) && fCellOk(sgrow,sgcol+3)) { sgw=4; sgh=1; }
-        else if (stretchV && fCellOk(sgrow+1,sgcol) && fCellOk(sgrow+2,sgcol) && fCellOk(sgrow+3,sgcol)) { sgw=1; sgh=4; }
-        else if (stretchH && fCellOk(sgrow,sgcol+1) && fCellOk(sgrow,sgcol+2)) { sgw=3; sgh=1; }
-        else if (stretchV && fCellOk(sgrow+1,sgcol) && fCellOk(sgrow+2,sgcol)) { sgw=1; sgh=3; }
-        else if (stretchH && fCellOk(sgrow,sgcol+1)) { sgw=2; sgh=1; }
-        else if (stretchV && fCellOk(sgrow+1,sgcol)) { sgw=1; sgh=2; }
+        var sgCanGrow = !fillerBoundary[sgrow][sgcol];
+        if (sgCanGrow && fCellOkGrow(sgrow,sgcol+1) && fCellOkGrow(sgrow+1,sgcol) && fCellOkGrow(sgrow+1,sgcol+1)) { sgw=2; sgh=2; }
+        else if (sgCanGrow && stretchH && fCellOkGrow(sgrow,sgcol+1) && fCellOkGrow(sgrow,sgcol+2) && fCellOkGrow(sgrow,sgcol+3)) { sgw=4; sgh=1; }
+        else if (sgCanGrow && stretchV && fCellOkGrow(sgrow+1,sgcol) && fCellOkGrow(sgrow+2,sgcol) && fCellOkGrow(sgrow+3,sgcol)) { sgw=1; sgh=4; }
+        else if (sgCanGrow && stretchH && fCellOkGrow(sgrow,sgcol+1) && fCellOkGrow(sgrow,sgcol+2)) { sgw=3; sgh=1; }
+        else if (sgCanGrow && stretchV && fCellOkGrow(sgrow+1,sgcol) && fCellOkGrow(sgrow+2,sgcol)) { sgw=1; sgh=3; }
+        else if (sgCanGrow && stretchH && fCellOkGrow(sgrow,sgcol+1)) { sgw=2; sgh=1; }
+        else if (sgCanGrow && stretchV && fCellOkGrow(sgrow+1,sgcol)) { sgw=1; sgh=2; }
         for (var smr=0; smr<sgh; smr++) for (var smc=0; smc<sgw; smc++) fUsed[sgrow+smr][sgcol+smc] = true;
-        var sgx = strokeW + sgcol*cellSize, sgy = strokeW + sgrow*cellSize;
+        var sgx = originX + sgcol*cellSize, sgy = originY + sgrow*cellSize;
         dctx.fillStyle = fg;
         if (sgw===1 && sgh===1) {
           var sgDef = SHAPES[sgKey] || SHAPES['dot'];
-          sgDef.draw(dctx, sgx, sgy, cellSize, sgChars || []);
+          if (fillerBoundary[sgrow][sgcol]) {
+            var sgShrunk = shrinkBoundaryCell(sgx, sgy, cellSize);
+            sgDef.draw(dctx, sgShrunk.x, sgShrunk.y, sgShrunk.s, sgChars || []);
+          } else {
+            sgDef.draw(dctx, sgx, sgy, cellSize, sgChars || []);
+          }
         } else {
           drawShapeFittedRect(dctx, sgKey, sgx, sgy, sgw*cellSize, sgh*cellSize, sgChars);
         }
@@ -6703,8 +7498,12 @@ function drawFrame(ctx, size, innerX0, innerY0, innerX1, innerY1, cellSize, fg, 
     var fUsedV = [];
     for (var uvr=0; uvr<fRows; uvr++) fUsedV.push(new Array(fCols).fill(false));
     function fCellOkV(r,c) { return r>=0 && r<fRows && c>=0 && c<fCols && !fUsedV[r][c] && !!fillerOn[r][c]; }
+    // WHY also checks fillerBoundary: same reasoning as stretch's
+    // fCellOkGrow just above -- a boundary-ring cell always falls back
+    // to its own shrunk single-cell draw, never absorbed into a 2x2/3x3
+    // Vary cluster.
     function fRectOkV(r,c,w,h) {
-      for (var rr=0; rr<h; rr++) for (var cc=0; cc<w; cc++) if (!fCellOkV(r+rr,c+cc)) return false;
+      for (var rr=0; rr<h; rr++) for (var cc=0; cc<w; cc++) { if (!fCellOkV(r+rr,c+cc) || fillerBoundary[r+rr][c+cc]) return false; }
       return true;
     }
     for (var vrow=0; vrow<fRows; vrow++) {
@@ -6716,11 +7515,16 @@ function drawFrame(ctx, size, innerX0, innerY0, innerX1, innerY1, cellSize, fg, 
         if (fRectOkV(vrow,vcol,3,3)) { vw=3; vh=3; }
         else if (fRectOkV(vrow,vcol,2,2)) { vw=2; vh=2; }
         for (var vmr=0; vmr<vh; vmr++) for (var vmc=0; vmc<vw; vmc++) fUsedV[vrow+vmr][vcol+vmc] = true;
-        var vx = strokeW + vcol*cellSize, vy = strokeW + vrow*cellSize;
+        var vx = originX + vcol*cellSize, vy = originY + vrow*cellSize;
         var vDef = SHAPES[vKey] || SHAPES['dot'];
         dctx.fillStyle = fg;
         if (vw===1 && vh===1) {
-          vDef.draw(dctx, vx, vy, cellSize, vChars || []);
+          if (fillerBoundary[vrow][vcol]) {
+            var vShrunk = shrinkBoundaryCell(vx, vy, cellSize);
+            vDef.draw(dctx, vShrunk.x, vShrunk.y, vShrunk.s, vChars || []);
+          } else {
+            vDef.draw(dctx, vx, vy, cellSize, vChars || []);
+          }
         } else {
           drawShapeFittedUniform(dctx, vKey, vx, vy, vw*cellSize, vh*cellSize, vChars, null, cellSize, false);
         }
@@ -6730,12 +7534,17 @@ function drawFrame(ctx, size, innerX0, innerY0, innerX1, innerY1, cellSize, fg, 
     for (var ofr=0; ofr<fRows; ofr++) {
       for (var ofc=0; ofc<fCols; ofc++) {
         if (!fillerOn[ofr][ofc]) continue;
-        var ofx = strokeW + ofc*cellSize, ofy = strokeW + ofr*cellSize;
+        var ofx = originX + ofc*cellSize, ofy = originY + ofr*cellSize;
         var fillerKey = pickRegionAwareShape(ofr, ofc, fRows, fCols, fillerKeys, dist, quarterShapes, halfShapes, frameScatter);
         var fillerChars = pickCharsForRegion(fillerKey, ofr, ofc, fRows, fCols, dist, quarterChars, halfChars, chars, frameScatter);
         var fillerDef = SHAPES[fillerKey] || SHAPES['dot'];
         dctx.fillStyle = fg;
-        fillerDef.draw(dctx, ofx, ofy, cellSize, fillerChars || []);
+        if (fillerBoundary[ofr][ofc]) {
+          var ofShrunk = shrinkBoundaryCell(ofx, ofy, cellSize);
+          fillerDef.draw(dctx, ofShrunk.x, ofShrunk.y, ofShrunk.s, fillerChars || []);
+        } else {
+          fillerDef.draw(dctx, ofx, ofy, cellSize, fillerChars || []);
+        }
       }
     }
   }
@@ -6759,6 +7568,18 @@ function drawFrame(ctx, size, innerX0, innerY0, innerX1, innerY1, cellSize, fg, 
 
 async function renderQRCore(canvas, url, size, ec, prefix) {
   var settings = resolveRenderSettings(prefix);
+  // WHY set here, right alongside resolveRenderSettings: same "live, render-
+  // time" handoff _activeGradient uses (see its own WHY) -- crescent's
+  // draw() is shared code with no idea which tab/saved-design is currently
+  // rendering, so this is how settings.crescentOrientation (live DOM or a
+  // saved design, whichever resolveRenderSettings just resolved) actually
+  // reaches it.
+  _activeCrescentOrientation = (settings.crescentOrientation && settings.crescentOrientation.length) ? settings.crescentOrientation : ['tr'];
+  // WHY set here too, same live render-time handoff: drawReflectable (used
+  // by crow/digital dog/Santa/witch hat/pumpkins/music notes/bolt) has no
+  // idea which tab/saved-design is rendering either -- see
+  // REFLECTABLE_SHAPE_KEYS' own WHY.
+  _activeShapeReflect = settings.shapeReflect || {};
   var matrix = await getQRMatrix(url, ec, 400);
   if (!matrix) return false;
 
@@ -7671,9 +8492,70 @@ async function renderQRCore(canvas, url, size, ec, prefix) {
   // that they click would be the first corner" treats tl as just as
   // customizable as the other two, not a fixed anchor.
   if (settings.asymmetricCorners) tlFinder = resolveCornerFinder('tl');
-  drawFinderComposite(ctx, box.x0, box.y0, cellSize, tl.outer, tl.inner, bg, tlFinder.outer, tlFinder.inner, settings.chars, tl.innerGrad, tlFinder.scale);
-  drawFinderComposite(ctx, box.x0 + (modules-7)*cellSize, box.y0, cellSize, tr.outer, tr.inner, bg, trFinder.outer, trFinder.inner, settings.chars, tr.innerGrad, trFinder.scale);
-  drawFinderComposite(ctx, box.x0, box.y0 + (modules-7)*cellSize, cellSize, bl.outer, bl.inner, bg, blFinder.outer, blFinder.inner, settings.chars, bl.innerGrad, blFinder.scale);
+  // WHY settings.finderChars, not settings.chars (the main body's pool), on
+  // all three calls below: Hali -- "the character windows to choose letters
+  // and numbers" for inner dots specifically -- see _finderChars' own WHY
+  // for why it's a separate pool rather than reusing the body's.
+  //
+  // WHY _activeCrescentOrientation gets PINNED to a single picked value
+  // right before each finder draw, instead of just leaving it as the full
+  // pool the way the body-dot loop above does: Hali -- "the cresent in the
+  // inner dot should be all uniform unless aysemetric is clicked and they
+  // are choosing specifically for each corner." SHAPES.crescent.draw()
+  // picks randomly from whatever pool it's handed EVERY time it's called --
+  // exactly what makes body dots mix (each module is its own instance), but
+  // with all 3 corners sharing the one global Inner Dot Style, 3 independent
+  // random picks could land on 3 different corners -- not uniform. Pinning
+  // to a single pre-picked value forces all 3 calls to draw identically
+  // when NOT asymmetric (one shared pick, reused for tl/tr/bl), while a
+  // corner with its OWN override (asymmetric on) still gets its own
+  // independent pick, same as any other per-corner override. Restored to
+  // the full pool right after (next to the _activeGradient restore) so
+  // anything drawn later -- the logo shape, if it's ever set to Crescent --
+  // still gets genuine random mixing, not stuck on the last finder's pick.
+  // WHY the branch is per-CORNER (does THIS corner have its own override),
+  // not a blanket check on the asymmetricCorners toggle: Hali's "unless
+  // aysemetric is clicked and they are choosing specifically for each
+  // corner" means only a corner she's actually touched should go its own
+  // way -- turning the toggle on but never picking a per-corner orientation
+  // must still leave every corner uniform with the others, inheriting the
+  // same one shared pick.
+  var _sharedFinderCrescentPick = null;
+  function pinCrescentForFinder(corner) {
+    // WHY index 0, never a random pick, on either branch here (this used
+    // to be Math.floor(Math.random()*override.length), same on the shared-
+    // pool branch below): Hali -- "for inner dots only allow one
+    // orientation to be selected for corners." toggleCrescentOrientation
+    // now keeps the Inner Dot Style's own orientation (per-corner override
+    // AND the shared pool) down to exactly one entry going forward, but a
+    // design saved before that fix can still have more than one stored --
+    // picking randomly among them was the actual bug Hali hit: a finder
+    // eye is drawn exactly once, yet the live preview, the floating zoom
+    // lens, and the final Generate/download render each call renderQRCore
+    // independently, so each one re-rolled its own random pick and showed
+    // a DIFFERENT orientation for the same corner. Taking index 0
+    // unconditionally makes every one of those render calls agree, for a
+    // legacy multi-entry array exactly as much as a fresh single-entry one.
+    var override = settings.asymmetricCorners && settings.crescentOrientationCorner && settings.crescentOrientationCorner[corner];
+    if (override && override.length) {
+      _activeCrescentOrientation = [ override[0] ];
+    } else {
+      // No override for this corner: resolve ONCE and reuse for every other
+      // non-overridden corner this render, so they all stay uniform.
+      if (!_sharedFinderCrescentPick) {
+        var pool = settings.crescentOrientation;
+        _sharedFinderCrescentPick = [ pool[0] ];
+      }
+      _activeCrescentOrientation = _sharedFinderCrescentPick;
+    }
+  }
+  pinCrescentForFinder('tl');
+  drawFinderComposite(ctx, box.x0, box.y0, cellSize, tl.outer, tl.inner, bg, tlFinder.outer, tlFinder.inner, settings.finderChars, tl.innerGrad, tlFinder.scale);
+  pinCrescentForFinder('tr');
+  drawFinderComposite(ctx, box.x0 + (modules-7)*cellSize, box.y0, cellSize, tr.outer, tr.inner, bg, trFinder.outer, trFinder.inner, settings.finderChars, tr.innerGrad, trFinder.scale);
+  pinCrescentForFinder('bl');
+  drawFinderComposite(ctx, box.x0, box.y0 + (modules-7)*cellSize, cellSize, bl.outer, bl.inner, bg, blFinder.outer, blFinder.inner, settings.finderChars, bl.innerGrad, blFinder.scale);
+  _activeCrescentOrientation = settings.crescentOrientation;
   _activeGradient = _savedGradForFinder;
 
   // Logo overlay — WHY centered on the real QR box instead of the canvas:
@@ -7924,6 +8806,14 @@ function scheduleLivePreview(prefix) {
 }
 async function updateLivePreview(prefix) {
   prefix = prefix || 's';
+  // WHY tracked here, not inside scheduleLivePreview: this is the one place
+  // every real design change already funnels through after its 250ms
+  // debounce settles (scheduleLivePreview is the ONLY caller -- see its own
+  // WHY), so a snapshot taken here captures one coherent "edit" even when a
+  // drag/typing burst fired scheduleLivePreview a dozen times in a row.
+  // Snapshotting on every keystroke instead would flood the undo stack with
+  // mid-drag intermediate states nobody would ever want to land back on.
+  trackUndoSnapshot(prefix);
   var canvas = document.getElementById(prefix==='s' ? 'qr-live-canvas' : 'd-qr-live-canvas');
   if (!canvas) return;
   var note = document.getElementById(prefix==='s' ? 'qr-live-note' : 'd-qr-live-note');
@@ -8192,6 +9082,7 @@ function showView(name) {
   document.getElementById('view-'+name).classList.add('active');
   window._cv = name;
   if (name==='dashboard') showDashboard();
+  if (name==='admin-shapes') renderAdminShapesView();
 }
 function requireAuth(dest) { if(!window._user){openAuthModal();return;} showView(dest); }
 function switchTab(t) {
@@ -8212,6 +9103,10 @@ function renderNav() {
   document.getElementById('nav-signup').style.display  = u?'none':'';
   document.getElementById('nav-signout').style.display = u?'':'none';
   document.getElementById('nav-dash').style.display    = u?'':'none';
+  // WHY window._isAdmin, not re-checking the email here too: onAuthStateChanged
+  // (module script above) is the one place that already knows the signed-in
+  // user's email synchronously -- see ADMIN_EMAIL's own WHY.
+  document.getElementById('nav-admin').style.display   = (u && window._isAdmin) ? '' : 'none';
   if(u) document.getElementById('dash-email').textContent=u.email;
 }
 
@@ -8244,6 +9139,16 @@ function captureDesignSettings(prefix) {
     // removing a dot type, a character, an emoji) silently mutates an
     // already-"saved" design object still sitting in memory elsewhere.
     shape: (prefix==='s' ? _selectedShape : _selectedShapeD).slice(),
+    crescentOrientation: (_crescentOrientation[prefix]||['tr']).slice(),
+    // Fresh object + fresh arrays, same by-reference-mutation concern as
+    // finderStyleCorner/finderDotStyleCorner just below.
+    crescentOrientationCorner: {
+      tl: _crescentOrientationCorner[prefix].tl ? _crescentOrientationCorner[prefix].tl.slice() : null,
+      tr: _crescentOrientationCorner[prefix].tr ? _crescentOrientationCorner[prefix].tr.slice() : null,
+      bl: _crescentOrientationCorner[prefix].bl ? _crescentOrientationCorner[prefix].bl.slice() : null
+    },
+    // Fresh object copy, same by-reference-mutation concern as above.
+    shapeReflect: Object.assign({}, _shapeReflect[prefix] || {}),
     colorMode: prefix==='s' ? _colorMode : _colorModeD,
     finderStyle: prefix==='s' ? _finderStyle : _finderStyleD,
     finderDotStyle: prefix==='s' ? _finderDotStyle : _finderDotStyleD,
@@ -8269,6 +9174,7 @@ function captureDesignSettings(prefix) {
     halfChars: { left:(prefix==='s'?_halfChars:_halfCharsD).left.slice(), right:(prefix==='s'?_halfChars:_halfCharsD).right.slice() },
     frameScatter: !!(document.getElementById(prefix+'-frame-scatter') && document.getElementById(prefix+'-frame-scatter').checked),
     chars: (_selectedChars[prefix]||[]).slice(),
+    finderChars: (_finderChars[prefix]||[]).slice(),
     emoji: (_selectedEmoji[prefix]||[]).slice(),
     emojiSize: _emojiSize[prefix],
     emojiDensity: _emojiDensity[prefix],
@@ -8340,6 +9246,31 @@ function applyDesignSettings(prefix, design) {
     else { _selectedShapeD.length=0; _selectedShapeD.push.apply(_selectedShapeD, shapesArr); }
     setGridSelection(prefix==='s'?'shape-grid':'d-shape-grid', shapesArr);
   }
+  // Restore Crescent Orientation too -- normalizeCrescentOrientation (see
+  // its own WHY) handles a legacy string, a legacy cardinal string, or
+  // today's array alike. NOT re-synced here: the tile .active state and
+  // both rows' visibility depend on the Inner Dot Style/Asymmetric Corners
+  // restore that happens further below, so the actual
+  // syncCrescentOrientationTiles call rides along on syncAsymmetricCornersUI
+  // at the end of this function instead (it already runs unconditionally,
+  // after everything crescent-relevant is back in place).
+  _crescentOrientation[prefix] = normalizeCrescentOrientation(design.crescentOrientation);
+  // Restore each corner's own orientation override too -- null fallback
+  // for a design saved before per-corner crescent orientation existed, same
+  // reasoning as finderDotStyleCorner's restore further below.
+  var coc = design.crescentOrientationCorner || {};
+  _crescentOrientationCorner[prefix] = {
+    tl: (Array.isArray(coc.tl) && coc.tl.length) ? coc.tl.slice() : null,
+    tr: (Array.isArray(coc.tr) && coc.tr.length) ? coc.tr.slice() : null,
+    bl: (Array.isArray(coc.bl) && coc.bl.length) ? coc.bl.slice() : null
+  };
+  // Restore the Reflect toggles too -- default {} for a design saved
+  // before this existed (see resolveRenderSettings' matching WHY). Not
+  // re-synced here either, same reasoning as Crescent Orientation above --
+  // syncShapeReflectButtons rides along on syncAsymmetricCornersUI at the
+  // end of this function, since it already runs unconditionally after
+  // everything shape-relevant is back in place.
+  _shapeReflect[prefix] = (design.shapeReflect && typeof design.shapeReflect === 'object') ? Object.assign({}, design.shapeReflect) : {};
   // Restore Stretch/Vary Dot Size too, re-syncing both buttons' own look
   // (not just the backing mode) — same reasoning as chars/emoji just
   // below. Backward-compatible with designs saved under the old single
@@ -8430,6 +9361,14 @@ function applyDesignSettings(prefix, design) {
     b.classList.toggle('selected', _selectedChars[prefix].includes(b.textContent));
   });
   updateCharNote(prefix);
+  // Restore the Inner Dot Style's own Characters pool too -- same
+  // by-reference-mutation concern as _selectedChars just above. No DOM
+  // re-sync needed here (unlike _selectedChars' .char-opt loop): the shared
+  // 🔤 grid only shows this pool once _charEditTarget is pointed at
+  // 'finder', via revealCharPicker, and setCharEditTarget already landed it
+  // back on 'main' just above.
+  _finderChars[prefix].length = 0;
+  if (Array.isArray(design.finderChars)) _finderChars[prefix].push.apply(_finderChars[prefix], design.finderChars);
   _selectedEmoji[prefix].length = 0;
   if (Array.isArray(design.emoji)) _selectedEmoji[prefix].push.apply(_selectedEmoji[prefix], design.emoji);
   var eGridEl = document.querySelector('#'+prefix+'-acc-emoji .char-options');
@@ -8619,6 +9558,84 @@ function applyDesignSettings(prefix, design) {
   scheduleLivePreview(prefix);
 }
 
+// ── UNDO (per-tab, multi-step) ────────────────────────────────────────────────
+// WHY built on captureDesignSettings/applyDesignSettings instead of a
+// separate diffing scheme: those two functions already know how to
+// round-trip every single design field (that's their whole job for saved
+// codes), so reusing them means Undo can never drift out of sync with a new
+// control someone adds later -- it automatically covers it the same way
+// saving to Firestore does. Static and Dynamic each get their OWN stack
+// (keyed by prefix) since they're independent designs -- undoing on one tab
+// must never touch the other's history.
+var _undoStack = { s: [], d: [] };
+// WHY null (not an initial snapshot) until the first real change: null is
+// how trackUndoSnapshot recognizes "nothing to compare against yet," so the
+// very first call after a fresh/reset design just establishes the baseline
+// instead of pushing a bogus "undo back to before anything existed" entry.
+var _lastKnownDesign = { s: null, d: null };
+// WHY a suppress flag instead of just not calling trackUndoSnapshot during
+// undo: applyDesignSettings always ends in scheduleLivePreview, same as any
+// real edit, so undoDesign's own restore would otherwise get captured as a
+// brand-new change and get pushed right back onto the stack -- turning
+// "Undo" into "Undo, then silently re-add what you just undid." This makes
+// the one capture that follows a pop a no-op instead.
+var _suppressUndoCapture = { s: false, d: false };
+var UNDO_MAX_STEPS = 30; // WHY capped: an unbounded stack is an unbounded memory leak over a long editing session; 30 steps is far more than anyone backs up through by hand.
+
+function trackUndoSnapshot(prefix) {
+  try {
+    var current = JSON.stringify(captureDesignSettings(prefix));
+    if (_suppressUndoCapture[prefix]) {
+      _suppressUndoCapture[prefix] = false;
+      _lastKnownDesign[prefix] = current;
+      updateUndoButtonState(prefix);
+      return;
+    }
+    var last = _lastKnownDesign[prefix];
+    if (last !== null && last !== current) {
+      _undoStack[prefix].push(last);
+      if (_undoStack[prefix].length > UNDO_MAX_STEPS) _undoStack[prefix].shift();
+    }
+    _lastKnownDesign[prefix] = current;
+    updateUndoButtonState(prefix);
+  } catch (e) {
+    // Non-fatal: a broken snapshot just means Undo sits out this one edit,
+    // never that the edit itself (or the rest of the page) should fail.
+  }
+}
+
+// WHY called at every "fresh design" point (new code, Refresh Design,
+// loading a different saved code into Redesign) and NOT on a plain tab
+// switch: Static and Dynamic already have separate stacks by prefix, so
+// switching tabs alone never mixes their history -- what WOULD mix history
+// is reusing the Dynamic tab's editor for a different code (or a blank one)
+// without clearing it first, which is exactly the leftover-state bug Hali
+// already flagged once for "+ New Dynamic Code" (see that button's own WHY).
+function resetUndoStack(prefix) {
+  _undoStack[prefix] = [];
+  _lastKnownDesign[prefix] = null;
+  _suppressUndoCapture[prefix] = false;
+  updateUndoButtonState(prefix);
+}
+
+function updateUndoButtonState(prefix) {
+  var link = document.getElementById(prefix+'-undo-link');
+  if (!link) return;
+  var has = _undoStack[prefix] && _undoStack[prefix].length > 0;
+  link.style.opacity = has ? '1' : '.35';
+  link.style.pointerEvents = has ? '' : 'none';
+}
+
+function undoDesign(prefix) {
+  var stack = _undoStack[prefix];
+  if (!stack || !stack.length) return;
+  var prevJSON = stack.pop();
+  _suppressUndoCapture[prefix] = true;
+  applyDesignSettings(prefix, JSON.parse(prevJSON));
+  updateUndoButtonState(prefix);
+  toast('Undone.','ok');
+}
+
 // ── DYNAMIC CREATE / DESIGN-EDIT ──────────────────────────────────────────────
 // WHY _editingQR: when set, the Dynamic generator is in "edit an existing
 // code's design" mode (routed here from the paid Change Design flow — see
@@ -8639,6 +9656,7 @@ var _pendingDynamicCreate = false;
 
 function resetDynamicForm() {
   _editingQR = null;
+  resetUndoStack('d'); // see its own WHY -- a leftover edit's Undo history must never carry into whatever loads into the Dynamic tab next
   var nameEl = document.getElementById('d-name'); if (nameEl) nameEl.value = '';
   var urlEl = document.getElementById('d-url');
   if (urlEl) { urlEl.value = ''; urlEl.readOnly = false; urlEl.style.opacity = ''; }
@@ -8673,6 +9691,7 @@ function navToGenerator() {
 // clearing one should never touch whatever's sitting on the other.
 async function refreshStaticDesign(){
   if(!(await brandedConfirm('Clear everything on the Static tab and start over?','Refresh'))) return;
+  resetUndoStack('s'); // a wiped design shouldn't leave its old history one Undo click away
   var sUrlEl = document.getElementById('s-url'); if (sUrlEl) sUrlEl.value = '';
   if (_defaultDesignSettings.s) applyDesignSettings('s', _defaultDesignSettings.s);
   toast('Static design reset.','ok');
@@ -8690,6 +9709,7 @@ async function refreshDynamicDesign(){
 // someone else to build later.
 function enterDesignEditMode(data) {
   _editingQR = data;
+  resetUndoStack('d'); // loading a different saved code's design must start its own fresh history, not inherit whatever was being edited before
   var nameEl = document.getElementById('d-name'); if (nameEl) nameEl.value = data.name || '';
   var urlEl = document.getElementById('d-url');
   if (urlEl) {
@@ -8757,6 +9777,368 @@ async function showDashboard() {
   } catch(e){list.innerHTML='<div class="empty-state"><p>Error: '+e.message+'</p></div>';}
 }
 
+// ── ADMIN: CUSTOM SHAPE ASSIGNMENT ──────────────────────────────────────────
+// WHY a tiny escaper here instead of trusting textContent everywhere: the
+// email/username/key values below get built into innerHTML strings (so the
+// Remove button's onclick can carry an index), so anything she types into
+// the lookup field has to be escaped before it lands in markup.
+function escapeHtml(s) {
+  return String(s==null?'':s).replace(/[&<>"']/g, function(ch){
+    return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch];
+  });
+}
+
+var _adminTargetUid = null;
+var _adminTargetEmail = null;
+var _adminTargetShapes = [];
+
+// WHY re-checked here too, not just trusting the Admin nav button being
+// hidden: showView('admin-shapes') can be reached directly (console,
+// back/forward nav) even when the button itself is hidden -- this is a
+// second client-side layer, same honest caveat as ADMIN_EMAIL's own WHY
+// (the real lock still has to be the Firestore rule).
+function renderAdminShapesView() {
+  var authorized = !!window._isAdmin;
+  document.getElementById('admin-not-authorized').style.display = authorized ? 'none' : 'block';
+  document.getElementById('admin-shapes-body').style.display = authorized ? '' : 'none';
+}
+
+async function adminLookupUserByEmail() {
+  if (!window._isAdmin) return;
+  var emailEl = document.getElementById('admin-lookup-email');
+  var email = (emailEl.value||'').trim().toLowerCase();
+  var out = document.getElementById('admin-lookup-result');
+  document.getElementById('admin-assign-form').style.display = 'none';
+  _adminTargetUid = null;
+  if (!email) { toast('Enter an email first.','err'); return; }
+  var fb = window._fb;
+  out.innerHTML = '<p style="color:var(--muted);font-size:.82rem;">Looking up…</p>';
+  try {
+    var q = fb.query(fb.collection(fb.db,'users'), fb.where('email','==',email));
+    var snap = await fb.getDocs(q);
+    if (snap.empty) {
+      out.innerHTML = '<p style="color:var(--muted);font-size:.82rem;">No account found for that email.</p>';
+      return;
+    }
+    var found = snap.docs[0];
+    _adminTargetUid = found.id;
+    _adminTargetEmail = email;
+    renderAdminTargetPanel(found.data());
+    document.getElementById('admin-assign-form').style.display = '';
+  } catch(e) {
+    out.innerHTML = '<p style="color:var(--red);font-size:.82rem;">Lookup failed: '+escapeHtml(e.message)+'</p>';
+  }
+}
+
+function renderAdminTargetPanel(userData) {
+  var out = document.getElementById('admin-lookup-result');
+  _adminTargetShapes = Array.isArray(userData.customShapes) ? userData.customShapes : [];
+  var rowsHtml = _adminTargetShapes.map(function(cs, i){
+    return '<div style="display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid var(--line);">'
+      + '<canvas width="40" height="40" style="background:#f0ece3;border-radius:4px;" data-admin-preview="'+i+'"></canvas>'
+      + '<span style="flex:1;font-size:.82rem;">'+escapeHtml(cs.label||'')+' <span style="color:var(--muted);">('+escapeHtml(cs.key)+')</span></span>'
+      + '<button class="act-btn act-btn-danger" onclick="adminRemoveShape('+i+')">Remove</button>'
+      + '</div>';
+  }).join('') || '<p style="color:var(--muted);font-size:.82rem;">No custom shapes assigned to this account yet.</p>';
+  out.innerHTML = '<p style="font-size:.86rem;margin-bottom:10px;">Account: <strong>'+escapeHtml(userData.username||_adminTargetEmail)+'</strong> ('+escapeHtml(_adminTargetEmail)+')</p>' + rowsHtml;
+  _adminTargetShapes.forEach(function(cs,i){
+    var cv = out.querySelector('[data-admin-preview="'+i+'"]');
+    if (!cv) return;
+    var cctx = cv.getContext('2d');
+    cctx.fillStyle = '#f0ece3';
+    try { drawSVG(cctx, 0, 0, 40, cs.d, 0, 0, cs.vbW||72, cs.vbH||72); } catch(e){}
+  });
+}
+
+// WHY live-updated on every input (see the admin-shape-d/-vbw/-vbh fields'
+// WHY a FileReader + DOMParser round trip instead of just handing the raw
+// SVG file to drawSVG: Hali -- "that button should say upload a custom
+// shape for users a window should appear giving an upload option detiling
+// what you expect for the file" -- pasting path data by hand was the
+// original (and still-available) path, but a real file upload is what she
+// actually pictured. drawSVG only ever draws ONE <path>'s "d" attribute
+// (see its own WHY), so this extracts exactly that -- the first <path> and
+// the document's own viewBox/width/height -- into the SAME fields the
+// manual-paste flow already fills, rather than inventing a second storage
+// shape or render path. A multi-path file (not single-path/flattened) just
+// warns and uses the first path, same spirit as adminAssignShape's own
+// "paste what I can use, don't silently guess" approach.
+function adminHandleShapeFileUpload(evt) {
+  var file = evt.target.files && evt.target.files[0];
+  if (!file) return;
+  var reader = new FileReader();
+  reader.onload = function(e) {
+    try {
+      var doc = new DOMParser().parseFromString(String(e.target.result), 'image/svg+xml');
+      if (doc.querySelector('parsererror')) { toast('That file is not valid SVG/XML.','err'); return; }
+      var pathEl = doc.querySelector('path');
+      if (!pathEl) { toast('No <path> found in that SVG -- flatten/expand shapes in your design tool first.','err'); return; }
+      var d = pathEl.getAttribute('d') || '';
+      if (!d) { toast('That <path> has no "d" data.','err'); return; }
+      var svgEl = doc.querySelector('svg');
+      var vbAttr = (svgEl && svgEl.getAttribute('viewBox')) || '';
+      var vbParts = vbAttr.trim().split(/\s+/);
+      var vbW = (vbParts.length===4 ? parseFloat(vbParts[2]) : NaN) || parseFloat(svgEl && svgEl.getAttribute('width')) || 72;
+      var vbH = (vbParts.length===4 ? parseFloat(vbParts[3]) : NaN) || parseFloat(svgEl && svgEl.getAttribute('height')) || 72;
+      document.getElementById('admin-shape-d').value = d;
+      document.getElementById('admin-shape-vbw').value = vbW;
+      document.getElementById('admin-shape-vbh').value = vbH;
+      var labelEl = document.getElementById('admin-shape-label');
+      if (labelEl && !labelEl.value.trim()) labelEl.value = '★';
+      adminPreviewShape();
+      if (doc.querySelectorAll('path').length > 1) {
+        toast('That file has more than one path -- only the first one was used.','err');
+      } else {
+        toast('Path data and viewBox filled in from the file -- review, then assign.','ok');
+      }
+    } catch (err) {
+      toast('Could not read that as an SVG file.','err');
+    }
+  };
+  reader.onerror = function(){ toast('Could not read that file.','err'); };
+  reader.readAsText(file);
+}
+// oninput handlers): same reasoning as every other shape picker here --
+// Hali should see what the path data actually draws before she commits to
+// saving it to someone's real account, not find out after.
+function adminPreviewShape() {
+  var cv = document.getElementById('admin-shape-preview');
+  if (!cv) return;
+  var ctx = cv.getContext('2d');
+  ctx.clearRect(0,0,cv.width,cv.height);
+  ctx.fillStyle = '#f0ece3';
+  var d = document.getElementById('admin-shape-d').value.trim();
+  var vbW = parseFloat(document.getElementById('admin-shape-vbw').value) || 72;
+  var vbH = parseFloat(document.getElementById('admin-shape-vbh').value) || 72;
+  if (!d) return;
+  try { drawSVG(ctx, 0, 0, 56, d, 0, 0, vbW, vbH); } catch(e){ /* mid-typing invalid path data -- just show nothing until it parses */ }
+}
+
+async function adminAssignShape() {
+  if (!window._isAdmin || !_adminTargetUid) { toast('Look up an account first.','err'); return; }
+  var rawKey = (document.getElementById('admin-shape-key').value||'').trim();
+  var label = (document.getElementById('admin-shape-label').value||'').trim() || '★';
+  var d = (document.getElementById('admin-shape-d').value||'').trim();
+  var vbW = parseFloat(document.getElementById('admin-shape-vbw').value) || 72;
+  var vbH = parseFloat(document.getElementById('admin-shape-vbh').value) || 72;
+  if (!rawKey || !d) { toast('Shape key and path data are both required.','err'); return; }
+  // WHY sanitize + de-dupe against SHAPES, not just trust what's typed: a
+  // key has to be a safe JS object key AND can't collide with a real
+  // built-in shape (crescent, heart, etc.) or it would silently overwrite
+  // that shape's draw function for every account, not just this one.
+  var key = 'client_' + rawKey.toLowerCase().replace(/[^a-z0-9_]+/g,'_').replace(/^_+|_+$/g,'');
+  if (!key || key === 'client_') { toast('That shape key has no usable characters once sanitized -- try again.','err'); return; }
+  // WHY check _adminTargetShapes too, not only the live SHAPES object: the
+  // 'client_' prefix already makes a collision with a real built-in shape
+  // structurally impossible, so the SHAPES check below is a harmless extra
+  // layer -- but it would never catch THIS account already having a
+  // different custom shape saved under the same sanitized key (Hali's own
+  // session has no reason to have THIS client's shapes injected into her
+  // own SHAPES), and that's the collision that actually matters here.
+  if (SHAPES[key] || _adminTargetShapes.some(function(cs){ return cs.key === key; })) {
+    toast('That key is already in use for this account -- pick a different one.','err'); return;
+  }
+  // WHY a Path2D sanity check here, not just at preview time: catches a
+  // genuinely malformed path string before it gets written to her database
+  // and only THEN fails for the client on their own page.
+  try { new Path2D(d); } catch(e) { toast('That path data is not valid SVG path syntax.','err'); return; }
+
+  var fb = window._fb;
+  try {
+    var updated = _adminTargetShapes.slice();
+    updated.push({ key: key, label: label, d: d, vbW: vbW, vbH: vbH, assignedAt: Date.now() });
+    await fb.updateDoc(fb.doc(fb.db,'users',_adminTargetUid), { customShapes: updated });
+    _adminTargetShapes = updated;
+    renderAdminTargetPanel({ username: null, customShapes: updated });
+    document.getElementById('admin-shape-key').value = '';
+    document.getElementById('admin-shape-label').value = '';
+    document.getElementById('admin-shape-d').value = '';
+    document.getElementById('admin-shape-vbw').value = 72;
+    document.getElementById('admin-shape-vbh').value = 72;
+    var fileEl = document.getElementById('admin-shape-file');
+    if (fileEl) fileEl.value = '';
+    adminPreviewShape();
+    toast('Shape assigned to '+_adminTargetEmail+'.','ok');
+  } catch(e) {
+    toast('Save failed: '+e.message,'err');
+  }
+}
+
+async function adminRemoveShape(index) {
+  if (!window._isAdmin || !_adminTargetUid) return;
+  var updated = _adminTargetShapes.slice();
+  var removed = updated.splice(index,1)[0];
+  var fb = window._fb;
+  try {
+    await fb.updateDoc(fb.doc(fb.db,'users',_adminTargetUid), { customShapes: updated });
+    _adminTargetShapes = updated;
+    renderAdminTargetPanel({ username: null, customShapes: updated });
+    toast(removed ? ('Removed '+(removed.label||removed.key)+'.') : 'Removed.','ok');
+  } catch(e) {
+    toast('Remove failed: '+e.message,'err');
+  }
+}
+
+// WHY the generator side reads this from the user's OWN account doc (not
+// the admin tool's doc), and injects straight into SHAPE_GROUPS/SHAPES at
+// login time: every existing shape picker (Dot Type, Inner Dot Style, and
+// anything else that iterates SHAPE_GROUPS) already renders whatever's in
+// there -- there's no separate "custom shape" rendering path to build or
+// keep in sync, this just adds one more category alongside Nature &
+// Weather, Symbols, etc. Scoped to ONLY shape-grid/d-shape-grid and
+// finder-dot-style-grid/d-finder-dot-style-grid (see
+// appendCustomShapeGroupTo*'s own WHY) -- per Hali's choice, a custom shape
+// should reach Dot Type and Inner Dot Style, not every other picker that
+// happens to iterate SHAPE_GROUPS too (Logo shape, Quarter/Half region
+// dropdowns), so this never calls those pickers' own build functions.
+function injectCustomShapesForUser(list) {
+  clearCustomShapesForUser();
+  if (!Array.isArray(list) || !list.length) return;
+  var GROUP = 'Your Custom Shapes';
+  var added = {};
+  list.forEach(function(cs){
+    if (!cs || !cs.key || !cs.d || SHAPES[cs.key]) return; // never clobber a real built-in shape
+    var vbW = cs.vbW||72, vbH = cs.vbH||72, d = cs.d, label = cs.label||'★';
+    added[cs.key] = { label: label, draw: function(c,x,y,s){ drawSVG(c,x,y,s,d,0,0,vbW,vbH); } };
+  });
+  if (!Object.keys(added).length) return;
+  SHAPE_GROUPS[GROUP] = added;
+  Object.keys(added).forEach(function(key){ SHAPES[key] = added[key]; });
+  appendCustomShapeGroupToMainGrid('shape-grid', _selectedShape, function(){ scheduleLivePreview('s'); syncDotSizeButtons('s'); syncCrescentOrientationTiles('s'); syncShapeReflectButtons('s'); });
+  appendCustomShapeGroupToMainGrid('d-shape-grid', _selectedShapeD, function(){ scheduleLivePreview('d'); syncDotSizeButtons('d'); syncCrescentOrientationTiles('d'); syncShapeReflectButtons('d'); });
+  appendCustomShapeGroupToInnerGrid('finder-dot-style-grid', function(key){
+    if (_asymmetricCorners.s) _finderDotStyleCorner.s[_activeCornerEdit.s] = key; else _finderDotStyle = key;
+    syncCrescentOrientationTiles('s');
+    syncShapeReflectButtons('s');
+    scheduleLivePreview('s');
+  });
+  appendCustomShapeGroupToInnerGrid('d-finder-dot-style-grid', function(key){
+    if (_asymmetricCorners.d) _finderDotStyleCorner.d[_activeCornerEdit.d] = key; else _finderDotStyleD = key;
+    syncCrescentOrientationTiles('d');
+    syncShapeReflectButtons('d');
+    scheduleLivePreview('d');
+  });
+}
+
+// WHY a dedicated remove-and-cleanup pass instead of just overwriting
+// SHAPE_GROUPS['Your Custom Shapes'] next login: this app never does a full
+// page reload between accounts (sign out, sign in as someone else), so
+// leftover tiles/keys/selections from the PREVIOUS account have to be torn
+// down explicitly -- otherwise a second account could render with the
+// first account's shapes still selected, or see duplicate tile rows piling
+// up across logins.
+function clearCustomShapesForUser() {
+  var GROUP = 'Your Custom Shapes';
+  if (SHAPE_GROUPS[GROUP]) {
+    Object.keys(SHAPE_GROUPS[GROUP]).forEach(function(key){ delete SHAPES[key]; });
+    delete SHAPE_GROUPS[GROUP];
+  }
+  ['shape-grid','d-shape-grid','finder-dot-style-grid','d-finder-dot-style-grid'].forEach(function(gridId){
+    var grid = document.getElementById(gridId);
+    if (!grid) return;
+    grid.querySelectorAll('[data-custom-shape-group]').forEach(function(el){ el.remove(); });
+  });
+  // Drop any now-dangling selection referencing a removed custom key,
+  // same "never let the array go empty" guard wireShapeTile already
+  // enforces for an ordinary click.
+  // WHY hadSelection guards the push-back-to-square fallback, not just
+  // "!arr.length" alone: _selectedShape/_selectedShapeD start genuinely
+  // EMPTY by design (see _selectedShape's own WHY — Hali: "the basic
+  // square is still staying highlighted on load") and are meant to STAY
+  // empty until she actually clicks a tile. This function runs on every
+  // page load (via onAuthStateChanged -> injectCustomShapesForUser, even
+  // for a visitor with zero custom shapes to clean up), and the old
+  // unconditional "!arr.length -> push('square')" fired on that already-
+  // empty array too -- silently undoing the "stays empty on load" fix a
+  // moment after it ran, and only for whichever account's custom-shapes
+  // lookup happened to resolve slower/faster than the generator's own
+  // init. Guarding on hadSelection means this only ever fires for its
+  // actual intended case: a selection that WAS real just went dangling
+  // because its one custom shape got revoked, not a selection that was
+  // never made.
+  [_selectedShape, _selectedShapeD].forEach(function(arr){
+    var hadSelection = arr.length > 0;
+    for (var i=arr.length-1;i>=0;i--) { if (!SHAPES[arr[i]]) arr.splice(i,1); }
+    if (hadSelection && !arr.length) arr.push('square');
+  });
+  if (_finderDotStyle && !SHAPES[_finderDotStyle]) _finderDotStyle = 'square';
+  if (_finderDotStyleD && !SHAPES[_finderDotStyleD]) _finderDotStyleD = 'square';
+}
+
+// WHY a standalone appender instead of calling buildShapePickerFor again:
+// that function has no "clear first" step (by design -- see its own
+// comments), so re-running it would duplicate every built-in category's
+// headers and tiles, not just add this one new group.
+function appendCustomShapeGroupToMainGrid(gridId, selectedArr, onChange) {
+  var grid = document.getElementById(gridId);
+  if (!grid || !SHAPE_GROUPS['Your Custom Shapes']) return;
+  grid.querySelectorAll('[data-custom-shape-group]').forEach(function(el){ el.remove(); });
+  var header = document.createElement('div');
+  header.dataset.customShapeGroup = '1';
+  header.style.cssText='width:100%;font-family:Cinzel,serif;font-size:.6rem;letter-spacing:.1em;color:var(--muted);margin:8px 0 4px;text-transform:uppercase;';
+  header.textContent = 'Your Custom Shapes';
+  grid.appendChild(header);
+  var row = document.createElement('div');
+  row.dataset.customShapeGroup = '1';
+  row.style.cssText='display:flex;flex-wrap:wrap;gap:5px;margin-bottom:4px;';
+  Object.keys(SHAPE_GROUPS['Your Custom Shapes']).forEach(function(key){
+    var btn = document.createElement('div');
+    btn.className = 'shape-opt' + (selectedArr.indexOf(key)>-1 ? ' selected' : '');
+    btn.title = key.replace(/_/g,' ');
+    btn.dataset.shapeKey = key;
+    var cv = document.createElement('canvas');
+    cv.width = 56; cv.height = 56;
+    var cctx = cv.getContext('2d');
+    cctx.fillStyle = '#f0ece3';
+    SHAPE_GROUPS['Your Custom Shapes'][key].draw(cctx, 0, 0, 56);
+    btn.appendChild(cv);
+    wireShapeTile(btn, key, selectedArr, onChange);
+    row.appendChild(btn);
+  });
+  grid.appendChild(row);
+}
+
+// WHY a near-duplicate of buildInnerDotPickerFor's own per-tile markup
+// instead of sharing one function: that builder's tile-building is
+// interleaved with its SHAPE_GROUPS iteration and its OWN trailing
+// Characters-tile append (see its WHY) -- cleanly inserting just one more
+// group into the middle of that without risk of duplicating/displacing
+// the Characters tile was more fragile than this short, separate function.
+function appendCustomShapeGroupToInnerGrid(gridId, onSelect) {
+  var grid = document.getElementById(gridId);
+  if (!grid || !SHAPE_GROUPS['Your Custom Shapes']) return;
+  grid.querySelectorAll('[data-custom-shape-group]').forEach(function(el){ el.remove(); });
+  var header = document.createElement('div');
+  header.dataset.customShapeGroup = '1';
+  header.style.cssText='width:100%;font-family:Cinzel,serif;font-size:.6rem;letter-spacing:.1em;color:var(--muted);margin:8px 0 4px;text-transform:uppercase;';
+  header.textContent = 'Your Custom Shapes';
+  grid.appendChild(header);
+  var row = document.createElement('div');
+  row.dataset.customShapeGroup = '1';
+  row.style.cssText='display:flex;flex-wrap:wrap;gap:5px;margin-bottom:4px;';
+  Object.keys(SHAPE_GROUPS['Your Custom Shapes']).forEach(function(key){
+    var btn = document.createElement('div');
+    btn.className = 'shape-opt';
+    btn.title = key.replace(/_/g,' ');
+    btn.dataset.finderKey = key;
+    var cv = document.createElement('canvas');
+    cv.width = 56; cv.height = 56;
+    var cctx = cv.getContext('2d');
+    cctx.fillStyle = '#f0ece3';
+    _qrModuleRenderMode = true;
+    SHAPE_GROUPS['Your Custom Shapes'][key].draw(cctx, 0, 0, 56, []);
+    _qrModuleRenderMode = false;
+    btn.appendChild(cv);
+    btn.onclick = function(){
+      grid.querySelectorAll('.shape-opt').forEach(function(b){ b.classList.remove('selected'); });
+      btn.classList.add('selected');
+      onSelect(key);
+    };
+    row.appendChild(btn);
+  });
+  grid.appendChild(row);
+}
+
 function buildQRItem(data) {
   var div=document.createElement('div');
   div.className='qr-item'; div.id='qritem-'+data.slug;
@@ -8789,11 +10171,30 @@ function buildQRItem(data) {
   qrCol.appendChild(qrDiv);
   var designBtn=document.createElement('button'); designBtn.className='act-btn'; designBtn.textContent='Redesign — $5';
   designBtn.onclick=function(){openDesignChange(data);};
-  qrCol.appendChild(designBtn);
+  // WHY a row wrapper, not appending straight to the column: Hali asked for
+  // Duplicate "to the right of" Redesign, i.e. side by side -- qrCol itself
+  // is a vertical stack (thumbnail on top), so these two need their own
+  // horizontal row nested inside it.
+  var designBtnRow=document.createElement('div'); designBtnRow.style.cssText='display:flex;gap:6px;';
+  var dupBtn=document.createElement('button'); dupBtn.className='act-btn'; dupBtn.textContent='Duplicate';
+  dupBtn.title='Make a copy of this code\'s design under a new name — free, no charge.';
+  dupBtn.onclick=function(){duplicateQRCode(data);};
+  designBtnRow.appendChild(designBtn); designBtnRow.appendChild(dupBtn);
+  qrCol.appendChild(designBtnRow);
   div.appendChild(qrCol);
 
   var body=document.createElement('div'); body.className='qr-item-body';
-  body.innerHTML='<div class="qr-item-name">'+data.name+'<span class="qr-item-type type-'+data.type+'">'+data.type+'</span></div>'
+  // WHY a button ABOVE the name, not beside it (Hali's correction after her
+  // first ask): this is a free, everyday action (unlike Redesign/Change
+  // Redirect, which are paid), so it reads as a lightweight edit affordance
+  // sitting right over the text it edits, not another item in the paid
+  // actions row below. WHY data-name/data-type on the name div instead of
+  // re-reading its live textContent: the type badge is nested INSIDE this
+  // same div, so textContent would include "Business Card QR Codedynamic"
+  // concatenated together -- these attributes keep the real name and type
+  // cleanly separate for startRenameQR/cancelRenameQR to rebuild from.
+  body.innerHTML='<button class="act-btn" style="font-size:.66rem;padding:2px 7px;margin-bottom:3px;" onclick="startRenameQR(\''+data.slug+'\')">✎ Rename</button>'
+    +'<div class="qr-item-name" id="qrname-'+data.slug+'" data-name="'+escapeHtml(data.name)+'" data-type="'+data.type+'">'+escapeHtml(data.name)+'<span class="qr-item-type type-'+data.type+'">'+data.type+'</span></div>'
     +'<div class="qr-item-url">→ '+data.redirectUrl+'</div>'
     +'<div style="font-size:.73rem;color:var(--muted);margin-top:4px;">Scans: '+(data.scanCount||0)+'</div>';
   div.appendChild(body);
@@ -8855,6 +10256,90 @@ function buildQRItem(data) {
   div.appendChild(sp);
   sp.querySelector('#st-pay-btn-'+data.slug).onclick=function(){openStatsPayment(data);};
   return div;
+}
+
+// WHY a plain template string instead of innerHTML string concatenation
+// re-done inline at each call site: startRenameQR/cancelRenameQR/
+// saveRenameQR all need to rebuild the exact same "name + type badge"
+// markup buildQRItem first wrote, so they share this one place to build
+// it from instead of three slightly-different copies drifting apart.
+function renderQRNameInner(name, type) {
+  return escapeHtml(name) + '<span class="qr-item-type type-'+type+'">'+type+'</span>';
+}
+// WHY inline-edit in place instead of a modal: this is a free, everyday
+// correction (unlike the paid Redesign/Change Redirect flows, which
+// already use their own dedicated panels) -- swapping the name text for
+// a text field right where it sits is the lightest-weight way to do it,
+// and avoids building a whole new "text prompt" modal for one field when
+// the app doesn't have one yet (brandedConfirm only does yes/no).
+function startRenameQR(slug) {
+  var nameDiv = document.getElementById('qrname-'+slug);
+  if (!nameDiv || nameDiv.dataset.editing === '1') return;
+  nameDiv.dataset.editing = '1';
+  nameDiv.innerHTML = '<input type="text" id="rename-input-'+slug+'" value="'+escapeHtml(nameDiv.dataset.name)+'" maxlength="60" '
+    + 'style="font-size:.85rem;font-weight:600;padding:3px 6px;border-radius:4px;border:1px solid var(--line);width:140px;">'
+    + ' <button class="act-btn" style="font-size:.65rem;padding:3px 8px;" onclick="saveRenameQR(\''+slug+'\')">Save</button>'
+    + ' <button class="act-btn" style="font-size:.65rem;padding:3px 8px;" onclick="cancelRenameQR(\''+slug+'\')">Cancel</button>';
+  var inp = document.getElementById('rename-input-'+slug);
+  if (inp) {
+    inp.focus(); inp.select();
+    inp.addEventListener('keydown', function(e){
+      if (e.key === 'Enter') { e.preventDefault(); saveRenameQR(slug); }
+      else if (e.key === 'Escape') { cancelRenameQR(slug); }
+    });
+  }
+}
+function cancelRenameQR(slug) {
+  var nameDiv = document.getElementById('qrname-'+slug);
+  if (!nameDiv) return;
+  nameDiv.dataset.editing = '';
+  nameDiv.innerHTML = renderQRNameInner(nameDiv.dataset.name, nameDiv.dataset.type);
+}
+async function saveRenameQR(slug) {
+  var nameDiv = document.getElementById('qrname-'+slug);
+  var inp = document.getElementById('rename-input-'+slug);
+  if (!nameDiv || !inp) return;
+  var newName = inp.value.trim();
+  if (!newName) { toast('Enter a name.','err'); return; }
+  try {
+    var fb = window._fb;
+    await fb.updateDoc(fb.doc(fb.db,'qrcodes',slug), {name:newName});
+    nameDiv.dataset.name = newName;
+    nameDiv.dataset.editing = '';
+    nameDiv.innerHTML = renderQRNameInner(newName, nameDiv.dataset.type);
+    toast('Renamed.','ok');
+  } catch(e) { toast('Error: '+e.message,'err'); }
+}
+
+// WHY a slug uniqueness loop here but not in createDynamic(): that one
+// generates its slug from whatever name she's freshly typed, so a
+// collision is rare (requires two DIFFERENT create flows to land on the
+// exact same slugified name). Duplicate ALWAYS starts from "Copy of X"
+// off the SAME source name -- duplicating the same code twice in a row
+// would otherwise generate the identical slug both times, and since
+// setDoc replaces a document wholesale at a given path, the second
+// duplicate would silently overwrite the first instead of erroring.
+async function duplicateQRCode(data) {
+  if (!window._user) { toast('Sign in first.','err'); return; }
+  try {
+    var fb = window._fb;
+    var userDoc = await fb.getDoc(fb.doc(fb.db,'users',window._user.uid));
+    var username = userDoc.exists() ? userDoc.data().username : window._user.uid.slice(0,8);
+    var newName = 'Copy of ' + data.name;
+    var baseSlug = username+'-'+newName.toLowerCase().replace(/[^a-z0-9]/g,'-').slice(0,20);
+    var slug = baseSlug, n = 2;
+    while (n <= 50) {
+      var existing = await fb.getDoc(fb.doc(fb.db,'qrcodes',slug));
+      if (!existing.exists()) break;
+      slug = baseSlug+'-'+n; n++;
+    }
+    await fb.setDoc(fb.doc(fb.db,'qrcodes',slug), {
+      uid: window._user.uid, name: newName, slug: slug, redirectUrl: data.redirectUrl,
+      type: 'dynamic', created: Date.now(), scanCount: 0, design: data.design || DEFAULT_DESIGN
+    });
+    toast('Design duplicated as "'+newName+'".','ok');
+    showDashboard();
+  } catch(e) { toast('Error: '+e.message,'err'); }
 }
 
 // ── DASHBOARD DOWNLOAD PANEL (paid, $5 per format) ───────────────────────────
@@ -9832,7 +11317,13 @@ async function doSignIn(){
   }
 }
 async function doSignUp(){
-  var fb=window._fb;var email=document.getElementById('su-email').value.trim();var pass=document.getElementById('su-pass').value;var username=document.getElementById('su-username').value.trim();
+  var fb=window._fb;
+  // WHY .toLowerCase() here too, not just .trim(): the admin check and the
+  // admin lookup-by-email tool (adminLookupUserByEmail) both compare
+  // against a lowercase address -- storing it lowercase at signup keeps
+  // every later lookup/compare consistent, instead of each one having to
+  // re-normalize whatever case someone's keyboard happened to produce.
+  var email=document.getElementById('su-email').value.trim().toLowerCase();var pass=document.getElementById('su-pass').value;var username=document.getElementById('su-username').value.trim();
   if(!username){showErr('Choose a username.');return;}
   try{var ex=await withAuthTimeout(fb.getDoc(fb.doc(fb.db,'usernames',username)));if(ex.exists()){showErr('Username taken.');return;}
   var cred=await withAuthTimeout(fb.createUserWithEmailAndPassword(fb.auth,email,pass));
