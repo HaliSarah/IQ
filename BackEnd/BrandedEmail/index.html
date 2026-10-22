@@ -305,7 +305,7 @@ textarea.inp{resize:vertical;min-height:200px;line-height:1.7;}
       <span class="attach-icon">📎</span>
       <span id="attachFileName">Choose file to attach…</span>
       <input type="file" id="attachFile" name="my_file"
-             accept=".pdf,.doc,.docx,.jpg,.jpeg,.png,.gif,.txt,.csv,.xls,.xlsx,.ppt,.pptx"
+             accept=".pdf,.doc,.docx,.jpg,.jpeg,.png,.gif,.txt,.csv,.xls,.xlsx,.ppt,.pptx,.wav,.mp3,.m4a"
              onchange="updateAttachName(this)" style="display:none;">
     </label>
     <button type="button" class="attach-clear" id="attachClear" onclick="clearAttach()" style="display:none;">✕ Remove</button>
@@ -434,7 +434,7 @@ textarea.inp{resize:vertical;min-height:200px;line-height:1.7;}
     <p style="font-size:13px;color:var(--muted);margin-bottom:20px;line-height:1.6;">This signature appears at the bottom of every email you send. Customize it below.</p>
     <div class="row-2">
       <div class="field"><label class="lbl">Your Full Name</label><input type="text" class="inp" id="sigName" value="Sarah Parsons"></div>
-      <div class="field"><label class="lbl">Your Title</label><input type="text" class="inp" id="sigTitle" value="Web Designer & Creative Director"></div>
+      <div class="field"><label class="lbl">Your Title</label><input type="text" class="inp" id="sigTitle" value="Owner & Creative Director"></div>
     </div>
     <div class="row-2">
       <div class="field"><label class="lbl">Phone (optional)</label><input type="text" class="inp" id="sigPhone" placeholder="(555) 000-0000"></div>
@@ -444,7 +444,7 @@ textarea.inp{resize:vertical;min-height:200px;line-height:1.7;}
     <button class="btn btn-gold" style="margin-top:16px;width:auto;padding:11px 28px;" onclick="updateSigPreview()">Update Preview</button>
     <div class="sig-preview" id="sigPreview" style="margin-top:16px;">
       <div class="sig-name">Sarah Parsons</div>
-      <div class="sig-title">Web Designer & Creative Director</div>
+      <div class="sig-title">Owner & Creative Director</div>
       <div class="sig-link">IQProductionz.com</div>
       <div style="margin-top:4px;font-size:11px;color:var(--muted);">I.Q. Productionz · Entertainment & Metaphysical Health</div>
     </div>
@@ -452,7 +452,7 @@ textarea.inp{resize:vertical;min-height:200px;line-height:1.7;}
 </div>
 
 </div><script>
-const EJS_SERVICE  = 'service_75wx6fk';
+const EJS_SERVICE  = 'service_wtg920o';
 const EJS_TEMPLATE_DEFAULT = 'template_nnmxioq';
 
 // ── TAB SWITCHING ──
@@ -660,7 +660,7 @@ function updateSigPreview(){
 // ── EMAIL HTML BUILDER ──
 function buildEmailHtml(clientName, rawContent){
   const sigName    = document.getElementById('sigName').value || 'Sarah Parsons';
-  const sigTitle   = document.getElementById('sigTitle').value || 'Web Designer & Creative Director';
+  const sigTitle   = document.getElementById('sigTitle').value || 'Owner & Creative Director';
   const sigPhone   = document.getElementById('sigPhone').value || '';
   const sigWeb     = document.getElementById('sigWeb').value || 'IQProductionz.com';
   const sigTagline = document.getElementById('sigTagline').value || '';

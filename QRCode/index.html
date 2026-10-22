@@ -132,7 +132,7 @@
      signup welcome email, and now the support-ticket modal) already called
      emailjs.send(...) assuming this library was loaded -- it never was, so
      every one of those calls was throwing "emailjs is not defined" with
-     nothing visible to show for it. Same service_75wx6fk/template_nnmxioq
+     nothing visible to show for it. Same service_wtg920o/template_nnmxioq
      and public key as her BrandedEmail tool (iqproductionz.com/BackEnd/
      BrandedEmail), since this is the same EmailJS account/project. -->
 <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
@@ -11142,7 +11142,7 @@ async function fulfillShapeRequest(paymentIntentId) {
 
     // WHY: send directly via EmailJS with a clear subject so Hali can
     // find shape requests instantly in her inbox without opening each email
-    await emailjs.send('service_75wx6fk', 'template_nnmxioq', {
+    await emailjs.send('service_wtg920o', 'template_nnmxioq', {
       to_email: 'SarahParsons@IQProductionz.com',
       subject: 'QR Code Shape Request — ' + req.description.slice(0,40),
       message: [
@@ -11171,7 +11171,7 @@ async function fulfillShapeRequest(paymentIntentId) {
   var customerEmail = window._user ? window._user.email : null;
   try {
     if (customerEmail) {
-      await emailjs.send('service_75wx6fk', 'template_nnmxioq', {
+      await emailjs.send('service_wtg920o', 'template_nnmxioq', {
         to_email: customerEmail,
         subject: 'Your QR Shape Request — I.Q. Productionz',
         message: [
@@ -11196,7 +11196,7 @@ async function fulfillShapeRequest(paymentIntentId) {
       '&name=' + encodeURIComponent('QR Shape Request: ' + req.description.slice(0,40));
 
     // Also send Hali a second email with the branded reply button embedded as a link
-    await emailjs.send('service_75wx6fk', 'template_nnmxioq', {
+    await emailjs.send('service_wtg920o', 'template_nnmxioq', {
       to_email: 'SarahParsons@IQProductionz.com',
       subject: 'ACTION: Reply to QR Shape Request — ' + req.description.slice(0,40),
       message: [
@@ -11338,7 +11338,7 @@ async function doSignUp(){
   if(_pendingDynamicCreate){_pendingDynamicCreate=false;createDynamic();}else{showView('dashboard');toast('Welcome! Your account is ready.','ok');}
     // WHY: welcome email confirms signup and lists benefits so user knows what they unlocked
     try {
-      await emailjs.send('service_75wx6fk','template_nnmxioq',{
+      await emailjs.send('service_wtg920o','template_nnmxioq',{
         to_email: email,
         subject: 'Welcome to I.Q. Productionz QR Platform!',
         message: [
@@ -11396,7 +11396,7 @@ document.querySelectorAll('.modal-bg').forEach(bg=>bg.addEventListener('click',f
 // info is in here" (her BrandedEmail tool's source) -- that tool, and 4
 // other places already in THIS file (shape-request notifications, the
 // signup welcome email), all send through the same already-paid-for
-// service_75wx6fk/template_nnmxioq EmailJS project, just with the SDK
+// service_wtg920o/template_nnmxioq EmailJS project, just with the SDK
 // script never actually loaded (see the <script> tag added in <head> and
 // its own WHY) -- so this reuses her existing account instead of asking
 // her to go set up a second one. WHY still a mailto fallback, same
@@ -11454,7 +11454,7 @@ async function submitTicket(){
       '<div style="margin:22px 0;"><a href="' + brandedReplyUrl + '" style="display:inline-block;padding:13px 32px;background:linear-gradient(135deg,#c98a2e,#a87025);color:#333;text-decoration:none;font-family:Georgia,serif;font-size:12px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;border-radius:6px;">Reply from Branded Email</a></div>',
       '<p style="font-size:11px;color:#999;">Or copy this link: ' + brandedReplyUrl + '</p>'
     ].join('');
-    await emailjs.send('service_75wx6fk', 'template_nnmxioq', {
+    await emailjs.send('service_wtg920o', 'template_nnmxioq', {
       to_email: TICKET_SUPPORT_EMAIL,
       subject: 'QR Platform Ticket',
       reply_to: email,
