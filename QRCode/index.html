@@ -12528,5 +12528,290 @@ function hideQRZoomLens() {
   });
 })();
 </script>
+
+<!--
+  Title:       Recent Colors & Color Palettes
+  Author:      Hali Sarah Parsons
+  Date:        2026-10-23
+  Modified By: Claude
+  Description: Adds a small ▾ button beside every color box in the generator.
+               It opens a drop-down card with the user's last 5 colors and
+               their saved, named palettes (create / rename / edit / delete).
+               Clicking any swatch puts that color into the box the card was
+               opened from. Signed-in users' palettes save to their account;
+               signed-out visitors keep them in this browser.
+-->
+<style>
+  /* WHY a separate small button instead of something "inside" the picker:
+     the color box opens the browser's own built-in picker, which a web page
+     can't add anything to. The ▾ sits right next to it instead. */
+  .cp-toggle{margin-top:2px;width:40px;height:18px;border:1px solid var(--line);border-radius:5px;background:var(--navy);color:var(--muted);font-size:.6rem;line-height:1;cursor:pointer;padding:0;}
+  .cp-toggle:hover,.cp-toggle.open{border-color:var(--gold);color:var(--gold2);}
+  #cp-card{position:absolute;z-index:1300;width:290px;max-width:calc(100vw - 32px);background:var(--panel);border:1px solid var(--gold);border-radius:10px;box-shadow:0 12px 34px rgba(0,0,0,.5);padding:12px 12px 10px;font-family:'Raleway',sans-serif;color:var(--white);display:none;}
+  #cp-card h4{font-family:Cinzel,serif;font-size:.68rem;letter-spacing:.08em;color:var(--muted);margin:0 0 6px;text-transform:uppercase;font-weight:600;}
+  .cp-row{display:flex;gap:6px;flex-wrap:wrap;align-items:center;}
+  .cp-sw{width:30px;height:30px;border-radius:6px;border:1px solid rgba(255,255,255,.25);cursor:pointer;padding:0;position:relative;}
+  .cp-sw:hover{outline:2px solid var(--gold);outline-offset:1px;}
+  .cp-sw .cp-x{position:absolute;top:-6px;right:-6px;width:16px;height:16px;border-radius:50%;background:var(--red);color:#fff;font-size:.6rem;line-height:16px;text-align:center;border:none;cursor:pointer;padding:0;}
+  .cp-empty{font-size:.7rem;color:var(--muted);}
+  .cp-btn{font-size:.68rem;padding:5px 10px;border:1px solid var(--line);border-radius:6px;background:transparent;color:var(--white);cursor:pointer;font-family:'Raleway',sans-serif;}
+  .cp-btn:hover{border-color:var(--gold);color:var(--gold2);}
+  .cp-btn.primary{background:var(--gold);border-color:var(--gold);color:#222;font-weight:600;}
+  .cp-btn.danger{border-color:var(--red);color:var(--red);}
+  .cp-pal{border-top:1px solid var(--line);padding:9px 0 4px;}
+  .cp-pal-name{font-size:.76rem;font-weight:600;margin-bottom:6px;display:flex;justify-content:space-between;align-items:center;gap:6px;}
+  .cp-name-input{width:100%;padding:6px 8px;border-radius:6px;border:1px solid var(--line);background:var(--navy);color:var(--white);font-size:.76rem;margin-bottom:6px;}
+  #cp-palettes{display:none;margin-top:8px;max-height:300px;overflow-y:auto;}
+</style>
+<div id="cp-card" role="dialog" aria-label="Recent colors and palettes"></div>
+<script>
+(function(){
+  var MAX_RECENT = 5;
+  var LS_KEY = 'qr_color_palettes_v1';
+  var _state = { recent: [], palettes: [] };
+  var _loadedFor = null;        // WHY: remembers whose data is loaded (uid or 'local') so switching accounts reloads it
+  var _activeInput = null;      // the color box the card was opened from
+  var _editingId = null;        // which palette is in edit mode, if any
+  var _palettesOpen = false;
+
+  // WHY normalize to lowercase #rrggbb: <input type=color> always reports
+  // that form, so recent-color de-duplication compares like with like.
+  function norm(c){ return String(c||'').trim().toLowerCase(); }
+  function esc(s){ return (typeof escapeHtml==='function') ? escapeHtml(s) : String(s).replace(/[&<>"']/g,function(m){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m];}); }
+  function uid(){ return window._user ? window._user.uid : null; }
+
+  // WHY two places to save: a signed-in user should see their palettes on
+  // any device (account), while a visitor who hasn't signed up still gets
+  // them in this browser. Storage can throw (private mode), hence try/catch.
+  function readLocal(){
+    try { var v = JSON.parse(localStorage.getItem(LS_KEY)||'null'); if (v && Array.isArray(v.recent) && Array.isArray(v.palettes)) return v; } catch(e){}
+    return { recent: [], palettes: [] };
+  }
+  function writeLocal(){ try { localStorage.setItem(LS_KEY, JSON.stringify(_state)); } catch(e){} }
+
+  async function load(){
+    var who = uid() || 'local';
+    if (_loadedFor === who) return;
+    _state = readLocal();
+    if (uid() && window._fb) {
+      try {
+        var fb = window._fb;
+        var snap = await fb.getDoc(fb.doc(fb.db,'users',uid()));
+        var d = snap.exists() ? snap.data() : {};
+        var acct = { recent: Array.isArray(d.colorRecent) ? d.colorRecent : [], palettes: Array.isArray(d.colorPalettes) ? d.colorPalettes : [] };
+        // WHY adopt this browser's palettes only when the account has none:
+        // someone who made palettes before signing up keeps them, but an
+        // account that already has palettes is never overwritten.
+        if (!acct.palettes.length && _state.palettes.length) { acct.palettes = _state.palettes; }
+        if (!acct.recent.length && _state.recent.length) { acct.recent = _state.recent; }
+        _state = acct;
+      } catch(e) { /* WHY: if the account read fails, fall back to this browser's copy rather than showing nothing */ }
+    }
+    _loadedFor = who;
+  }
+
+  var _saveTimer = null;
+  function save(){
+    writeLocal();
+    if (!uid() || !window._fb) return;
+    // WHY debounced: recent colors change on every pick; one write per burst
+    // is plenty and keeps Firestore writes low.
+    clearTimeout(_saveTimer);
+    _saveTimer = setTimeout(function(){
+      var fb = window._fb;
+      fb.setDoc(fb.doc(fb.db,'users',uid()), { colorRecent: _state.recent.slice(0,MAX_RECENT), colorPalettes: _state.palettes }, { merge: true })
+        .catch(function(e){ console.warn('[palettes] save failed', e && e.message); });
+    }, 600);
+  }
+
+  function pushRecent(c){
+    c = norm(c); if (!/^#[0-9a-f]{6}$/.test(c)) return;
+    _state.recent = [c].concat(_state.recent.filter(function(x){ return norm(x)!==c; })).slice(0,MAX_RECENT);
+    save();
+  }
+
+  // WHY dispatch both events: every color box's existing wiring listens for
+  // 'input' (live preview, corner colors), and 'change' also records it as a
+  // recent color -- so a swatch click behaves exactly like a manual pick.
+  function applyColor(c){
+    if (!_activeInput) return;
+    _activeInput.value = norm(c);
+    _activeInput.dispatchEvent(new Event('input', { bubbles:true }));
+    _activeInput.dispatchEvent(new Event('change', { bubbles:true }));
+    render();
+  }
+
+  function swatch(c, extra){
+    return '<button type="button" class="cp-sw" style="background:'+esc(c)+'" title="'+esc(c)+'" data-color="'+esc(c)+'"'+(extra||'')+'></button>';
+  }
+
+  function render(){
+    var card = document.getElementById('cp-card');
+    var cur = _activeInput ? norm(_activeInput.value) : '#000000';
+    var recent = _state.recent.length
+      ? _state.recent.map(function(c){ return swatch(c,' data-act="apply"'); }).join('')
+      : '<span class="cp-empty">Colors you pick will show up here.</span>';
+
+    var pals = _state.palettes.map(function(p){
+      if (p.id === _editingId) {
+        return '<div class="cp-pal" data-pal="'+esc(p.id)+'">'
+          + '<input class="cp-name-input" id="cp-name-'+esc(p.id)+'" value="'+esc(p.name)+'" maxlength="40" placeholder="Palette name">'
+          + '<div class="cp-row" style="margin-bottom:8px;">'
+          + (p.colors.length ? p.colors.map(function(c,i){ return '<span style="position:relative;display:inline-block;">'+swatch(c,' data-act="apply"')+'<button type="button" class="cp-x" data-act="rmcolor" data-i="'+i+'" title="Remove color">×</button></span>'; }).join('') : '<span class="cp-empty">No colors yet.</span>')
+          + '</div>'
+          + '<div class="cp-row">'
+          + '<button type="button" class="cp-btn" data-act="addcur">+ Add current color <span style="display:inline-block;width:10px;height:10px;border-radius:2px;vertical-align:middle;background:'+esc(cur)+'"></span></button>'
+          + '<button type="button" class="cp-btn primary" data-act="saveedit">Save</button>'
+          + '<button type="button" class="cp-btn" data-act="canceledit">Cancel</button>'
+          + '</div></div>';
+      }
+      return '<div class="cp-pal" data-pal="'+esc(p.id)+'">'
+        + '<div class="cp-pal-name"><span>'+esc(p.name)+'</span><span class="cp-row">'
+        + '<button type="button" class="cp-btn" data-act="edit">Edit</button>'
+        + '<button type="button" class="cp-btn danger" data-act="delete">Delete</button></span></div>'
+        + '<div class="cp-row">'+(p.colors.map(function(c){ return swatch(c,' data-act="apply"'); }).join('') || '<span class="cp-empty">Empty palette</span>')+'</div></div>';
+    }).join('') || '<div class="cp-empty" style="padding:6px 0;">No palettes yet. Save your recent colors as one, or start a new one.</div>';
+
+    card.innerHTML =
+        '<h4>Recent colors</h4>'
+      + '<div class="cp-row" style="margin-bottom:8px;">'+recent+'</div>'
+      + '<div class="cp-row" style="margin-bottom:6px;">'
+      + (_state.recent.length ? '<button type="button" class="cp-btn" data-act="saverecent">Save these as a palette</button>' : '')
+      + '</div>'
+      + '<button type="button" class="cp-btn primary" style="width:100%;margin-top:4px;" data-act="togglepals">'+(_palettesOpen?'Hide my color palettes ▴':'See my color palettes ▾')+'</button>'
+      + '<div id="cp-palettes" style="display:'+(_palettesOpen?'block':'none')+';">'
+      + pals
+      + '<div style="border-top:1px solid var(--line);padding-top:8px;margin-top:4px;"><button type="button" class="cp-btn" data-act="newpal">+ New palette</button></div>'
+      + (uid() ? '' : '<div class="cp-empty" style="margin-top:8px;">Sign in to keep your palettes on every device.</div>')
+      + '</div>';
+  }
+
+  function position(btn){
+    var card = document.getElementById('cp-card');
+    var r = btn.getBoundingClientRect();
+    var left = r.left + window.scrollX;
+    var maxLeft = window.scrollX + document.documentElement.clientWidth - card.offsetWidth - 16;
+    card.style.left = Math.max(window.scrollX + 16, Math.min(left, maxLeft)) + 'px';
+    card.style.top = (r.bottom + window.scrollY + 6) + 'px';
+  }
+
+  async function open(input, btn){
+    _activeInput = input;
+    _editingId = null;
+    document.querySelectorAll('.cp-toggle.open').forEach(function(b){ b.classList.remove('open'); });
+    btn.classList.add('open');
+    await load();
+    var card = document.getElementById('cp-card');
+    render();
+    card.style.display = 'block';
+    card._btn = btn;
+    position(btn);
+  }
+  function close(){
+    var card = document.getElementById('cp-card');
+    card.style.display = 'none';
+    document.querySelectorAll('.cp-toggle.open').forEach(function(b){ b.classList.remove('open'); });
+    _editingId = null;
+  }
+
+  function newId(){ return 'p' + Date.now().toString(36) + Math.random().toString(36).slice(2,6); }
+  function findPal(id){ return _state.palettes.find(function(p){ return p.id===id; }); }
+
+  // WHY one delegated click handler: the card's contents are re-rendered on
+  // every change, so per-button listeners would be lost each time.
+  document.addEventListener('click', async function(e){
+    var card = document.getElementById('cp-card');
+    if (!card) return;
+    var actEl = e.target.closest('#cp-card [data-act]');
+    if (actEl) {
+      e.preventDefault();
+      var act = actEl.dataset.act;
+      var palEl = actEl.closest('[data-pal]');
+      var p = palEl ? findPal(palEl.dataset.pal) : null;
+      if (act === 'apply') { applyColor(actEl.dataset.color); return; }
+      if (act === 'togglepals') { _palettesOpen = !_palettesOpen; render(); return; }
+      if (act === 'saverecent') {
+        var np = { id: newId(), name: 'Palette ' + (_state.palettes.length+1), colors: _state.recent.slice() };
+        _state.palettes.unshift(np); _palettesOpen = true; _editingId = np.id; save(); render();
+        var ni = document.getElementById('cp-name-'+np.id); if (ni) { ni.focus(); ni.select(); }
+        return;
+      }
+      if (act === 'newpal') {
+        var cur = _activeInput ? norm(_activeInput.value) : null;
+        var np2 = { id: newId(), name: 'Palette ' + (_state.palettes.length+1), colors: cur ? [cur] : [] };
+        _state.palettes.push(np2); _editingId = np2.id; save(); render();
+        var ni2 = document.getElementById('cp-name-'+np2.id); if (ni2) { ni2.focus(); ni2.select(); }
+        return;
+      }
+      if (!p) return;
+      if (act === 'edit') { _editingId = p.id; render(); return; }
+      if (act === 'canceledit') { _editingId = null; render(); return; }
+      if (act === 'saveedit') {
+        var nameEl = document.getElementById('cp-name-'+p.id);
+        p.name = (nameEl && nameEl.value.trim()) || p.name;
+        _editingId = null; save(); render(); return;
+      }
+      if (act === 'addcur') {
+        // WHY keep the typed name: re-rendering would otherwise reset an unsaved rename
+        var nm = document.getElementById('cp-name-'+p.id); if (nm && nm.value.trim()) p.name = nm.value.trim();
+        var c = _activeInput ? norm(_activeInput.value) : null;
+        if (c && p.colors.indexOf(c) < 0) { p.colors.push(c); save(); }
+        render(); return;
+      }
+      if (act === 'rmcolor') {
+        var nm2 = document.getElementById('cp-name-'+p.id); if (nm2 && nm2.value.trim()) p.name = nm2.value.trim();
+        p.colors.splice(parseInt(actEl.dataset.i,10),1); save(); render(); return;
+      }
+      if (act === 'delete') {
+        var ok = (typeof brandedConfirm === 'function') ? await brandedConfirm('Delete the palette "'+p.name+'"?') : true;
+        if (!ok) return;
+        _state.palettes = _state.palettes.filter(function(x){ return x.id!==p.id; }); save(); render(); return;
+      }
+      return;
+    }
+    // WHY close on any click outside the card and its own ▾: standard
+    // drop-down behavior, so it never covers the design controls for long.
+    if (card.style.display === 'block' && !e.target.closest('#cp-card') && !e.target.closest('.cp-toggle')) close();
+  });
+  document.addEventListener('keydown', function(e){ if (e.key === 'Escape') close(); });
+  window.addEventListener('resize', function(){ var c=document.getElementById('cp-card'); if (c && c.style.display==='block' && c._btn) position(c._btn); });
+
+  // WHY 'change' (not 'input') for recent colors: 'input' fires continuously
+  // while dragging inside the picker; 'change' fires once when a color is
+  // actually chosen, so only real picks land in the recent list.
+  document.addEventListener('change', function(e){
+    var t = e.target;
+    // WHY capture the value now: load() can finish after the user has already
+    // picked another color, and reading t.value then would record the wrong one.
+    if (t && t.matches && t.matches('.grad-stop input[type=color]')) { var picked = t.value; load().then(function(){ pushRecent(picked); if (document.getElementById('cp-card').style.display==='block') render(); }); }
+  });
+
+  // WHY attach on load to every .grad-stop color box: that wrapper is shared
+  // by all 55 color fields on both tabs (body, gradients, corners, logo
+  // background...), so one sweep covers them all without editing each one.
+  function enhance(){
+    document.querySelectorAll('.grad-stop input[type=color]').forEach(function(inp){
+      if (inp.dataset.cpReady) return;
+      inp.dataset.cpReady = '1';
+      var btn = document.createElement('button');
+      btn.type = 'button';
+      btn.className = 'cp-toggle';
+      btn.textContent = '▾';
+      btn.title = 'Recent colors & my color palettes';
+      btn.setAttribute('aria-label', 'Recent colors and my color palettes');
+      btn.addEventListener('click', function(ev){
+        ev.preventDefault(); ev.stopPropagation();
+        var card = document.getElementById('cp-card');
+        if (card.style.display === 'block' && _activeInput === inp) { close(); return; }
+        open(inp, btn);
+      });
+      inp.insertAdjacentElement('afterend', btn);
+    });
+  }
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', enhance); else enhance();
+  window.addEventListener('load', enhance); // WHY again on load: catches any color boxes built by script after the HTML
+})();
+</script>
+
 </body>
 </html>
