@@ -89,6 +89,12 @@
   // also fires on page load for an already-logged-in session (no doSignIn()
   // call happens then), and that's the case this needs to cover too — see
   // TEST_USERNAME's WHY in the main script below.
+  // WHY a helper: both private checks (admin email, test username) compare
+  // SHA-256 hashes so neither value has to appear in the page source.
+  async function sha256Hex(str) {
+    var buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(str));
+    return Array.from(new Uint8Array(buf)).map(function(b){ return b.toString(16).padStart(2,'0'); }).join('');
+  }
   onAuthStateChanged(auth,user=>{
     window._user=user||null;
     window._isTestAccount=false;
@@ -105,10 +111,24 @@
     // common way this happens unnoticed) would never match this exact
     // hardcoded lowercase constant. This makes the admin check match the
     // way Firebase itself treats the address, not a byte-for-byte string.
-    window._isAdmin = !!(user && user.email && user.email.trim().toLowerCase() === window.ADMIN_EMAIL.toLowerCase());
+    // WHY hashed (see ADMIN_EMAIL_HASH): the page only knows the hash, so the
+    // signed-in email is hashed and compared. crypto.subtle is async, so the
+    // nav re-renders once the answer is in.
+    window._isAdmin = false;
+    if (user && user.email) {
+      sha256Hex(user.email.trim().toLowerCase()).then(function(h){
+        window._isAdmin = (h === window.ADMIN_EMAIL_HASH);
+        renderNav();
+      }).catch(function(){ window._isAdmin = false; });
+    }
     if(user){
-      getDoc(doc(db,'users',user.uid)).then(function(snap){
-        window._isTestAccount = snap.exists() && snap.data().username===window.TEST_USERNAME;
+      getDoc(doc(db,'users',user.uid)).then(async function(snap){
+        // WHY try/catch around the hash: an unexpected crypto failure must
+        // just mean "not the test account", never block shape loading below.
+        try {
+          window._isTestAccount = snap.exists() && !!snap.data().username
+            && (await sha256Hex(String(snap.data().username))) === window.TEST_USERNAME_HASH;
+        } catch(e) { window._isTestAccount = false; }
         // WHY injected here, not only from the Admin tool's own page: ANY
         // signed-in user (not just Hali) needs their own previously-assigned
         // custom shapes to show up in their Dot Type / Inner Dot Style
@@ -132,7 +152,7 @@
      signup welcome email, and now the support-ticket modal) already called
      emailjs.send(...) assuming this library was loaded -- it never was, so
      every one of those calls was throwing "emailjs is not defined" with
-     nothing visible to show for it. Same service_wtg920o/template_nnmxioq
+     nothing visible to show for it. Same service_75wx6fk/template_nnmxioq
      and public key as her BrandedEmail tool (iqproductionz.com/BackEnd/
      BrandedEmail), since this is the same EmailJS account/project. -->
 <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
@@ -481,7 +501,14 @@ footer a{color:var(--muted);}footer a:hover{color:var(--white);}
          nav-dash above: only shows for window._isAdmin (ADMIN_EMAIL) --
          see renderNav's own WHY. This is a convenience hide, not the real
          security boundary (see ADMIN_EMAIL's WHY). -->
-    <button class="nav-btn" id="nav-admin" style="display:none" onclick="requireAuth('admin-shapes')">Upload Shape</button>
+    <button class="nav-btn" id="nav-admin" style="display:none" onclick="requireAuth('admin-shapes')">Admin Tools</button><!-- WHY renamed: Hali -- this page now holds the request queue and privacy cleanup too, not just shape upload -->
+    <!-- WHY no window._isAdmin check here, unlike nav-admin right above:
+         Hali, 2026-10 -- "don't change the admin account yet. Just make
+         sure you're changing the user account options in which they can
+         upload their own design." This button is for ANY signed-in user
+         (same u-only check as nav-dash below) -- it's the self-service
+         twin of the admin-only tool above, not a relaxed version of it. -->
+    <button class="nav-btn" id="nav-my-shapes" style="display:none" onclick="requireAuth('my-shapes')">Upload Your Design</button>
     <button class="nav-btn" id="nav-signin" onclick="openAuthModal('signin')">Sign In</button>
     <button class="nav-btn primary" id="nav-signup" onclick="openAuthModal('signup')">Get Started — Free</button>
     <button class="nav-btn" id="nav-signout" style="display:none" onclick="doSignOut()">Sign Out</button>
@@ -636,6 +663,13 @@ footer a{color:var(--muted);}footer a:hover{color:var(--white);}
                   </div>
                 </div>
                 <div class="char-preview-note" id="s-char-note">Select characters above to use them as one of your dot types.</div>
+              </div>
+              <!-- WHY here, signed-in only: Hali wants the upload option on the Create
+                   Code screen itself, and only for signed-in users since the
+                   shape saves to their account. renderNav() toggles every
+                   .signed-in-only element. -->
+              <div class="signed-in-only" style="display:none;margin:6px 0 8px;font-size:.72rem;color:var(--muted);">
+                Have your own design? <a style="color:var(--gold2);cursor:pointer;text-decoration:underline;" onclick="showView('my-shapes')">Upload your own dot / inner corner shape</a>
               </div>
               <div class="shape-grid" id="shape-grid"></div>
               <!-- CRESCENT ORIENTATION — Hali: "make the cresent have a drop
@@ -1219,6 +1253,13 @@ footer a{color:var(--muted);}footer a:hover{color:var(--white);}
                 </div>
                 <div class="char-preview-note" id="d-char-note">Select characters above to use them as one of your dot types.</div>
               </div>
+              <!-- WHY here, signed-in only: Hali wants the upload option on the Create
+                   Code screen itself, and only for signed-in users since the
+                   shape saves to their account. renderNav() toggles every
+                   .signed-in-only element. -->
+              <div class="signed-in-only" style="display:none;margin:6px 0 8px;font-size:.72rem;color:var(--muted);">
+                Have your own design? <a style="color:var(--gold2);cursor:pointer;text-decoration:underline;" onclick="showView('my-shapes')">Upload your own dot / inner corner shape</a>
+              </div>
               <div class="shape-grid" id="d-shape-grid"></div>
               <!-- CRESCENT ORIENTATION — same control as the Static tab's own
                    s-crescent-orientation-row; see its WHY there. -->
@@ -1557,6 +1598,16 @@ footer a{color:var(--muted);}footer a:hover{color:var(--white);}
     </div>
     <p style="font-size:.74rem;color:var(--muted);margin:-10px 0 16px;">Check codes below to include them in CSV export, bulk stats, or bulk delete.</p>
     <div id="qr-list"><div class="empty-state"><p>No QR codes yet.</p></div></div>
+
+    <!-- WHY a status tracker instead of in-app chat: Hali needs to tell a
+         client whether a custom shape can be done and when it'll arrive.
+         Status + promise date + a short note covers that, and each change is
+         also emailed (clients check email far more than a dashboard). -->
+    <div id="my-requests-section" style="margin-top:40px;border-top:1px solid var(--line);padding-top:24px;">
+      <h3 style="font-family:Cinzel,serif;font-size:1.05rem;margin-bottom:6px;">My Shape Requests</h3>
+      <p style="font-size:.74rem;color:var(--muted);margin-bottom:14px;">Custom shapes you've requested and where each one stands. You'll also get an email whenever the status changes.</p>
+      <div id="my-requests-list"><p style="color:var(--muted);font-size:.82rem;">Loading…</p></div>
+    </div>
   </div>
 </div>
 
@@ -1572,7 +1623,7 @@ footer a{color:var(--muted);}footer a:hover{color:var(--white);}
      too, as a second layer in case this view is ever reached another way. -->
 <div class="view" id="view-admin-shapes">
   <div class="section" style="padding-bottom:48px;">
-    <h2 class="section-title">Custom Shape Assignment</h2>
+    <h2 class="section-title">Admin Tools</h2>
     <p class="section-sub">Look up a client by the email on their account, then paste in the path data for a shape you've designed for them. It only ever shows up in THAT account's Dot Type and Inner Dot Style pickers — no one else sees it.</p>
 
     <div id="admin-not-authorized" style="display:none;">
@@ -1580,6 +1631,18 @@ footer a{color:var(--muted);}footer a:hover{color:var(--white);}
     </div>
 
     <div id="admin-shapes-body">
+      <!-- WHY the queue sits above the assignment tool: a request comes in,
+           Hali replies (status/date/note), designs it, then uses "Assign
+           shape to this account" which drops her into the tool below. -->
+      <div style="margin-bottom:34px;">
+        <div style="display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:10px;">
+          <h3 style="font-family:Cinzel,serif;font-size:1rem;margin:0;">Shape Requests</h3>
+          <label style="font-size:.72rem;color:var(--muted);display:inline-flex;align-items:center;gap:6px;cursor:pointer;"><input type="checkbox" id="admin-req-show-closed" onchange="adminLoadShapeRequests()" style="width:14px;height:14px;min-width:14px;"> Show delivered / declined</label>
+        </div>
+        <div id="admin-requests-list"><p style="color:var(--muted);font-size:.82rem;">Loading requests…</p></div>
+      </div>
+
+      <h3 style="font-family:Cinzel,serif;font-size:1rem;margin:0 0 12px;border-top:1px solid var(--line);padding-top:22px;">Assign a Shape to an Account</h3>
       <div class="field">
         <label>Client's account email</label>
         <input type="text" id="admin-lookup-email" placeholder="client@example.com" onkeydown="if(event.key==='Enter'){event.preventDefault();adminLookupUserByEmail();}">
@@ -1594,13 +1657,10 @@ footer a{color:var(--muted);}footer a:hover{color:var(--white);}
       <div id="admin-assign-form" style="display:none;margin-top:28px;border-top:1px solid var(--line);padding-top:22px;">
         <h3 style="font-family:Cinzel,serif;font-size:1rem;margin-bottom:14px;">Assign a New Shape</h3>
         <div class="field">
-          <label>Shape key (short, no spaces — e.g. client_star)</label>
+          <label>Shape name (short, no spaces — e.g. client_star)</label>
           <input type="text" id="admin-shape-key" placeholder="client_star">
         </div>
-        <div class="field">
-          <label>Label (a short glyph/text shown on the tile, e.g. ★)</label>
-          <input type="text" id="admin-shape-label" placeholder="★">
-        </div>
+        <!-- WHY no glyph field: Hali -- "why cant a glyph be made from the shape uploaded?" Every tile and list row already draws the real uploaded shape, so the shape's name is used wherever plain text is needed. -->
         <div class="field">
           <label>Upload an SVG file for this shape</label>
           <input type="file" id="admin-shape-file" accept=".svg,image/svg+xml" onchange="adminHandleShapeFileUpload(event)">
@@ -1628,9 +1688,87 @@ footer a{color:var(--muted);}footer a:hover{color:var(--white);}
       </div>
     </div>
 
-    <p style="font-size:.7rem;color:var(--muted);margin-top:36px;border-top:1px solid var(--line);padding-top:16px;">
-      TODO (security): this page only hides itself from everyone but your own account client-side. The real lock needs to be a Firestore Security Rule restricting writes to users/{uid}.customShapes to requests where request.auth.token.email == "halisarahparsons@gmail.com" — without that rule, anyone signed in could in theory call the same save function from their browser console. Add that rule in the Firebase console before relying on this for anything sensitive.
-    </p>
+    <!-- WHY removed: the old security TODO quoted the admin email in plain text on this page. The rules it describes are now published in Firestore. -->
+  </div>
+</div>
+
+<!-- SELF-SERVICE CUSTOM SHAPE UPLOAD -- Hali, 2026-10: "don't change the
+     admin account yet. Just make sure you're changing the user account
+     options in which they can upload their own design so I can make sure
+     that that's working properly." This is the non-admin twin of the
+     "Custom Shape Assignment" tool above: same SVG-upload/path-paste
+     fields and the same drawSVG preview, but there's no account lookup --
+     it always reads/writes the SIGNED-IN user's OWN users/{uid}.customShapes,
+     and it's reachable by any signed-in account (see nav-my-shapes above
+     and renderNav's matching display rule), not gated by window._isAdmin.
+     Kept as its own view/functions rather than reusing the admin ones so
+     the admin tool/button/view above is never touched by this change. -->
+<div class="view" id="view-my-shapes">
+  <div class="section" style="padding-bottom:48px;">
+    <h2 class="section-title">Upload Your Own Design</h2>
+    <p class="section-sub">Upload an SVG shape of your own — it's saved to your account only and shows up in your own Dot Type and Inner Dot Style pickers. No one else sees it.</p>
+
+    <div id="my-shapes-not-authorized" style="display:none;">
+      <p style="color:var(--red);">Sign in first.</p>
+    </div>
+
+    <div id="my-shapes-body">
+      <div class="field">
+        <label>Shape name (short, no spaces — e.g. my_star)</label>
+        <input type="text" id="my-shape-key" placeholder="my_star">
+      </div>
+        <!-- WHY no glyph field: Hali -- "why cant a glyph be made from the shape uploaded?" Every tile and list row already draws the real uploaded shape, so the shape's name is used wherever plain text is needed. -->
+      <div class="field">
+        <label>Upload an SVG file for this shape</label>
+        <input type="file" id="my-shape-file" accept=".svg,image/svg+xml" onchange="myShapeHandleFileUpload(event)">
+        <!-- WHY a full directions box instead of the old one-line hint: Hali --
+             "With directions on the type of file needed in order for users to
+             have their own dot show up." Most people uploading a logo or icon
+             have never exported a single-path SVG, so the steps sit right
+             beside the upload button. -->
+        <div style="margin-top:8px;padding:12px 14px;border:1px solid var(--line);border-radius:8px;background:var(--navy);font-size:.72rem;line-height:1.55;color:var(--muted);">
+          <strong style="color:var(--gold2);">What file to upload</strong>
+          <ul style="margin:6px 0 0 18px;padding:0;">
+            <li><strong>Format:</strong> an <strong>.svg</strong> file only. PNG, JPG and PDF won't work.</li>
+            <li><strong>One solid shape, one color.</strong> Your design is filled with the QR colors you pick, so detail made with extra colors disappears.</li>
+            <li><strong>One path:</strong> Illustrator: <em>Object &rarr; Expand</em>, then <em>Pathfinder &rarr; Unite</em>. Inkscape: <em>Path &rarr; Object to Path</em>, then <em>Path &rarr; Union</em>. Figma: <em>Flatten</em>. Turn any text into outlines first.</li>
+            <li><strong>Square artboard</strong> (e.g. 72&times;72 or 100&times;100), with the shape filling most of it so it lines up with the grid.</li>
+            <li><strong>Bold and simple.</strong> Each dot prints tiny; thin lines and small holes blur out and can stop the code from scanning.</li>
+          </ul>
+        </div>
+      </div>
+      <div class="field">
+        <label>SVG path data (the d="..." value)</label>
+        <textarea id="my-shape-d" rows="4" placeholder="M36.182,0 L27.454,29.455 ..." oninput="myShapePreview()"></textarea>
+      </div>
+      <div style="display:flex;gap:14px;">
+        <div class="field" style="flex:1;">
+          <label>viewBox width</label>
+          <input type="number" id="my-shape-vbw" value="72" oninput="myShapePreview()">
+        </div>
+        <div class="field" style="flex:1;">
+          <label>viewBox height</label>
+          <input type="number" id="my-shape-vbh" value="72" oninput="myShapePreview()">
+        </div>
+        <div class="field" style="flex:0 0 72px;">
+          <label>Preview</label>
+          <canvas id="my-shape-preview" width="56" height="56" style="background:#f0ece3;border-radius:6px;"></canvas>
+        </div>
+      </div>
+      <!-- WHY two independent checkboxes: Hali -- users "can also choose both
+           or either of where they want that option to show up." A shape that
+           works as a tiny module may look wrong as the corner eye, or the
+           reverse, so each placement is its own opt-in. Both start checked. -->
+      <div class="field">
+        <label>Show this shape in</label>
+        <label style="display:inline-flex;align-items:center;gap:6px;cursor:pointer;margin-right:18px;font-weight:400;"><input type="checkbox" id="my-shape-in-dot" checked style="width:14px;height:14px;min-width:14px;"> Dot Type options</label>
+        <label style="display:inline-flex;align-items:center;gap:6px;cursor:pointer;font-weight:400;"><input type="checkbox" id="my-shape-in-inner" checked style="width:14px;height:14px;min-width:14px;"> Inner corner dots</label>
+      </div>
+      <button class="nav-btn primary" onclick="myShapeAssign()">Save This Shape To My Account</button>
+
+      <h3 style="font-family:Cinzel,serif;font-size:1rem;margin:28px 0 14px;border-top:1px solid var(--line);padding-top:22px;">Your Shapes</h3>
+      <div id="my-shapes-list"><p style="color:var(--muted);font-size:.82rem;">Loading your shapes…</p></div>
+    </div>
   </div>
 </div>
 
@@ -1639,7 +1777,7 @@ footer a{color:var(--muted);}footer a:hover{color:var(--white);}
   <div class="modal">
     <button class="modal-close" onclick="closeModal('auth-modal')">✕</button>
     <h3 id="auth-modal-title">Sign In</h3>
-    <p id="auth-modal-sub">Welcome back — enter your username and password.</p>
+    <p id="auth-modal-sub">Welcome back — enter your email and password.</p>
 
     <!-- WHY onkeydown="Enter" on every field here, not just the buttons'
          onclick: Hali -- "even before i could hit enter to load the sign in
@@ -1653,7 +1791,12 @@ footer a{color:var(--muted);}footer a:hover{color:var(--white);}
          override) -- so the fix is a direct Enter handler on each field
          instead of switching to <form>/onsubmit. -->
     <div id="auth-signin">
-      <div class="field"><label>Username</label><input type="text" id="si-username" placeholder="yourname" oninput="this.value=this.value.toLowerCase().replace(/[^a-z0-9]/g,'')" onkeydown="if(event.key==='Enter')doSignIn()"></div>
+      <!-- WHY email, not username (2026-10-23): signing in by username meant the
+           username-to-email lookup had to be publicly readable, so anyone
+           could pull any member's email from it. Firebase signs in by email
+           directly, so nothing private has to be public. id kept as
+           si-username so existing listeners/styles still find it. -->
+      <div class="field"><label>Email</label><input type="email" id="si-username" placeholder="you@example.com" autocomplete="email" onkeydown="if(event.key==='Enter')doSignIn()"></div>
       <div class="field" style="margin-top:14px;"><label>Password</label><div class="pw-field-wrap"><input type="password" id="si-pass" placeholder="Password" onkeydown="if(event.key==='Enter')doSignIn()"><button type="button" class="pw-toggle-btn" onclick="togglePasswordVisibility('si-pass', this)" aria-label="Show password">👁</button></div></div>
       <button class="gen-btn" style="margin-top:18px;" onclick="doSignIn()">Sign In</button>
     </div>
@@ -1797,7 +1940,11 @@ var BASE_REDIRECT = 'https://iqproductionz.com/QRCode/Account/?slug=';
 // that's harmless: it isn't a login bypass, just a "don't charge THIS
 // already-authenticated account" flag, and nobody else can sign in as this
 // account without its password.
-var TEST_USERNAME = 'ntn';
+// WHY a SHA-256 hash, not the username itself: Hali -- "clients dont see
+// this email or my username." A hash can't be turned back into the name,
+// so viewing page source no longer reveals it; the check hashes the
+// signed-in account's username and compares the two hashes.
+var TEST_USERNAME_HASH = '86475f5e72acb469f359fa04817d701b5eb7eb380f1ddb635292b7454cb10ce7';
 // WHY a single hardcoded email, not a Firestore "role" field: Hali -- "you
 // privately assigning a shape to a specific client's account ... an admin
 // tool visible only to your account." There's exactly one admin (her), so
@@ -1809,7 +1956,10 @@ var TEST_USERNAME = 'ntn';
 // customShapes field to this exact email (see injectCustomShapesForUser's
 // WHY and adminAssignShape's own note) -- this file can't enforce that
 // server-side on its own.
-var ADMIN_EMAIL = 'halisarahparsons@gmail.com';
+// WHY a hash (2026-10-23): admin moved to Hali's newthoughtnursery account,
+// and per her "clients dont see this email" the address itself is no longer
+// in the page -- only its SHA-256 hash, compared in onAuthStateChanged.
+var ADMIN_EMAIL_HASH = 'db9a0685e7e2900c4cf6321a640b397e0bf4eb902854b6c5c3749a1a82a97364';
 
 // WHY: defer Stripe init until window fully loaded so Stripe.js is available
 var stripe = null;
@@ -3005,10 +3155,27 @@ var SAFE_GROUP_SHAPES = [
 // own historical WHY, now replaced -- "enlarge the notehead and thicken/
 // center the stem so real ink sits under the cell's center"). Flagged to
 // Hali directly rather than silently reshaping the artwork she supplied.
+// WHY right_triangle was added to this exclusion list, after shipping an
+// entire dedicated grouping construction just for it (see triBoxOkV/
+// drawTriBoxV and the "KNOWN TRADEOFF" comment at this file's real-module
+// Vary pass): that construction's own comment already flagged zbar scan
+// testing failing 0/10-0/20 at every size 2-7, with Hali choosing to ship
+// it anyway so she could check scan reliability herself. Hali, 2026-10,
+// after that hands-on testing -- "I can't get vary dot size to work with
+// the right triangles as well. So take that option off." Pulling it out
+// of SAFE_VARY_SHAPES turns the existing unsupported-shape warning (see
+// syncDotSizeButtons' own WHY) on for right_triangle, same as it already
+// is for splatter/classy/etc below -- Vary simply leaves it as a plain
+// single dot per module instead of attempting the triangle/square boxes.
+// The triBoxOkV machinery itself is left in place rather than deleted: it
+// never runs now that vKey==='right_triangle' can't reach the
+// SAFE_VARY_SHAPES-gated branch that calls it, so there's no behavior to
+// re-verify by removing dead code, and it was a lot of hard-won geometry
+// to risk breaking for no functional gain.
 var SAFE_VARY_SHAPES = Object.keys(SHAPES).filter(function(k){
   return ['splatter','classy','custom_char','hflower','tulip','halo_cat',
           'drip_skull','xskull','instagram','youtube','sun',
-          'snote','dnote'].indexOf(k) === -1;
+          'snote','dnote','right_triangle'].indexOf(k) === -1;
 });
 
 // WHY a THIRD allowlist just for the "big" tier, on top of SAFE_VARY_SHAPES
@@ -5607,6 +5774,28 @@ function toggleCrescentOrientation(prefix, key, context) {
     if (arr.length === 1) { if (typeof toast==='function') toast('Pick at least one orientation.','err'); return; }
     arr.splice(idx, 1);
   } else {
+    // WHY block mixing a 'top' (tl/tr) orientation with a 'bottom' (bl/br)
+    // one here, only when right_triangle is one of this tab's selected Dot
+    // Types: Hali, 2026-10 -- "when working with the right triangles for
+    // dots you can't mix bottoms and tops ... top and bottom oriented right
+    // triangles don't scan when used together." This pool is shared across
+    // every ORIENTABLE_SHAPES selection for this tab (see _crescentOrientation's
+    // own WHY), so the check has to look at whether right_triangle is
+    // CURRENTLY picked, not assume this row is only ever used for it --
+    // crescent/lips/classy/parallelogram/lightning have no such restriction
+    // and keep mixing freely even while this guard is active.
+    var shapesNow = (prefix === 's' ? _selectedShape : _selectedShapeD) || [];
+    if (shapesNow.indexOf('right_triangle') > -1) {
+      var TOP_ORIENT = ['tl','tr'], BOTTOM_ORIENT = ['bl','br'];
+      var addingTop = TOP_ORIENT.indexOf(key) > -1;
+      var addingBottom = BOTTOM_ORIENT.indexOf(key) > -1;
+      var hasTop = arr.some(function(k){ return TOP_ORIENT.indexOf(k) > -1; });
+      var hasBottom = arr.some(function(k){ return BOTTOM_ORIENT.indexOf(k) > -1; });
+      if ((addingTop && hasBottom) || (addingBottom && hasTop)) {
+        if (typeof toast==='function') toast("Top and bottom oriented right triangles don't scan when used together.",'err');
+        return;
+      }
+    }
     arr.push(key);
   }
   syncCrescentOrientationTiles(prefix);
@@ -9082,7 +9271,8 @@ function showView(name) {
   document.getElementById('view-'+name).classList.add('active');
   window._cv = name;
   if (name==='dashboard') showDashboard();
-  if (name==='admin-shapes') renderAdminShapesView();
+  if (name==='admin-shapes') { renderAdminShapesView(); if (window._isAdmin) adminLoadShapeRequests(); }
+  if (name==='my-shapes') renderMyShapesView();
 }
 function requireAuth(dest) { if(!window._user){openAuthModal();return;} showView(dest); }
 function switchTab(t) {
@@ -9107,6 +9297,13 @@ function renderNav() {
   // (module script above) is the one place that already knows the signed-in
   // user's email synchronously -- see ADMIN_EMAIL's own WHY.
   document.getElementById('nav-admin').style.display   = (u && window._isAdmin) ? '' : 'none';
+  // WHY just "u", not "u && window._isAdmin" like nav-admin above: this is
+  // the self-service upload button, open to every signed-in account -- see
+  // nav-my-shapes's own WHY in the nav markup.
+  document.getElementById('nav-my-shapes').style.display = u ? '' : 'none';
+  // WHY a class sweep: the create-screen "Upload your own" links (one per
+  // tab) follow the same signed-in-only rule as nav-my-shapes.
+  document.querySelectorAll('.signed-in-only').forEach(function(el){ el.style.display = u ? '' : 'none'; });
   if(u) document.getElementById('dash-email').textContent=u.email;
 }
 
@@ -9737,6 +9934,12 @@ async function createDynamic() {
   var name=document.getElementById('d-name').value.trim();
   var url=document.getElementById('d-url').value.trim();
   if(!name||!url){toast('Enter a name and destination URL.','err');return;}
+  // WHY add https:// here too: a destination saved without it gets treated
+  // by the redirect page as a folder on iqproductionz.com instead of an
+  // outside site (scans landed on /QRCode/Account/<what-you-typed>).
+  if (!/^[a-z][a-z0-9+.-]*:/i.test(url)) url = 'https://' + url.replace(/^\/+/, '');
+  if (!/^https?:\/\//i.test(url)) { toast('Destination must be a web address (https://...).','err'); return; }
+  document.getElementById('d-url').value = url;
   var design = captureDesignSettings('d');
   try {
     var fb=window._fb;
@@ -9764,6 +9967,7 @@ async function createDynamic() {
 // ── DASHBOARD ─────────────────────────────────────────────────────────────────
 async function showDashboard() {
   if(!window._user) return;
+  loadMyShapeRequests(); // WHY not awaited: the request list loads beside the codes list, never blocks it
   var fb=window._fb;
   var list=document.getElementById('qr-list');
   list.innerHTML='<div class="empty-state"><span class="spin"></span> Loading…</div>';
@@ -9917,7 +10121,7 @@ function adminPreviewShape() {
 async function adminAssignShape() {
   if (!window._isAdmin || !_adminTargetUid) { toast('Look up an account first.','err'); return; }
   var rawKey = (document.getElementById('admin-shape-key').value||'').trim();
-  var label = (document.getElementById('admin-shape-label').value||'').trim() || '★';
+  var label = rawKey; // WHY: the name doubles as the text label (no separate glyph field anymore)
   var d = (document.getElementById('admin-shape-d').value||'').trim();
   var vbW = parseFloat(document.getElementById('admin-shape-vbw').value) || 72;
   var vbH = parseFloat(document.getElementById('admin-shape-vbh').value) || 72;
@@ -9951,7 +10155,6 @@ async function adminAssignShape() {
     _adminTargetShapes = updated;
     renderAdminTargetPanel({ username: null, customShapes: updated });
     document.getElementById('admin-shape-key').value = '';
-    document.getElementById('admin-shape-label').value = '';
     document.getElementById('admin-shape-d').value = '';
     document.getElementById('admin-shape-vbw').value = 72;
     document.getElementById('admin-shape-vbh').value = 72;
@@ -9979,6 +10182,224 @@ async function adminRemoveShape(index) {
   }
 }
 
+// ── SELF-SERVICE: USER UPLOADS THEIR OWN CUSTOM SHAPE ───────────────────────
+// WHY a whole separate block instead of just dropping the _isAdmin check
+// from the admin functions above: Hali, 2026-10 -- "don't change the admin
+// account yet. Just make sure you're changing the user account options in
+// which they can upload their own design." The admin tool above looks up
+// ANOTHER account by email and writes to THAT uid; this one skips the
+// lookup entirely and always targets the SIGNED-IN user's OWN uid, so a
+// regular (non-admin) account can give itself a custom shape without
+// touching ADMIN_EMAIL, _isAdmin, nav-admin, or any admin-shapes
+// function/view above. The field written (customShapes on users/{uid}) and
+// the SVG expectations are identical on purpose -- it's the same storage
+// shape injectCustomShapesForUser already knows how to read.
+var _myShapesList = [];
+
+// WHY re-fetched from Firestore on every view-open instead of trusting
+// whatever onAuthStateChanged last cached: this view can be opened right
+// after a fresh sign-in, after another tab changed the account's shapes,
+// or after this same tab's own myShapeAssign/myShapeRemove already
+// mutated _myShapesList -- re-reading here is the one source of truth
+// that's always right, same spirit as adminLookupUserByEmail's own fetch.
+function renderMyShapesView() {
+  // WHY a second check here too, not just requireAuth() at the nav-button
+  // level: same reasoning as renderAdminShapesView's own WHY -- this view
+  // can be reached directly (console, back/forward nav) even if the user
+  // signed out in another tab since the button was last shown.
+  var authed = !!window._user;
+  document.getElementById('my-shapes-not-authorized').style.display = authed ? 'none' : 'block';
+  document.getElementById('my-shapes-body').style.display = authed ? '' : 'none';
+  if (!authed) return;
+  var out = document.getElementById('my-shapes-list');
+  out.innerHTML = '<p style="color:var(--muted);font-size:.82rem;">Loading your shapes…</p>';
+  var fb = window._fb;
+  fb.getDoc(fb.doc(fb.db,'users',window._user.uid)).then(function(snap){
+    _myShapesList = (snap.exists() && Array.isArray(snap.data().customShapes)) ? snap.data().customShapes : [];
+    renderMyShapesList();
+  }).catch(function(e){
+    out.innerHTML = '<p style="color:var(--red);font-size:.82rem;">Could not load your shapes: '+escapeHtml(e.message)+'</p>';
+  });
+}
+
+function renderMyShapesList() {
+  var out = document.getElementById('my-shapes-list');
+  var rowsHtml = _myShapesList.map(function(cs, i){
+    return '<div style="display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid var(--line);">'
+      + '<canvas width="40" height="40" style="background:#f0ece3;border-radius:4px;" data-my-shape-preview="'+i+'"></canvas>'
+      + '<span style="flex:1;font-size:.82rem;">'+escapeHtml(cs.label||'')+' <span style="color:var(--muted);">('+escapeHtml(cs.key)+')</span>'
+      + '<span style="display:block;font-size:.68rem;color:var(--muted);margin-top:3px;">'
+      + '<label style="cursor:pointer;margin-right:12px;"><input type="checkbox" '+(customShapeShowsIn(cs,'dot')?'checked':'')+' onchange="myShapeSetPlacement('+i+',\'dot\',this.checked,this)"> Dots</label>'
+      + '<label style="cursor:pointer;"><input type="checkbox" '+(customShapeShowsIn(cs,'inner')?'checked':'')+' onchange="myShapeSetPlacement('+i+',\'inner\',this.checked,this)"> Inner corners</label>'
+      + '</span></span>'
+      + '<button class="act-btn act-btn-danger" onclick="myShapeRemove('+i+')">Remove</button>'
+      + '</div>';
+  }).join('') || '<p style="color:var(--muted);font-size:.82rem;">You haven\'t uploaded any custom shapes yet.</p>';
+  out.innerHTML = rowsHtml;
+  _myShapesList.forEach(function(cs,i){
+    var cv = out.querySelector('[data-my-shape-preview="'+i+'"]');
+    if (!cv) return;
+    var cctx = cv.getContext('2d');
+    cctx.fillStyle = '#2a1230'; // WHY dark plum: these preview canvases have a cream background, so the old cream fill was invisible
+    try { drawSVG(cctx, 0, 0, 40, cs.d, 0, 0, cs.vbW||72, cs.vbH||72); } catch(e){}
+  });
+}
+
+// WHY the same FileReader + DOMParser round trip as adminHandleShapeFileUpload
+// (same single-<path>, same viewBox-extraction expectations): kept as its
+// own copy rather than factored into a shared helper so the admin tool's
+// code path is never touched by this change, per Hali's "don't change the
+// admin account yet" instruction above.
+function myShapeHandleFileUpload(evt) {
+  var file = evt.target.files && evt.target.files[0];
+  if (!file) return;
+  var reader = new FileReader();
+  reader.onload = function(e) {
+    try {
+      var doc = new DOMParser().parseFromString(String(e.target.result), 'image/svg+xml');
+      if (doc.querySelector('parsererror')) { toast('That file is not valid SVG/XML.','err'); return; }
+      var pathEl = doc.querySelector('path');
+      if (!pathEl) { toast('No <path> found in that SVG -- flatten/expand shapes in your design tool first.','err'); return; }
+      var d = pathEl.getAttribute('d') || '';
+      if (!d) { toast('That <path> has no "d" data.','err'); return; }
+      var svgEl = doc.querySelector('svg');
+      var vbAttr = (svgEl && svgEl.getAttribute('viewBox')) || '';
+      var vbParts = vbAttr.trim().split(/\s+/);
+      var vbW = (vbParts.length===4 ? parseFloat(vbParts[2]) : NaN) || parseFloat(svgEl && svgEl.getAttribute('width')) || 72;
+      var vbH = (vbParts.length===4 ? parseFloat(vbParts[3]) : NaN) || parseFloat(svgEl && svgEl.getAttribute('height')) || 72;
+      document.getElementById('my-shape-d').value = d;
+      document.getElementById('my-shape-vbw').value = vbW;
+      document.getElementById('my-shape-vbh').value = vbH;
+      var labelEl = document.getElementById('my-shape-label');
+      if (labelEl && !labelEl.value.trim()) labelEl.value = '★';
+      myShapePreview();
+      if (doc.querySelectorAll('path').length > 1) {
+        toast('That file has more than one path -- only the first one was used.','err');
+      } else {
+        toast('Path data and viewBox filled in from the file -- review, then save.','ok');
+      }
+    } catch (err) {
+      toast('Could not read that as an SVG file.','err');
+    }
+  };
+  reader.onerror = function(){ toast('Could not read that file.','err'); };
+  reader.readAsText(file);
+}
+
+function myShapePreview() {
+  var cv = document.getElementById('my-shape-preview');
+  if (!cv) return;
+  var ctx = cv.getContext('2d');
+  ctx.clearRect(0,0,cv.width,cv.height);
+  ctx.fillStyle = '#2a1230'; // WHY dark plum: same cream-on-cream fix as the list previews
+  var d = document.getElementById('my-shape-d').value.trim();
+  var vbW = parseFloat(document.getElementById('my-shape-vbw').value) || 72;
+  var vbH = parseFloat(document.getElementById('my-shape-vbh').value) || 72;
+  if (!d) return;
+  try { drawSVG(ctx, 0, 0, 56, d, 0, 0, vbW, vbH); } catch(e){ /* mid-typing invalid path data -- just show nothing until it parses */ }
+}
+
+async function myShapeAssign() {
+  if (!window._user) { toast('Sign in first.','err'); return; }
+  var rawKey = (document.getElementById('my-shape-key').value||'').trim();
+  var label = rawKey; // WHY: the name doubles as the text label (no separate glyph field anymore)
+  var d = (document.getElementById('my-shape-d').value||'').trim();
+  var vbW = parseFloat(document.getElementById('my-shape-vbw').value) || 72;
+  var vbH = parseFloat(document.getElementById('my-shape-vbh').value) || 72;
+  if (!rawKey || !d) { toast('Shape key and path data are both required.','err'); return; }
+  // WHY refuse an empty showIn: a shape set to show nowhere would save but
+  // never appear, which looks like a broken upload.
+  var showIn = [];
+  if (document.getElementById('my-shape-in-dot').checked) showIn.push('dot');
+  if (document.getElementById('my-shape-in-inner').checked) showIn.push('inner');
+  if (!showIn.length) { toast('Pick at least one place for this shape to show up.','err'); return; }
+  // WHY the same 'client_' prefix + sanitize as the admin tool: it's what
+  // makes a collision with a real built-in shape (crescent, heart, etc.)
+  // structurally impossible -- see adminAssignShape's own WHY.
+  var key = 'client_' + rawKey.toLowerCase().replace(/[^a-z0-9_]+/g,'_').replace(/^_+|_+$/g,'');
+  if (!key || key === 'client_') { toast('That shape key has no usable characters once sanitized -- try again.','err'); return; }
+  if (SHAPES[key] || _myShapesList.some(function(cs){ return cs.key === key; })) {
+    toast('That key is already in use -- pick a different one.','err'); return;
+  }
+  // WHY a Path2D sanity check here, not just at preview time: catches a
+  // genuinely malformed path string before it gets written to the database.
+  try { new Path2D(d); } catch(e) { toast('That path data is not valid SVG path syntax.','err'); return; }
+
+  var fb = window._fb;
+  try {
+    var updated = _myShapesList.slice();
+    updated.push({ key: key, label: label, d: d, vbW: vbW, vbH: vbH, showIn: showIn, assignedAt: Date.now() });
+    // WHY setDoc+merge instead of updateDoc: updateDoc fails outright if this
+    // account's users/{uid} doc was never created; merge leaves every other
+    // field untouched.
+    await fb.setDoc(fb.doc(fb.db,'users',window._user.uid), { customShapes: updated }, { merge: true });
+    _myShapesList = updated;
+    renderMyShapesList();
+    document.getElementById('my-shape-key').value = '';
+    document.getElementById('my-shape-d').value = '';
+    document.getElementById('my-shape-vbw').value = 72;
+    document.getElementById('my-shape-vbh').value = 72;
+    var fileEl = document.getElementById('my-shape-file');
+    if (fileEl) fileEl.value = '';
+    myShapePreview();
+    // WHY re-inject immediately, not just save to Firestore: she should be
+    // able to go straight to Dot Type / Inner Dot Style and see the new
+    // shape there without signing out and back in -- injectCustomShapesForUser
+    // is the exact same function the login flow calls (see its own WHY).
+    if (typeof injectCustomShapesForUser === 'function') injectCustomShapesForUser(updated);
+    document.getElementById('my-shape-in-dot').checked = true;
+    document.getElementById('my-shape-in-inner').checked = true;
+    toast('Your shape has been saved -- check '+(showIn.length===2?'Dot Type and Inner Dot Style':(showIn[0]==='dot'?'Dot Type':'Inner Dot Style'))+'.','ok');
+  } catch(e) {
+    toast('Save failed: '+e.message,'err');
+  }
+}
+
+// WHY a helper: shapes saved before this option existed have no showIn
+// field, and those keep appearing in both places like they did before.
+function customShapeShowsIn(cs, where) {
+  return !Array.isArray(cs.showIn) || cs.showIn.indexOf(where) > -1;
+}
+
+// WHY editable after saving: changes where an existing shape shows up
+// without deleting and re-uploading it.
+async function myShapeSetPlacement(index, where, on, cb) {
+  if (!window._user || !_myShapesList[index]) return;
+  var updated = _myShapesList.map(function(cs){ return Object.assign({}, cs); });
+  var cs = updated[index];
+  var set = Array.isArray(cs.showIn) ? cs.showIn.slice() : ['dot','inner'];
+  if (on && set.indexOf(where) < 0) set.push(where);
+  if (!on) set = set.filter(function(w){ return w !== where; });
+  if (!set.length) { if (cb) cb.checked = true; toast('A shape has to show up in at least one place -- remove it instead.','err'); return; }
+  cs.showIn = set;
+  var fb = window._fb;
+  try { // WHY try/catch: a rules or network failure must undo the checkbox, not leave it showing a change that didn't save
+    await fb.setDoc(fb.doc(fb.db,'users',window._user.uid), { customShapes: updated }, { merge: true });
+    _myShapesList = updated;
+    injectCustomShapesForUser(updated);
+    toast('Updated.','ok');
+  } catch(e) {
+    if (cb) cb.checked = !on;
+    toast('Update failed: '+e.message,'err');
+  }
+}
+
+async function myShapeRemove(index) {
+  if (!window._user) return;
+  var updated = _myShapesList.slice();
+  var removed = updated.splice(index,1)[0];
+  var fb = window._fb;
+  try {
+    await fb.setDoc(fb.doc(fb.db,'users',window._user.uid), { customShapes: updated }, { merge: true });
+    _myShapesList = updated;
+    renderMyShapesList();
+    if (typeof injectCustomShapesForUser === 'function') injectCustomShapesForUser(updated);
+    toast(removed ? ('Removed '+(removed.label||removed.key)+'.') : 'Removed.','ok');
+  } catch(e) {
+    toast('Remove failed: '+e.message,'err');
+  }
+}
+
 // WHY the generator side reads this from the user's OWN account doc (not
 // the admin tool's doc), and injects straight into SHAPE_GROUPS/SHAPES at
 // login time: every existing shape picker (Dot Type, Inner Dot Style, and
@@ -9991,6 +10412,10 @@ async function adminRemoveShape(index) {
 // should reach Dot Type and Inner Dot Style, not every other picker that
 // happens to iterate SHAPE_GROUPS too (Logo shape, Quarter/Half region
 // dropdowns), so this never calls those pickers' own build functions.
+// WHY per-picker key lists: each picker only gets the shapes the user chose
+// for it (customShapeShowsIn). SHAPES still holds all of them, so a saved
+// design that used a shape keeps rendering if its placement later changes.
+var _customDotKeys = [], _customInnerKeys = [];
 function injectCustomShapesForUser(list) {
   clearCustomShapesForUser();
   if (!Array.isArray(list) || !list.length) return;
@@ -10004,6 +10429,8 @@ function injectCustomShapesForUser(list) {
   if (!Object.keys(added).length) return;
   SHAPE_GROUPS[GROUP] = added;
   Object.keys(added).forEach(function(key){ SHAPES[key] = added[key]; });
+  _customDotKeys = list.filter(function(cs){ return cs && added[cs.key] && customShapeShowsIn(cs,'dot'); }).map(function(cs){ return cs.key; });
+  _customInnerKeys = list.filter(function(cs){ return cs && added[cs.key] && customShapeShowsIn(cs,'inner'); }).map(function(cs){ return cs.key; });
   appendCustomShapeGroupToMainGrid('shape-grid', _selectedShape, function(){ scheduleLivePreview('s'); syncDotSizeButtons('s'); syncCrescentOrientationTiles('s'); syncShapeReflectButtons('s'); });
   appendCustomShapeGroupToMainGrid('d-shape-grid', _selectedShapeD, function(){ scheduleLivePreview('d'); syncDotSizeButtons('d'); syncCrescentOrientationTiles('d'); syncShapeReflectButtons('d'); });
   appendCustomShapeGroupToInnerGrid('finder-dot-style-grid', function(key){
@@ -10073,6 +10500,7 @@ function appendCustomShapeGroupToMainGrid(gridId, selectedArr, onChange) {
   var grid = document.getElementById(gridId);
   if (!grid || !SHAPE_GROUPS['Your Custom Shapes']) return;
   grid.querySelectorAll('[data-custom-shape-group]').forEach(function(el){ el.remove(); });
+  if (!_customDotKeys.length) return; // WHY: no empty header when no custom shape is set to show in Dot Type
   var header = document.createElement('div');
   header.dataset.customShapeGroup = '1';
   header.style.cssText='width:100%;font-family:Cinzel,serif;font-size:.6rem;letter-spacing:.1em;color:var(--muted);margin:8px 0 4px;text-transform:uppercase;';
@@ -10081,7 +10509,7 @@ function appendCustomShapeGroupToMainGrid(gridId, selectedArr, onChange) {
   var row = document.createElement('div');
   row.dataset.customShapeGroup = '1';
   row.style.cssText='display:flex;flex-wrap:wrap;gap:5px;margin-bottom:4px;';
-  Object.keys(SHAPE_GROUPS['Your Custom Shapes']).forEach(function(key){
+  _customDotKeys.forEach(function(key){
     var btn = document.createElement('div');
     btn.className = 'shape-opt' + (selectedArr.indexOf(key)>-1 ? ' selected' : '');
     btn.title = key.replace(/_/g,' ');
@@ -10108,6 +10536,7 @@ function appendCustomShapeGroupToInnerGrid(gridId, onSelect) {
   var grid = document.getElementById(gridId);
   if (!grid || !SHAPE_GROUPS['Your Custom Shapes']) return;
   grid.querySelectorAll('[data-custom-shape-group]').forEach(function(el){ el.remove(); });
+  if (!_customInnerKeys.length) return; // WHY: same as the main grid, for inner corner dots
   var header = document.createElement('div');
   header.dataset.customShapeGroup = '1';
   header.style.cssText='width:100%;font-family:Cinzel,serif;font-size:.6rem;letter-spacing:.1em;color:var(--muted);margin:8px 0 4px;text-transform:uppercase;';
@@ -10116,7 +10545,7 @@ function appendCustomShapeGroupToInnerGrid(gridId, onSelect) {
   var row = document.createElement('div');
   row.dataset.customShapeGroup = '1';
   row.style.cssText='display:flex;flex-wrap:wrap;gap:5px;margin-bottom:4px;';
-  Object.keys(SHAPE_GROUPS['Your Custom Shapes']).forEach(function(key){
+  _customInnerKeys.forEach(function(key){
     var btn = document.createElement('div');
     btn.className = 'shape-opt';
     btn.title = key.replace(/_/g,' ');
@@ -10861,7 +11290,7 @@ function openAuthModal(tab){
     if(sub)   sub.textContent   = 'Free to start — no credit card required.';
   } else {
     if(title) title.textContent = 'Sign In';
-    if(sub)   sub.textContent   = 'Welcome back — enter your username and password.';
+    if(sub)   sub.textContent   = 'Welcome back — enter your email and password.';
   }
   openModal('auth-modal');
   authTab(tab);
@@ -11095,6 +11524,155 @@ function exportCSV(rows, filename) {
   URL.revokeObjectURL(a.href);
 }
 
+// ── SHAPE REQUEST STATUS TRACKER ─────────────────────────────────────────────
+// WHY one table of statuses: the client list, the admin dropdown and the
+// notification email all have to use the same names and wording.
+// 'pending' is what requests were saved as before this tracker existed,
+// so it's shown as Submitted.
+var SHAPE_REQUEST_STATUS = {
+  submitted: { label: 'Submitted',  color: 'var(--muted)', blurb: 'We received your request and will review it shortly.' },
+  reviewing: { label: 'Reviewing',  color: 'var(--gold2)', blurb: 'We are reviewing your request.' },
+  accepted:  { label: 'Accepted',   color: 'var(--gold2)', blurb: 'Your shape is in progress.' },
+  declined:  { label: 'Declined',   color: 'var(--red)',   blurb: 'We are not able to make this shape.' },
+  delivered: { label: 'Delivered',  color: '#5fb37a',      blurb: 'Your shape is live in your Dot Type / Inner Dot Style pickers.' }
+};
+function shapeReqStatusKey(r) { return SHAPE_REQUEST_STATUS[r.status] ? r.status : 'submitted'; }
+
+// WHY a plain YYYY-MM-DD string for the promise date: it's what <input
+// type="date"> gives back, and formatting it with a fixed T12:00 avoids the
+// date showing one day early in US time zones (midnight UTC = previous day).
+function formatPromiseDate(ymd) {
+  if (!ymd) return '';
+  var d = new Date(ymd + 'T12:00:00');
+  return isNaN(d) ? ymd : d.toLocaleDateString(undefined, { month:'long', day:'numeric', year:'numeric' });
+}
+
+// WHY the client query filters on uid: Firestore rules only let a client
+// read requests whose uid is theirs, and a query must match the rule.
+// Sorted here instead of with orderBy so no composite index is needed.
+async function loadMyShapeRequests() {
+  var out = document.getElementById('my-requests-list');
+  if (!out || !window._user) return;
+  var fb = window._fb;
+  try {
+    var snap = await fb.getDocs(fb.query(fb.collection(fb.db,'shape_requests'), fb.where('uid','==',window._user.uid)));
+    var rows = snap.docs.map(function(d){ return Object.assign({ id: d.id }, d.data()); })
+      .sort(function(a,b){ return (b.created||0) - (a.created||0); });
+    if (!rows.length) {
+      out.innerHTML = '<p style="color:var(--muted);font-size:.82rem;">No shape requests yet. You can request one from the Dot Type section on the Create Code screen.</p>';
+      return;
+    }
+    out.innerHTML = rows.map(function(r){
+      var st = SHAPE_REQUEST_STATUS[shapeReqStatusKey(r)];
+      var dateLine = (shapeReqStatusKey(r)==='accepted' && r.promiseDate) ? '<div style="font-size:.78rem;margin-top:4px;">Delivery by <strong>'+escapeHtml(formatPromiseDate(r.promiseDate))+'</strong></div>' : '';
+      // WHY "IQ Admin": Hali wants replies credited to the business, never
+      // to her personal name, email or username.
+      var note = r.note ? '<div style="font-size:.76rem;color:var(--muted);margin-top:6px;white-space:pre-wrap;"><strong style="color:var(--gold2);">IQ Admin:</strong> '+escapeHtml(r.note)+'</div>' : '';
+      return '<div style="padding:12px 14px;border:1px solid var(--line);border-radius:8px;margin-bottom:10px;background:var(--panel);">'
+        + '<div style="display:flex;justify-content:space-between;gap:10px;align-items:baseline;">'
+        + '<span style="font-size:.84rem;">'+escapeHtml(r.description||'')+'</span>'
+        + '<span style="font-size:.7rem;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:'+st.color+';white-space:nowrap;">'+st.label+'</span></div>'
+        + '<div style="font-size:.7rem;color:var(--muted);margin-top:3px;">Requested '+new Date(r.created||Date.now()).toLocaleDateString()+'</div>'
+        + dateLine + note + '</div>';
+    }).join('');
+  } catch(e) { // WHY catch: a rules or network error should say so, not spin forever
+    out.innerHTML = '<p style="color:var(--red);font-size:.82rem;">Could not load your requests: '+escapeHtml(e.message)+'</p>';
+  }
+}
+
+var _adminRequests = [];
+
+// WHY no username-list cleanup here anymore: it was a one-time job (run 2026-10-23)
+// to strip emails stored before sign-in moved to email; new sign-ups never add one.
+
+// WHY open requests only by default: once a request is delivered or
+// declined there's nothing left to do on it, so it shouldn't crowd the queue.
+async function adminLoadShapeRequests() {
+  var out = document.getElementById('admin-requests-list');
+  if (!out || !window._isAdmin) return;
+  var showClosed = document.getElementById('admin-req-show-closed').checked;
+  var fb = window._fb;
+  out.innerHTML = '<p style="color:var(--muted);font-size:.82rem;">Loading requests…</p>';
+  try {
+    var snap = await fb.getDocs(fb.collection(fb.db,'shape_requests'));
+    _adminRequests = snap.docs.map(function(d){ return Object.assign({ id: d.id }, d.data()); })
+      .filter(function(r){ var k = shapeReqStatusKey(r); return showClosed || (k!=='delivered' && k!=='declined'); })
+      .sort(function(a,b){ return (b.created||0) - (a.created||0); });
+    if (!_adminRequests.length) { out.innerHTML = '<p style="color:var(--muted);font-size:.82rem;">No open requests.</p>'; return; }
+    out.innerHTML = _adminRequests.map(function(r, i){
+      var k = shapeReqStatusKey(r);
+      var opts = Object.keys(SHAPE_REQUEST_STATUS).map(function(key){
+        return '<option value="'+key+'"'+(key===k?' selected':'')+'>'+SHAPE_REQUEST_STATUS[key].label+'</option>';
+      }).join('');
+      return '<div style="padding:14px;border:1px solid var(--line);border-radius:8px;margin-bottom:12px;background:var(--panel);">'
+        + '<div style="font-size:.86rem;margin-bottom:4px;">'+escapeHtml(r.description||'')+'</div>'
+        + '<div style="font-size:.7rem;color:var(--muted);margin-bottom:10px;">'+escapeHtml(r.email||'unknown')+' · '+escapeHtml((r.tier||'generic')==='custom'?'Custom (private)':'Generic (public)')+' · '+new Date(r.created||Date.now()).toLocaleString()+'</div>'
+        + '<div style="display:flex;gap:10px;flex-wrap:wrap;">'
+        + '<div class="field" style="flex:1;min-width:140px;margin:0;"><label>Status</label><select id="adm-req-status-'+i+'">'+opts+'</select></div>'
+        + '<div class="field" style="flex:1;min-width:140px;margin:0;"><label>Promise date</label><input type="date" id="adm-req-date-'+i+'" value="'+escapeHtml(r.promiseDate||'')+'"></div>'
+        + '</div>'
+        + '<div class="field" style="margin:10px 0 0;"><label>Note to client (optional)</label><textarea id="adm-req-note-'+i+'" rows="2" placeholder="e.g. Can do! I\'ll simplify the inner lines so it scans.">'+escapeHtml(r.note||'')+'</textarea></div>'
+        + '<div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:10px;">'
+        + '<button class="nav-btn primary" onclick="adminSaveShapeRequest('+i+')">Save &amp; Email Client</button>'
+        + '<button class="act-btn" onclick="adminAssignFromRequest('+i+')">Assign shape to this account</button>'
+        + '</div></div>';
+    }).join('');
+  } catch(e) { // WHY catch: most likely the admin-read rule isn't published yet; say so plainly
+    out.innerHTML = '<p style="color:var(--red);font-size:.82rem;">Could not load requests: '+escapeHtml(e.message)+'</p>';
+  }
+}
+
+// WHY save first, email second: the dashboard status is the record. If the
+// email fails (ad-blocker, EmailJS down) the client still sees the update,
+// and Hali is told the email didn't go out so she can follow up by hand.
+async function adminSaveShapeRequest(i) {
+  var r = _adminRequests[i];
+  if (!r || !window._isAdmin) return;
+  var status = document.getElementById('adm-req-status-'+i).value;
+  var promiseDate = document.getElementById('adm-req-date-'+i).value;
+  var note = document.getElementById('adm-req-note-'+i).value.trim();
+  if (status === 'accepted' && !promiseDate) { toast('Set a promise date before accepting.','err'); return; }
+  var fb = window._fb;
+  try {
+    await fb.updateDoc(fb.doc(fb.db,'shape_requests',r.id), { status: status, promiseDate: promiseDate, note: note, updated: Date.now() });
+  } catch(e) { toast('Save failed: '+e.message,'err'); return; }
+
+  var st = SHAPE_REQUEST_STATUS[status];
+  var lines = [
+    'Your custom QR shape request has an update.',
+    '',
+    'Request: ' + (r.description||''),
+    'Status: ' + st.label + ' -- ' + st.blurb
+  ];
+  if (status === 'accepted' && promiseDate) lines.push('Delivery by: ' + formatPromiseDate(promiseDate));
+  if (note) lines.push('', 'Note from IQ Admin:', note);
+  lines.push('', 'See all your requests on your dashboard: https://iqproductionz.com/QRCode/', '', '-- I.Q. Productionz · iqproductionz.com');
+  try {
+    if (!window.emailjs || !r.email || r.email === 'unknown') throw new Error('no email');
+    await emailjs.send('service_75wx6fk', 'template_nnmxioq', {
+      to_email: r.email,
+      subject: 'QR Shape Request: ' + st.label + ' -- I.Q. Productionz',
+      message: lines.join('\n')
+    });
+    toast('Saved and emailed ' + r.email + '.','ok');
+  } catch(e) { // WHY catch: the save already worked; only the email needs a manual follow-up
+    toast('Saved -- but the email did not send. Let the client know directly.','err');
+  }
+  adminLoadShapeRequests();
+}
+
+// WHY a shortcut into the assignment tool: after designing the shape, the
+// next step is always "put it on this person's account", so this fills in
+// their email and runs the lookup instead of retyping it.
+function adminAssignFromRequest(i) {
+  var r = _adminRequests[i];
+  if (!r || !r.email || r.email === 'unknown') { toast('This request has no account email.','err'); return; }
+  document.getElementById('admin-lookup-email').value = r.email;
+  adminLookupUserByEmail();
+  document.getElementById('admin-lookup-email').scrollIntoView({ behavior:'smooth', block:'center' });
+  toast('After assigning the shape, set this request to Delivered.','ok');
+}
+
 // ── SHAPE REQUEST ────────────────────────────────────────────────────────────
 var _pendingShapeRequest = null;
 
@@ -11105,10 +11683,17 @@ async function requestShape(prefix, tier) {
   var input = document.getElementById(inputId);
   var description = input ? input.value.trim() : '';
   if (!description) { toast('Describe the shape you want first.','err'); return; }
+  // WHY sign-in first: the finished shape is delivered into the requester's
+  // account and its status shows on their dashboard, so there has to be one.
+  if (!window._user) { toast('Sign in first -- your shape gets delivered to your account.','err'); openAuthModal(); return; }
   _pendingShapeRequest = { description, prefix, tier };
-  _pendingAction = { type: 'shape_request' };
-  // Open payment modal for $5
-  document.getElementById('pay-amount').textContent = '$5.00';
+  // WHY the amount comes from the tier: custom (private) requests are $50,
+  // generic ones $5. Before this, both paths charged $5 because
+  // confirmPayment fell back to its $5 default when no amount was set.
+  var price = tier === 'custom' ? 50 : 5;
+  _pendingShapeRequest.price = price;
+  _pendingAction = { type: 'shape_request', amount: price };
+  document.getElementById('pay-amount').textContent = '$' + price + '.00';
   document.getElementById('pay-desc').textContent = 'Custom shape request: ' + description;
   document.getElementById('pay-title').textContent = 'Request a Custom Shape';
   openModal('pay-modal');
@@ -11136,17 +11721,23 @@ async function fulfillShapeRequest(paymentIntentId) {
       payment_intent: paymentIntentId,
       uid: window._user ? window._user.uid : 'anonymous',
       email: window._user ? window._user.email : 'unknown',
+      tier: req.tier || 'generic',
       created: Date.now(),
-      status: 'pending'
+      // WHY these fields: the status tracker (see SHAPE_REQUEST_STATUS) reads
+      // them on the client dashboard and Hali edits them on the admin page.
+      status: 'submitted',
+      promiseDate: '',
+      note: '',
+      updated: Date.now()
     });
 
     // WHY: send directly via EmailJS with a clear subject so Hali can
     // find shape requests instantly in her inbox without opening each email
-    await emailjs.send('service_wtg920o', 'template_nnmxioq', {
+    await emailjs.send('service_75wx6fk', 'template_nnmxioq', {
       to_email: 'SarahParsons@IQProductionz.com',
       subject: 'QR Code Shape Request — ' + req.description.slice(0,40),
       message: [
-        'NEW SHAPE REQUEST — $5 PAID',
+        'NEW SHAPE REQUEST — $' + (req.price||5) + ' PAID (' + (req.tier==='custom'?'custom/private':'generic/public') + ')',
         'Payment ID: ' + paymentIntentId,
         '',
         'Shape requested: ' + req.description,
@@ -11171,14 +11762,14 @@ async function fulfillShapeRequest(paymentIntentId) {
   var customerEmail = window._user ? window._user.email : null;
   try {
     if (customerEmail) {
-      await emailjs.send('service_wtg920o', 'template_nnmxioq', {
+      await emailjs.send('service_75wx6fk', 'template_nnmxioq', {
         to_email: customerEmail,
         subject: 'Your QR Shape Request — I.Q. Productionz',
         message: [
           'Thank you for your shape request!',
           '',
           'Shape requested: ' + req.description,
-          'Payment confirmed — $5.00',
+          'Payment confirmed — $' + (req.price||5) + '.00',
           '',
           'Your shape will be added to the QR Code Platform within 7 business days.',
           'You will receive an email from us once it is live.',
@@ -11196,7 +11787,7 @@ async function fulfillShapeRequest(paymentIntentId) {
       '&name=' + encodeURIComponent('QR Shape Request: ' + req.description.slice(0,40));
 
     // Also send Hali a second email with the branded reply button embedded as a link
-    await emailjs.send('service_wtg920o', 'template_nnmxioq', {
+    await emailjs.send('service_75wx6fk', 'template_nnmxioq', {
       to_email: 'SarahParsons@IQProductionz.com',
       subject: 'ACTION: Reply to QR Shape Request — ' + req.description.slice(0,40),
       message: [
@@ -11263,17 +11854,12 @@ function togglePasswordVisibility(id, btn) {
 }
 
 async function sendPasswordReset() {
-  // WHY: Firebase sendPasswordResetEmail requires the email, not username.
-  // We look up the email from the usernames collection first.
+  // WHY no lookup anymore: sign-in is by email now, so the reset can go
+  // straight to the address typed in -- no public username-to-email list.
   var fb = window._fb;
-  var username = document.getElementById('si-username').value.trim();
-  if (!username) { showErr('Enter your username first, then click forgot password.'); return; }
+  var email = document.getElementById('si-username').value.trim().toLowerCase();
+  if (!email || email.indexOf('@')<0) { showErr('Enter your email first, then click forgot password.'); return; }
   try {
-    var usnap = await withAuthTimeout(fb.getDoc(fb.doc(fb.db,'usernames',username)));
-    if (!usnap.exists()) { showErr('Username not found.'); return; }
-    var uid = usnap.data().uid;
-    var usnap2 = await withAuthTimeout(fb.getDoc(fb.doc(fb.db,'users',uid)));
-    var email = usnap2.data().email;
     // WHY: import sendPasswordResetEmail from firebase/auth at runtime
     var { sendPasswordResetEmail } = await import('https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js');
     await withAuthTimeout(sendPasswordResetEmail(fb.auth, email));
@@ -11284,18 +11870,13 @@ async function sendPasswordReset() {
 
 async function doSignIn(){
   var fb=window._fb;
-  var username=document.getElementById('si-username').value.trim();
+  var email=document.getElementById('si-username').value.trim().toLowerCase();
   var pass=document.getElementById('si-pass').value;
-  if(!username){showErr('Enter your username.');return;}
+  // WHY the "@" check: returning members may still type their old username
+  // out of habit -- tell them what changed instead of a confusing auth error.
+  if(!email){showErr('Enter your email.');return;}
+  if(email.indexOf('@')<0){showErr('Sign in with the email on your account now (usernames are no longer used to sign in).');return;}
   try{
-    // WHY: Firebase auth uses email, not username. We look up the email from
-    // the usernames collection, then sign in with that email.
-    var usnap=await withAuthTimeout(fb.getDoc(fb.doc(fb.db,'usernames',username)));
-    if(!usnap.exists()){showErr('Username not found.');return;}
-    var uid=usnap.data().uid;
-    var usnap2=await withAuthTimeout(fb.getDoc(fb.doc(fb.db,'users',uid)));
-    if(!usnap2.exists()){showErr('Account not found.');return;}
-    var email=usnap2.data().email;
     var cred=await withAuthTimeout(fb.signInWithEmailAndPassword(fb.auth,email,pass));
     // WHY set window._user here instead of waiting on onAuthStateChanged:
     // that listener fires asynchronously, a tick or more after this await
@@ -11328,6 +11909,15 @@ async function doSignUp(){
   try{var ex=await withAuthTimeout(fb.getDoc(fb.doc(fb.db,'usernames',username)));if(ex.exists()){showErr('Username taken.');return;}
   var cred=await withAuthTimeout(fb.createUserWithEmailAndPassword(fb.auth,email,pass));
   await withAuthTimeout(fb.setDoc(fb.doc(fb.db,'users',cred.user.uid),{email,username,created:Date.now()}));
+  // WHY email now stored here too, not just on users/{uid}: doSignIn reads
+  // it from THIS doc so it never needs an unauthenticated pre-login read of
+  // another account's users/{uid} doc -- see doSignIn's own WHY. usernames
+  // docs are already publicly readable (by design, for this exact
+  // username->uid lookup), so this is no more exposed than the username
+  // itself already was.
+  // WHY uid only (2026-10-23): this list is public so "username taken"
+  // can be checked before sign-up; the email used to be here too, which
+  // exposed every member's address. Sign-in no longer needs it.
   await withAuthTimeout(fb.setDoc(fb.doc(fb.db,'usernames',username),{uid:cred.user.uid}));
   // WHY set window._user here, and branch on _pendingDynamicCreate exactly
   // like doSignIn does: see _pendingDynamicCreate's own WHY -- sign-UP can
@@ -11338,7 +11928,7 @@ async function doSignUp(){
   if(_pendingDynamicCreate){_pendingDynamicCreate=false;createDynamic();}else{showView('dashboard');toast('Welcome! Your account is ready.','ok');}
     // WHY: welcome email confirms signup and lists benefits so user knows what they unlocked
     try {
-      await emailjs.send('service_wtg920o','template_nnmxioq',{
+      await emailjs.send('service_75wx6fk','template_nnmxioq',{
         to_email: email,
         subject: 'Welcome to I.Q. Productionz QR Platform!',
         message: [
@@ -11396,7 +11986,7 @@ document.querySelectorAll('.modal-bg').forEach(bg=>bg.addEventListener('click',f
 // info is in here" (her BrandedEmail tool's source) -- that tool, and 4
 // other places already in THIS file (shape-request notifications, the
 // signup welcome email), all send through the same already-paid-for
-// service_wtg920o/template_nnmxioq EmailJS project, just with the SDK
+// service_75wx6fk/template_nnmxioq EmailJS project, just with the SDK
 // script never actually loaded (see the <script> tag added in <head> and
 // its own WHY) -- so this reuses her existing account instead of asking
 // her to go set up a second one. WHY still a mailto fallback, same
@@ -11454,7 +12044,7 @@ async function submitTicket(){
       '<div style="margin:22px 0;"><a href="' + brandedReplyUrl + '" style="display:inline-block;padding:13px 32px;background:linear-gradient(135deg,#c98a2e,#a87025);color:#333;text-decoration:none;font-family:Georgia,serif;font-size:12px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;border-radius:6px;">Reply from Branded Email</a></div>',
       '<p style="font-size:11px;color:#999;">Or copy this link: ' + brandedReplyUrl + '</p>'
     ].join('');
-    await emailjs.send('service_wtg920o', 'template_nnmxioq', {
+    await emailjs.send('service_75wx6fk', 'template_nnmxioq', {
       to_email: TICKET_SUPPORT_EMAIL,
       subject: 'QR Platform Ticket',
       reply_to: email,

@@ -3,7 +3,7 @@
   Title:       QR Code Redirect Handler
   Author:      Hali Sarah Parsons
   Date:        2026-09-25
-  Modified By: Claude
+  Modified By: Claude (2026-10-19: add https:// to bare destinations; scan logging can't block redirect)
   Description: Reads the slug from ?slug=... (or a #hash fallback), looks up
                the redirect URL in Firestore, logs the scan (count + device
                type, for dashboard stats), then redirects. Restyled to match
@@ -106,6 +106,22 @@
     msg.innerHTML = html;
   }
 
+  // WHY normalizeDest exists: a destination saved without "https://"
+  // (e.g. "IQProductionz.com/QRCode") is treated by the browser as a
+  // folder on THIS site, so scans landed on
+  // /QRCode/Account/IQProductionz.com/qrcode and 404'd. Adding the scheme
+  // makes it a real outside address. Only http(s) is allowed so a saved
+  // "javascript:" link can never run script on this domain.
+  function normalizeDest(raw) {
+    if (!raw) return null;
+    var s = String(raw).trim();
+    if (!/^[a-z][a-z0-9+.-]*:/i.test(s)) s = 'https://' + s.replace(/^\/+/, '');
+    try {
+      var u = new URL(s);
+      return (u.protocol === 'http:' || u.protocol === 'https:') ? u.href : null;
+    } catch (e) { return null; } // WHY catch: a malformed address throws; treat it as missing
+  }
+
   // WHY: slug can come from query param ?slug=... (easy with GitHub Pages)
   // or from the hash #slug (fallback). GitHub Pages doesn't support
   // server-side path rewrites, so we use query params on the redirect URL.
@@ -126,12 +142,18 @@
         }
 
         var data = snap.data();
-        var dest = data.redirectUrl;
+        var dest = normalizeDest(data.redirectUrl);
+        if (!dest) {
+          showError('This code has no valid destination yet. <a href="/QRCode/">Home</a>');
+          return;
+        }
 
         // WHY: log scan with timestamp, device type, and basic metadata
         // so dashboard stats are accurate
         var isMobile = /Mobi|Android|iPhone|iPad/i.test(navigator.userAgent);
-        await Promise.all([
+        // WHY allSettled + a 1.2s cap: counting the scan must never stop
+        // or delay the person scanning from reaching the destination.
+        await Promise.race([new Promise(function(r){ setTimeout(r, 1200); }), Promise.allSettled([
           // Increment counter on the main doc
           updateDoc(ref, { scanCount: increment(1) }),
           // Add a scan log entry for per-day / per-device breakdown
@@ -140,7 +162,7 @@
             mobile: isMobile,
             ua: navigator.userAgent.slice(0,120)
           })
-        ]);
+        ])]);
 
         // Redirect
         window.location.replace(dest);
