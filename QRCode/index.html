@@ -9957,7 +9957,18 @@ async function createDynamic() {
     }
     var userDoc=await fb.getDoc(fb.doc(fb.db,'users',window._user.uid));
     var username=userDoc.exists()?userDoc.data().username:window._user.uid.slice(0,8);
-    var slug=username+'-'+name.toLowerCase().replace(/[^a-z0-9]/g,'-').slice(0,20);
+    var baseSlug=username+'-'+name.toLowerCase().replace(/[^a-z0-9]/g,'-').slice(0,20);
+    // WHY check before saving: setDoc replaces whatever is already at that
+    // address, so a new code named like an existing one would silently
+    // overwrite it -- printed code, destination, scans and all. Adding -2,
+    // -3... keeps every code's link unique.
+    var slug=baseSlug, n=2;
+    while (n <= 50) {
+      var taken = await fb.getDoc(fb.doc(fb.db,'qrcodes',slug));
+      if (!taken.exists()) break;
+      slug = baseSlug+'-'+n; n++;
+    }
+    if (n > 50) { toast('Too many codes with that name -- try a different name.','err'); return; }
     await fb.setDoc(fb.doc(fb.db,'qrcodes',slug),{uid:window._user.uid,name,slug,redirectUrl:url,type:'dynamic',created:Date.now(),scanCount:0,design:design});
     toast('Dynamic QR code created!','ok');
     showView('dashboard');
@@ -10606,7 +10617,7 @@ function buildQRItem(data) {
   // horizontal row nested inside it.
   var designBtnRow=document.createElement('div'); designBtnRow.style.cssText='display:flex;gap:6px;';
   var dupBtn=document.createElement('button'); dupBtn.className='act-btn'; dupBtn.textContent='Duplicate';
-  dupBtn.title='Make a copy of this code\'s design under a new name — free, no charge.';
+  dupBtn.title='Start a NEW code with this design: you pick the new name and destination — free.';
   dupBtn.onclick=function(){duplicateQRCode(data);};
   designBtnRow.appendChild(designBtn); designBtnRow.appendChild(dupBtn);
   qrCol.appendChild(designBtnRow);
@@ -10740,35 +10751,22 @@ async function saveRenameQR(slug) {
   } catch(e) { toast('Error: '+e.message,'err'); }
 }
 
-// WHY a slug uniqueness loop here but not in createDynamic(): that one
-// generates its slug from whatever name she's freshly typed, so a
-// collision is rare (requires two DIFFERENT create flows to land on the
-// exact same slugified name). Duplicate ALWAYS starts from "Copy of X"
-// off the SAME source name -- duplicating the same code twice in a row
-// would otherwise generate the identical slug both times, and since
-// setDoc replaces a document wholesale at a given path, the second
-// duplicate would silently overwrite the first instead of erroring.
-async function duplicateQRCode(data) {
+// WHY Duplicate now loads the design into the Dynamic editor instead of
+// instantly copying the code: Hali -- "the only reason why I put the
+// duplicate button is really just for the design ... make sure it's going
+// to be a new code where a new name and a new link can be." The old version
+// cloned the whole code (same destination, "Copy of ..." name). Now the
+// design comes along, the name and destination start blank, and Create
+// makes a brand-new code with its own new link (slug).
+function duplicateQRCode(data) {
   if (!window._user) { toast('Sign in first.','err'); return; }
-  try {
-    var fb = window._fb;
-    var userDoc = await fb.getDoc(fb.doc(fb.db,'users',window._user.uid));
-    var username = userDoc.exists() ? userDoc.data().username : window._user.uid.slice(0,8);
-    var newName = 'Copy of ' + data.name;
-    var baseSlug = username+'-'+newName.toLowerCase().replace(/[^a-z0-9]/g,'-').slice(0,20);
-    var slug = baseSlug, n = 2;
-    while (n <= 50) {
-      var existing = await fb.getDoc(fb.doc(fb.db,'qrcodes',slug));
-      if (!existing.exists()) break;
-      slug = baseSlug+'-'+n; n++;
-    }
-    await fb.setDoc(fb.doc(fb.db,'qrcodes',slug), {
-      uid: window._user.uid, name: newName, slug: slug, redirectUrl: data.redirectUrl,
-      type: 'dynamic', created: Date.now(), scanCount: 0, design: data.design || DEFAULT_DESIGN
-    });
-    toast('Design duplicated as "'+newName+'".','ok');
-    showDashboard();
-  } catch(e) { toast('Error: '+e.message,'err'); }
+  resetDynamicForm(); // WHY: clears any code being edited, so Create can't update the original
+  applyDesignSettings('d', data.design || DEFAULT_DESIGN);
+  showView('home');
+  switchTab('dynamic');
+  var nameEl = document.getElementById('d-name');
+  if (nameEl) { nameEl.scrollIntoView({ behavior:'smooth', block:'center' }); setTimeout(function(){ nameEl.focus(); }, 400); }
+  toast('Design copied -- give your new code a name and destination, then create it.','ok');
 }
 
 // ── DASHBOARD DOWNLOAD PANEL (paid, $5 per format) ───────────────────────────
