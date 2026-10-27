@@ -577,19 +577,44 @@ footer a{color:var(--muted);}footer a:hover{color:var(--white);}
           <!-- LEFT COL -->
           <div>
             <div class="two-col">
-              <div class="field">
-                <label>Size (px)</label>
-                <select id="s-size">
-                  <option value="200">200 × 200 — Web / Social</option>
-                  <option value="300" selected>300 × 300 — Web / Email</option>
-                  <option value="500">500 × 500 — Business Card</option>
-                  <option value="800">800 × 800 — Flyer / Poster</option>
-                  <option value="1200">1200 × 1200 — Large Print</option>
-                  <option value="2000">2000 × 2000 — Banner / Sign</option>
-                  <option value="3000">3000 × 3000 — Car Decal (10")</option>
-                  <option value="4000">4000 × 4000 — Car Decal (13")</option>
-                  <option value="6000">6000 × 6000 — Billboard / Vehicle Wrap</option>
+              <div class="field" style="grid-column:1 / -1;">
+                <!-- WHY typed size + unit instead of a fixed pixel list: Hali --
+                     "I have a 2-inch sticker ... when I make it smaller, it's
+                     getting blurry ... have a write-in for image size, and you
+                     can pick inches, centimeters, pixels." One number is enough
+                     because a QR code is always square. The hidden s-size
+                     still holds the final pixel count, so every existing
+                     renderer and saved design keeps working unchanged. -->
+                <label>Size (square)</label>
+                <div style="display:flex;gap:6px;flex-wrap:wrap;align-items:center;">
+                  <input type="number" id="s-size-val" value="300" min="0.1" step="any" style="width:90px;" oninput="syncPrintSize('s')">
+                  <select id="s-size-unit" style="width:auto;" onchange="onPrintUnitChange('s')">
+                    <option value="px" selected>pixels</option>
+                    <option value="in">inches</option>
+                    <option value="cm">cm</option>
+                    <option value="mm">mm</option>
+                  </select>
+                  <select id="s-size-dpi" style="width:auto;display:none;" onchange="syncPrintSize('s')" title="Print quality (dots per inch)">
+                    <option value="150">150 DPI (draft)</option>
+                    <option value="300" selected>300 DPI (print)</option>
+                    <option value="600">600 DPI (sharpest)</option>
+                  </select>
+                </div>
+                <select id="s-size-preset" style="margin-top:6px;" onchange="applyPrintPreset('s', this.value); this.selectedIndex=0;">
+                  <option value="">Quick pick a size…</option>
+                  <option value="1|in|300">1" sticker / label</option>
+                  <option value="2|in|300">2" sticker</option>
+                  <option value="3|in|300">3" sticker</option>
+                  <option value="3.5|in|300">Business card (3.5")</option>
+                  <option value="300|px|">Web / email (300 px)</option>
+                  <option value="1080|px|">Social post (1080 px)</option>
+                  <option value="8|in|300">Flyer / poster (8")</option>
+                  <option value="10|in|300">Car decal (10")</option>
+                  <option value="13|in|300">Car decal (13")</option>
+                  <option value="24|in|150">Sign / banner (24")</option>
                 </select>
+                <div id="s-size-note" style="font-size:.68rem;color:var(--muted);margin-top:4px;">= 300 × 300 px</div>
+                <input type="hidden" id="s-size" value="300">
               </div>
               <div class="field">
                 <label>Error Correction</label>
@@ -1175,19 +1200,44 @@ footer a{color:var(--muted);}footer a:hover{color:var(--white);}
         <div class="design-grid" style="margin-bottom:20px;">
           <div>
             <div class="two-col">
-              <div class="field">
-                <label>Size (px)</label>
-                <select id="d-size">
-                  <option value="200">200 × 200 — Web / Social</option>
-                  <option value="300" selected>300 × 300 — Web / Email</option>
-                  <option value="500">500 × 500 — Business Card</option>
-                  <option value="800">800 × 800 — Flyer / Poster</option>
-                  <option value="1200">1200 × 1200 — Large Print</option>
-                  <option value="2000">2000 × 2000 — Banner / Sign</option>
-                  <option value="3000">3000 × 3000 — Car Decal (10")</option>
-                  <option value="4000">4000 × 4000 — Car Decal (13")</option>
-                  <option value="6000">6000 × 6000 — Billboard / Vehicle Wrap</option>
+              <div class="field" style="grid-column:1 / -1;">
+                <!-- WHY typed size + unit instead of a fixed pixel list: Hali --
+                     "I have a 2-inch sticker ... when I make it smaller, it's
+                     getting blurry ... have a write-in for image size, and you
+                     can pick inches, centimeters, pixels." One number is enough
+                     because a QR code is always square. The hidden d-size
+                     still holds the final pixel count, so every existing
+                     renderer and saved design keeps working unchanged. -->
+                <label>Size (square)</label>
+                <div style="display:flex;gap:6px;flex-wrap:wrap;align-items:center;">
+                  <input type="number" id="d-size-val" value="300" min="0.1" step="any" style="width:90px;" oninput="syncPrintSize('d')">
+                  <select id="d-size-unit" style="width:auto;" onchange="onPrintUnitChange('d')">
+                    <option value="px" selected>pixels</option>
+                    <option value="in">inches</option>
+                    <option value="cm">cm</option>
+                    <option value="mm">mm</option>
+                  </select>
+                  <select id="d-size-dpi" style="width:auto;display:none;" onchange="syncPrintSize('d')" title="Print quality (dots per inch)">
+                    <option value="150">150 DPI (draft)</option>
+                    <option value="300" selected>300 DPI (print)</option>
+                    <option value="600">600 DPI (sharpest)</option>
+                  </select>
+                </div>
+                <select id="d-size-preset" style="margin-top:6px;" onchange="applyPrintPreset('d', this.value); this.selectedIndex=0;">
+                  <option value="">Quick pick a size…</option>
+                  <option value="1|in|300">1" sticker / label</option>
+                  <option value="2|in|300">2" sticker</option>
+                  <option value="3|in|300">3" sticker</option>
+                  <option value="3.5|in|300">Business card (3.5")</option>
+                  <option value="300|px|">Web / email (300 px)</option>
+                  <option value="1080|px|">Social post (1080 px)</option>
+                  <option value="8|in|300">Flyer / poster (8")</option>
+                  <option value="10|in|300">Car decal (10")</option>
+                  <option value="13|in|300">Car decal (13")</option>
+                  <option value="24|in|150">Sign / banner (24")</option>
                 </select>
+                <div id="d-size-note" style="font-size:.68rem;color:var(--muted);margin-top:4px;">= 300 × 300 px</div>
+                <input type="hidden" id="d-size" value="300">
               </div>
               <div class="field">
                 <label>Error Correction</label>
@@ -8964,6 +9014,91 @@ async function renderQRCore(canvas, url, size, ec, prefix) {
   return true;
 }
 
+// ── PRINT SIZE (typed size + unit + DPI) ──────────────────────────────────
+// WHY 8000 px max: browsers start refusing canvases much past this, and
+// 8000 px already covers a 26" print at 300 DPI.
+var PRINT_MAX_PX = 8000, PRINT_MIN_PX = 50;
+var PRINT_PER_INCH = { in: 1, cm: 2.54, mm: 25.4 };
+
+// WHY one function for both tabs: same three fields, just a different prefix.
+function syncPrintSize(prefix) {
+  var valEl = document.getElementById(prefix+'-size-val');
+  var unit = document.getElementById(prefix+'-size-unit').value;
+  var dpiEl = document.getElementById(prefix+'-size-dpi');
+  var v = parseFloat(valEl.value);
+  dpiEl.style.display = unit === 'px' ? 'none' : '';
+  if (!(v > 0)) { document.getElementById(prefix+'-size-note').textContent = 'Enter a size.'; return; }
+  var dpi = parseInt(dpiEl.value, 10) || 300;
+  var px = unit === 'px' ? Math.round(v) : Math.round(v / PRINT_PER_INCH[unit] * dpi);
+  var clamped = Math.max(PRINT_MIN_PX, Math.min(PRINT_MAX_PX, px));
+  document.getElementById(prefix+'-size').value = clamped;
+  var note = '= ' + clamped + ' × ' + clamped + ' px';
+  if (unit !== 'px') note += ' · prints at ' + v + ' ' + unit + ' (' + dpi + ' DPI)';
+  if (clamped !== px) note += ' · capped at ' + (clamped === PRINT_MAX_PX ? 'the 8000 px maximum' : 'the 50 px minimum') + (unit !== 'px' && clamped === PRINT_MAX_PX ? ' -- try a lower DPI' : '');
+  document.getElementById(prefix+'-size-note').textContent = note;
+}
+
+// WHY convert the number when the unit changes: switching "600 px" to
+// inches should show 2 (at 300 DPI), not reinterpret 600 as 600 inches.
+function onPrintUnitChange(prefix) {
+  var valEl = document.getElementById(prefix+'-size-val');
+  var unit = document.getElementById(prefix+'-size-unit').value;
+  var dpi = parseInt(document.getElementById(prefix+'-size-dpi').value, 10) || 300;
+  var px = parseInt(document.getElementById(prefix+'-size').value, 10) || 300;
+  valEl.value = unit === 'px' ? px : +((px / dpi) * PRINT_PER_INCH[unit]).toFixed(2);
+  syncPrintSize(prefix);
+}
+
+function applyPrintPreset(prefix, preset) {
+  if (!preset) return;
+  var parts = preset.split('|');
+  document.getElementById(prefix+'-size-val').value = parts[0];
+  document.getElementById(prefix+'-size-unit').value = parts[1];
+  if (parts[2]) document.getElementById(prefix+'-size-dpi').value = parts[2];
+  syncPrintSize(prefix);
+}
+
+// WHY null for pixels: a pixel size has no real-world size to record, so
+// downloads stay exactly as they were.
+function getPrintSize(prefix) {
+  var unit = document.getElementById(prefix+'-size-unit').value;
+  var v = parseFloat(document.getElementById(prefix+'-size-val').value);
+  if (unit === 'px' || !(v > 0)) return null;
+  return { value: v, unit: unit, dpi: parseInt(document.getElementById(prefix+'-size-dpi').value, 10) || 300 };
+}
+
+// WHY write the DPI into the file: without it, print and design programs
+// assume 72 pixels per inch, so a 600 px sticker file opens as 8.3" wide.
+// With it, the same file opens at exactly 2". PNG stores this in a "pHYs"
+// chunk (pixels per meter), which canvas.toDataURL never adds on its own.
+var _crcTable = null;
+function _crc32(bytes) {
+  if (!_crcTable) { _crcTable = []; for (var n=0;n<256;n++){ var c=n; for (var k=0;k<8;k++) c = (c&1) ? (0xEDB88320 ^ (c>>>1)) : (c>>>1); _crcTable[n]=c>>>0; } }
+  var crc = 0xFFFFFFFF;
+  for (var i=0;i<bytes.length;i++) crc = _crcTable[(crc ^ bytes[i]) & 0xFF] ^ (crc >>> 8);
+  return (crc ^ 0xFFFFFFFF) >>> 0;
+}
+function _b64ToBytes(dataUrl) { var bin = atob(dataUrl.split(',')[1]); var u = new Uint8Array(bin.length); for (var i=0;i<bin.length;i++) u[i]=bin.charCodeAt(i); return u; }
+function imageDataUrlWithDpi(dataUrl, dpi) {
+  if (!dpi) return dataUrl;
+  try { // WHY try/catch: if anything about the file is unexpected, hand back the untouched image rather than failing the download
+    var b = _b64ToBytes(dataUrl), out;
+    if (dataUrl.indexOf('image/png') > -1) {
+      var ppm = Math.round(dpi / 0.0254);
+      var chunk = new Uint8Array(21); var dv = new DataView(chunk.buffer);
+      dv.setUint32(0, 9); chunk.set([0x70,0x48,0x59,0x73], 4); // length 9, "pHYs"
+      dv.setUint32(8, ppm); dv.setUint32(12, ppm); chunk[16] = 1;  // pixels per meter, x & y; unit = meter
+      dv.setUint32(17, _crc32(chunk.subarray(4, 17)));
+      var at = 33; // right after the 8-byte signature + 25-byte IHDR chunk
+      out = new Uint8Array(b.length + 21); out.set(b.subarray(0, at)); out.set(chunk, at); out.set(b.subarray(at), at + 21);
+    } else if (b[6]===0x4A && b[7]===0x46 && b[8]===0x49 && b[9]===0x46) { // JPEG with a JFIF header
+      out = b.slice(); out[13] = 1; out[14] = dpi >> 8; out[15] = dpi & 255; out[16] = dpi >> 8; out[17] = dpi & 255;
+    } else { return dataUrl; }
+    var bin = ''; for (var i=0;i<out.length;i+=0x8000) bin += String.fromCharCode.apply(null, out.subarray(i, i+0x8000));
+    return dataUrl.split(',')[0] + ',' + btoa(bin);
+  } catch(e) { return dataUrl; }
+}
+
 async function generateCustomQR() {
   var url = document.getElementById('s-url').value.trim();
   if (!url) { toast('Enter a URL or text to encode.','err'); return; }
@@ -9235,16 +9370,27 @@ function isFinderModule(row, col, n) {
   return false;
 }
 
-function downloadCustomQR(fmt) {
+// WHY regenerate before every download: the old version saved whatever was
+// last generated, so changing the size and clicking Download without
+// pressing Generate again kept handing out the OLD size -- which looked like
+// the size setting did nothing.
+async function downloadCustomQR(fmt) {
+  if (!document.getElementById('s-url').value.trim()) { toast('Enter a URL or text first.','err'); return; }
+  await generateCustomQR();
   var canvas = document.getElementById('qr-output');
   if (!canvas.width) { toast('Generate a QR code first.','err'); return; }
+  var ps = getPrintSize('s');
   var a = document.createElement('a');
   if (fmt==='png') {
-    a.href = canvas.toDataURL('image/png');
+    a.href = imageDataUrlWithDpi(canvas.toDataURL('image/png'), ps && ps.dpi);
     a.download = 'qr-code.png';
   } else {
+    // WHY physical width/height: with a real-world size picked, the SVG opens
+    // at that size (e.g. 2in) in design and print programs. The picture
+    // inside is still the full-resolution image, not vector shapes.
     var dataUrl = canvas.toDataURL('image/png');
-    var svg = '<svg xmlns="http://www.w3.org/2000/svg" width="'+canvas.width+'" height="'+canvas.height+'"><image href="'+dataUrl+'" width="'+canvas.width+'" height="'+canvas.height+'"/></svg>';
+    var w = ps ? (ps.value + ps.unit) : canvas.width, h = w;
+    var svg = '<svg xmlns="http://www.w3.org/2000/svg" width="'+w+'" height="'+h+'" viewBox="0 0 '+canvas.width+' '+canvas.height+'"><image href="'+dataUrl+'" width="'+canvas.width+'" height="'+canvas.height+'"/></svg>';
     a.href = 'data:image/svg+xml;charset=utf-8,'+encodeURIComponent(svg);
     a.download = 'qr-code.svg';
   }
@@ -9393,6 +9539,7 @@ function captureDesignSettings(prefix) {
     logoCutoutSize: _logoCutoutSize[prefix],
     ec: val('ec','M'),
     size: parseInt(val('size','300'),10) || 300,
+    printSize: getPrintSize(prefix), // WHY: lets paid downloads of a saved dynamic code keep its real-world size
     colors: {
       fg: val('c-fg','#000000'), bg: val('c-bg','#ffffff'),
       g2_1: val('g2-1','#c98a2e'), g2_2: val('g2-2','#4A1060'), g2_bg: val('g2-bg','#ffffff'), g2_dir: val('g2-dir','horizontal'), g2_gradient: checkedVal('g2-gradient', true),
@@ -9731,6 +9878,16 @@ function applyDesignSettings(prefix, design) {
   updateEmojiFrameStatus(prefix);
   set('ec', design.ec);
   if (design.size) set('size', String(design.size));
+  // WHY restore the typed size too: otherwise the size box would show 300 px
+  // while the hidden pixel value says something else.
+  (function(){
+    var ps = design.printSize;
+    var vEl = document.getElementById(prefix+'-size-val'); if (!vEl) return;
+    document.getElementById(prefix+'-size-unit').value = ps ? ps.unit : 'px';
+    if (ps && ps.dpi) document.getElementById(prefix+'-size-dpi').value = String(ps.dpi);
+    vEl.value = ps ? ps.value : (design.size || 300);
+    syncPrintSize(prefix);
+  })();
   set('c-fg', c.fg); set('c-bg', c.bg);
   set('g2-1', c.g2_1); set('g2-2', c.g2_2); set('g2-bg', c.g2_bg); set('g2-dir', c.g2_dir);
   // WHY the ?? true fallback instead of leaving an unset field alone (like
@@ -10833,7 +10990,11 @@ async function fulfillDownload() {
 async function downloadDashQRFormat(slug,url,fmt,design) {
   design = design || DEFAULT_DESIGN;
   if (fmt==='svg'){ await buildDashSVG(slug,url,design); return; }
-  var size = Math.max(design.size||300, 800); // WHY floor at 800: a design's saved "web preview" size is too low-res for a print/decal download
+  // WHY no 800 px floor when a real-world size was picked: that size was
+  // chosen on purpose for print (e.g. a 2" sticker = 600 px at 300 DPI).
+  // A plain pixel size still gets the floor so web-sized designs print sharp.
+  var ps = design.printSize || null;
+  var size = ps ? (design.size||300) : Math.max(design.size||300, 800);
   var canvas=document.createElement('canvas');
   var ok = await renderQRCore(canvas, url, size, design.ec||'M', design);
   if (!ok) { toast('Could not render the QR code — try again.','err'); return; }
@@ -10842,10 +11003,10 @@ async function downloadDashQRFormat(slug,url,fmt,design) {
     // WHY no separate white-flatten step (the old plain-qrcodejs path
     // needed one): renderQRCore always paints an opaque background first,
     // so the canvas has no transparency to begin with.
-    a.href=canvas.toDataURL('image/jpeg',0.95);
+    a.href=imageDataUrlWithDpi(canvas.toDataURL('image/jpeg',0.95), ps && ps.dpi);
     a.download=slug+'.jpg';
   } else {
-    a.href=canvas.toDataURL('image/png');
+    a.href=imageDataUrlWithDpi(canvas.toDataURL('image/png'), ps && ps.dpi);
     a.download=slug+'.png';
   }
   a.click();
@@ -11048,7 +11209,10 @@ async function buildDashSVG(slug,url,design) {
     + finderSVG(n-7,0,trF.outer,trF.inner,trF.scale)
     + finderSVG(0,n-7,blF.outer,blF.inner,blF.scale);
 
-  var svg='<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 '+n+' '+n+'" shape-rendering="crispEdges">'
+  // WHY width/height from the print size: a vector file can carry its real
+  // size, so a 2" sticker design opens at exactly 2" in print software.
+  var psv = design.printSize, svgDim = psv ? ' width="'+psv.value+psv.unit+'" height="'+psv.value+psv.unit+'"' : '';
+  var svg='<svg xmlns="http://www.w3.org/2000/svg"'+svgDim+' viewBox="0 0 '+n+' '+n+'" shape-rendering="crispEdges">'
     + (defs?'<defs>'+defs+'</defs>':'')
     + '<rect x="0" y="0" width="'+n+'" height="'+n+'" fill="'+bg+'"/>'
     + '<g '+fillAttr+'>'+rects+'</g>'
