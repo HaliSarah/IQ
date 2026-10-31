@@ -131,7 +131,7 @@ textarea.inp{resize:vertical;min-height:220px;line-height:1.7;}
 
   <div class="field">
     <label class="lbl" for="email-subject">Email Subject *</label>
-    <input type="text" class="inp" id="email-subject" value="A Note From Your Mary Kay Beauty Consultant ✨">
+    <input type="text" class="inp" id="email-subject" value="A Note From Your Beauty Consultant ✨">
   </div>
 
   <div class="field">
@@ -146,7 +146,7 @@ textarea.inp{resize:vertical;min-height:220px;line-height:1.7;}
       <option value="Welcome to the Team">
       <option value="Just Checking In">
     </datalist>
-    <div class="hint">Small line under "Mary Kay" in the pink email header, click the box for ideas or type your own</div>
+    <div class="hint">Small line under "Beauty by Hali Sarah" in the pink email header, click the box for ideas or type your own</div>
   </div>
 
   <!-- ─── MESSAGE ───────────────────────────────── -->
@@ -175,7 +175,7 @@ textarea.inp{resize:vertical;min-height:220px;line-height:1.7;}
     <div class="btn-builder-row">
       <div class="btn-builder-field">
         <div class="lbl" style="font-size:9px;">Link Text (what they see)</div>
-        <input type="text" id="link-text" placeholder="e.g. TimeWise® Miracle Set">
+        <input type="text" id="link-text" placeholder="e.g. Age-Defying Essentials Set">
       </div>
       <div class="btn-builder-field">
         <div class="lbl" style="font-size:9px;">URL</div>
@@ -484,7 +484,7 @@ function buildEmailHtml(clientName, rawContent){
   '</style></head>' +
   '<body><div style="padding:24px 16px;background:#fdf6f8;">' +
   '<div class="wrap">' +
-  '<div class="hdr"><h1>Mary Kay</h1>' + (tagline ? '<p>' + escapeHtml(tagline) + '</p>' : '') + '</div>' +
+  '<div class="hdr"><h1>Beauty by Hali Sarah</h1>' + (tagline ? '<p>' + escapeHtml(tagline) + '</p>' : '') + '</div>' +
   '<div class="body">' +
   (opener
     ? '<p style="font-family:\'Cormorant Garamond\',Georgia,serif;font-size:26px;color:#2a1a20;font-weight:300;margin:0 0 6px;">' + escapeHtml(opener) + '</p>' +

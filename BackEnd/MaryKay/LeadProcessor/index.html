@@ -197,20 +197,20 @@ function buildProducts(skinType, definition, foundation) {
   var eyeNote  = null;
 
   if(definition === 'Acne'){
-    products.push({name:'Clear Proof\u00ae Acne System Set', url:'https://www.marykay.com/sistahay/en/skincare/collection/clear-proof/clear-proof-acne-system-10058977/10058977US10058977.html'});
+    products.push({name:'Clear Skin Acne-Fighting System', url:'https://www.marykay.com/sistahay/en/skincare/collection/clear-proof/clear-proof-acne-system-10058977/10058977US10058977.html'});
   } else if(definition === 'Expression Lines'){
-    if(isOily) products.push({name:'Mary Kay\u00ae Mattifying Regimen', url:'https://www.marykay.com/sistahay/en/skincare/collection/mary-kay-skin-care/mary-kay-mattifying-regimen-990322396/990322396US10230673.html'});
-    else        products.push({name:'Mary Kay\u00ae Hydrating Regimen', url:'https://www.marykay.com/sistahay/en/skincare/collection/mary-kay-skin-care/mary-kay-hydrating-regimen-990322397/990322397US10230672.html'});
-    eyeNote = 'Concerned about lines around your eyes? Add the <a href="https://www.marykay.com/sistahay/en/skincare/collection/timewise/timewise-eye-cream-990307131/990307131US10217408.html" style="color:#e8507a;">TimeWise\u00ae Eye Cream</a> to your regimen!';
-    products.push({name:'TimeWise\u00ae Eye Cream', url:'https://www.marykay.com/sistahay/en/skincare/collection/timewise/timewise-eye-cream-990307131/990307131US10217408.html', sampleOnly:true});
+    if(isOily) products.push({name:'The Shine-Control Matte Ritual', url:'https://www.marykay.com/sistahay/en/skincare/collection/mary-kay-skin-care/mary-kay-mattifying-regimen-990322396/990322396US10230673.html'});
+    else        products.push({name:'The Dewy Hydration Ritual', url:'https://www.marykay.com/sistahay/en/skincare/collection/mary-kay-skin-care/mary-kay-hydrating-regimen-990322397/990322397US10230672.html'});
+    eyeNote = 'Concerned about lines around your eyes? Add the <a href="https://www.marykay.com/sistahay/en/skincare/collection/timewise/timewise-eye-cream-990307131/990307131US10217408.html" style="color:#e8507a;">Bright-Eyed Renewal Eye Cream</a> to your regimen!';
+    products.push({name:'Bright-Eyed Renewal Eye Cream', url:'https://www.marykay.com/sistahay/en/skincare/collection/timewise/timewise-eye-cream-990307131/990307131US10217408.html', sampleOnly:true});
   } else if(definition === 'Wrinkles'){
-    if(isOily) products.push({name:'TimeWise\u00ae Miracle Set Combination/Oily', url:'https://www.marykay.com/sistahay/en/skincare/collection/timewise/timewise-miracle-set-combination-oily-990312971/990312971US10217415.html'});
-    else        products.push({name:'TimeWise\u00ae Miracle Set Normal/Dry', url:'https://www.marykay.com/sistahay/en/skincare/collection/timewise/timewise-miracle-set-normal-dry-990312970/990312970US10217417.html'});
-    eyeNote = 'Want eye care included? The <a href="https://www.marykay.com/sistahay/en/skincare/collection/timewise/ultimate-timewise-miracle-set-combination-to-oily-990314980/990314980US10223244.html" style="color:#e8507a;">Ultimate TimeWise\u00ae Miracle Set</a> includes an eye cream \u2014 available as a sample!';
-    if(isOily) products.push({name:'Ultimate TimeWise\u00ae Miracle Set Combination/Oily', url:'https://www.marykay.com/sistahay/en/skincare/collection/timewise/ultimate-timewise-miracle-set-combination-to-oily-990314980/990314980US10223244.html', sampleOnly:true});
-    else        products.push({name:'Ultimate TimeWise\u00ae Miracle Set Normal/Dry', url:'https://www.marykay.com/sistahay/en/skincare/collection/timewise/ultimate-timewise-miracle-set-normal-to-dry-990314981/990314981US10223243.html', sampleOnly:true});
+    if(isOily) products.push({name:'Age-Defying Essentials Set (Combination/Oily)', url:'https://www.marykay.com/sistahay/en/skincare/collection/timewise/timewise-miracle-set-combination-oily-990312971/990312971US10217415.html'});
+    else        products.push({name:'Age-Defying Essentials Set (Normal/Dry)', url:'https://www.marykay.com/sistahay/en/skincare/collection/timewise/timewise-miracle-set-normal-dry-990312970/990312970US10217417.html'});
+    eyeNote = 'Want eye care included? The <a href="https://www.marykay.com/sistahay/en/skincare/collection/timewise/ultimate-timewise-miracle-set-combination-to-oily-990314980/990314980US10223244.html" style="color:#e8507a;">Ultimate Age-Defying Collection</a> includes an eye cream \u2014 available as a sample!';
+    if(isOily) products.push({name:'Ultimate Age-Defying Collection (Combination/Oily)', url:'https://www.marykay.com/sistahay/en/skincare/collection/timewise/ultimate-timewise-miracle-set-combination-to-oily-990314980/990314980US10223244.html', sampleOnly:true});
+    else        products.push({name:'Ultimate Age-Defying Collection (Normal/Dry)', url:'https://www.marykay.com/sistahay/en/skincare/collection/timewise/ultimate-timewise-miracle-set-normal-to-dry-990314981/990314981US10223243.html', sampleOnly:true});
   } else if(definition === 'Sagging'){
-    products.push({name:'TimeWise Repair\u00ae Volu-Firm\u00ae Set', url:'https://www.marykay.com/sistahay/en/skincare/collection/timewise-repair/timewise-repair-volufirm-set-990324679/990324679US10211954.html'});
+    products.push({name:'Lift & Volumize Repair Set', url:'https://www.marykay.com/sistahay/en/skincare/collection/timewise-repair/timewise-repair-volufirm-set-990324679/990324679US10211954.html'});
   }
 
   return {products, eyeNote};
@@ -227,7 +227,7 @@ function buildResultsEmailHtml(firstName, skinType, definition, foundation, prod
   return '<!DOCTYPE html><html><head><meta charset="UTF-8"></head><body style="margin:0;padding:24px 16px;background:#fdf6f8;font-family:Jost,Arial,sans-serif;">'
     +'<div style="max-width:600px;margin:0 auto;background:#fff;border-radius:16px;overflow:hidden;box-shadow:0 4px 24px rgba(232,80,122,.10);">'
     +'<div style="background:linear-gradient(135deg,#e8507a,#c93a62);padding:32px 40px;text-align:center;">'
-    +'<h1 style="margin:0;font-family:Cormorant Garamond,Georgia,serif;font-size:28px;font-weight:300;color:#fff;letter-spacing:3px;text-transform:uppercase;">Mary Kay</h1>'
+    +'<h1 style="margin:0;font-family:Cormorant Garamond,Georgia,serif;font-size:28px;font-weight:300;color:#fff;letter-spacing:3px;text-transform:uppercase;">Beauty by Hali Sarah</h1>'
     +'<p style="margin:6px 0 0;font-size:12px;color:rgba(255,255,255,.85);letter-spacing:2px;text-transform:uppercase;">Your Skincare Results</p>'
     +'</div>'
     +'<div style="padding:32px 40px;">'

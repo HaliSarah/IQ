@@ -1681,6 +1681,14 @@ footer a{color:var(--muted);}footer a:hover{color:var(--white);}
     </div>
 
     <div id="admin-shapes-body">
+      <!-- WHY first in Admin: shows which partner-mailer businesses actually signed up and paid -->
+      <div style="margin-bottom:34px;">
+        <div style="display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:10px;">
+          <h3 style="font-family:Cinzel,serif;font-size:1rem;margin:0;">Successful Referrals</h3>
+          <button class="nav-btn" onclick="adminLoadReferrals()" style="font-size:.7rem;">Refresh</button>
+        </div>
+        <div id="admin-referrals-list"><p style="color:var(--muted);font-size:.82rem;">Loading referrals…</p></div>
+      </div>
       <!-- WHY the queue sits above the assignment tool: a request comes in,
            Hali replies (status/date/note), designs it, then uses "Assign
            shape to this account" which drops her into the tool below. -->
@@ -1854,6 +1862,8 @@ footer a{color:var(--muted);}footer a:hover{color:var(--white);}
       <div class="field"><label>Email</label><input type="email" id="su-email" placeholder="you@email.com" onkeydown="if(event.key==='Enter')doSignUp()"></div>
       <div class="field" style="margin-top:14px;"><label>Password (min 6 chars)</label><div class="pw-field-wrap"><input type="password" id="su-pass" placeholder="Password" onkeydown="if(event.key==='Enter')doSignUp()"><button type="button" class="pw-toggle-btn" onclick="togglePasswordVisibility('su-pass', this)" aria-label="Show password">👁</button></div></div>
       <div class="field" style="margin-top:14px;"><label>Username (letters & numbers only)</label><input type="text" id="su-username" placeholder="yourname" oninput="this.value=this.value.toLowerCase().replace(/[^a-z0-9]/g,'')" onkeydown="if(event.key==='Enter')doSignUp()"></div>
+      <!-- WHY optional: only business partners from the mailer have a code; everyone else skips it -->
+      <div class="field" style="margin-top:14px;"><label>Partner referral code (optional)</label><input type="text" id="su-ref" placeholder="e.g. 13AAC8" maxlength="6" autocomplete="off" oninput="this.value=this.value.toUpperCase().replace(/[^0-9A-F]/g,'');checkRefCode()" onkeydown="if(event.key==='Enter')doSignUp()"><div id="su-ref-status" style="font-size:.76rem;margin-top:6px;min-height:1em;"></div></div>
       <button class="gen-btn" style="margin-top:18px;" onclick="doSignUp()">Create Account</button>
     </div>
     <div class="modal-err" id="auth-err"></div>
@@ -10173,6 +10183,34 @@ function renderAdminShapesView() {
   var authorized = !!window._isAdmin;
   document.getElementById('admin-not-authorized').style.display = authorized ? 'none' : 'block';
   document.getElementById('admin-shapes-body').style.display = authorized ? '' : 'none';
+  if (authorized) adminLoadReferrals();
+}
+
+// Lists every account that signed up with a partner code.
+// WHY "Paying customer" vs "Used credit" vs "Signed up": tells Hali which mailers turned into real sales.
+async function adminLoadReferrals() {
+  var out = document.getElementById('admin-referrals-list');
+  if (!out || !window._isAdmin) return;
+  var fb = window._fb;
+  try {
+    var snap = await fb.getDocs(fb.query(fb.collection(fb.db,'users'), fb.where('referralCode','>=','')));
+    var rows = snap.docs.map(function(d){ return d.data(); }).sort(function(a,b){ return (b.referredAt||0)-(a.referredAt||0); });
+    if (!rows.length) { out.innerHTML = '<p style="color:var(--muted);font-size:.82rem;">No referral sign-ups yet.</p>'; return; }
+    var paying = rows.filter(function(r){ return (r.paidTotal||0) > 0; }).length;
+    out.innerHTML = '<p style="font-size:.78rem;color:var(--muted);margin-bottom:10px;">'+rows.length+' sign-up'+(rows.length===1?'':'s')+' · '+paying+' paying</p>'
+      + rows.map(function(r){
+        var status = (r.paidTotal||0) > 0 ? ['Paying customer · $'+r.paidTotal, 'var(--green)']
+                   : (r.referralCreditUsed||0) > 0 ? ['Used $'+r.referralCreditUsed+' credit', 'var(--gold2)']
+                   : ['Signed up', 'var(--muted)'];
+        return '<div style="padding:12px 14px;border:1px solid var(--line);border-radius:8px;margin-bottom:8px;background:var(--panel);">'
+          + '<div style="display:flex;justify-content:space-between;gap:10px;align-items:baseline;flex-wrap:wrap;">'
+          + '<span style="font-size:.86rem;"><strong>'+escapeHtml(r.referralBusiness||'')+'</strong> <span style="color:var(--muted);">#'+escapeHtml(r.referralCode||'')+'</span></span>'
+          + '<span style="font-size:.7rem;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:'+status[1]+';">'+status[0]+'</span></div>'
+          + '<div style="font-size:.74rem;color:var(--muted);margin-top:3px;">'+escapeHtml(r.email||'')+' · '+escapeHtml(r.username||'')+' · joined '+new Date(r.referredAt||r.created||Date.now()).toLocaleDateString()+'</div></div>';
+      }).join('');
+  } catch(e) { // WHY: a Firestore rules/index error should be visible, not a silent blank list
+    out.innerHTML = '<p style="color:var(--red);font-size:.82rem;">Could not load referrals: '+escapeHtml(e.message)+'</p>';
+  }
 }
 
 async function adminLookupUserByEmail() {
@@ -11385,10 +11423,10 @@ async function fulfillPendingAction(paymentIntentId){
   else if(type==='reset_scans') await performResetScans(_pendingAction.qrId);
   else if(type==='csv_export') await downloadAllCSV(_pendingAction.slugs);
   else if(type==='stats_bulk') await fulfillBulkStats(paymentIntentId);
-  if(type==='redirect'||type==='stats') toast((paymentIntentId==='test-bypass'?'Test account — no charge. ':'Payment confirmed. ')+(type==='redirect'?'Redirect updated.':'Stats unlocked.'),'ok');
+  if(type==='redirect'||type==='stats') toast((paymentIntentId==='test-bypass'?'Test account — no charge. ':paymentIntentId==='referral-credit'?'Paid with partner credit. ':'Payment confirmed. ')+(type==='redirect'?'Redirect updated.':'Stats unlocked.'),'ok');
 }
 
-function initiatePayment(type){
+async function initiatePayment(type){
   closeModal('redirect-modal');
   // WHY a test-account short-circuit here, before the Stripe modal even
   // opens: this is the one place every paid action funnels through, so
@@ -11405,9 +11443,25 @@ function initiatePayment(type){
   // fallbacks below cover the original redirect/stats flows, which never set
   // those fields.
   var amount=(_pendingAction && _pendingAction.amount!=null) ? _pendingAction.amount : (type==='redirect'?25:5);
+  // WHY here: every paid action passes through this point, so partner credit applies to all of them
+  var credit=await getReferralCredit();
+  if(credit>0 && amount>0){
+    var use=Math.min(credit, amount);
+    if(!_pendingAction) _pendingAction={type:type};
+    _pendingAction.creditApplied=use;
+    if(use>=amount){
+      await recordReferralUse(use, 0);
+      toast('Partner credit applied — $'+use+' covered this.','ok');
+      fulfillPendingAction('referral-credit');
+      return;
+    }
+    amount=amount-use;
+    _pendingAction.amount=amount;
+  }
   var desc=(_pendingAction && _pendingAction.desc) ? _pendingAction.desc : (type==='redirect'?'Update QR code redirect destination':'View QR code scan statistics');
   var title=(_pendingAction && _pendingAction.title) ? _pendingAction.title : (type==='redirect'?'Pay to Update Redirect':'Pay to View Statistics');
   document.getElementById('pay-amount').textContent='$'+amount+'.00';
+  if(_pendingAction && _pendingAction.creditApplied) desc += ' ($'+_pendingAction.creditApplied+' partner credit applied)';
   document.getElementById('pay-desc').textContent=desc;
   document.getElementById('pay-title').textContent=title;
   openModal('pay-modal');
@@ -11429,6 +11483,8 @@ async function confirmPayment(){
     var result=await stripe.confirmCardPayment(data.client_secret,{payment_method:{card:cardElement}});
     if(result.error)throw new Error(result.error.message);
     closeModal('pay-modal');
+    // WHY: logs partner credit used + money paid so referrals show as paying customers in Admin
+    await recordReferralUse((_pendingAction&&_pendingAction.creditApplied)||0, amount);
     btn.disabled=false; btn.textContent='Pay Now'; // WHY reset here: the modal closing doesn't clear it, and it must be ready for the next paid action this session
     await fulfillPendingAction(result.paymentIntent.id);
   }catch(e){errEl.textContent=e.message;btn.textContent='Pay Now';btn.disabled=false;}
@@ -12059,6 +12115,59 @@ async function doSignIn(){
     }
   }
 }
+// ── PARTNER REFERRAL CREDIT ───────────────────────────────────────────────────
+// WHY: businesses from the partner mailer get $25 off their first paid action.
+// Valid codes live in /QRCode/ref/<first char>.json (split so a lookup only
+// downloads ~1/16 of the list).
+var REF_CREDIT = 25;
+var _refCache = {};
+async function lookupRefCode(code){
+  code = (code||'').trim().toUpperCase();
+  if(!/^[0-9A-F]{6}$/.test(code)) return null;
+  var k = code.charAt(0).toLowerCase();
+  // WHY try/catch: a missing/blocked shard should read as "not valid", never crash sign-up
+  try{
+    if(!_refCache[k]) _refCache[k] = await (await fetch('/QRCode/ref/'+k+'.json')).json();
+    return _refCache[k][code] ? { code: code, business: _refCache[k][code] } : null;
+  }catch(e){ return null; }
+}
+var _refTimer = null;
+function checkRefCode(){
+  var el = document.getElementById('su-ref'), st = document.getElementById('su-ref-status');
+  clearTimeout(_refTimer);
+  var v = el.value;
+  if(!v){ st.textContent=''; return; }
+  if(v.length < 6){ st.style.color='var(--muted)'; st.textContent='Codes are 6 characters.'; return; }
+  st.style.color='var(--muted)'; st.textContent='Checking…';
+  // WHY debounce: avoids a fetch per keystroke while someone is still typing
+  _refTimer = setTimeout(async function(){
+    var r = await lookupRefCode(v);
+    if(el.value !== v) return;
+    if(r){ st.style.color='var(--green)'; st.textContent='✓ '+r.business+' — $'+REF_CREDIT+' credit will be added to your account.'; }
+    else { st.style.color='var(--red)'; st.textContent='That code isn\'t on our partner list. Check it, or leave it blank.'; }
+  }, 300);
+}
+/** Remaining partner credit on the signed-in account (0 if none). */
+async function getReferralCredit(){
+  if(!window._user) return 0;
+  var fb = window._fb;
+  try{
+    var s = await fb.getDoc(fb.doc(fb.db,'users',window._user.uid));
+    if(!s.exists()) return 0;
+    var d = s.data();
+    return Math.max(0, (d.referralCredit||0) - (d.referralCreditUsed||0));
+  }catch(e){ return 0; }
+}
+/** Records credit used and money paid, so the admin can see which referrals became customers. */
+async function recordReferralUse(creditUsed, paid){
+  if(!window._user) return;
+  var fb = window._fb, upd = {};
+  if(creditUsed > 0) upd.referralCreditUsed = fb.increment(creditUsed);
+  if(paid > 0){ upd.paidTotal = fb.increment(paid); upd.lastPurchaseAt = Date.now(); }
+  if(!Object.keys(upd).length) return;
+  try{ await fb.updateDoc(fb.doc(fb.db,'users',window._user.uid), upd); }catch(e){ console.warn('referral tracking:', e); }
+}
+
 async function doSignUp(){
   var fb=window._fb;
   // WHY .toLowerCase() here too, not just .trim(): the admin check and the
@@ -12068,9 +12177,15 @@ async function doSignUp(){
   // re-normalize whatever case someone's keyboard happened to produce.
   var email=document.getElementById('su-email').value.trim().toLowerCase();var pass=document.getElementById('su-pass').value;var username=document.getElementById('su-username').value.trim();
   if(!username){showErr('Choose a username.');return;}
+  // WHY validate before creating the account: a typo shouldn't leave them with an account and no credit
+  var refTyped=(document.getElementById('su-ref')||{}).value||'';
+  var ref=null;
+  if(refTyped){ ref=await lookupRefCode(refTyped); if(!ref){showErr('That partner referral code isn\'t valid. Check it or leave it blank.');return;} }
   try{var ex=await withAuthTimeout(fb.getDoc(fb.doc(fb.db,'usernames',username)));if(ex.exists()){showErr('Username taken.');return;}
   var cred=await withAuthTimeout(fb.createUserWithEmailAndPassword(fb.auth,email,pass));
-  await withAuthTimeout(fb.setDoc(fb.doc(fb.db,'users',cred.user.uid),{email,username,created:Date.now()}));
+  var userData={email,username,created:Date.now()};
+  if(ref){ userData.referralCode=ref.code; userData.referralBusiness=ref.business; userData.referralCredit=REF_CREDIT; userData.referralCreditUsed=0; userData.referredAt=Date.now(); }
+  await withAuthTimeout(fb.setDoc(fb.doc(fb.db,'users',cred.user.uid),userData));
   // WHY email now stored here too, not just on users/{uid}: doSignIn reads
   // it from THIS doc so it never needs an unauthenticated pre-login read of
   // another account's users/{uid} doc -- see doSignIn's own WHY. usernames
@@ -12087,7 +12202,7 @@ async function doSignUp(){
   // auth modal doesn't care which tab she lands on).
   window._user=cred.user;
   closeModal('auth-modal');
-  if(_pendingDynamicCreate){_pendingDynamicCreate=false;createDynamic();}else{showView('dashboard');toast('Welcome! Your account is ready.','ok');}
+  if(_pendingDynamicCreate){_pendingDynamicCreate=false;createDynamic();}else{showView('dashboard');toast(ref?'Welcome! $'+REF_CREDIT+' partner credit added to your account.':'Welcome! Your account is ready.','ok');}
     // WHY: welcome email confirms signup and lists benefits so user knows what they unlocked
     try {
       await emailjs.send('service_75wx6fk','template_nnmxioq',{
