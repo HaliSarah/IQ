@@ -12120,6 +12120,9 @@ async function doSignIn(){
 // Valid codes live in /QRCode/ref/<first char>.json (split so a lookup only
 // downloads ~1/16 of the list).
 var REF_CREDIT = 25;
+// WHY: partners who registered on beauty.iqproductionz.com/NewPartners/ are stored in a Google Sheet.
+// Paste the same Apps Script /exec URL used in the beauty site's assets/partner/config.js.
+var NEW_PARTNER_API = 'https://script.google.com/macros/s/AKfycbw5hdV3I6s4YI1BbAF48WAsyNNQ6FvIy8A-Ub7d9JbHNUEvvptLkl3iCtvKF0h3pm8g/exec';
 var _refCache = {};
 async function lookupRefCode(code){
   code = (code||'').trim().toUpperCase();
@@ -12128,8 +12131,16 @@ async function lookupRefCode(code){
   // WHY try/catch: a missing/blocked shard should read as "not valid", never crash sign-up
   try{
     if(!_refCache[k]) _refCache[k] = await (await fetch('/QRCode/ref/'+k+'.json')).json();
-    return _refCache[k][code] ? { code: code, business: _refCache[k][code] } : null;
-  }catch(e){ return null; }
+    if(_refCache[k][code]) return { code: code, business: _refCache[k][code] };
+  }catch(e){ /* fall through to the Sheet check below */ }
+  // WHY second check: newly registered partners aren't in the mailing-list files
+  if(NEW_PARTNER_API){
+    try{
+      var d = await (await fetch(NEW_PARTNER_API + '?code=' + encodeURIComponent(code))).json();
+      if(d && d.ok) return { code: code, business: d.business + (d.city ? ', ' + d.city : '') };
+    }catch(e){}
+  }
+  return null;
 }
 var _refTimer = null;
 function checkRefCode(){
