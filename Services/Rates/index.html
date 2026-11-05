@@ -37,11 +37,11 @@ body{font-family:'Raleway',sans-serif;background:var(--bg);color:var(--white);mi
 }
 /* WHY positioned against the header: it holds the top-right corner without
    pushing the centered logo and title out of place. */
-.tools-btn{position:absolute;top:18px;right:20px;z-index:2;padding:10px 18px;border-radius:8px;background:linear-gradient(135deg,var(--gold-lt),var(--gold));color:#222;font-size:14px;font-weight:700;line-height:1.2;text-decoration:none;white-space:nowrap;transition:filter .2s;}
-.tools-btn:hover{filter:brightness(1.1);}
+.tools-btn{position:absolute;top:18px;right:20px;z-index:2;padding:9px 16px;border:1px solid #ffffff;border-radius:8px;background:var(--card);color:#ffffff;font-size:13px;font-weight:600;line-height:1.2;text-decoration:none;white-space:nowrap;transition:background .2s;}
+.tools-btn:hover{background:#505050;}
 .tools-btn:focus-visible{outline:3px solid var(--white);outline-offset:2px;}
 /* WHY static on phones: in the corner it would sit on top of the centered logo. */
-@media(max-width:720px){.tools-btn{position:static;display:block;width:fit-content;margin:0 0 16px auto;font-size:13px;padding:9px 14px;}}
+@media(max-width:720px){.tools-btn{position:static;display:block;width:fit-content;margin:0 0 16px auto;font-size:12.5px;padding:8px 13px;}}
 @media(prefers-reduced-motion:reduce){.tools-btn{transition:none;}}
 .logo-wrap{display:flex;align-items:center;justify-content:center;margin-bottom:22px;}
 .logo-wrap img{height:62px;width:auto;filter:drop-shadow(0 0 14px rgba(201,138,46,0.45));}
@@ -277,9 +277,10 @@ body{font-family:'Raleway',sans-serif;background:var(--bg);color:var(--white);mi
 
   <div class="payment-section">
     <h2>Payment Options</h2>
-    <p>Most projects begin with a 50% deposit; balance due on delivery. Accepted via Cash App or PayPal — see your service's page for exact terms.</p>
+    <p>Most projects begin with a 50% deposit; balance due on delivery. Accepted by card, Cash App, or PayPal — see your service's page for exact terms.</p>
     <div class="payment-options">
       <a class="pay-btn" href="https://paypal.me/IQPR?country.x=US&locale.x=en_US" target="_blank" rel="noopener">Pay with PayPal</a>
+      <a class="pay-btn secondary" href="/Pay/">Pay with Card</a>
       <span class="pay-btn secondary">Cash App — $IQENT</span>
     </div>
   </div>

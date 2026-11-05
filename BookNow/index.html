@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <!--
   Title:       Book Now — I.Q. Productionz
-  Author:      Hali Sarah Parsons  Date: 2026  Modified By: Claude (Cowork)
+  Author:      Hali Sarah Parsons  Date: 2026  Modified By: Claude (Cowork); Claude (Anthropic), 2026-11-05: added Pay with Card
   Description: Central booking hub. Lists every service category with its rate and
                links to that category's own intake form. Payment accepted via
                Cash App ($IQENT) or PayPal — shown once at the bottom so it isn't
@@ -264,9 +264,10 @@ body{font-family:'Raleway',sans-serif;background:var(--bg);color:var(--white);mi
   <!-- WHY: payment info lives once at the bottom, not repeated on every card, per bottom-heavy layout preference -->
   <div class="payment-section">
     <h2>Payment Options</h2>
-    <p>Most projects begin with a 50% deposit; balance due on delivery. Accepted via Cash App or PayPal — see your service's page for exact terms.</p>
+    <p>Most projects begin with a 50% deposit; balance due on delivery. Accepted by card, Cash App, or PayPal — see your service's page for exact terms.</p>
     <div class="payment-options">
       <a class="pay-btn" href="https://paypal.me/IQPR?country.x=US&locale.x=en_US" target="_blank" rel="noopener">Pay with PayPal</a>
+      <a class="pay-btn secondary" href="/Pay/">Pay with Card</a>
       <span class="pay-btn secondary">Cash App — $IQENT</span>
     </div>
   </div>

@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<!--
+  Title:       Make a Payment
+  Author:      Hali Sarah Parsons
+  Date:        2026-11-05
+  Modified By: Claude (Anthropic), 2026-11-05
+  Description: Customers enter any amount, choose one-time or recurring, and go to
+               Stripe's secure checkout. The Worker on iq-website-files creates the
+               session, so the Stripe secret key never touches this page.
+-->
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Make a Payment | I.Q. Productionz</title>
+<meta name="description" content="Make a secure one-time or recurring card payment to I.Q. Productionz.">
+<!-- WHY noindex: this is a tool for existing customers, not a page to find in search. -->
+<meta name="robots" content="noindex">
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700&family=Raleway:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  /* Same values as the Rates page and QR platform, so this reads as one site. */
+  :root {
+    --bg:#333333; --card:#454545; --border:#2e2b24; --gold:#c98a2e; --gold-lt:#e0a84a;
+    --white:#f0ece3; --muted:#a9a9a9; --radius:8px;
+  }
+  * { box-sizing:border-box; margin:0; padding:0; }
+  body { min-height:100vh; display:flex; flex-direction:column; background:var(--bg); color:var(--white); font-family:'Raleway',sans-serif; line-height:1.6; }
+  .form-header { padding:36px 20px 28px; text-align:center; background:linear-gradient(160deg,#454545 0%,#333333 60%); border-bottom:1px solid var(--border); }
+  .form-header img { height:56px; width:auto; }
+  /* WHY margin-top auto: pushes the form down, keeping the page bottom-heavy. */
+  main { width:100%; max-width:520px; margin:auto auto 0; padding:32px 16px 16px; }
+  .card { padding:28px 24px; border:1px solid var(--border); border-radius:10px; background:var(--card); }
+  h1 { font-family:'Cinzel',serif; font-weight:600; font-size:clamp(1.6rem,6vw,2.1rem); line-height:1.2; margin-bottom:8px; }
+  .sub { margin-bottom:22px; }
+  label { display:block; margin:0 0 6px; font-weight:600; font-size:.95rem; }
+  .field { margin-bottom:18px; }
+  input, select { width:100%; padding:12px; border:1px solid var(--border); border-radius:var(--radius); background:#333333; color:var(--white); font:500 1rem 'Raleway',sans-serif; }
+  .money { position:relative; }
+  .money span { position:absolute; left:12px; top:12px; color:var(--muted); }
+  .money input { padding-left:26px; }
+  button { width:100%; padding:14px; border:0; border-radius:var(--radius); background:linear-gradient(135deg,var(--gold-lt),var(--gold)); color:#222; font:700 1.05rem 'Raleway',sans-serif; cursor:pointer; }
+  button:hover { filter:brightness(1.1); }
+  button:disabled { opacity:.65; cursor:wait; }
+  input:focus-visible, select:focus-visible, button:focus-visible, a:focus-visible { outline:3px solid var(--gold-lt); outline-offset:2px; }
+  .note { margin-top:12px; font-size:.9rem; color:var(--muted); }
+  .message { display:none; margin-bottom:18px; padding:12px; border:1px solid var(--gold); border-radius:var(--radius); font-weight:600; }
+  .message.show { display:block; }
+  footer { padding:24px 16px 32px; text-align:center; font-size:.9rem; color:var(--muted); }
+  footer a { color:var(--gold-lt); }
+</style>
+</head>
+<body>
+
+<header class="form-header">
+  <a href="https://iqproductionz.com/"><img src="https://iqproductionz.com/Content/Images/Main/IQ-noglow_Updated.avif" alt="I.Q. Productionz" onerror="this.style.display='none'"></a>
+</header>
+
+<main>
+  <div class="card">
+    <h1>Make a Payment</h1>
+    <p class="sub">Enter your amount and choose how often to pay.</p>
+    <div class="message" id="message" role="alert"></div>
+    <form id="payForm" novalidate>
+      <div class="field">
+        <label for="note">What is this payment for?</label>
+        <input id="note" type="text" maxlength="100" placeholder="e.g. Website balance, hosting, Reiki session" required>
+      </div>
+      <div class="field">
+        <label for="amount">Amount</label>
+        <div class="money"><span aria-hidden="true">$</span><input id="amount" type="number" inputmode="decimal" min="1" max="10000" step="0.01" placeholder="0.00" required></div>
+      </div>
+      <div class="field">
+        <label for="frequency">How often?</label>
+        <select id="frequency">
+          <option value="once">One-time payment</option>
+          <option value="month">Subscription, every month</option>
+          <option value="year">Subscription, every year</option>
+        </select>
+      </div>
+      <button type="submit" id="payBtn">Continue to secure checkout</button>
+      <p class="note">You'll finish on Stripe's secure checkout page.</p>
+    </form>
+  </div>
+</main>
+
+<footer>
+  Questions? Email <a href="mailto:SarahParsons@IQProductionz.com">SarahParsons@IQProductionz.com</a><br>
+  <a href="https://iqproductionz.com/Services/Rates/">Back to Rates</a>
+</footer>
+
+<script>
+  const CHECKOUT_URL = 'https://iq-website-files.halisarahparsons.workers.dev/checkout';
+  const payForm = document.getElementById('payForm');
+  const payBtn = document.getElementById('payBtn');
+
+  /** Shows a message above the form. WHY one spot: every state reads the same way. */
+  function showMessage(text) {
+    const box = document.getElementById('message');
+    box.textContent = text;
+    box.classList.toggle('show', !!text);
+  }
+
+  /** Checks the fields here. WHY: customers get a fix right away; the Worker still re-checks. */
+  function formProblem(note, amount) {
+    if (!note) return "Tell us what this payment is for.";
+    if (!(amount >= 1 && amount <= 10000)) return 'Enter an amount from $1 to $10,000.';
+    return '';
+  }
+
+  /** Reports the result when Stripe sends the customer back. */
+  function showReturnStatus() {
+    const status = new URLSearchParams(window.location.search).get('status');
+    if (status === 'paid') showMessage('Thank you. Your payment went through.');
+    if (status === 'canceled') showMessage('Your checkout was canceled, and you were not charged.');
+  }
+
+  /** Starts Stripe checkout for the entered amount. */
+  async function startCheckout(event) {
+    event.preventDefault();
+    const note = document.getElementById('note').value.trim();
+    const amount = Number(document.getElementById('amount').value);
+    const problem = formProblem(note, amount);
+    showMessage(problem);
+    if (problem) return;
+
+    payBtn.disabled = true;
+    payBtn.textContent = 'Opening checkout…';
+
+    // WHY try/catch: a network failure should leave the form usable for another try.
+    try {
+      const response = await fetch(CHECKOUT_URL, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ note, amount, frequency: document.getElementById('frequency').value }),
+      });
+      const data = await response.json();
+      if (!response.ok) throw new Error(data.error || 'Checkout failed.');
+      window.location.href = data.url;
+    } catch (err) {
+      console.error('Checkout failed:', err);
+      payBtn.disabled = false;
+      payBtn.textContent = 'Continue to secure checkout';
+      showMessage('Checkout could not open, and you were not charged. Please try again.');
+    }
+  }
+
+  payForm.addEventListener('submit', startCheckout);
+  showReturnStatus();
+</script>
+</body>
+</html>
