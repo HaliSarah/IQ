@@ -1,0 +1,16 @@
+{
+  "id": "/QRCode/",
+  "name": "I.Q. Productionz QR Platform",
+  "short_name": "IQ QR",
+  "description": "Design custom QR codes and manage your dynamic codes.",
+  "start_url": "/QRCode/?source=app",
+  "scope": "/QRCode/",
+  "display": "standalone",
+  "background_color": "#2a2a2a",
+  "theme_color": "#222222",
+  "icons": [
+    { "src": "icons/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "icons/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "icons/icon-maskable-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ]
+}

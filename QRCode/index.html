@@ -486,6 +486,22 @@ footer a{color:var(--muted);}footer a:hover{color:var(--white);}
   .design-grid{grid-template-columns:1fr;}
 }
 </style>
+<!-- WHY these tags: they let phones install /QRCode as an app. The manifest serves
+     Android and desktop; the apple- tags serve iPhones, which skip most of the manifest. -->
+<link rel="manifest" href="/QRCode/manifest.webmanifest">
+<meta name="theme-color" content="#222222">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="IQ QR">
+<link rel="apple-touch-icon" href="/QRCode/icons/apple-touch-icon.png">
+<style>
+/* WHY a dialog on iPhone: Safari has no install prompt, so people need the steps. */
+/* WHY margin:auto: the page's global margin reset would otherwise pin this to the top corner. */
+#ios-install-dialog{margin:auto;max-width:320px;padding:24px;border:1px solid var(--gold);border-radius:var(--r);background:var(--panel);color:var(--white);font-family:'Raleway',sans-serif;line-height:1.6;}
+#ios-install-dialog::backdrop{background:rgba(0,0,0,.6);}
+#ios-install-dialog h3{font-family:'Cinzel',serif;font-size:1.1rem;margin-bottom:10px;}
+#ios-install-dialog ol{margin:0 0 18px 20px;}
+</style>
 </head>
 <body>
 
@@ -495,6 +511,8 @@ footer a{color:var(--muted);}footer a:hover{color:var(--white);}
     <span>QR Platform</span>
   </a>
   <div id="nav-right">
+    <!-- WHY hidden: pwa-install.js shows it only where installing is actually possible. -->
+    <button class="nav-btn primary" id="install-app-btn" hidden>Install App</button>
     <button class="nav-btn" onclick="navToGenerator()">Generator</button>
     <button class="nav-btn" id="nav-dash" style="display:none" onclick="requireAuth('dashboard')">My Codes</button>
     <!-- WHY display:none here too, re-set every renderNav() call like
@@ -13101,5 +13119,16 @@ function hideQRZoomLens() {
 })();
 </script>
 
+<!-- WHY in the page: these are the iPhone steps opened by the Install App button. -->
+<dialog id="ios-install-dialog">
+  <h3>Add to your Home Screen</h3>
+  <ol>
+    <li>Tap the Share button in your browser.</li>
+    <li>Tap Add to Home Screen.</li>
+    <li>Tap Add.</li>
+  </ol>
+  <button class="nav-btn primary" id="ios-install-close">Got it</button>
+</dialog>
+<script src="/QRCode/pwa-install.js" defer></script>
 </body>
 </html>

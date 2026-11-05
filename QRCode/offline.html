@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<!--
+  Title:       QR Platform Offline Screen
+  Author:      Hali Sarah Parsons
+  Date:        2026-11-05
+  Modified By: Claude (Anthropic), 2026-11-05
+  Description: Shown by sw.js when the app opens with no connection.
+               Deploy to: QRCode/offline.html
+-->
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="robots" content="noindex">
+<title>You're offline | I.Q. Productionz QR</title>
+<style>
+  /* WHY system fonts: Google Fonts can't load here because there is no connection. */
+  body {
+    margin: 0;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end; /* WHY: keeps the bottom-heavy layout of the site. */
+    padding: 32px 24px 72px;
+    box-sizing: border-box;
+    background: #2a2a2a;
+    color: #f0ece3;
+    font-family: Georgia, serif;
+  }
+  img { width: 72px; height: 72px; border-radius: 16px; margin-bottom: 20px; }
+  h1 { margin: 0; font-size: 1.8rem; font-weight: 600; }
+  p { margin: 12px 0 24px; color: #a9a9a9; font-family: system-ui, sans-serif; line-height: 1.6; }
+  a {
+    align-self: flex-start;
+    padding: 12px 22px;
+    border-radius: 8px;
+    background: #e0a84a;
+    color: #222;
+    font-weight: 700;
+    font-family: system-ui, sans-serif;
+    text-decoration: none;
+  }
+</style>
+</head>
+<body>
+  <img src="/QRCode/icons/icon-192.png" alt="">
+  <h1>You're offline</h1>
+  <p>Connect to the internet to design codes and see your dashboard. Codes you've already printed keep working.</p>
+  <a href="/QRCode/">Try again</a>
+</body>
+</html>
