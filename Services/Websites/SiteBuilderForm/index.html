@@ -1,4 +1,13 @@
 <!DOCTYPE html>
+<!--
+  Title:       Website Project Intake
+  Author:      Hali Sarah Parsons
+  Date:        2026
+  Modified By: Claude (Anthropic), 2026-11-05: added the $175 deposit step with Stripe, and made
+               screenshots, logos, and photos actually reach Hali by private link
+  Description: Six-step website brief sent by EmailJS. Deposit screenshots go to the
+               Client Files Worker, and their private link goes in the brief email.
+-->
 <html lang="en">
 <head>
 <meta charset="UTF-8">
@@ -9,6 +18,7 @@
 <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700&family=Raleway:wght@300;400;500;600&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
 <script>emailjs.init("3vNjQbWmqzzOO6IK-");</script>
+<script src="https://js.stripe.com/v3/"></script>
 <style>
   :root {
     --bg:      #333333;
@@ -122,7 +132,10 @@
   .upload-zone .up-icon { font-size:26px; margin-bottom:8px; }
   .upload-zone .up-text { font-size:13px; color:var(--muted); }
   .upload-zone .up-text strong { color:var(--gold); }
-  .upload-zone .file-list { margin-top:10px; font-size:12px; color:var(--success); text-align:left; }
+  /* WHY pre-line: names are set as plain text for safety, so line breaks come from \n. */
+  .upload-zone .file-list { margin-top:10px; font-size:12px; color:var(--success); text-align:left; white-space:pre-line; }
+  .upload-tip { margin-top:8px; font-size:12px; line-height:1.5; color:var(--muted); }
+  .upload-zone .file-warning { margin-top:8px; font-size:12px; font-weight:600; color:#ffb4a8; text-align:left; white-space:pre-line; }
 
   /* ADDRESS */
   .addr-row { display:grid; grid-template-columns:1fr 1fr; gap:14px; }
@@ -198,6 +211,25 @@
   .btn-next:disabled, .btn-submit:disabled { opacity:.5; cursor:not-allowed; }
 
   /* DIVIDER */
+  /* DEPOSIT: stronger border because this is the one step that must not be missed. */
+  .deposit-box { border:1px solid var(--gold); border-radius:var(--radius); padding:20px; margin-top:24px; }
+  .deposit-box h3 { font-family:'Cinzel',serif; font-size:17px; font-weight:600; color:var(--white); margin-bottom:6px; }
+  .deposit-box > p { font-size:14px; line-height:1.6; margin-bottom:14px; }
+  .deposit-box strong { color:var(--gold-lt); }
+  .pay-choice { display:flex; flex-wrap:wrap; gap:10px; margin-bottom:16px; }
+  .pay-choice button { flex:1 1 180px; padding:12px 14px; border:1px solid var(--gold); border-radius:var(--radius); background:transparent; color:var(--white); font:600 14px 'Raleway',sans-serif; cursor:pointer; }
+  .pay-choice button[aria-pressed="true"] { background:var(--gold-lt); border-color:var(--gold-lt); color:#222; }
+  .pay-choice button:focus-visible { outline:3px solid var(--white); outline-offset:2px; }
+  /* WHY white: Stripe draws the card field in its own frame, so dark text needs this. */
+  #cardElement { padding:14px 12px; border-radius:var(--radius); background:#ffffff; }
+  .pay-links { display:flex; flex-wrap:wrap; gap:10px; margin-bottom:16px; }
+  .pay-link { flex:1 1 180px; padding:12px 14px; border-radius:var(--radius); background:var(--gold-lt); color:#222; font-weight:700; font-size:14px; text-align:center; text-decoration:none; }
+  .pay-link:hover { filter:brightness(1.1); }
+  .pay-link:focus-visible { outline:3px solid var(--white); outline-offset:2px; }
+  /* WHY a real message: customers need to see why Submit didn't go through. */
+  .deposit-error { display:none; margin-top:10px; font-size:13px; font-weight:600; color:#ffb4a8; }
+  .deposit-error.show { display:block; }
+  .upload-zone.needs-file { border-color:#ffb4a8; }
   .divider { border:none; border-top:1px solid var(--border); margin:24px 0; }
 
   /* PAGES */
@@ -299,7 +331,7 @@
 
 <div class="sending-overlay" id="sendingOverlay">
   <div class="spinner"></div>
-  <p>Sending Your Brief…</p>
+  <p id="sendingText">Sending Your Brief…</p>
 </div>
 
 <!-- HEADER -->
@@ -366,7 +398,8 @@
         <button class="yn-btn" onclick="yn(this,'logoNo',null)">No, create one for me</button>
       </div>
       <div class="reveal" id="logoReveal">
-        <div class="upload-zone"><input type="file" accept="image/*,.pdf,.svg,.ai,.eps" onchange="handleFiles(this,'logoFileList')" multiple><div class="up-icon">🖼️</div><div class="up-text"><strong>Click to upload</strong> your logo<br><span style="font-size:11px">PNG, SVG, PDF, AI — any format</span></div><div class="file-list" id="logoFileList"></div></div>
+        <div class="upload-zone"><input type="file" accept="image/*,.pdf,.svg,.ai,.eps" onchange="handleFiles(this,'logoFileList')" multiple><div class="up-icon">🖼️</div><div class="up-text"><strong>Click to upload</strong> your logo<br><span style="font-size:11px">PNG, SVG, PDF, AI — up to 25 MB each</span></div><div class="file-list" id="logoFileList"></div></div>
+        <p class="upload-tip">Logo file over 25 MB? Add it to Google Drive and paste the link in the notes on the last step.</p>
       </div>
     </div>
     <hr class="divider">
@@ -395,7 +428,8 @@
         <button class="yn-btn" onclick="yn(this,'photoNo',null)">No, use stock photos</button>
       </div>
       <div class="reveal" id="photoReveal">
-        <div class="upload-zone"><input type="file" accept="image/*,video/*" multiple onchange="handleFiles(this,'photoFileList')"><div class="up-icon">📸</div><div class="up-text"><strong>Upload photos or videos</strong><br><span style="font-size:11px">JPG, PNG, MP4 — as many as you'd like</span></div><div class="file-list" id="photoFileList"></div></div>
+        <div class="upload-zone"><input type="file" accept="image/*" multiple onchange="handleFiles(this,'photoFileList')"><div class="up-icon">📸</div><div class="up-text"><strong>Upload your photos</strong><br><span style="font-size:11px">JPG or PNG, up to 20 photos, 25 MB each</span></div><div class="file-list" id="photoFileList"></div></div>
+        <p class="upload-tip">Have videos or a file over 25 MB? Add it to Google Drive and paste the link in the notes on the last step.</p>
       </div>
     </div>
     <hr class="divider">
@@ -572,7 +606,34 @@
     </div>
     <hr class="divider">
     <div class="field"><label>Launch date or deadline <span class="hint">(optional)</span></label><input type="text" id="deadline" placeholder="e.g. Before July 4th weekend, ASAP, no rush" /></div>
-    <div class="field"><label>Anything else we should know? <span class="hint">(optional)</span></label><textarea id="finalNotes" placeholder="Special instructions, things to avoid, questions you have…" style="min-height:80px"></textarea></div>
+    <div class="field"><label for="finalNotes">Video links, file links, and anything else <span class="hint">(optional)</span></label><p class="upload-tip" style="margin:0 0 8px">Paste YouTube links and Google Drive links for videos or files over 25 MB. In Google Drive, set sharing to "Anyone with the link" so we can open them.</p><textarea id="finalNotes" placeholder="Video and Google Drive links, special instructions, things to avoid, questions you have…" style="min-height:110px"></textarea></div>
+  <div class="deposit-box">
+    <h3>Pay your $175 deposit</h3>
+    <p>Your website is <strong>$350 flat</strong>. We start as soon as your 50% deposit comes through. Choose how you'd like to pay.</p>
+    <div class="pay-choice">
+      <button type="button" id="payCardBtn" aria-pressed="false" onclick="choosePayment('card')">Pay by card</button>
+      <button type="button" id="payManualBtn" aria-pressed="false" onclick="choosePayment('manual')">Cash App or PayPal</button>
+    </div>
+    <p class="deposit-error" id="payChoiceError" role="alert"></p>
+    <div id="cardPanel" hidden>
+      <label for="cardElement">Card details</label>
+      <div id="cardElement"></div>
+      <p class="upload-tip">Secured by Stripe. Your $175 is charged when you submit, so no screenshot is needed.</p>
+      <p class="deposit-error" id="cardError" role="alert"></p>
+    </div>
+    <div id="manualPanel" hidden>
+    <p>Pay below, then add your screenshot.</p>
+    <div class="pay-links">
+      <a class="pay-link" href="https://cash.app/$IQENT/175" target="_blank" rel="noopener">Pay $175 with Cash App</a>
+      <a class="pay-link" href="https://paypal.me/IQPR/175" target="_blank" rel="noopener">Pay $175 with PayPal</a>
+    </div>
+    <div class="field" style="margin-bottom:0">
+      <label for="paymentProof">Payment screenshot <span class="hint">(required)</span></label>
+      <div class="upload-zone" id="proofZone"><input type="file" id="paymentProof" accept="image/*,.pdf" onchange="handleProof(this)"><div class="up-icon">🧾</div><div class="up-text"><strong>Click to upload</strong> your payment screenshot<br><span style="font-size:11px">Image or PDF, up to 8 MB</span></div><div class="file-list" id="proofFileList"></div></div>
+      <p class="deposit-error" id="proofError" role="alert"></p>
+    </div>
+    </div>
+  </div>
   </div>
   <div class="nav-bar">
     <button class="btn-back" onclick="goTo(5)">← Back</button>
@@ -588,6 +649,8 @@
       <h2>You're All Set</h2>
       <div class="gold-rule"></div>
       <p>Your project brief has been submitted to I.Q. Productionz. We'll review everything and reach out within 24 hours to confirm your timeline and next steps.</p>
+      <p id="intakeNumberNote" style="display:none;margin-top:16px"></p>
+      <p id="uploadFailedNote" style="display:none;margin-top:16px;color:var(--gold-lt)"></p>
       <p style="margin-top:16px">Questions in the meantime? Email us at<br><a href="mailto:SarahParsons@IQProductionz.com" style="color:var(--gold);text-decoration:none">SarahParsons@IQProductionz.com</a></p>
     </div>
   </div>
@@ -605,6 +668,29 @@
   const EMAILJS_SERVICE  = 'service_wtg920o';
   const EMAILJS_TEMPLATE = 'template_nnmxioq';
   const TO_EMAIL         = 'SarahParsons@IQProductionz.com';
+
+  // WHY a separate Worker: EmailJS sends text here, so the file is stored there
+  // and the brief carries a private link to it.
+  const PROOF_WORKER     = 'https://iq-website-files.halisarahparsons.workers.dev';
+  const MAX_PROOF_BYTES  = 8 * 1024 * 1024;
+  const MAX_FILE_BYTES   = 25 * 1024 * 1024; // WHY: the most the Worker's storage holds per file.
+  const MAX_FILES_PER_BOX = 20; // WHY: keeps a phone upload from running for many minutes.
+
+  // WHY kept here: a file input forgets earlier picks, and customers often add
+  // photos in more than one round.
+  const clientFiles = { logoFileList: [], photoFileList: [] };
+
+  // WHY set at submit: every file in one brief must land in the same intake.
+  let intakeSession = null;
+
+  // WHY public here: this key can only start a payment, never read or refund one.
+  // It's the same one the QR page already uses.
+  const STRIPE_PUBLIC_KEY = 'pk_live_51KGEFWCL2m4xr1VIspOtCN2T1EVYCgfhsF5zgDOT4NkIKbQ8PqiPTYBmaoYzJwXqp9jkFdb2TNZOf5QKBaQh5RAv00IYVZw3oI';
+
+  let paymentMethod = null;
+  let stripe = null;
+  let cardElement = null;
+  let cardComplete = false;
 
   let currentPage = 1;
   const totalPages = 6;
@@ -628,9 +714,225 @@
     if (revealId) { const r = document.getElementById(revealId); if (r) r.classList.add('open'); }
   }
 
+  /**
+   * Adds picked files to the list that gets uploaded at submit.
+   * WHY warn per file: one oversized video shouldn't cost a customer their other photos.
+   */
   function handleFiles(input, listId) {
-    const list = document.getElementById(listId);
-    if (list) list.innerHTML = Array.from(input.files).map(f => '✓ ' + f.name).join('<br>');
+    const saved = clientFiles[listId];
+    const skipped = [];
+
+    Array.from(input.files).forEach(file => {
+      const isDuplicate = saved.some(f => f.name === file.name && f.size === file.size);
+      if (isDuplicate) return;
+      // WHY the file.type check: a phone's file picker can still offer videos.
+      if (file.type.startsWith('video/')) skipped.push(file.name + ' is a video. Paste a video link in the notes on the last step.');
+      else if (file.size > MAX_FILE_BYTES) skipped.push(file.name + ' is over 25 MB. Paste a Google Drive link in the notes on the last step.');
+      else if (saved.length >= MAX_FILES_PER_BOX) skipped.push(file.name + ' is over the ' + MAX_FILES_PER_BOX + '-file limit. Paste a Google Drive link in the notes on the last step.');
+      else saved.push(file);
+    });
+
+    input.value = ''; // WHY: otherwise re-picking the same file wouldn't fire onchange.
+
+    // WHY textContent: file names are customer input and must never be treated as HTML.
+    document.getElementById(listId).textContent = saved.map(f => '✓ ' + f.name).join('\n');
+
+    const zone = document.getElementById(listId).parentElement;
+    let warning = zone.querySelector('.file-warning');
+    if (!warning) {
+      warning = document.createElement('div');
+      warning.className = 'file-warning';
+      zone.appendChild(warning);
+    }
+    warning.textContent = skipped.join('\n');
+  }
+
+  /** Shows or clears a message under the payment area. */
+  function setMessage(id, message) {
+    const element = document.getElementById(id);
+    element.textContent = message;
+    element.classList.toggle('show', !!message);
+  }
+
+  /**
+   * Sets up the Stripe card field the first time it's needed.
+   * WHY only then: customers paying by Cash App never need Stripe's field.
+   */
+  function setUpCardField() {
+    if (cardElement) return true;
+    if (!window.Stripe) return false; // WHY: a blocker or bad signal can stop Stripe loading.
+    stripe = Stripe(STRIPE_PUBLIC_KEY);
+    cardElement = stripe.elements().create('card', { style: { base: { fontSize: '16px', color: '#222222' } } });
+    cardElement.mount('#cardElement');
+    cardElement.on('change', event => {
+      cardComplete = event.complete;
+      setMessage('cardError', event.error ? event.error.message : '');
+    });
+    return true;
+  }
+
+  /** Switches between paying by card and paying with a screenshot. */
+  function choosePayment(method) {
+    setMessage('payChoiceError', '');
+    setMessage('cardError', '');
+    if (method === 'card' && !setUpCardField()) {
+      setMessage('payChoiceError', 'Card payment is not available right now. Use Cash App or PayPal.');
+      return;
+    }
+    paymentMethod = method;
+    document.getElementById('payCardBtn').setAttribute('aria-pressed', method === 'card');
+    document.getElementById('payManualBtn').setAttribute('aria-pressed', method === 'manual');
+    document.getElementById('cardPanel').hidden = method !== 'card';
+    document.getElementById('manualPanel').hidden = method !== 'manual';
+    // WHY the label changes: the customer should know this click charges their card.
+    document.getElementById('submitBtn').textContent = method === 'card' ? '✦ Pay $175 & Submit' : '✦ Submit My Project Brief';
+  }
+
+  /** Sends a JSON request to the Worker for the current intake. */
+  async function workerPost(path) {
+    const response = await fetch(PROOF_WORKER + path, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ intake: intakeSession.intake, secret: intakeSession.secret }),
+    });
+    const data = await response.json();
+    if (!response.ok) throw new Error(data.error || 'Payment request failed.');
+    return data;
+  }
+
+  /**
+   * Charges the deposit, then asks the Worker to confirm it with Stripe.
+   * WHY try/catch: any failure stops here, before files or email, so the customer
+   * can fix their card and try again without losing the brief.
+   * @returns {Promise<{paymentId: string, verified: boolean}|{error: string}>}
+   */
+  async function payDeposit() {
+    try {
+      const intent = await workerPost('/deposit-intent');
+      if (!intent.alreadyPaid) {
+        const result = await stripe.confirmCardPayment(intent.clientSecret, { payment_method: { card: cardElement } });
+        if (result.error) return { error: result.error.message };
+      }
+    } catch (err) {
+      console.error('Card payment failed:', err);
+      return { error: 'Your card was not charged. Try again, or use Cash App or PayPal.' };
+    }
+
+    // WHY its own try/catch: the card already went through, so a failed check must
+    // never look like a failed payment or invite a second charge.
+    try {
+      const check = await workerPost('/deposit-confirm');
+      return { paymentId: check.paymentId, verified: check.paid };
+    } catch (err) {
+      console.error('Payment check failed:', err);
+      return { paymentId: 'Check your Stripe dashboard', verified: false };
+    }
+  }
+
+  /** Shows or clears the message under the payment upload. */
+  function setProofError(message) {
+    const error = document.getElementById('proofError');
+    error.textContent = message;
+    error.classList.toggle('show', !!message);
+    document.getElementById('proofZone').classList.toggle('needs-file', !!message);
+  }
+
+  /**
+   * Checks the screenshot when it's picked.
+   * WHY here and not at submit: customers fix a problem faster right where they made it.
+   */
+  function handleProof(input) {
+    const file = input.files[0];
+    const list = document.getElementById('proofFileList');
+    list.textContent = '';
+    setProofError('');
+    if (!file) return;
+    if (file.size > MAX_PROOF_BYTES) {
+      input.value = '';
+      setProofError('That file is over 8 MB. Choose a smaller screenshot.');
+      return;
+    }
+    list.textContent = '✓ ' + file.name;
+  }
+
+  /**
+   * Shrinks an image before upload.
+   * WHY: phone screenshots can be several MB, and on a weak signal that delay
+   * could make someone abandon a form they just spent 8 minutes on.
+   */
+  async function shrinkProof(file) {
+    if (!file.type.startsWith('image/')) return file;
+    // WHY try/catch: some browsers can't read iPhone HEIC photos, and the original
+    // file is still fine to send, so failing to shrink must not stop the upload.
+    try {
+      const bitmap = await createImageBitmap(file);
+      const scale = Math.min(1, 1600 / Math.max(bitmap.width, bitmap.height));
+      const canvas = document.createElement('canvas');
+      canvas.width = Math.round(bitmap.width * scale);
+      canvas.height = Math.round(bitmap.height * scale);
+      canvas.getContext('2d').drawImage(bitmap, 0, 0, canvas.width, canvas.height);
+      const blob = await new Promise(resolve => canvas.toBlob(resolve, 'image/jpeg', 0.85));
+      return blob || file;
+    } catch (err) {
+      console.warn('Sending original screenshot:', err);
+      return file;
+    }
+  }
+
+  /**
+   * Opens the intake that groups this customer's files.
+   * WHY try/catch: if it fails, uploads are skipped and the brief still gets sent.
+   */
+  async function startIntake() {
+    try {
+      const response = await fetch(PROOF_WORKER + '/intake', { method: 'POST' });
+      if (!response.ok) throw new Error('Intake returned ' + response.status);
+      return await response.json();
+    } catch (err) {
+      console.error('Could not open an intake:', err);
+      return null;
+    }
+  }
+
+  /** Stores one file and returns its private link, or null if it failed. */
+  async function uploadFile(body, name) {
+    if (!intakeSession) return null;
+    // WHY try/catch: a failed upload returns null so submitForm can still send the
+    // brief. Losing a customer's whole brief would be worse than chasing one file.
+    try {
+      const query = new URLSearchParams({ intake: intakeSession.intake, secret: intakeSession.secret, name });
+      const response = await fetch(PROOF_WORKER + '/upload?' + query, {
+        method: 'POST',
+        headers: { 'Content-Type': body.type || 'application/octet-stream' },
+        body,
+      });
+      if (!response.ok) throw new Error('Upload returned ' + response.status);
+      return (await response.json()).url;
+    } catch (err) {
+      console.error('Upload failed for ' + name + ':', err);
+      return null;
+    }
+  }
+
+  /**
+   * Uploads a group of client files and writes their section of the email.
+   * WHY one at a time: phones on a weak signal handle that far better than a burst.
+   */
+  async function uploadGroup(files, title, progress, failedNames) {
+    if (!files.length) return '';
+    const lines = [];
+    for (const file of files) {
+      progress.done += 1;
+      document.getElementById('sendingText').textContent = 'Uploading file ' + progress.done + ' of ' + progress.total + '…';
+      const url = await uploadFile(file, file.name);
+      if (url) {
+        lines.push('  ' + file.name + ': ' + url);
+      } else {
+        lines.push('  ' + file.name + ': UPLOAD FAILED');
+        failedNames.push(file.name);
+      }
+    }
+    return title + '\n' + lines.join('\n') + '\n\n';
   }
 
   function addItem(listId, label) {
@@ -773,6 +1075,24 @@ IQProductionz.com
   }
 
   async function submitForm() {
+    // WHY first: the deposit is required, and this stops the send before anything starts.
+    if (!paymentMethod) {
+      setMessage('payChoiceError', 'Choose how you would like to pay your deposit.');
+      document.getElementById('payCardBtn').scrollIntoView({ behavior: 'smooth', block: 'center' });
+      return;
+    }
+    if (paymentMethod === 'card' && !cardComplete) {
+      setMessage('cardError', 'Enter your card details to submit your brief.');
+      return;
+    }
+
+    const proofFile = paymentMethod === 'manual' ? document.getElementById('paymentProof').files[0] : null;
+    if (paymentMethod === 'manual' && !proofFile) {
+      setProofError('Add your payment screenshot to submit your brief.');
+      document.getElementById('proofZone').scrollIntoView({ behavior: 'smooth', block: 'center' });
+      return;
+    }
+
     const btn = document.getElementById('submitBtn');
     const overlay = document.getElementById('sendingOverlay');
     btn.disabled = true;
@@ -782,17 +1102,81 @@ IQProductionz.com
     const ownerName = gv('ownerName') || 'Client';
     const replyTo   = gv('bizEmail') || TO_EMAIL;
 
+    // WHY keep an existing one: a retry after a declined card must stay on the same
+    // intake, so the Worker reuses that charge instead of creating a second.
+    intakeSession = intakeSession || await startIntake();
+
+    let cardPayment = null;
+    if (paymentMethod === 'card') {
+      if (!intakeSession) {
+        overlay.classList.remove('show');
+        btn.disabled = false;
+        setMessage('cardError', 'Card payment is not available right now. Use Cash App or PayPal.');
+        return;
+      }
+      document.getElementById('sendingText').textContent = 'Processing your payment…';
+      cardPayment = await payDeposit();
+      if (cardPayment.error) {
+        overlay.classList.remove('show');
+        btn.disabled = false;
+        setMessage('cardError', cardPayment.error);
+        return;
+      }
+    }
+
+    const failedNames = [];
+    const logos = clientFiles.logoFileList;
+    const photos = clientFiles.photoFileList;
+    const proofCount = proofFile ? 1 : 0;
+    const progress = { done: proofCount, total: proofCount + logos.length + photos.length };
+    document.getElementById('sendingText').textContent = 'Uploading your files…';
+
+    const proofUrl = proofFile ? await uploadFile(await shrinkProof(proofFile), 'deposit-' + proofFile.name) : null;
+    if (proofFile && !proofUrl) failedNames.push('your payment screenshot');
+
+    const logoSection  = await uploadGroup(logos, 'LOGO FILES', progress, failedNames);
+    const photoSection = await uploadGroup(photos, 'PHOTOS', progress, failedNames);
+    document.getElementById('sendingText').textContent = 'Sending Your Brief…';
+
+    // WHY at the very top of the email: this is the first thing you need to start work.
+    const intakeNumber = intakeSession ? intakeSession.intake : 'Not assigned';
+    const manageLine = intakeSession
+      ? 'INTAKE NUMBER: ' + intakeNumber + '\nDOWNLOAD OR DELETE CUSTOMER FILES: ' + intakeSession.manageUrl + '\n\n'
+      : 'INTAKE NUMBER: Not assigned. Files did not upload.\n\n';
+
+    let depositLine = 'DEPOSIT SCREENSHOT ($175): UPLOAD FAILED. Ask the client to email it.';
+    if (proofUrl) depositLine = 'DEPOSIT SCREENSHOT ($175): ' + proofUrl;
+    if (cardPayment) {
+      depositLine = cardPayment.verified
+        ? 'DEPOSIT ($175): PAID BY STRIPE. Payment ID: ' + cardPayment.paymentId
+        : 'DEPOSIT ($175): STRIPE PAYMENT NOT CONFIRMED. Check your Stripe dashboard. Payment ID: ' + cardPayment.paymentId;
+    }
+    const depositReceived = !!proofUrl || !!cardPayment;
+
     const params = {
       to_email: TO_EMAIL,
-      subject:  'New Website Brief — ' + bizName,
+      subject:  'Intake ' + intakeNumber + ' — ' +
+                (cardPayment ? 'Deposit Paid by Stripe' : proofUrl ? 'Deposit Screenshot Received' : 'Screenshot Missing') +
+                (failedNames.length && depositReceived ? ' — Some Files Missing' : '') +
+                ' — New Website Brief — ' + bizName,
       name:     ownerName,
-      message:  collectFormData(),
+      message:  manageLine + depositLine + '\n\n' + logoSection + photoSection + collectFormData(),
       reply_to: replyTo,
     };
 
     try {
       await emailjs.send(EMAILJS_SERVICE, EMAILJS_TEMPLATE, params);
       overlay.classList.remove('show');
+      if (intakeSession) {
+        const numberNote = document.getElementById('intakeNumberNote');
+        numberNote.textContent = 'Your intake number is ' + intakeSession.intake + '. Keep it for your records.';
+        numberNote.style.display = 'block';
+      }
+      if (failedNames.length) {
+        const note = document.getElementById('uploadFailedNote');
+        note.textContent = "Your brief came through, but we didn't receive " + failedNames.join(', ') + '. Please email ' + (failedNames.length > 1 ? 'them' : 'it') + ' to us so we can get started.';
+        note.style.display = 'block';
+      }
       goTo(7);
     } catch (err) {
       overlay.classList.remove('show');

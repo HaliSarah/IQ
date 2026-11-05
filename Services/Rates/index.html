@@ -1,7 +1,8 @@
 <!DOCTYPE html>
 <!--
   Title:       Rates — I.Q. Productionz
-  Author:      Hali Sarah Parsons  Date: 2026  Modified By: Claude (Cowork)
+  Author:      Hali Sarah Parsons  Date: 2026  Modified By: Claude (Cowork);
+               Claude (Anthropic), 2026-11-05: added the Independent Business Tools button
   Description: Rate-card variant of BookNow/index.html. Same layout, but each
                card links to the service's info page (/Services/...) instead of
                its booking form (/BookNow/...), so visitors can browse rates
@@ -34,6 +35,14 @@ body{font-family:'Raleway',sans-serif;background:var(--bg);color:var(--white);mi
   background:radial-gradient(ellipse at 50% 0%,rgba(201,138,46,0.13) 0%,transparent 70%);
   pointer-events:none;
 }
+/* WHY positioned against the header: it holds the top-right corner without
+   pushing the centered logo and title out of place. */
+.tools-btn{position:absolute;top:18px;right:20px;z-index:2;padding:10px 18px;border-radius:8px;background:linear-gradient(135deg,var(--gold-lt),var(--gold));color:#222;font-size:14px;font-weight:700;line-height:1.2;text-decoration:none;white-space:nowrap;transition:filter .2s;}
+.tools-btn:hover{filter:brightness(1.1);}
+.tools-btn:focus-visible{outline:3px solid var(--white);outline-offset:2px;}
+/* WHY static on phones: in the corner it would sit on top of the centered logo. */
+@media(max-width:720px){.tools-btn{position:static;display:block;width:fit-content;margin:0 0 16px auto;font-size:13px;padding:9px 14px;}}
+@media(prefers-reduced-motion:reduce){.tools-btn{transition:none;}}
 .logo-wrap{display:flex;align-items:center;justify-content:center;margin-bottom:22px;}
 .logo-wrap img{height:62px;width:auto;filter:drop-shadow(0 0 14px rgba(201,138,46,0.45));}
 .gold-rule{width:60px;height:2px;background:linear-gradient(90deg,transparent,var(--gold),transparent);margin:18px auto;}
@@ -152,6 +161,7 @@ body{font-family:'Raleway',sans-serif;background:var(--bg);color:var(--white);mi
 <body>
 
 <div class="form-header">
+  <a class="tools-btn" href="/Tools4YRBiz/">Independent Business Tools</a>
   <div class="logo-wrap">
     <img src="https://iqproductionz.com/Content/Images/Main/IQ-noglow_Updated.avif" alt="I.Q. Productionz" onerror="this.style.display='none'">
   </div>
