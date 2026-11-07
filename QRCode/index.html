@@ -957,7 +957,7 @@ footer a{color:var(--muted);}footer a:hover{color:var(--white);}
                 </div>
                 <label style="display:flex;align-items:center;cursor:pointer;margin-top:8px;"><input type="checkbox" id="bg4-gradient" checked onchange="scheduleLivePreview('s')" style="width:14px;height:14px;min-width:14px;flex:0 0 14px;margin:0 7px 0 0;padding:0;vertical-align:middle;">Gradient (uncheck for hard quarters)</label>
               </div>
-              <p style="font-size:.7rem;color:var(--muted);margin-top:6px;">Scan tip: keep every background color light and the dots dark (or the reverse) so phones can still read it.</p>
+              <p style="font-size:.7rem;color:var(--gold2);margin-top:6px;line-height:1.5;">⚠ <strong>Scan caution:</strong> scanners need ONE consistent pattern across the whole code — dots darker than the background everywhere (safest) or lighter everywhere. A split where the colors swap sides (black dots on white on one half, white dots on black on the other) confuses the scanner and usually won't scan. Always test-scan before printing.</p><div id="bg-scan-warn" style="display:none;margin-top:8px;padding:8px 12px;border:1px solid var(--red);border-radius:6px;background:rgba(220,80,80,.08);color:var(--red);font-size:.72rem;line-height:1.5;"></div>
             </div>
 
             <!-- ASYMMETRIC CORNERS — Hali: "the check mark should go right
@@ -1524,7 +1524,7 @@ footer a{color:var(--muted);}footer a:hover{color:var(--white);}
                 </div>
                 <label style="display:flex;align-items:center;cursor:pointer;margin-top:8px;"><input type="checkbox" id="d-bg4-gradient" checked onchange="scheduleLivePreview('d')" style="width:14px;height:14px;min-width:14px;flex:0 0 14px;margin:0 7px 0 0;padding:0;vertical-align:middle;">Gradient (uncheck for hard quarters)</label>
               </div>
-              <p style="font-size:.7rem;color:var(--muted);margin-top:6px;">Scan tip: keep every background color light and the dots dark (or the reverse) so phones can still read it.</p>
+              <p style="font-size:.7rem;color:var(--gold2);margin-top:6px;line-height:1.5;">⚠ <strong>Scan caution:</strong> scanners need ONE consistent pattern across the whole code — dots darker than the background everywhere (safest) or lighter everywhere. A split where the colors swap sides (black dots on white on one half, white dots on black on the other) confuses the scanner and usually won't scan. Always test-scan before printing.</p><div id="d-bg-scan-warn" style="display:none;margin-top:8px;padding:8px 12px;border:1px solid var(--red);border-radius:6px;background:rgba(220,80,80,.08);color:var(--red);font-size:.72rem;line-height:1.5;"></div>
             </div>
 
             <!-- ASYMMETRIC CORNERS — mirrors the Static tab's; see its WHY. -->
@@ -5630,6 +5630,62 @@ function buildBackgroundStyle(ctx, size, settings) {
   return solid;
 }
 
+// ── SCAN CONTRAST CHECK ──────────────────────────────────────────────────────
+// WHY: Hali found a half split with swapped colors (black dots on white one
+// side, white dots on black the other) won't scan. Scanners turn the image
+// into dark/light and expect dark = dot across the WHOLE code; if the
+// relationship flips partway, half the data and finder eyes read inverted.
+// So this samples the dot color and the background color at the same spots
+// across the code and flags (1) polarity that flips, (2) fully inverted
+// light-on-dark (many phone cameras can't read it), (3) low contrast spots.
+// Uses gradientColorAt so the samples match exactly what the renderer draws.
+function checkScanContrast(prefix) {
+  var box = document.getElementById((prefix==='s'?'':'d-')+'bg-scan-warn');
+  if (!box) return;
+  var settings;
+  // WHY try/catch: this is advisory only -- a failure here must never
+  // break the preview itself, just hide the warning.
+  try { settings = resolveRenderSettings(prefix); } catch (e) { box.style.display='none'; return; }
+  var c = settings.colors || {}, S = 1000, saved = _activeGradient;
+  var bgMode = c.bgMode || 'solid';
+  var solidBg = (c.bgMode ? c.bg : settings.colorMode==='grad2' ? c.g2_bg : settings.colorMode==='grad4' ? c.g4_bg : c.bg) || '#ffffff';
+  var bgColors = bgMode==='grad2'
+    ? { g2_1:c.bg2_1, g2_2:c.bg2_2, g2_dir:c.bg2_dir, g2_gradient:c.bg2_gradient!==false }
+    : { g4_1:c.bg4_1, g4_2:c.bg4_2, g4_3:c.bg4_3, g4_4:c.bg4_4, g4_dir:c.bg4_dir, g4_gradient:c.bg4_gradient!==false };
+  // WHY WCAG relative luminance: it's the standard measure of how light a
+  // color looks, which is what a scanner's dark/light threshold cares about.
+  function lum(str) {
+    var r,g,b,m = /rgb\((\d+),(\d+),(\d+)\)/.exec(str||'');
+    if (m) { r=+m[1]; g=+m[2]; b=+m[3]; }
+    else { var h=(str||'#000000').replace('#',''); if (h.length===3) h=h[0]+h[0]+h[1]+h[1]+h[2]+h[2];
+      var n=parseInt(h,16)||0; r=(n>>16)&255; g=(n>>8)&255; b=n&255; }
+    function ch(v){ v/=255; return v<=0.03928 ? v/12.92 : Math.pow((v+0.055)/1.055,2.4); }
+    return 0.2126*ch(r)+0.7152*ch(g)+0.0722*ch(b);
+  }
+  var darkOnLight=0, lightOnDark=0, minRatio=99;
+  try {
+    for (var i=0;i<9;i++) for (var j=0;j<9;j++) {
+      // WHY offset by half a step: keeps samples off the exact split
+      // lines, where a hard half/quarter has no single "true" color.
+      var x=(i+0.5)*S/9, y=(j+0.5)*S/9, fgC, bgC;
+      if (settings.colorMode==='solid') fgC = c.fg||'#000000';
+      else { _activeGradient = { colorMode:settings.colorMode, colors:c, size:S }; fgC = gradientColorAt(x,y); }
+      if (bgMode==='solid') bgC = solidBg;
+      else { _activeGradient = { colorMode:bgMode, colors:bgColors, size:S }; bgC = gradientColorAt(x,y); }
+      var lf=lum(fgC), lb=lum(bgC);
+      var ratio=(Math.max(lf,lb)+0.05)/(Math.min(lf,lb)+0.05);
+      if (ratio<minRatio) minRatio=ratio;
+      if (ratio>=1.5) { if (lf<lb) darkOnLight++; else lightOnDark++; }
+    }
+  } finally { _activeGradient = saved; }
+  var msgs=[];
+  if (darkOnLight && lightOnDark) msgs.push('<strong>Won\'t scan reliably:</strong> your dots are darker than the background in some areas and lighter in others. Keep the dots on the same side everywhere — all darker (best) or all lighter.');
+  else if (lightOnDark) msgs.push('<strong>Inverted code:</strong> light dots on a dark background. Some phone cameras can\'t read this — dark dots on a light background is safest.');
+  if (minRatio < 3) msgs.push('<strong>Low contrast:</strong> in at least one area the dots and background are too close in brightness to scan well.');
+  box.innerHTML = msgs.map(function(m){ return '⚠ '+m; }).join('<br>');
+  box.style.display = msgs.length ? '' : 'none';
+}
+
 // ── ASYMMETRIC CORNERS ───────────────────────────────────────────────────────
 // WHY manual tabbed per-corner control, not the earlier random-rotation v1:
 // Hali saw the first version (which auto-rotated Top-Right/Bottom-Left
@@ -9331,6 +9387,9 @@ async function updateLivePreview(prefix) {
     var ok = await renderQRCore(canvas, url, 220, ec, prefix);
     if (seq !== _livePreviewSeq[prefix]) return;
     if (!ok) { if (note) note.textContent = 'Preview unavailable — try again in a moment.'; return; }
+    // WHY here, after every successful preview render: the scan warning
+    // has to follow the colors live, the same moment the preview changes.
+    checkScanContrast(prefix);
     if (note) note.textContent = typed
       ? 'Previewing your QR code.'
       : 'Previewing with a sample URL — type yours above to encode it.';
