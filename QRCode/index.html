@@ -8,6 +8,8 @@
                Custom QR renderer: dots, diamonds, triangles, ovals, stars,
                hearts, rounded corners, letters, numbers as dot shapes.
                Gradient support up to 4 stops. Logo upload to center.
+               Background modes: solid, 2-color (half split or gradient),
+               4-color (quarters or gradient), with direction options.
                Firebase auth + Firestore. Stripe via Cloudflare Worker.
                Deploy to: QRCode/index.html
 -->
@@ -909,6 +911,51 @@ footer a{color:var(--muted);}footer a:hover{color:var(--white);}
             </div>
 
 
+            <!-- BACKGROUND MODE — WHY its own section instead of more pickers
+                 inside Color Mode above: Hali asked for background options
+                 "like the main options -- half, quarter, gradient
+                 directions." The body color mode decides the DOTS; this one
+                 decides what sits BEHIND them, so the two have to be picked
+                 independently (gold-to-plum dots on a plain white card, or
+                 black dots on a soft split background). Solid keeps using the
+                 Background picker already inside Color Mode so every design
+                 saved before this existed still renders exactly the same.
+                 Same Gradient-checkbox rule as the dots: checked = smooth
+                 blend, unchecked = hard Half (2-color) or Quarters (4-color). -->
+            <div class="field">
+              <label>Background</label>
+              <input type="hidden" id="bg-mode" value="solid">
+              <div class="grad-toggle">
+                <button id="bg-mode-solid" class="active" onclick="setBgMode('solid','s')">Solid</button>
+                <button id="bg-mode-grad2" onclick="setBgMode('grad2','s')">2-color</button>
+                <button id="bg-mode-grad4" onclick="setBgMode('grad4','s')">4-color</button>
+              </div>
+              <div id="bg-color-solid" style="font-size:.72rem;color:var(--muted);">Uses the Background color picked in Color Mode above.</div>
+              <div id="bg-color-grad2" style="display:none;">
+                <div class="grad-row">
+                  <div class="grad-stop"><input type="color" id="bg2-1" value="#ffffff"><span>Color 1</span></div>
+                  <div class="grad-stop"><input type="color" id="bg2-2" value="#f5e6c8"><span>Color 2</span></div>
+                  <div class="field" style="flex:1;min-width:100px;margin-bottom:0;">
+                    <select id="bg2-dir"><option value="horizontal">Horizontal → (left / right)</option><option value="vertical">Vertical ↓ (top / bottom)</option><option value="diagonal">Diagonal ↘</option><option value="diagonal2">Diagonal ↗</option><option value="radial">Radial ◎ (center / edge)</option></select>
+                  </div>
+                </div>
+                <label style="display:flex;align-items:center;cursor:pointer;margin-top:8px;"><input type="checkbox" id="bg2-gradient" checked onchange="scheduleLivePreview('s')" style="width:14px;height:14px;min-width:14px;flex:0 0 14px;margin:0 7px 0 0;padding:0;vertical-align:middle;">Gradient (uncheck for a hard half split)</label>
+              </div>
+              <div id="bg-color-grad4" style="display:none;">
+                <div class="grad-row">
+                  <div class="grad-stop"><input type="color" id="bg4-1" value="#fff7e8"><span>Top-L</span></div>
+                  <div class="grad-stop"><input type="color" id="bg4-2" value="#f5e6c8"><span>Top-R</span></div>
+                  <div class="grad-stop"><input type="color" id="bg4-3" value="#f3e8f7"><span>Bot-L</span></div>
+                  <div class="grad-stop"><input type="color" id="bg4-4" value="#e8d5f0"><span>Bot-R</span></div>
+                  <div class="field" style="flex:1;min-width:100px;margin-bottom:0;">
+                    <select id="bg4-dir"><option value="diagonal">Diagonal ↘</option><option value="diagonal2">Diagonal ↗</option><option value="horizontal">Horizontal →</option><option value="vertical">Vertical ↓</option><option value="radial">Radial ◎</option></select>
+                  </div>
+                </div>
+                <label style="display:flex;align-items:center;cursor:pointer;margin-top:8px;"><input type="checkbox" id="bg4-gradient" checked onchange="scheduleLivePreview('s')" style="width:14px;height:14px;min-width:14px;flex:0 0 14px;margin:0 7px 0 0;padding:0;vertical-align:middle;">Gradient (uncheck for hard quarters)</label>
+              </div>
+              <p style="font-size:.7rem;color:var(--muted);margin-top:6px;">Scan tip: keep every background color light and the dots dark (or the reverse) so phones can still read it.</p>
+            </div>
+
             <!-- ASYMMETRIC CORNERS — Hali: "the check mark should go right
                  above the corner style ... three tabs would show up ...
                  corner one, corner two, corner three, that way they could
@@ -1439,6 +1486,41 @@ footer a{color:var(--muted);}footer a:hover{color:var(--white);}
                 </div>
                 <label style="display:flex;align-items:center;cursor:pointer;margin-top:8px;"><input type="checkbox" id="d-g4-gradient" onchange="scheduleLivePreview('d')" style="width:14px;height:14px;min-width:14px;flex:0 0 14px;margin:0 7px 0 0;padding:0;vertical-align:middle;">Gradient</label>
               </div>
+            </div>
+
+            <!-- BACKGROUND MODE — mirrors the Static tab's; see its WHY. -->
+            <div class="field">
+              <label>Background</label>
+              <input type="hidden" id="d-bg-mode" value="solid">
+              <div class="grad-toggle">
+                <button id="d-bg-mode-solid" class="active" onclick="setBgMode('solid','d')">Solid</button>
+                <button id="d-bg-mode-grad2" onclick="setBgMode('grad2','d')">2-color</button>
+                <button id="d-bg-mode-grad4" onclick="setBgMode('grad4','d')">4-color</button>
+              </div>
+              <div id="d-bg-color-solid" style="font-size:.72rem;color:var(--muted);">Uses the Background color picked in Color Mode above.</div>
+              <div id="d-bg-color-grad2" style="display:none;">
+                <div class="grad-row">
+                  <div class="grad-stop"><input type="color" id="d-bg2-1" value="#ffffff"><span>Color 1</span></div>
+                  <div class="grad-stop"><input type="color" id="d-bg2-2" value="#f5e6c8"><span>Color 2</span></div>
+                  <div class="field" style="flex:1;min-width:100px;margin-bottom:0;">
+                    <select id="d-bg2-dir"><option value="horizontal">Horizontal → (left / right)</option><option value="vertical">Vertical ↓ (top / bottom)</option><option value="diagonal">Diagonal ↘</option><option value="diagonal2">Diagonal ↗</option><option value="radial">Radial ◎ (center / edge)</option></select>
+                  </div>
+                </div>
+                <label style="display:flex;align-items:center;cursor:pointer;margin-top:8px;"><input type="checkbox" id="d-bg2-gradient" checked onchange="scheduleLivePreview('d')" style="width:14px;height:14px;min-width:14px;flex:0 0 14px;margin:0 7px 0 0;padding:0;vertical-align:middle;">Gradient (uncheck for a hard half split)</label>
+              </div>
+              <div id="d-bg-color-grad4" style="display:none;">
+                <div class="grad-row">
+                  <div class="grad-stop"><input type="color" id="d-bg4-1" value="#fff7e8"><span>Top-L</span></div>
+                  <div class="grad-stop"><input type="color" id="d-bg4-2" value="#f5e6c8"><span>Top-R</span></div>
+                  <div class="grad-stop"><input type="color" id="d-bg4-3" value="#f3e8f7"><span>Bot-L</span></div>
+                  <div class="grad-stop"><input type="color" id="d-bg4-4" value="#e8d5f0"><span>Bot-R</span></div>
+                  <div class="field" style="flex:1;min-width:100px;margin-bottom:0;">
+                    <select id="d-bg4-dir"><option value="diagonal">Diagonal ↘</option><option value="diagonal2">Diagonal ↗</option><option value="horizontal">Horizontal →</option><option value="vertical">Vertical ↓</option><option value="radial">Radial ◎</option></select>
+                  </div>
+                </div>
+                <label style="display:flex;align-items:center;cursor:pointer;margin-top:8px;"><input type="checkbox" id="d-bg4-gradient" checked onchange="scheduleLivePreview('d')" style="width:14px;height:14px;min-width:14px;flex:0 0 14px;margin:0 7px 0 0;padding:0;vertical-align:middle;">Gradient (uncheck for hard quarters)</label>
+              </div>
+              <p style="font-size:.7rem;color:var(--muted);margin-top:6px;">Scan tip: keep every background color light and the dots dark (or the reverse) so phones can still read it.</p>
             </div>
 
             <!-- ASYMMETRIC CORNERS — mirrors the Static tab's; see its WHY. -->
@@ -5406,12 +5488,12 @@ document.addEventListener('DOMContentLoaded', function() {
   // WHY: wire every control that affects the live preview (under the color
   // pickers) to re-render it, debounced — both tabs now have a working
   // preview, so both sets of fields are wired, each to its own prefix.
-  ['s-url','s-ec','c-fg','c-bg','g2-1','g2-2','g2-bg','g2-dir','g4-1','g4-2','g4-3','g4-4','g4-bg','g4-dir']
+  ['s-url','s-ec','c-fg','c-bg','g2-1','g2-2','g2-bg','g2-dir','g4-1','g4-2','g4-3','g4-4','g4-bg','g4-dir','bg2-1','bg2-2','bg2-dir','bg4-1','bg4-2','bg4-3','bg4-4','bg4-dir']
     .forEach(function(id){
       var el = document.getElementById(id);
       if (el) el.addEventListener('input', function(){ scheduleLivePreview('s'); });
     });
-  ['d-url','d-ec','d-c-fg','d-c-bg','d-g2-1','d-g2-2','d-g2-bg','d-g2-dir','d-g4-1','d-g4-2','d-g4-3','d-g4-4','d-g4-bg','d-g4-dir']
+  ['d-url','d-ec','d-c-fg','d-c-bg','d-g2-1','d-g2-2','d-g2-bg','d-g2-dir','d-g4-1','d-g4-2','d-g4-3','d-g4-4','d-g4-bg','d-g4-dir','d-bg2-1','d-bg2-2','d-bg2-dir','d-bg4-1','d-bg4-2','d-bg4-3','d-bg4-4','d-bg4-dir']
     .forEach(function(id){
       var el = document.getElementById(id);
       if (el) el.addEventListener('input', function(){ scheduleLivePreview('d'); });
@@ -5490,6 +5572,53 @@ function setColorMode(mode, prefix) {
   // switch on either one needs to re-render its own preview (this used to
   // only fire for the Static tab, back when the Dynamic tab had none).
   if (typeof scheduleLivePreview==='function') scheduleLivePreview(prefix);
+}
+
+// ── BACKGROUND MODE ──────────────────────────────────────────────────────────
+// WHY a hidden #bg-mode input as the source of truth instead of a JS global
+// like _colorMode: captureDesignSettings/applyDesignSettings already round-
+// trip every color through val()/set() on DOM fields, so storing the mode in
+// a field means save, load, "reset generator" and Change Design all carry it
+// for free -- no extra global that a future reset path could forget.
+function setBgMode(mode, prefix) {
+  prefix = prefix || 's';
+  var d = prefix==='s' ? '' : 'd-';
+  var hidden = document.getElementById(d+'bg-mode');
+  if (hidden) hidden.value = mode;
+  ['solid','grad2','grad4'].forEach(function(m){
+    var ce=document.getElementById(d+'bg-color-'+m);
+    var me=document.getElementById(d+'bg-mode-'+m);
+    if(ce) ce.style.display=m===mode?'':'none';
+    if(me) me.classList.toggle('active',m===mode);
+  });
+  if (typeof scheduleLivePreview==='function') scheduleLivePreview(prefix);
+}
+
+// WHY reuse buildForegroundStyle through a tiny stand-in settings object
+// instead of a second copy of the gradient math: Hali wants the background
+// to have "the main options" -- the exact same half split, quarters and
+// direction choices the dots already have. Routing through the same builder
+// guarantees a "Diagonal ↗ half" background splits on precisely the same
+// line a "Diagonal ↗ half" dot fill does, and any future fix to that math
+// fixes both. Returns a plain color string for Solid so every existing
+// caller that passes bg on (finder gap ring, logo cutout halo, frame) keeps
+// working unchanged -- a CanvasGradient/Pattern is just as valid a fillStyle.
+function buildBackgroundStyle(ctx, size, settings) {
+  var c = settings.colors || {};
+  var solid = settings.colorMode==='solid' ? c.bg :
+              settings.colorMode==='grad2' ? c.g2_bg : c.g4_bg;
+  solid = solid || '#ffffff';
+  var mode = c.bgMode || 'solid';
+  if (mode === 'grad2') {
+    return buildForegroundStyle(ctx, size, { colorMode:'grad2', colors:{
+      g2_1: c.bg2_1||'#ffffff', g2_2: c.bg2_2||'#f5e6c8', g2_dir: c.bg2_dir||'horizontal', g2_gradient: c.bg2_gradient !== false } });
+  }
+  if (mode === 'grad4') {
+    return buildForegroundStyle(ctx, size, { colorMode:'grad4', colors:{
+      g4_1: c.bg4_1||'#fff7e8', g4_2: c.bg4_2||'#f5e6c8', g4_3: c.bg4_3||'#f3e8f7', g4_4: c.bg4_4||'#e8d5f0',
+      g4_dir: c.bg4_dir||'diagonal', g4_gradient: c.bg4_gradient !== false } });
+  }
+  return solid;
 }
 
 // ── ASYMMETRIC CORNERS ───────────────────────────────────────────────────────
@@ -6859,6 +6988,11 @@ function resolveRenderSettings(prefix) {
         fg: c.fg||'#000000', bg: c.bg||'#ffffff',
         g2_1: c.g2_1||'#c98a2e', g2_2: c.g2_2||'#4A1060', g2_bg: c.g2_bg||'#ffffff', g2_dir: c.g2_dir||'horizontal',
         g4_1: c.g4_1||'#c98a2e', g4_2: c.g4_2||'#e0a84a', g4_3: c.g4_3||'#4A1060', g4_4: c.g4_4||'#6B2D8E', g4_bg: c.g4_bg||'#ffffff', g4_dir: c.g4_dir||'diagonal',
+        // WHY 'solid' fallback: a design saved before Background Mode
+        // existed only ever had a flat background -- keep it that way.
+        bgMode: c.bgMode||'solid',
+        bg2_1: c.bg2_1||'#ffffff', bg2_2: c.bg2_2||'#f5e6c8', bg2_dir: c.bg2_dir||'horizontal', bg2_gradient: c.bg2_gradient !== false,
+        bg4_1: c.bg4_1||'#fff7e8', bg4_2: c.bg4_2||'#f5e6c8', bg4_3: c.bg4_3||'#f3e8f7', bg4_4: c.bg4_4||'#e8d5f0', bg4_dir: c.bg4_dir||'diagonal', bg4_gradient: c.bg4_gradient !== false,
         finderOuter: c.finderOuter||'#000000', finderInner: c.finderInner||'#000000',
         // WHY these have their own g2_1/g2_2/g4_1-4 fields, separate from
         // the body's above: each corner piece's own gradient (see
@@ -6941,6 +7075,12 @@ function resolveRenderSettings(prefix) {
       fg: val('c-fg','#000000'), bg: val('c-bg','#ffffff'),
       g2_1: val('g2-1','#c98a2e'), g2_2: val('g2-2','#4A1060'), g2_bg: val('g2-bg','#ffffff'), g2_dir: val('g2-dir','horizontal'), g2_gradient: checkedVal('g2-gradient', true),
       g4_1: val('g4-1','#c98a2e'), g4_2: val('g4-2','#e0a84a'), g4_3: val('g4-3','#4A1060'), g4_4: val('g4-4','#6B2D8E'), g4_bg: val('g4-bg','#ffffff'), g4_dir: val('g4-dir','diagonal'), g4_gradient: checkedVal('g4-gradient', true),
+      // WHY bgMode lives inside colors: see setBgMode's WHY -- every save/
+      // load path already copies colors wholesale, so the background mode
+      // and its own colors travel with the design automatically.
+      bgMode: val('bg-mode','solid'),
+      bg2_1: val('bg2-1','#ffffff'), bg2_2: val('bg2-2','#f5e6c8'), bg2_dir: val('bg2-dir','horizontal'), bg2_gradient: checkedVal('bg2-gradient', true),
+      bg4_1: val('bg4-1','#fff7e8'), bg4_2: val('bg4-2','#f5e6c8'), bg4_3: val('bg4-3','#f3e8f7'), bg4_4: val('bg4-4','#e8d5f0'), bg4_dir: val('bg4-dir','diagonal'), bg4_gradient: checkedVal('bg4-gradient', true),
       // WHY read from the _finderOuterColorGlobal/_finderInnerColorGlobal
       // cache here instead of the DOM (unlike every body color above):
       // those c-finder-outer*/c-finder-inner* DOM fields are now a VIEW
@@ -7870,10 +8010,9 @@ async function renderQRCore(canvas, url, size, ec, prefix) {
   var ctx = canvas.getContext('2d');
   var c = settings.colors;
 
-  // Background
-  var bg = settings.colorMode==='solid' ? c.bg :
-           settings.colorMode==='grad2' ? c.g2_bg : c.g4_bg;
-  bg = bg || '#ffffff';
+  // Background -- see buildBackgroundStyle's WHY (solid / half / quarters /
+  // gradient, independent of the dots' own Color Mode).
+  var bg = buildBackgroundStyle(ctx, size, settings);
   ctx.fillStyle = bg;
   ctx.fillRect(0,0,size,size);
 
@@ -9572,6 +9711,12 @@ function captureDesignSettings(prefix) {
       fg: val('c-fg','#000000'), bg: val('c-bg','#ffffff'),
       g2_1: val('g2-1','#c98a2e'), g2_2: val('g2-2','#4A1060'), g2_bg: val('g2-bg','#ffffff'), g2_dir: val('g2-dir','horizontal'), g2_gradient: checkedVal('g2-gradient', true),
       g4_1: val('g4-1','#c98a2e'), g4_2: val('g4-2','#e0a84a'), g4_3: val('g4-3','#4A1060'), g4_4: val('g4-4','#6B2D8E'), g4_bg: val('g4-bg','#ffffff'), g4_dir: val('g4-dir','diagonal'), g4_gradient: checkedVal('g4-gradient', true),
+      // WHY bgMode lives inside colors: see setBgMode's WHY -- every save/
+      // load path already copies colors wholesale, so the background mode
+      // and its own colors travel with the design automatically.
+      bgMode: val('bg-mode','solid'),
+      bg2_1: val('bg2-1','#ffffff'), bg2_2: val('bg2-2','#f5e6c8'), bg2_dir: val('bg2-dir','horizontal'), bg2_gradient: checkedVal('bg2-gradient', true),
+      bg4_1: val('bg4-1','#fff7e8'), bg4_2: val('bg4-2','#f5e6c8'), bg4_3: val('bg4-3','#f3e8f7'), bg4_4: val('bg4-4','#e8d5f0'), bg4_dir: val('bg4-dir','diagonal'), bg4_gradient: checkedVal('bg4-gradient', true),
       // WHY read from the _finderOuterColorGlobal/_finderInnerColorGlobal
       // cache here instead of the DOM (unlike every body color above):
       // those c-finder-outer*/c-finder-inner* DOM fields are now a VIEW
@@ -9927,6 +10072,14 @@ function applyDesignSettings(prefix, design) {
   setChecked('g2-gradient', c.g2_gradient !== false);
   set('g4-1', c.g4_1); set('g4-2', c.g4_2); set('g4-3', c.g4_3); set('g4-4', c.g4_4); set('g4-bg', c.g4_bg); set('g4-dir', c.g4_dir);
   setChecked('g4-gradient', c.g4_gradient !== false);
+  set('bg2-1', c.bg2_1); set('bg2-2', c.bg2_2); set('bg2-dir', c.bg2_dir);
+  setChecked('bg2-gradient', c.bg2_gradient !== false);
+  set('bg4-1', c.bg4_1); set('bg4-2', c.bg4_2); set('bg4-3', c.bg4_3); set('bg4-4', c.bg4_4); set('bg4-dir', c.bg4_dir);
+  setChecked('bg4-gradient', c.bg4_gradient !== false);
+  // WHY always call (legacy designs → 'solid'): otherwise a 2-color
+  // background picked earlier in the session would bleed into a reloaded
+  // design that never had one.
+  setBgMode(c.bgMode || 'solid', prefix);
   // WHY NOT restoring c-finder-outer*/c-finder-inner* DOM fields directly
   // here (the way the body colors just above are), or calling
   // setFinderColorMode: those fields are now a VIEW onto whichever corner
@@ -11085,6 +11238,50 @@ async function buildDashSVG(slug,url,design) {
   var c=design.colors||{};
   var colorMode=design.colorMode||'solid';
   var bg = colorMode==='solid' ? (c.bg||'#ffffff') : colorMode==='grad2' ? (c.g2_bg||'#ffffff') : (c.g4_bg||'#ffffff');
+  // WHY build the background as its own SVG markup up front: the paid
+  // vector file must show the same half / quarters / gradient background
+  // as the live preview (see buildBackgroundStyle), not silently fall back
+  // to a flat color. Uses its own gradient id ("bgfill") so it can't
+  // collide with the dots' "fg" gradient defined below.
+  var bgDefs = '', bgPaint = bg;
+  (function(){
+    // WHY userSpaceOnUse (0..n canvas coords) instead of SVG's default
+    // per-shape bounding box: the same "bgfill" also paints each finder's
+    // gap ring below, and it has to show the slice of the background that
+    // sits behind that corner -- not a whole mini-gradient squeezed into
+    // the ring.
+    var mode = c.bgMode || 'solid';
+    function axis(dir, id, stops){
+      var u=' gradientUnits="userSpaceOnUse"';
+      if (dir==='radial') return '<radialGradient id="'+id+'"'+u+' cx="'+n/2+'" cy="'+n/2+'" r="'+n/2+'">'+stops+'</radialGradient>';
+      if (dir==='diagonal2') return '<linearGradient id="'+id+'"'+u+' x1="0" y1="'+n+'" x2="'+n+'" y2="0">'+stops+'</linearGradient>';
+      var x2=(dir==='horizontal'||dir==='diagonal')?n:0, y2=(dir==='vertical'||dir==='diagonal')?n:0;
+      return '<linearGradient id="'+id+'"'+u+' x1="0" y1="0" x2="'+x2+'" y2="'+y2+'">'+stops+'</linearGradient>';
+    }
+    function st(o,col){ return '<stop offset="'+o+'" stop-color="'+col+'"/>'; }
+    if (mode==='grad2') {
+      var a=c.bg2_1||'#ffffff', b=c.bg2_2||'#f5e6c8';
+      var stops = c.bg2_gradient===false ? st('0%',a)+st('50%',a)+st('50%',b)+st('100%',b) : st('0%',a)+st('100%',b);
+      bgDefs = axis(c.bg2_dir||'horizontal','bgfill',stops);
+      bgPaint = 'url(#bgfill)';
+    } else if (mode==='grad4' && c.bg4_gradient===false) {
+      // WHY a pattern of 4 rects: one SVG gradient only varies along one
+      // axis, so real quadrants need their own flat fills (same reason as
+      // the hard4 dots below).
+      var h=n/2;
+      bgDefs = '<pattern id="bgfill" patternUnits="userSpaceOnUse" x="0" y="0" width="'+n+'" height="'+n+'">'
+        +'<rect x="0" y="0" width="'+h+'" height="'+h+'" fill="'+(c.bg4_1||'#fff7e8')+'"/>'
+        +'<rect x="'+h+'" y="0" width="'+h+'" height="'+h+'" fill="'+(c.bg4_2||'#f5e6c8')+'"/>'
+        +'<rect x="0" y="'+h+'" width="'+h+'" height="'+h+'" fill="'+(c.bg4_3||'#f3e8f7')+'"/>'
+        +'<rect x="'+h+'" y="'+h+'" width="'+h+'" height="'+h+'" fill="'+(c.bg4_4||'#e8d5f0')+'"/></pattern>';
+      bgPaint = 'url(#bgfill)';
+    } else if (mode==='grad4') {
+      var s4 = st('0%',c.bg4_1||'#fff7e8')+st('33%',c.bg4_2||'#f5e6c8')+st('66%',c.bg4_3||'#f3e8f7')+st('100%',c.bg4_4||'#e8d5f0');
+      bgDefs = axis(c.bg4_dir||'diagonal','bgfill',s4);
+      bgPaint = 'url(#bgfill)';
+    }
+  })();
+  var bgMarkup = '<rect x="0" y="0" width="'+n+'" height="'+n+'" fill="'+bgPaint+'"/>';
 
   var defs='', fillAttr='fill="'+(c.fg||'#000000')+'"';
   // WHY these two hard-split branches: Hali -- "in the color sections on 2
@@ -11230,7 +11427,7 @@ async function buildDashSVG(slug,url,design) {
     var w = 3 * (typeof innerScale==='number' ? innerScale : 1);
     var off = (7 - w) / 2;
     return shapeSVG(outerKey, x, y, 7, fOuter)
-      + shapeSVG(outerKey, x+1, y+1, 5, bg)
+      + shapeSVG(outerKey, x+1, y+1, 5, bgPaint)
       + shapeSVG(innerKey || outerKey, x+off, y+off, w, fInner);
   }
   // WHY per-corner finderStyleCorner/finderDotStyleCorner/finderCornerSize
@@ -11269,8 +11466,8 @@ async function buildDashSVG(slug,url,design) {
   // size, so a 2" sticker design opens at exactly 2" in print software.
   var psv = design.printSize, svgDim = psv ? ' width="'+psv.value+psv.unit+'" height="'+psv.value+psv.unit+'"' : '';
   var svg='<svg xmlns="http://www.w3.org/2000/svg"'+svgDim+' viewBox="0 0 '+n+' '+n+'" shape-rendering="crispEdges">'
-    + (defs?'<defs>'+defs+'</defs>':'')
-    + '<rect x="0" y="0" width="'+n+'" height="'+n+'" fill="'+bg+'"/>'
+    + ((defs||bgDefs)?'<defs>'+defs+bgDefs+'</defs>':'')
+    + bgMarkup
     + '<g '+fillAttr+'>'+rects+'</g>'
     + finders
     + '</svg>';
