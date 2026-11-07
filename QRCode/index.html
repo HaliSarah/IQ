@@ -856,8 +856,8 @@ footer a{color:var(--muted);}footer a:hover{color:var(--white);}
 
               <div id="color-solid">
                 <div style="display:flex;gap:14px;">
-                  <div class="grad-stop"><input type="color" id="c-fg" value="#000000"><span>Foreground</span></div>
-                  <div class="grad-stop"><input type="color" id="c-bg" value="#ffffff"><span>Background</span></div>
+                  <div class="grad-stop"><input type="color" id="c-fg" value="#000000"><span>Dot color</span></div>
+                  
                 </div>
               </div>
 
@@ -865,7 +865,7 @@ footer a{color:var(--muted);}footer a:hover{color:var(--white);}
                 <div class="grad-row">
                   <div class="grad-stop"><input type="color" id="g2-1" value="#c98a2e"><span>Color 1</span></div>
                   <div class="grad-stop"><input type="color" id="g2-2" value="#4A1060"><span>Color 2</span></div>
-                  <div class="grad-stop"><input type="color" id="g2-bg" value="#ffffff"><span>Background</span></div>
+                  
                   <div class="field" style="flex:1;min-width:100px;margin-bottom:0;">
                     <select id="g2-dir">
                       <option value="horizontal">Horizontal →</option>
@@ -885,7 +885,7 @@ footer a{color:var(--muted);}footer a:hover{color:var(--white);}
                   <div class="grad-stop"><input type="color" id="g4-2" value="#e0a84a"><span>Top-R</span></div>
                   <div class="grad-stop"><input type="color" id="g4-3" value="#4A1060"><span>Bot-L</span></div>
                   <div class="grad-stop"><input type="color" id="g4-4" value="#6B2D8E"><span>Bot-R</span></div>
-                  <div class="grad-stop"><input type="color" id="g4-bg" value="#ffffff"><span>Background</span></div>
+                  
                   <!-- WHY a direction select here now, matching g2-dir above:
                        Hali -- "I also don't see color directional options for
                        the four color mode for the basic color of the dots."
@@ -920,6 +920,10 @@ footer a{color:var(--muted);}footer a:hover{color:var(--white);}
                  black dots on a soft split background). Solid keeps using the
                  Background picker already inside Color Mode so every design
                  saved before this existed still renders exactly the same.
+                 UPDATE -- Hali: "A dot color cannot have a foreground and a
+                 background color." So every Background picker was pulled out
+                 of Dot Color; the one solid picker (#c-bg, same id so saved
+                 designs still load into it) now lives here under Solid.
                  Same Gradient-checkbox rule as the dots: checked = smooth
                  blend, unchecked = hard Half (2-color) or Quarters (4-color). -->
             <div class="field">
@@ -930,7 +934,7 @@ footer a{color:var(--muted);}footer a:hover{color:var(--white);}
                 <button id="bg-mode-grad2" onclick="setBgMode('grad2','s')">2-color</button>
                 <button id="bg-mode-grad4" onclick="setBgMode('grad4','s')">4-color</button>
               </div>
-              <div id="bg-color-solid" style="font-size:.72rem;color:var(--muted);">Uses the Background picker in Dot Color above.</div>
+              <div id="bg-color-solid"><div style="display:flex;gap:14px;"><div class="grad-stop"><input type="color" id="c-bg" value="#ffffff"><span>Background</span></div></div></div>
               <div id="bg-color-grad2" style="display:none;">
                 <div class="grad-row">
                   <div class="grad-stop"><input type="color" id="bg2-1" value="#ffffff"><span>Color 1</span></div>
@@ -1446,15 +1450,15 @@ footer a{color:var(--muted);}footer a:hover{color:var(--white);}
               </div>
               <div id="d-color-solid">
                 <div style="display:flex;gap:14px;">
-                  <div class="grad-stop"><input type="color" id="d-c-fg" value="#000000"><span>Foreground</span></div>
-                  <div class="grad-stop"><input type="color" id="d-c-bg" value="#ffffff"><span>Background</span></div>
+                  <div class="grad-stop"><input type="color" id="d-c-fg" value="#000000"><span>Dot color</span></div>
+                  
                 </div>
               </div>
               <div id="d-color-grad2" style="display:none;">
                 <div class="grad-row">
                   <div class="grad-stop"><input type="color" id="d-g2-1" value="#c98a2e"><span>Color 1</span></div>
                   <div class="grad-stop"><input type="color" id="d-g2-2" value="#4A1060"><span>Color 2</span></div>
-                  <div class="grad-stop"><input type="color" id="d-g2-bg" value="#ffffff"><span>Background</span></div>
+                  
                   <div class="field" style="flex:1;min-width:100px;margin-bottom:0;">
                     <select id="d-g2-dir">
                       <option value="horizontal">Horizontal →</option>
@@ -1473,7 +1477,7 @@ footer a{color:var(--muted);}footer a:hover{color:var(--white);}
                   <div class="grad-stop"><input type="color" id="d-g4-2" value="#e0a84a"><span>Top-R</span></div>
                   <div class="grad-stop"><input type="color" id="d-g4-3" value="#4A1060"><span>Bot-L</span></div>
                   <div class="grad-stop"><input type="color" id="d-g4-4" value="#6B2D8E"><span>Bot-R</span></div>
-                  <div class="grad-stop"><input type="color" id="d-g4-bg" value="#ffffff"><span>Background</span></div>
+                  
                   <div class="field" style="flex:1;min-width:100px;margin-bottom:0;">
                     <select id="d-g4-dir">
                       <option value="diagonal">Diagonal ↘</option>
@@ -1497,7 +1501,7 @@ footer a{color:var(--muted);}footer a:hover{color:var(--white);}
                 <button id="d-bg-mode-grad2" onclick="setBgMode('grad2','d')">2-color</button>
                 <button id="d-bg-mode-grad4" onclick="setBgMode('grad4','d')">4-color</button>
               </div>
-              <div id="d-bg-color-solid" style="font-size:.72rem;color:var(--muted);">Uses the Background picker in Dot Color above.</div>
+              <div id="d-bg-color-solid"><div style="display:flex;gap:14px;"><div class="grad-stop"><input type="color" id="d-c-bg" value="#ffffff"><span>Background</span></div></div></div>
               <div id="d-bg-color-grad2" style="display:none;">
                 <div class="grad-row">
                   <div class="grad-stop"><input type="color" id="d-bg2-1" value="#ffffff"><span>Color 1</span></div>
@@ -5605,8 +5609,13 @@ function setBgMode(mode, prefix) {
 // working unchanged -- a CanvasGradient/Pattern is just as valid a fillStyle.
 function buildBackgroundStyle(ctx, size, settings) {
   var c = settings.colors || {};
-  var solid = settings.colorMode==='solid' ? c.bg :
-              settings.colorMode==='grad2' ? c.g2_bg : c.g4_bg;
+  // WHY prefer c.bg whenever bgMode exists, but fall back to the old per-
+  // dot-mode g2_bg/g4_bg otherwise: the solid picker now only lives in
+  // Background Color (#c-bg). Designs saved before that had a separate
+  // background per dot mode, and have no bgMode -- keep showing theirs.
+  var solid = c.bgMode ? c.bg :
+              settings.colorMode==='grad2' ? c.g2_bg :
+              settings.colorMode==='grad4' ? c.g4_bg : c.bg;
   solid = solid || '#ffffff';
   var mode = c.bgMode || 'solid';
   if (mode === 'grad2') {
@@ -10061,7 +10070,10 @@ function applyDesignSettings(prefix, design) {
     vEl.value = ps ? ps.value : (design.size || 300);
     syncPrintSize(prefix);
   })();
-  set('c-fg', c.fg); set('c-bg', c.bg);
+  // WHY the legacy pick: see buildBackgroundStyle -- an old design's real
+  // background lived in g2_bg/g4_bg when its dots used 2/4 colors.
+  set('c-fg', c.fg);
+  set('c-bg', c.bgMode ? c.bg : design.colorMode==='grad2' ? c.g2_bg : design.colorMode==='grad4' ? c.g4_bg : c.bg);
   set('g2-1', c.g2_1); set('g2-2', c.g2_2); set('g2-bg', c.g2_bg); set('g2-dir', c.g2_dir);
   // WHY the ?? true fallback instead of leaving an unset field alone (like
   // set() does): a design saved before this checkbox existed has no
@@ -11237,7 +11249,8 @@ async function buildDashSVG(slug,url,design) {
   var n=matrix.length;
   var c=design.colors||{};
   var colorMode=design.colorMode||'solid';
-  var bg = colorMode==='solid' ? (c.bg||'#ffffff') : colorMode==='grad2' ? (c.g2_bg||'#ffffff') : (c.g4_bg||'#ffffff');
+  // WHY: same legacy rule as buildBackgroundStyle's solid fallback.
+  var bg = (c.bgMode ? c.bg : colorMode==='grad2' ? c.g2_bg : colorMode==='grad4' ? c.g4_bg : c.bg) || '#ffffff';
   // WHY build the background as its own SVG markup up front: the paid
   // vector file must show the same half / quarters / gradient background
   // as the live preview (see buildBackgroundStyle), not silently fall back
