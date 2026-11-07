@@ -847,7 +847,7 @@ footer a{color:var(--muted);}footer a:hover{color:var(--white);}
           <div>
             <!-- COLOR / GRADIENT -->
             <div class="field">
-              <label>Color Mode</label>
+              <label>Dot Color</label>
               <div class="grad-toggle">
                 <button id="mode-solid" class="active" onclick="setColorMode('solid')">Solid</button>
                 <button id="mode-grad2" onclick="setColorMode('grad2')">2-color gradient</button>
@@ -923,14 +923,14 @@ footer a{color:var(--muted);}footer a:hover{color:var(--white);}
                  Same Gradient-checkbox rule as the dots: checked = smooth
                  blend, unchecked = hard Half (2-color) or Quarters (4-color). -->
             <div class="field">
-              <label>Background</label>
+              <label>Background Color</label>
               <input type="hidden" id="bg-mode" value="solid">
               <div class="grad-toggle">
                 <button id="bg-mode-solid" class="active" onclick="setBgMode('solid','s')">Solid</button>
                 <button id="bg-mode-grad2" onclick="setBgMode('grad2','s')">2-color</button>
                 <button id="bg-mode-grad4" onclick="setBgMode('grad4','s')">4-color</button>
               </div>
-              <div id="bg-color-solid" style="font-size:.72rem;color:var(--muted);">Uses the Background color picked in Color Mode above.</div>
+              <div id="bg-color-solid" style="font-size:.72rem;color:var(--muted);">Uses the Background picker in Dot Color above.</div>
               <div id="bg-color-grad2" style="display:none;">
                 <div class="grad-row">
                   <div class="grad-stop"><input type="color" id="bg2-1" value="#ffffff"><span>Color 1</span></div>
@@ -1438,7 +1438,7 @@ footer a{color:var(--muted);}footer a:hover{color:var(--white);}
 
           <div>
             <div class="field">
-              <label>Color Mode</label>
+              <label>Dot Color</label>
               <div class="grad-toggle">
                 <button id="d-mode-solid" class="active" onclick="setColorMode('solid','d')">Solid</button>
                 <button id="d-mode-grad2" onclick="setColorMode('grad2','d')">2-color</button>
@@ -1490,14 +1490,14 @@ footer a{color:var(--muted);}footer a:hover{color:var(--white);}
 
             <!-- BACKGROUND MODE — mirrors the Static tab's; see its WHY. -->
             <div class="field">
-              <label>Background</label>
+              <label>Background Color</label>
               <input type="hidden" id="d-bg-mode" value="solid">
               <div class="grad-toggle">
                 <button id="d-bg-mode-solid" class="active" onclick="setBgMode('solid','d')">Solid</button>
                 <button id="d-bg-mode-grad2" onclick="setBgMode('grad2','d')">2-color</button>
                 <button id="d-bg-mode-grad4" onclick="setBgMode('grad4','d')">4-color</button>
               </div>
-              <div id="d-bg-color-solid" style="font-size:.72rem;color:var(--muted);">Uses the Background color picked in Color Mode above.</div>
+              <div id="d-bg-color-solid" style="font-size:.72rem;color:var(--muted);">Uses the Background picker in Dot Color above.</div>
               <div id="d-bg-color-grad2" style="display:none;">
                 <div class="grad-row">
                   <div class="grad-stop"><input type="color" id="d-bg2-1" value="#ffffff"><span>Color 1</span></div>
