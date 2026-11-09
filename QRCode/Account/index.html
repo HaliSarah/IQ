@@ -3,7 +3,7 @@
   Title:       QR Code Redirect Handler
   Author:      Hali Sarah Parsons
   Date:        2026-09-25
-  Modified By: Claude (2026-10-19: add https:// to bare destinations; scan logging can't block redirect)
+  Modified By: Claude (2026-10-19: add https:// to bare destinations; scan logging can't block redirect; 2026-11-09: log approximate scan location)
   Description: Reads the slug from ?slug=... (or a #hash fallback), looks up
                the redirect URL in Firestore, logs the scan (count + device
                type, for dashboard stats), then redirects. Restyled to match
@@ -125,6 +125,17 @@
   // WHY: slug can come from query param ?slug=... (easy with GitHub Pages)
   // or from the hash #slug (fallback). GitHub Pages doesn't support
   // server-side path rewrites, so we use query params on the redirect URL.
+  // WHY a Worker call for location: this static page can't see where the
+  // visitor is, but Cloudflare's edge can (request.cf), so the QR payment
+  // Worker's /geo endpoint hands back city/region/country. WHY start it
+  // now, before the Firestore lookup: both run at once, so location adds
+  // no wait. WHY catch to {}: a failed lookup still logs the scan, just
+  // without a location.
+  const GEO_URL = 'https://qrcode-order.halisarahparsons.workers.dev/geo';
+  var geoPromise = fetch(GEO_URL, { cache: 'no-store' })
+    .then(function(r){ return r.ok ? r.json() : {}; })
+    .catch(function(){ return {}; });
+
   var slug = new URLSearchParams(window.location.search).get('slug')
           || window.location.hash.replace('#','').trim();
 
@@ -151,6 +162,9 @@
         // WHY: log scan with timestamp, device type, and basic metadata
         // so dashboard stats are accurate
         var isMobile = /Mobi|Android|iPhone|iPad/i.test(navigator.userAgent);
+        // WHY a 600ms cap: if the location lookup is slow, the scan is
+        // logged without it rather than holding the person up.
+        var geo = await Promise.race([geoPromise, new Promise(function(r){ setTimeout(function(){ r({}); }, 600); })]);
         // WHY allSettled + a 1.2s cap: counting the scan must never stop
         // or delay the person scanning from reaching the destination.
         await Promise.race([new Promise(function(r){ setTimeout(r, 1200); }), Promise.allSettled([
@@ -160,7 +174,14 @@
           addDoc(collection(db,'qrcodes',slug,'scans'), {
             ts: Date.now(),
             mobile: isMobile,
-            ua: navigator.userAgent.slice(0,120)
+            ua: navigator.userAgent.slice(0,120),
+            // WHY approximate only: this comes from the network address, so
+            // it's city-level and carriers can be off by a town or two.
+            city: String(geo.city || '').slice(0,60),
+            region: String(geo.region || '').slice(0,60),
+            country: String(geo.country || '').slice(0,4),
+            lat: typeof geo.lat === 'number' ? geo.lat : null,
+            lon: typeof geo.lon === 'number' ? geo.lon : null
           })
         ])]);
 
