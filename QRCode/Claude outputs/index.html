@@ -3,7 +3,8 @@
   Title:       QR Code Platform — I.Q. Productionz
   Author:      Hali Sarah Parsons
   Date:        2026-09-25
-  Modified By: Claude (2026-11-09: Scan Locations stat, location columns in CSV)
+  Modified By: Claude (2026-11-09: Scan Locations + unique/time/hours/devices/map stats, date range,
+               name sort that follows renames, floating toolbar, tracking settings, CSV columns)
   Description: Full QR code platform. Static free, dynamic $25/change $5/stats.
                Custom QR renderer: dots, diamonds, triangles, ovals, stars,
                hearts, rounded corners, letters, numbers as dot shapes.
@@ -358,6 +359,40 @@ nav{display:flex;justify-content:space-between;align-items:center;padding:14px 2
    nothing in the UI ever told you that, or gave you a way to act on a
    selection — checking a box visibly did nothing. */
 .dash-toolbar{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:16px;}
+/* WHY: date range picker, charts, tooltip, floating toolbar and tracking
+   panel styles for the expanded stats (2026-11-09). Colors come from the
+   existing :root tokens so everything matches the dashboard. */
+.st-range-row{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin:14px 0 4px;font-size:.78rem;color:var(--muted);}
+.st-range-row select,.st-range-row input[type=date],.dash-sort{background:var(--panel);color:var(--white);border:1px solid var(--line);border-radius:5px;padding:4px 6px;font-size:.78rem;}
+.st-range-custom{align-items:center;gap:6px;}
+.st-range-note{font-size:.68rem;}
+.stat-box.full{grid-column:1/-1;text-align:left;}
+.stat-sub{font-size:.7rem;color:var(--muted);margin-top:6px;}
+.stat-chart{display:block;max-width:100%;height:auto;}
+.stat-chart .bar{fill:var(--gold2);}
+.stat-chart .bc:hover .bar{fill:var(--gold);}
+.stat-chart .grid{stroke:#5a5a5a;stroke-width:1;}
+.stat-chart text{fill:var(--muted);font-size:10px;font-family:'Raleway',sans-serif;}
+.chart-tip{position:fixed;z-index:9999;display:none;pointer-events:none;background:#1f1d19;color:var(--white);border:1px solid var(--gold-dim);border-radius:6px;padding:5px 8px;font-size:.74rem;white-space:nowrap;box-shadow:0 4px 14px rgba(0,0,0,.4);}
+.loc-row{display:flex;justify-content:space-between;gap:10px;font-size:.82rem;padding:4px 0;border-bottom:1px solid var(--line);}
+.loc-row strong{color:var(--gold2);}
+.hbar-box{display:grid;grid-template-columns:1fr 1fr;gap:18px;}
+.hbar-row{display:grid;grid-template-columns:minmax(80px,120px) 1fr auto;gap:8px;align-items:center;font-size:.78rem;padding:3px 0;}
+.hbar-track{background:#3a3a3a;border-radius:4px;height:8px;overflow:hidden;}
+.hbar-fill{background:var(--gold2);height:100%;border-radius:0 4px 4px 0;}
+.hbar-num{text-align:right;color:var(--white);white-space:nowrap;}
+.stats-map{height:280px;border-radius:6px;overflow:hidden;background:#3a3a3a;}
+.stats-map.empty{height:auto;background:none;}
+.track-panel{display:none;}
+.track-opt{align-items:flex-start;}
+.track-opt label{display:flex;flex-direction:column;gap:2px;}
+.track-note{font-size:.7rem;color:var(--muted);line-height:1.4;}
+.dash-float-bar{position:fixed;left:50%;bottom:16px;transform:translate(-50%,140%);display:flex;gap:8px;flex-wrap:wrap;align-items:center;justify-content:center;max-width:calc(100vw - 24px);padding:10px 12px;background:rgba(42,42,42,.96);border:1px solid var(--gold-dim);border-radius:12px;box-shadow:0 8px 28px rgba(0,0,0,.5);z-index:900;opacity:0;pointer-events:none;transition:transform .25s ease,opacity .25s ease;}
+.dash-float-bar.show{transform:translate(-50%,0);opacity:1;pointer-events:auto;}
+.dash-float-count{font-size:.74rem;color:var(--gold2);}
+/* WHY: on phones three stat columns overflowed the card; two fit, and min-width:0 stops long text from pushing boxes wider */
+.stats-grid>*{min-width:0;}
+@media (max-width:640px){.hbar-box{grid-template-columns:1fr;}.stats-panel .stats-grid{grid-template-columns:repeat(2,minmax(0,1fr));} /* WHY .stats-panel prefix: the base .stats-grid rule comes later in the file and would win otherwise */.hbar-row{grid-template-columns:minmax(64px,90px) 1fr auto;}}
 .stats-panel{background:var(--navy);border:1px solid var(--line);border-radius:var(--r);padding:20px;margin-top:14px;display:none;width:100%;}
 .stats-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-bottom:18px;}
 .stat-box{background:var(--panel);border-radius:7px;padding:14px;text-align:center;}
@@ -581,6 +616,7 @@ footer a{color:var(--muted);}footer a:hover{color:var(--white);}
           <li>Change redirect anytime</li>
           <li>Scan count tracking</li>
           <li>Device &amp; location data</li>
+          <li>Unique scans, time charts &amp; scan map</li>
           <li>Reset scan counter</li>
           <li>PNG or <strong>SVG</strong> download — print-ready, scalable</li>
           <li>Your code never expires</li>
@@ -1778,9 +1814,23 @@ footer a{color:var(--muted);}footer a:hover{color:var(--white);}
       <button class="act-btn" onclick="openCSVExportPayment()">⬇ Export CSV — $25</button>
       <button class="act-btn" id="dash-bulk-stats-btn" style="display:none;" onclick="openBulkStatsPanel()">📊 Stats for Selected</button>
       <button class="act-btn act-btn-danger" id="dash-delete-selected-btn" style="display:none;" onclick="deleteSelectedQRCodes()">🗑 Delete Selected</button>
+      <select id="dash-sort" class="dash-sort" onchange="setDashSort(this.value)" aria-label="Sort codes"><option value="name">Sort: Name A–Z</option><option value="scans">Sort: Most scans</option><option value="newest">Sort: Newest</option></select>
     </div>
     <p style="font-size:.74rem;color:var(--muted);margin:-10px 0 16px;">Check codes below to include them in CSV export, bulk stats, or bulk delete.</p>
     <div id="qr-list"><div class="empty-state"><p>No QR codes yet.</p></div></div>
+    <!-- WHY a second, floating copy of the toolbar: with many codes, the real
+         toolbar scrolls out of reach. This one slides up from the bottom only
+         once the real one is off screen (see the IntersectionObserver near
+         setDashSort). Its buttons have their own ids so updateToolbarVisibility
+         can keep both copies in sync. -->
+    <div class="dash-float-bar" id="dash-float-bar" aria-hidden="true">
+      <span class="dash-float-count" id="dash-float-count"></span>
+      <button class="act-btn" onclick="selectAllQRCodes()">☑ Select All</button>
+      <button class="act-btn" onclick="openCSVExportPayment()">⬇ Export CSV — $25</button>
+      <button class="act-btn" id="fl-bulk-stats-btn" style="display:none;" onclick="openBulkStatsPanel()">📊 Stats for Selected</button>
+      <button class="act-btn act-btn-danger" id="fl-delete-selected-btn" style="display:none;" onclick="deleteSelectedQRCodes()">🗑 Delete Selected</button>
+      <select id="dash-sort-fl" class="dash-sort" onchange="setDashSort(this.value)" aria-label="Sort codes"><option value="name">Sort: Name A–Z</option><option value="scans">Sort: Most scans</option><option value="newest">Sort: Newest</option></select>
+    </div>
 
     <!-- WHY a status tracker instead of in-app chat: Hali needs to tell a
          client whether a custom shape can be done and when it'll arrive.
@@ -2035,8 +2085,18 @@ footer a{color:var(--muted);}footer a:hover{color:var(--white);}
       <label for="bst-today">Scans Today</label><span class="dl-price">$5 / code</span></div>
     <div class="dl-opt-row"><input type="checkbox" class="bst-opt" id="bst-mobile" data-stat="mobile" onchange="updateBulkStatTotal()">
       <label for="bst-mobile">Mobile %</label><span class="dl-price">$5 / code</span></div>
+    <div class="dl-opt-row"><input type="checkbox" class="bst-opt" id="bst-unique" data-stat="unique" onchange="updateBulkStatTotal()">
+      <label for="bst-unique">Unique Scans</label><span class="dl-price">$5 / code</span></div>
     <div class="dl-opt-row"><input type="checkbox" class="bst-opt" id="bst-locations" data-stat="locations" onchange="updateBulkStatTotal()">
       <label for="bst-locations">Scan Locations</label><span class="dl-price">$5 / code</span></div>
+    <div class="dl-opt-row"><input type="checkbox" class="bst-opt" id="bst-timeline" data-stat="timeline" onchange="updateBulkStatTotal()">
+      <label for="bst-timeline">Scans Over Time</label><span class="dl-price">$5 / code</span></div>
+    <div class="dl-opt-row"><input type="checkbox" class="bst-opt" id="bst-hours" data-stat="hours" onchange="updateBulkStatTotal()">
+      <label for="bst-hours">Busiest Hours &amp; Days</label><span class="dl-price">$5 / code</span></div>
+    <div class="dl-opt-row"><input type="checkbox" class="bst-opt" id="bst-devices" data-stat="devices" onchange="updateBulkStatTotal()">
+      <label for="bst-devices">Devices &amp; Browsers</label><span class="dl-price">$5 / code</span></div>
+    <div class="dl-opt-row"><input type="checkbox" class="bst-opt" id="bst-map" data-stat="map" onchange="updateBulkStatTotal()">
+      <label for="bst-map">Scan Map</label><span class="dl-price">$5 / code</span></div>
     <div class="dl-total-row"><span>Total</span><span id="bst-total-amt">$0.00</span></div>
     <button class="gen-btn" id="bst-pay-btn" disabled onclick="openBulkStatsPayment()">Select a stat</button>
   </div>
@@ -10429,6 +10489,7 @@ async function showDashboard() {
     if(snap.empty){list.innerHTML='<div class="empty-state"><p>No dynamic QR codes yet.</p></div>';updateToolbarVisibility();return;}
     list.innerHTML='';
     snap.forEach(d=>list.appendChild(buildQRItem(d.data())));
+    setDashSort(_dashSort); // WHY: puts cards in the chosen order and syncs both sort menus
     updateToolbarVisibility();
   } catch(e){list.innerHTML='<div class="empty-state"><p>Error: '+e.message+'</p></div>';}
 }
@@ -11051,6 +11112,8 @@ function appendCustomShapeGroupToInnerGrid(gridId, onSelect) {
 function buildQRItem(data) {
   var div=document.createElement('div');
   div.className='qr-item'; div.id='qritem-'+data.slug;
+  // WHY on the card itself: resortDashboard reorders cards from these without another Firestore read
+  div.dataset.sortname=data.name||''; div.dataset.scans=data.scanCount||0; div.dataset.created=data.created||0;
   div.style.position='relative';
   // WHY: checkbox allows selecting multiple codes for bulk CSV export, bulk
   // stats, and bulk delete — onchange keeps the toolbar's Stats/Delete
@@ -11121,8 +11184,13 @@ function buildQRItem(data) {
   // WHY no per-card Delete button here: it was a redundant second way to do
   // what checking this card's box + the toolbar's Delete Selected already
   // does — Hali asked for it to come out.
-  [dlBtn,changeBtn,statsBtn].forEach(b=>actions.appendChild(b));
+  var trackBtn=document.createElement('button'); trackBtn.className='act-btn'; trackBtn.textContent='Tracking ▾';
+  trackBtn.onclick=function(){toggleTrackPanel(data.slug);};
+  [dlBtn,changeBtn,statsBtn,trackBtn].forEach(b=>actions.appendChild(b));
   div.appendChild(actions);
+  var tp=document.createElement('div'); tp.className='dl-panel track-panel'; tp.id='trackpanel-'+data.slug;
+  tp.innerHTML=trackPanelHtml(data);
+  div.appendChild(tp);
 
   // WHY $5 per format with a running total: each format is billed
   // separately per Hali's pricing, and "select all" is a shortcut that
@@ -11153,16 +11221,10 @@ function buildQRItem(data) {
   sp.innerHTML=
       '<div class="dl-opt-row"><input type="checkbox" id="st-all-'+data.slug+'" onchange="toggleStatAll(\''+data.slug+'\')">'
         +'<label for="st-all-'+data.slug+'">Select all</label></div>'
-    + '<div class="dl-opt-row"><input type="checkbox" class="st-opt" id="st-total-'+data.slug+'" data-stat="total" onchange="updateStatTotal(\''+data.slug+'\')">'
-        +'<label for="st-total-'+data.slug+'">Total Scans</label><span class="dl-price">$5</span></div>'
-    + '<div class="dl-opt-row"><input type="checkbox" class="st-opt" id="st-today-'+data.slug+'" data-stat="today" onchange="updateStatTotal(\''+data.slug+'\')">'
-        +'<label for="st-today-'+data.slug+'">Scans Today</label><span class="dl-price">$5</span></div>'
-    + '<div class="dl-opt-row"><input type="checkbox" class="st-opt" id="st-mobile-'+data.slug+'" data-stat="mobile" onchange="updateStatTotal(\''+data.slug+'\')">'
-        +'<label for="st-mobile-'+data.slug+'">Mobile %</label><span class="dl-price">$5</span></div>'
-    + '<div class="dl-opt-row"><input type="checkbox" class="st-opt" id="st-locations-'+data.slug+'" data-stat="locations" onchange="updateStatTotal(\''+data.slug+'\')">'
-        +'<label for="st-locations-'+data.slug+'">Scan Locations</label><span class="dl-price">$5</span></div>'
+    + statOptionRowsHtml(data.slug)
     + '<div class="dl-total-row"><span>Total</span><span id="st-total-amt-'+data.slug+'">$0.00</span></div>'
     + '<button class="gen-btn" id="st-pay-btn-'+data.slug+'" disabled>Select a stat</button>'
+    + statRangeRowHtml(data.slug)
     + '<div class="stats-grid" id="stats-grid-'+data.slug+'" style="margin-top:16px;"></div>';
   div.appendChild(sp);
   sp.querySelector('#st-pay-btn-'+data.slug).onclick=function(){openStatsPayment(data);};
@@ -11218,6 +11280,10 @@ async function saveRenameQR(slug) {
     nameDiv.dataset.name = newName;
     nameDiv.dataset.editing = '';
     nameDiv.innerHTML = renderQRNameInner(newName, nameDiv.dataset.type);
+    // WHY re-sort and scroll: a renamed code moves to its new alphabetical
+    // spot, and scrolling there keeps it from seeming to vanish.
+    var item = document.getElementById('qritem-'+slug);
+    if (item) { item.dataset.sortname = newName; resortDashboard(); item.scrollIntoView({block:'nearest', behavior:'smooth'}); }
     toast('Renamed.','ok');
   } catch(e) { toast('Error: '+e.message,'err'); }
 }
@@ -11649,7 +11715,7 @@ function openStatsPayment(data) {
   var slug=data.slug;
   var keys=Array.from(document.querySelectorAll('#stats-'+slug+' .st-opt:checked:not(:disabled)')).map(function(cb){return cb.dataset.stat;});
   if(keys.length===0){toast('Select at least one stat.','err');return;}
-  var labels={total:'Total Scans',today:'Scans Today',mobile:'Mobile %',locations:'Scan Locations'};
+  var labels=STAT_LABELS;
   _currentQRItem=data;
   _pendingAction={
     type:'stats', qrId:slug, stats:keys, amount:keys.length*5,
@@ -11659,23 +11725,309 @@ function openStatsPayment(data) {
   initiatePayment('stats');
 }
 
-// WHY newStats merges into _purchasedStats instead of replacing it: re-
-// buying a second stat later in the session (or clicking Reset) shouldn't
-// forget a stat already paid for earlier — see _purchasedStats' WHY.
+// ── STATS ENGINE ─────────────────────────────────────────────────────────────
+// WHY one shared list of stat keys and labels for the card panel, the bulk
+// modal and the payment descriptions: a new stat only has to be added here to
+// show up, and be billed at $5, everywhere.
+var STAT_LABELS = {
+  total:'Total Scans', today:'Scans Today', mobile:'Mobile %', unique:'Unique Scans',
+  locations:'Scan Locations', timeline:'Scans Over Time', hours:'Busiest Hours & Days',
+  devices:'Devices & Browsers', map:'Scan Map'
+};
+var STAT_ORDER = ['total','today','mobile','unique','locations','timeline','hours','devices','map'];
+// WHY a separate list: these read the per-scan log, so they're the ones the
+// date range filters. Total (the resettable counter) and Today are fixed.
+var LOG_STATS = ['mobile','unique','locations','timeline','hours','devices','map'];
+
+function statOptionRowsHtml(slug) {
+  return STAT_ORDER.map(function(k){
+    return '<div class="dl-opt-row"><input type="checkbox" class="st-opt" id="st-'+k+'-'+slug+'" data-stat="'+k+'" onchange="updateStatTotal(\''+slug+'\')">'
+      + '<label for="st-'+k+'-'+slug+'">'+STAT_LABELS[k]+'</label><span class="dl-price">$5</span></div>';
+  }).join('');
+}
+
+// ── Date range ──
+var _statRange = {};
+function statRangeRowHtml(slug) {
+  var on = 'onchange="onStatRangeChange(\''+slug+'\')"';
+  return '<div class="st-range-row" id="st-range-row-'+slug+'" style="display:none;">'
+    + '<label for="st-range-'+slug+'">Date range</label>'
+    + '<select id="st-range-'+slug+'" '+on+'>'
+    +   '<option value="all">All time</option><option value="7">Last 7 days</option>'
+    +   '<option value="30">Last 30 days</option><option value="90">Last 90 days</option>'
+    +   '<option value="custom">Custom dates</option></select>'
+    + '<span class="st-range-custom" id="st-range-custom-'+slug+'" style="display:none;">'
+    +   '<input type="date" id="st-from-'+slug+'" '+on+'> to <input type="date" id="st-to-'+slug+'" '+on+'></span>'
+    + '<span class="st-range-note">Applies to every stat except Total and Today</span>'
+    + '</div>';
+}
+function onStatRangeChange(slug) {
+  var sel=document.getElementById('st-range-'+slug); if(!sel) return;
+  var custom=document.getElementById('st-range-custom-'+slug);
+  if (custom) custom.style.display = sel.value==='custom' ? 'inline-flex' : 'none';
+  _statRange[slug] = {
+    mode: sel.value,
+    from: (document.getElementById('st-from-'+slug)||{}).value||'',
+    to:   (document.getElementById('st-to-'+slug)||{}).value||''
+  };
+  loadStats(slug); // WHY no newStats: just re-draws what's already paid for, under the new range — never a new charge
+}
+function rangeBounds(slug) {
+  var r=_statRange[slug]||{mode:'all'}, now=Date.now();
+  if (r.mode==='7'||r.mode==='30'||r.mode==='90') {
+    var start=new Date(); start.setHours(0,0,0,0); start.setDate(start.getDate()-(parseInt(r.mode,10)-1));
+    return {from:start.getTime(), to:now, fixedStart:true};
+  }
+  if (r.mode==='custom') {
+    // WHY T00:00 / T23:59 local: the date boxes mean whole days in the viewer's own time zone
+    var f = r.from ? new Date(r.from+'T00:00:00').getTime() : 0;
+    var t = r.to ? new Date(r.to+'T23:59:59.999').getTime() : now;
+    return {from:f, to:t, fixedStart:!!r.from};
+  }
+  return {from:0, to:now, fixedStart:false};
+}
+
+var _scanLogCache = {};
+async function fetchScanLog(slug) {
+  // WHY a 60-second cache: one date-range change re-draws several stats; a
+  // single read of the scan log serves all of them instead of one read each.
+  var c=_scanLogCache[slug];
+  if (c && Date.now()-c.at < 60000) return c.rows;
+  var fb=window._fb;
+  var snap=await fb.getDocs(fb.collection(fb.db,'qrcodes',slug,'scans'));
+  var rows=[]; snap.forEach(function(dd){ rows.push(dd.data()); });
+  _scanLogCache[slug]={at:Date.now(), rows:rows};
+  return rows;
+}
+
+// WHY parsed here too, not only at scan time: scans logged before the
+// redirect page started saving os/browser only have the raw browser string.
+// WHY the iOS → Safari fallback: older logs cut that string at 120
+// characters, which on iPhones drops the "Safari" word; Safari is the
+// built-in default there, and other iPhone browsers name themselves earlier.
+function parseUA(ua) {
+  ua = ua || '';
+  var os = /iPhone|iPad|iPod/.test(ua) ? 'iOS' : /Android/.test(ua) ? 'Android' : /Windows/.test(ua) ? 'Windows'
+         : /CrOS/.test(ua) ? 'ChromeOS' : /Mac OS X|Macintosh/.test(ua) ? 'Mac' : /Linux/.test(ua) ? 'Linux' : 'Other';
+  var br = /FBAN|FBAV/.test(ua) ? 'Facebook app' : /Instagram/.test(ua) ? 'Instagram app' : /SamsungBrowser/.test(ua) ? 'Samsung Internet'
+         : /EdgiOS|EdgA|Edg\//.test(ua) ? 'Edge' : /FxiOS|Firefox\//.test(ua) ? 'Firefox' : /CriOS|Chrome\//.test(ua) ? 'Chrome'
+         : /Safari\/|Version\//.test(ua) ? 'Safari' : (os==='iOS' ? 'Safari' : 'Other');
+  return {os:os, browser:br};
+}
+
+// ── Charts ──
+// WHY hand-drawn SVG instead of a chart library: this is one self-contained
+// page, and a library would be a large download for a few small bar charts.
+// WHY width passed in (the box's real pixel width) instead of a fixed
+// viewBox that scales: scaled text shrinks to unreadable on phones.
+function niceMax(v) {
+  if (v<=5) return 5;
+  var p=Math.pow(10, Math.floor(Math.log10(v))), n=v/p;
+  return (n<=1?1:n<=2?2:n<=5?5:10)*p;
+}
+function barChartSvg(bars, width, ariaLabel, tickEvery) {
+  var W=Math.max(200, Math.round(width)), H=160, pl=30, pr=6, pt=10, pb=22;
+  var n=bars.length||1, ch=H-pt-pb, base=pt+ch;
+  var max=niceMax(Math.max.apply(null, bars.map(function(b){return b.value;}).concat([1])));
+  var slot=(W-pl-pr)/n, gap=Math.min(2, slot*0.3), w=Math.max(1, slot-gap); // WHY 2px gap: bars stay distinct without a heavy outline
+  var s='<svg class="stat-chart" width="'+W+'" height="'+H+'" viewBox="0 0 '+W+' '+H+'" role="img" aria-label="'+escapeHtml(ariaLabel)+'">';
+  [0, max/2, max].forEach(function(t){ // WHY only three gridlines: recessive axes keep attention on the bars
+    var y=base-(t/max)*ch;
+    s+='<line class="grid" x1="'+pl+'" x2="'+(W-pr)+'" y1="'+y+'" y2="'+y+'"/>'
+     + '<text x="'+(pl-5)+'" y="'+(y+3)+'" text-anchor="end">'+(t%1?t.toFixed(1):t)+'</text>';
+  });
+  bars.forEach(function(b,i){
+    var x=pl+i*slot+gap/2, h=(b.value/max)*ch, top=base-h, r=Math.min(4, w/2, h);
+    s+='<g class="bc" data-tip="'+escapeHtml(b.tip)+'">';
+    if (h>0) s+='<path class="bar" d="M'+x+','+base+' V'+(top+r)+' Q'+x+','+top+' '+(x+r)+','+top+' H'+(x+w-r)+' Q'+(x+w)+','+top+' '+(x+w)+','+(top+r)+' V'+base+' Z"/>';
+    // WHY a full-height invisible hit area: thin bars (or zero days) are still easy to hover or tap
+    s+='<rect x="'+(pl+i*slot)+'" y="'+pt+'" width="'+slot+'" height="'+ch+'" fill="transparent"/></g>';
+    if (b.tick || (tickEvery && i%tickEvery===0)) s+='<text x="'+(x+w/2)+'" y="'+(H-6)+'" text-anchor="middle">'+escapeHtml(b.tick||b.label)+'</text>';
+  });
+  return s+'</svg>';
+}
+function hbarListHtml(title, counts, total) {
+  var keys=Object.keys(counts).sort(function(a,b){return counts[b]-counts[a];});
+  return '<div class="hbar-group"><div class="stat-label" style="margin:0 0 6px;">'+title+'</div>'
+    + (keys.length ? keys.map(function(k){
+        var pct=total?Math.round(counts[k]/total*100):0;
+        return '<div class="hbar-row"><span>'+escapeHtml(k)+'</span><div class="hbar-track"><div class="hbar-fill" style="width:'+Math.max(2,pct)+'%"></div></div>'
+          + '<span class="hbar-num">'+counts[k]+' · '+pct+'%</span></div>';
+      }).join('') : '<div class="stat-sub">No scans in this range.</div>')
+    + '</div>';
+}
+
+// WHY one shared tooltip with event delegation: charts are re-drawn whenever
+// the range changes, so per-bar listeners would need re-attaching each time.
+// WHY click as well as mousemove: phones have no hover.
+(function(){
+  var tip=null;
+  function ensure(){ if(!tip){ tip=document.createElement('div'); tip.className='chart-tip'; document.body.appendChild(tip); } return tip; }
+  function hide(){ if(tip) tip.style.display='none'; }
+  function show(e){
+    var t=e.target && e.target.closest ? e.target.closest('[data-tip]') : null;
+    if (!t || !t.closest('.stats-grid')) { hide(); return; }
+    var el=ensure(); el.textContent=t.getAttribute('data-tip'); el.style.display='block';
+    el.style.left=Math.max(8, Math.min(window.innerWidth-el.offsetWidth-8, e.clientX+12))+'px';
+    el.style.top=Math.max(8, e.clientY-el.offsetHeight-10)+'px';
+  }
+  document.addEventListener('mousemove', show);
+  document.addEventListener('click', show);
+  window.addEventListener('scroll', hide, true);
+})();
+
+var MONTHS=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+var WEEKDAYS=['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
+function hourLabel(h){ return (h%12===0?12:h%12)+(h<12?' AM':' PM'); }
+
+function timelineBoxHtml(scans, slug, width) {
+  var b=rangeBounds(slug);
+  var first = scans.length ? Math.min.apply(null, scans.map(function(s){return s.ts||Date.now();})) : Date.now();
+  var start=new Date(b.fixedStart ? b.from : first); start.setHours(0,0,0,0);
+  var end=new Date(Math.min(b.to, Date.now())); end.setHours(0,0,0,0);
+  var days=Math.max(1, Math.round((end-start)/864e5)+1);
+  // WHY switch to weeks past ~4 months: hundreds of one-pixel day bars are unreadable
+  var weekly=days>120, step=weekly?7:1, buckets=Math.ceil(days/step), bars=[];
+  for (var i=0;i<buckets;i++){
+    var d=new Date(start); d.setDate(d.getDate()+i*step);
+    var lbl=MONTHS[d.getMonth()]+' '+d.getDate();
+    bars.push({label:lbl, value:0, tip:(weekly?'Week of ':'')+lbl+', '+d.getFullYear()});
+  }
+  scans.forEach(function(s){
+    var d=new Date(s.ts); d.setHours(0,0,0,0);
+    var idx=Math.floor(Math.round((d-start)/864e5)/step);
+    if (idx>=0 && idx<bars.length) bars[idx].value++;
+  });
+  var best=null;
+  bars.forEach(function(bar){ bar.tip+=': '+bar.value+' scan'+(bar.value===1?'':'s'); if(!best||bar.value>best.value) best=bar; });
+  var tickEvery=Math.max(1, Math.ceil(bars.length/Math.max(2, Math.min(7, Math.floor(width/60))))); // WHY up to 7 labels, fewer on narrow phones: date labels need ~60px each or they overlap
+  return '<div class="stat-box full"><div class="stat-label" style="margin:0 0 6px;">Scans Over Time ('+(weekly?'by week':'by day')+')</div>'
+    + barChartSvg(bars, width, 'Scans over time', tickEvery)
+    + '<div class="stat-sub">'+scans.length+' scan'+(scans.length===1?'':'s')+' in this range'
+    + (best&&best.value ? ' · busiest '+(weekly?'week':'day')+': '+escapeHtml(best.tip.split(':')[0])+' ('+best.value+')' : '')+'</div></div>';
+}
+function hoursBoxHtml(scans, width) {
+  var hrs=[], days=[];
+  for (var h=0;h<24;h++) hrs.push({label:hourLabel(h), value:0, tick:(h%3===0?hourLabel(h).replace(' AM','a').replace(' PM','p'):'')});
+  for (var d=0;d<7;d++) days.push({label:WEEKDAYS[d], value:0, tick:WEEKDAYS[d]});
+  scans.forEach(function(s){ var dt=new Date(s.ts); hrs[dt.getHours()].value++; days[dt.getDay()].value++; });
+  hrs.forEach(function(b,h){ b.tip=hourLabel(h)+' – '+hourLabel((h+1)%24)+': '+b.value+' scan'+(b.value===1?'':'s'); });
+  days.forEach(function(b){ b.tip=b.label+': '+b.value+' scan'+(b.value===1?'':'s'); });
+  var topH=hrs.reduce(function(a,b){return b.value>a.value?b:a;}), topD=days.reduce(function(a,b){return b.value>a.value?b:a;});
+  // WHY two charts, hours first and days below: "what time" is the question
+  // asked most; the weekday view sits underneath as the follow-up.
+  return '<div class="stat-box full"><div class="stat-label" style="margin:0 0 6px;">Busiest Hours (your time zone)</div>'
+    + barChartSvg(hrs, width, 'Scans by hour of day', 0)
+    + '<div class="stat-label" style="margin:12px 0 6px;">Busiest Days</div>'
+    + barChartSvg(days, width, 'Scans by day of week', 0)
+    + '<div class="stat-sub">'+(topH.value ? 'Peak hour: '+topH.tip.split(':')[0]+' · Peak day: '+topD.label : 'No scans in this range.')+'</div></div>';
+}
+function devicesBoxHtml(scans) {
+  var os={}, br={};
+  scans.forEach(function(s){
+    var p = (s.os && s.browser) ? {os:s.os, browser:s.browser} : parseUA(s.ua);
+    os[p.os]=(os[p.os]||0)+1; br[p.browser]=(br[p.browser]||0)+1;
+  });
+  return '<div class="stat-box full hbar-box">'+hbarListHtml('Phone / Computer Type', os, scans.length)+hbarListHtml('Browser', br, scans.length)+'</div>';
+}
+function uniqueBoxHtml(scans) {
+  var ids={}, legacy=0;
+  scans.forEach(function(s){ if (s.vid) ids[s.vid]=1; else legacy++; });
+  var n=Object.keys(ids).length;
+  // WHY older scans shown separately: they were logged before the scanner id
+  // existed, so they can't be told apart — counting them as unique would inflate it.
+  return '<div class="stat-box"><div class="stat-num">'+n+'</div><div class="stat-label">Unique Scans</div>'
+    + (legacy ? '<div class="stat-sub">+'+legacy+' older scan'+(legacy===1?'':'s')+' not counted (logged before this feature)</div>' : '')+'</div>';
+}
+function locationsBoxHtml(scans) {
+  var counts={}, unknown=0;
+  scans.forEach(function(sd){
+    var key=[sd.city,sd.region,sd.country].filter(Boolean).join(', ');
+    if (key) counts[key]=(counts[key]||0)+1; else unknown++;
+  });
+  var top=Object.keys(counts).sort(function(a,b){return counts[b]-counts[a];}).slice(0,10);
+  // WHY the "without location" note: scans from before tracking began have no
+  // city, so they're counted openly instead of silently dropped.
+  return '<div class="stat-box full"><div class="stat-label" style="margin:0 0 8px;">Scan Locations (approximate, city level)</div>'
+    + (top.length ? top.map(function(k){ return '<div class="loc-row"><span>'+escapeHtml(k)+'</span><strong>'+counts[k]+'</strong></div>'; }).join('')
+                  : '<div class="stat-sub">No located scans in this range.</div>')
+    + (unknown ? '<div class="stat-sub">'+unknown+' scan'+(unknown===1?'':'s')+' without a location (from before tracking began, or the lookup was unavailable)</div>' : '')
+    + '</div>';
+}
+
+// ── Map ──
+var _leafletLoading=null;
+// WHY loaded only when the Scan Map stat is opened: most visitors never need
+// it, so it shouldn't slow down the page for everyone.
+function loadLeaflet() {
+  if (window.L) return Promise.resolve(window.L);
+  if (_leafletLoading) return _leafletLoading;
+  _leafletLoading = new Promise(function(res, rej){
+    var css=document.createElement('link'); css.rel='stylesheet'; css.href='https://unpkg.com/leaflet@1.9.4/dist/leaflet.css';
+    document.head.appendChild(css);
+    var s=document.createElement('script'); s.src='https://unpkg.com/leaflet@1.9.4/dist/leaflet.js';
+    s.onload=function(){ res(window.L); };
+    s.onerror=function(){ _leafletLoading=null; rej(new Error('Map could not load')); }; // WHY reset: lets a later click try again
+    document.head.appendChild(s);
+  });
+  return _leafletLoading;
+}
+var _maps={};
+async function renderScanMap(slug, scans) {
+  var el=document.getElementById('stats-map-'+slug); if(!el) return;
+  if (_maps[slug]) { try{ _maps[slug].remove(); }catch(e){} delete _maps[slug]; } // WHY try: the old map's box was already replaced when the grid re-drew
+  var pts={};
+  scans.forEach(function(s){
+    var precise = typeof s.gpsLat==='number';
+    var lat = precise ? s.gpsLat : s.lat, lon = precise ? s.gpsLon : s.lon;
+    if (typeof lat!=='number' || typeof lon!=='number') return;
+    // WHY rounding: approximate scans from one city share coordinates, so they
+    // group into one sized circle; precise ones keep ~100 m detail.
+    var k = precise ? lat.toFixed(3)+','+lon.toFixed(3)+',p' : lat.toFixed(2)+','+lon.toFixed(2)+',a';
+    (pts[k] = pts[k] || {lat:lat, lon:lon, n:0, precise:precise, label:[s.city,s.region].filter(Boolean).join(', ')}).n++;
+  });
+  var list=Object.keys(pts).map(function(k){return pts[k];});
+  if (!list.length) { el.classList.add('empty'); el.innerHTML='<div class="stat-sub">No scans with a map location in this range yet.</div>'; return; }
+  var L;
+  try { L = await loadLeaflet(); } catch(e) { el.innerHTML='<div class="stat-sub">'+escapeHtml(e.message)+'</div>'; return; }
+  var map=L.map(el, {scrollWheelZoom:false}); // WHY no scroll-zoom: scrolling the dashboard past the map shouldn't turn into zooming
+  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {maxZoom:18, attribution:'&copy; OpenStreetMap contributors'}).addTo(map);
+  var max=Math.max.apply(null, list.map(function(p){return p.n;})), bounds=[];
+  list.forEach(function(p){
+    // WHY filled vs. ringed: precise and approximate points must differ by more than shade alone
+    L.circleMarker([p.lat,p.lon], {radius:6+14*Math.sqrt(p.n/max), color:'#e0a84a', weight:2, fillColor:'#e0a84a', fillOpacity:p.precise?.85:.25})
+      .bindTooltip(escapeHtml(p.label||'Unknown place')+' — '+p.n+' scan'+(p.n===1?'':'s')+(p.precise?' (precise)':' (approximate)'))
+      .addTo(map);
+    bounds.push([p.lat,p.lon]);
+  });
+  if (bounds.length===1) map.setView(bounds[0], 10); else map.fitBounds(bounds, {padding:[24,24], maxZoom:12});
+  _maps[slug]=map;
+}
+
+// WHY newStats merges into _purchasedStats instead of replacing it: buying a
+// second stat later in the session (or clicking Reset) shouldn't forget one
+// already paid for.
 async function loadStats(slug, newStats) {
   var fb=window._fb; var panel=document.getElementById('stats-'+slug); if(!panel)return;
   var purchased = _purchasedStats[slug] || (_purchasedStats[slug]=new Set());
   (newStats||[]).forEach(function(k){ purchased.add(k); });
   panel.style.display='block';
   var grid=document.getElementById('stats-grid-'+slug);
+  var rangeRow=document.getElementById('st-range-row-'+slug);
   try {
-    var html='', d, allSnap;
+    var html='', d, scans=[];
+    var needLog = LOG_STATS.some(function(k){ return purchased.has(k); });
+    // WHY the range picker only shows once a log-based stat is owned: before that there's nothing for it to filter
+    if (rangeRow) rangeRow.style.display = needLog ? 'flex' : 'none';
+    if (needLog) {
+      var b=rangeBounds(slug);
+      scans = (await fetchScanLog(slug)).filter(function(s){ return s.ts>=b.from && s.ts<=b.to; });
+    }
+    var width = grid ? Math.max(200, grid.clientWidth-30) : 560; // WHY minus 30: the stat box's own padding
     if (purchased.has('total')) {
       d = await fb.getDoc(fb.doc(fb.db,'qrcodes',slug));
-      // WHY the reset button lives inside this one box instead of as its own
-      // row below the grid: it only makes sense next to the number it zeroes
-      // out (Total Scans) — Hali asked for it small and attached there, not
-      // as a separate full-width action anymore.
+      // WHY the reset button lives inside this box: it only makes sense next
+      // to the number it zeroes out — Hali asked for it small and attached here.
       html += '<div class="stat-box"><div class="stat-num">'+(d.data().scanCount||0)+'</div><div class="stat-label">Total Scans</div>'
             + '<button class="stat-reset-btn" onclick="openResetScansPayment(\''+slug+'\')">↺ Reset — $1</button></div>';
     }
@@ -11686,30 +12038,18 @@ async function loadStats(slug, newStats) {
       html += '<div class="stat-box"><div class="stat-num">'+snap.size+'</div><div class="stat-label">Today</div></div>';
     }
     if (purchased.has('mobile')) {
-      allSnap = await fb.getDocs(fb.collection(fb.db,'qrcodes',slug,'scans'));
-      var m=0; allSnap.forEach(function(dd){if(dd.data().mobile)m++;});
-      html += '<div class="stat-box"><div class="stat-num">'+(allSnap.size>0?Math.round(m/allSnap.size*100)+'%':'—')+'</div><div class="stat-label">Mobile %</div></div>';
+      var m=scans.filter(function(s){return s.mobile;}).length;
+      html += '<div class="stat-box"><div class="stat-num">'+(scans.length>0?Math.round(m/scans.length*100)+'%':'—')+'</div><div class="stat-label">Mobile %</div></div>';
     }
-    if (purchased.has('locations')) {
-      // WHY reuse allSnap when Mobile % already fetched it: one read of the scan log, not two.
-      if (!allSnap) allSnap = await fb.getDocs(fb.collection(fb.db,'qrcodes',slug,'scans'));
-      var counts={}, unknown=0;
-      allSnap.forEach(function(dd){
-        var sd=dd.data();
-        var key=[sd.city,sd.region,sd.country].filter(Boolean).join(', ');
-        if (key) counts[key]=(counts[key]||0)+1; else unknown++;
-      });
-      var top=Object.keys(counts).sort(function(a,b){return counts[b]-counts[a];}).slice(0,10);
-      // WHY full width (grid-column 1/-1): a ranked list doesn't fit in a one-number box.
-      // WHY the "without location" note: scans from before tracking began have no city,
-      // so they're counted openly instead of silently dropped.
-      html += '<div class="stat-box" style="grid-column:1/-1;text-align:left;"><div class="stat-label" style="margin:0 0 8px;">Scan Locations (approximate, city level)</div>'
-        + (top.length ? top.map(function(k){ return '<div style="display:flex;justify-content:space-between;gap:10px;font-size:.82rem;padding:4px 0;border-bottom:1px solid var(--line);"><span>'+escapeHtml(k)+'</span><strong style="color:var(--gold2);">'+counts[k]+'</strong></div>'; }).join('')
-                      : '<div style="font-size:.82rem;color:var(--muted);">No located scans yet.</div>')
-        + (unknown ? '<div style="font-size:.7rem;color:var(--muted);margin-top:6px;">'+unknown+' scan'+(unknown===1?'':'s')+' without a location (from before tracking began, or the lookup was unavailable)</div>' : '')
-        + '</div>';
-    }
+    if (purchased.has('unique'))    html += uniqueBoxHtml(scans);
+    if (purchased.has('locations')) html += locationsBoxHtml(scans);
+    if (purchased.has('timeline'))  html += timelineBoxHtml(scans, slug, width);
+    if (purchased.has('hours'))     html += hoursBoxHtml(scans, width);
+    if (purchased.has('devices'))   html += devicesBoxHtml(scans);
+    if (purchased.has('map'))       html += '<div class="stat-box full"><div class="stat-label" style="margin:0 0 6px;">Scan Map</div><div class="stats-map" id="stats-map-'+slug+'"></div>'
+                                          + '<div class="stat-sub">Filled circles = precise location (only if turned on under Tracking). Ringed = approximate, city level. Bigger = more scans.</div></div>';
     if (grid) grid.innerHTML = html;
+    if (purchased.has('map')) renderScanMap(slug, scans); // WHY after innerHTML: the map needs its box to exist in the page first
     // Lock every purchased stat's checkbox so it can never be re-billed.
     purchased.forEach(function(key){
       var cb=document.getElementById('st-'+key+'-'+slug);
@@ -11720,7 +12060,7 @@ async function loadStats(slug, newStats) {
       }
     });
     updateStatTotal(slug);
-  } catch(e){ if (grid) grid.innerHTML='<p style="color:var(--red);font-size:.84rem;">Error: '+e.message+'</p>'; }
+  } catch(e){ if (grid) grid.innerHTML='<p style="color:var(--red);font-size:.84rem;">Error: '+escapeHtml(e.message)+'</p>'; } // WHY shown, not swallowed: a rules or network error should be visible
 }
 
 // WHY a $1 paid action instead of the old free confirm()-gated resetScans:
@@ -11741,7 +12081,7 @@ async function performResetScans(slug){
   // actually purchased (see loadStats), so there's no longer a fixed
   // sn-total-<slug>/sn-today-<slug> to write into directly — redrawing from
   // the current purchased set is what keeps this correct either way.
-  try{await fb.updateDoc(fb.doc(fb.db,'qrcodes',slug),{scanCount:0});await loadStats(slug);toast('Scan count reset.','ok');}catch(e){toast('Error: '+e.message,'err');}
+  try{await fb.updateDoc(fb.doc(fb.db,'qrcodes',slug),{scanCount:0});var it=document.getElementById('qritem-'+slug);if(it)it.dataset.scans=0;await loadStats(slug);toast('Scan count reset.','ok');}catch(e){toast('Error: '+e.message,'err');}
 }
 
 // ── PAYMENT ───────────────────────────────────────────────────────────────────
@@ -11859,6 +12199,77 @@ function openAuthModal(tab){
 // threw a TypeError every time this ran and silently killed the auth-err
 // reset on the line after it.
 function authTab(t){document.getElementById('auth-signin').style.display=t==='signin'?'':'none';document.getElementById('auth-signup').style.display=t==='signup'?'':'none';document.getElementById('auth-err').style.display='none';}
+// ── DASHBOARD SORT ───────────────────────────────────────────────────────────
+// WHY sorted here instead of trusting Firestore's order: Firestore returns
+// codes by their link id (slug), which only looked alphabetical because the
+// slug starts as the name. Renaming changes the name but never the slug (it's
+// printed on the code), so a renamed code stayed in its old spot.
+// WHY remembered in localStorage: whichever sort she picks should still be
+// there next visit. WHY try/catch: Safari private mode can block storage.
+var _dashSort = (function(){ try { return localStorage.getItem('iq_dash_sort') || 'name'; } catch(e){ return 'name'; } })();
+function dashSortCompare(a, b) {
+  var d=0;
+  if (_dashSort==='scans') d=(+b.dataset.scans||0)-(+a.dataset.scans||0);
+  else if (_dashSort==='newest') d=(+b.dataset.created||0)-(+a.dataset.created||0);
+  if (d) return d;
+  // WHY numeric + base sensitivity: "Flyer 2" sorts before "Flyer 10", and capital letters don't jump ahead
+  return (a.dataset.sortname||'').localeCompare(b.dataset.sortname||'', undefined, {sensitivity:'base', numeric:true});
+}
+function resortDashboard() {
+  var list=document.getElementById('qr-list'); if(!list) return;
+  // WHY move the existing cards instead of rebuilding: any open stats, download or tracking panel stays exactly as it was
+  Array.from(list.children).filter(function(el){ return el.classList.contains('qr-item'); })
+    .sort(dashSortCompare).forEach(function(el){ list.appendChild(el); });
+}
+function setDashSort(v) {
+  _dashSort = v || 'name';
+  try { localStorage.setItem('iq_dash_sort', _dashSort); } catch(e) {}
+  ['dash-sort','dash-sort-fl'].forEach(function(id){ var s=document.getElementById(id); if (s) s.value=_dashSort; }); // WHY both: the floating copy must always match the main toolbar
+  resortDashboard();
+}
+
+// ── FLOATING TOOLBAR ─────────────────────────────────────────────────────────
+// WHY IntersectionObserver: the floating copy appears only after the real
+// toolbar scrolls off the top, so the two are never on screen together.
+(function(){
+  function init(){
+    var bar=document.querySelector('.dash-toolbar'), fl=document.getElementById('dash-float-bar');
+    if (!bar || !fl || !('IntersectionObserver' in window)) return;
+    new IntersectionObserver(function(entries){
+      var e=entries[0];
+      var show=!e.isIntersecting && e.boundingClientRect.top<0; // WHY top<0: hidden only because it's scrolled ABOVE view, not because the dashboard is closed
+      fl.classList.toggle('show', show);
+      fl.setAttribute('aria-hidden', show?'false':'true');
+    }).observe(bar);
+  }
+  if (document.readyState==='loading') document.addEventListener('DOMContentLoaded', init); else init();
+})();
+
+// ── TRACKING SETTINGS (free, per code) ───────────────────────────────────────
+// WHY free: these change what gets recorded for future scans; the paid part
+// is viewing the stats, same as before.
+function toggleTrackPanel(slug) {
+  var p=document.getElementById('trackpanel-'+slug); if(!p) return;
+  p.style.display = p.style.display==='block' ? 'none' : 'block';
+}
+async function saveTrackingSetting(slug, key, on, cb) {
+  var fb=window._fb, upd={}; upd[key]=!!on;
+  try {
+    await fb.updateDoc(fb.doc(fb.db,'qrcodes',slug), upd);
+    toast((key==='askGps'?'Precise location ':'Google Analytics tags ')+(on?'on.':'off.'),'ok');
+  } catch(e) {
+    if (cb) cb.checked=!on; // WHY revert: the box must show what's actually saved
+    toast('Error: '+e.message,'err');
+  }
+}
+function trackPanelHtml(data) {
+  var s=data.slug;
+  return '<div class="dl-opt-row track-opt"><input type="checkbox" id="trk-gps-'+s+'"'+(data.askGps?' checked':'')+' onchange="saveTrackingSetting(\''+s+'\',\'askGps\',this.checked,this)">'
+    + '<label for="trk-gps-'+s+'">Ask scanners for precise location<span class="track-note">Shows a "share location?" pop-up before redirecting. Many people tap Don\'t Allow, and it can add a few seconds.</span></label></div>'
+    + '<div class="dl-opt-row track-opt"><input type="checkbox" id="trk-utm-'+s+'"'+(data.utm?' checked':'')+' onchange="saveTrackingSetting(\''+s+'\',\'utm\',this.checked,this)">'
+    + '<label for="trk-utm-'+s+'">Add Google Analytics tags (UTM)<span class="track-note">Adds utm_source=qr, utm_medium=qr_code and utm_campaign='+escapeHtml(s)+' to the destination, so QR visits show up in Google Analytics on your site.</span></label></div>';
+}
+
 // ── SELECT ALL & CSV EXPORT ───────────────────────────────────────────────────
 function selectAllQRCodes() {
   var cbs = document.querySelectorAll('.qr-select-cb');
@@ -11880,6 +12291,10 @@ function updateToolbarVisibility() {
   var delBtn = document.getElementById('dash-delete-selected-btn');
   if (statsBtn) statsBtn.style.display = any ? '' : 'none';
   if (delBtn) delBtn.style.display = any ? '' : 'none';
+  // WHY: the floating toolbar copy mirrors the main one, plus a count since the cards may be off screen
+  var n = document.querySelectorAll('.qr-select-cb:checked').length;
+  ['fl-bulk-stats-btn','fl-delete-selected-btn'].forEach(function(id){ var b=document.getElementById(id); if (b) b.style.display = any ? '' : 'none'; });
+  var cnt = document.getElementById('dash-float-count'); if (cnt) cnt.textContent = n ? n+' selected' : '';
 }
 
 // ── DELETE ────────────────────────────────────────────────────────────────────
@@ -11978,7 +12393,7 @@ function updateBulkStatTotal() {
 function openBulkStatsPayment() {
   var keys=Array.from(document.querySelectorAll('.bst-opt:checked')).map(function(cb){return cb.dataset.stat;});
   if(keys.length===0){toast('Select at least one stat.','err');return;}
-  var labels={total:'Total Scans',today:'Scans Today',mobile:'Mobile %',locations:'Scan Locations'};
+  var labels=STAT_LABELS;
   var amount=_bulkStatsBillableTotal(keys);
   var slugs=_bulkStatsSlugs.slice();
   closeModal('bulk-stats-modal');
@@ -12009,7 +12424,7 @@ async function downloadCSV(slug) {
   var fb=window._fb;
   try {
     var snap=await fb.getDocs(fb.collection(fb.db,'qrcodes',slug,'scans'));
-    var rows=[['Timestamp','Date','Time','Device','User Agent','City','Region','Country']];
+    var rows=[['Timestamp','Date','Time','Device','User Agent','City','Region','Country','OS','Browser','Language','Latitude','Longitude','Location Type']];
     snap.forEach(function(d){
       var data=d.data();
       var dt=new Date(data.ts);
@@ -12021,7 +12436,13 @@ async function downloadCSV(slug) {
         (data.ua||'').replace(/,/g,' '),
         data.city||'',
         data.region||'',
-        data.country||''
+        data.country||'',
+        data.os||parseUA(data.ua).os,
+        data.browser||parseUA(data.ua).browser,
+        data.lang||'',
+        typeof data.gpsLat==='number'?data.gpsLat:(data.lat==null?'':data.lat),
+        typeof data.gpsLat==='number'?data.gpsLon:(data.lon==null?'':data.lon),
+        typeof data.gpsLat==='number'?'Precise':(data.lat!=null?'Approximate':'')
       ]);
     });
     exportCSV(rows, slug+'-scans.csv');
@@ -12051,7 +12472,7 @@ async function downloadAllCSV(slugs) {
   var selected = slugs || Array.from(document.querySelectorAll('.qr-select-cb:checked')).map(cb=>cb.dataset.slug);
   if(selected.length===0){toast('Select at least one QR code first.','err');return;}
   var fb=window._fb;
-  var rows=[['QR Code','Timestamp','Date','Time','Device','User Agent','City','Region','Country']];
+  var rows=[['QR Code','Timestamp','Date','Time','Device','User Agent','City','Region','Country','OS','Browser','Language','Latitude','Longitude','Location Type']];
   try {
     for(var i=0;i<selected.length;i++){
       var slug=selected[i];
@@ -12068,7 +12489,13 @@ async function downloadAllCSV(slugs) {
           (data.ua||'').replace(/,/g,' '),
           data.city||'',
           data.region||'',
-          data.country||''
+          data.country||'',
+          data.os||parseUA(data.ua).os,
+          data.browser||parseUA(data.ua).browser,
+          data.lang||'',
+          typeof data.gpsLat==='number'?data.gpsLat:(data.lat==null?'':data.lat),
+          typeof data.gpsLat==='number'?data.gpsLon:(data.lon==null?'':data.lon),
+          typeof data.gpsLat==='number'?'Precise':(data.lat!=null?'Approximate':'')
         ]);
       });
     }

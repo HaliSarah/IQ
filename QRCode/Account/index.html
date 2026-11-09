@@ -3,7 +3,8 @@
   Title:       QR Code Redirect Handler
   Author:      Hali Sarah Parsons
   Date:        2026-09-25
-  Modified By: Claude (2026-10-19: add https:// to bare destinations; scan logging can't block redirect; 2026-11-09: log approximate scan location)
+  Modified By: Claude (2026-10-19: add https:// to bare destinations; scan logging can't block redirect; 2026-11-09: log approximate scan location;
+               scanner id, os/browser/language, optional GPS + UTM tags)
   Description: Reads the slug from ?slug=... (or a #hash fallback), looks up
                the redirect URL in Firestore, logs the scan (count + device
                type, for dashboard stats), then redirects. Restyled to match
@@ -136,6 +137,58 @@
     .then(function(r){ return r.ok ? r.json() : {}; })
     .catch(function(){ return {}; });
 
+  // WHY a random id kept in this browser: lets the dashboard count unique
+  // scanners (one phone scanning twice = one person) without storing
+  // anything personal. WHY try/catch: private browsing can block storage;
+  // the scan still logs, just without the id.
+  function getVisitorId() {
+    try {
+      var k='iqqr_vid', v=localStorage.getItem(k);
+      if (!v) { v = (crypto.randomUUID ? crypto.randomUUID() : Date.now().toString(36)+Math.random().toString(36).slice(2)); localStorage.setItem(k, v); }
+      return v;
+    } catch (e) { return ''; }
+  }
+
+  // WHY the same parser as the dashboard's parseUA: saved at scan time so
+  // stats don't depend on the raw browser string being complete.
+  function parseUA(ua) {
+    ua = ua || '';
+    var os = /iPhone|iPad|iPod/.test(ua) ? 'iOS' : /Android/.test(ua) ? 'Android' : /Windows/.test(ua) ? 'Windows'
+           : /CrOS/.test(ua) ? 'ChromeOS' : /Mac OS X|Macintosh/.test(ua) ? 'Mac' : /Linux/.test(ua) ? 'Linux' : 'Other';
+    var br = /FBAN|FBAV/.test(ua) ? 'Facebook app' : /Instagram/.test(ua) ? 'Instagram app' : /SamsungBrowser/.test(ua) ? 'Samsung Internet'
+           : /EdgiOS|EdgA|Edg\//.test(ua) ? 'Edge' : /FxiOS|Firefox\//.test(ua) ? 'Firefox' : /CriOS|Chrome\//.test(ua) ? 'Chrome'
+           : /Safari\/|Version\//.test(ua) ? 'Safari' : (os==='iOS' ? 'Safari' : 'Other');
+    return { os: os, browser: br };
+  }
+
+  // WHY only when the code's owner turned it on: it shows a permission
+  // pop-up. WHY our own 10s cap: the browser's timeout doesn't count the
+  // time the pop-up sits unanswered, so without it the redirect could hang.
+  function getPreciseLocation() {
+    return new Promise(function(resolve){
+      if (!navigator.geolocation) return resolve(null);
+      var done=false; function fin(v){ if (!done) { done=true; resolve(v); } }
+      setTimeout(function(){ fin(null); }, 10000);
+      navigator.geolocation.getCurrentPosition(
+        function(pos){ fin({ lat: pos.coords.latitude, lon: pos.coords.longitude, acc: Math.round(pos.coords.accuracy) }); },
+        function(){ fin(null); }, // WHY: "Don't Allow" or an error just means no precise point
+        { enableHighAccuracy: false, timeout: 8000, maximumAge: 600000 }
+      );
+    });
+  }
+
+  // WHY keep any utm_ values already in the destination: the owner may have
+  // set their own, and those should win.
+  function addUtm(dest, slug) {
+    try {
+      var u = new URL(dest);
+      if (!u.searchParams.has('utm_source'))   u.searchParams.set('utm_source', 'qr');
+      if (!u.searchParams.has('utm_medium'))   u.searchParams.set('utm_medium', 'qr_code');
+      if (!u.searchParams.has('utm_campaign')) u.searchParams.set('utm_campaign', slug);
+      return u.href;
+    } catch (e) { return dest; } // WHY: a destination URL can't parse → send them there untouched
+  }
+
   var slug = new URLSearchParams(window.location.search).get('slug')
           || window.location.hash.replace('#','').trim();
 
@@ -162,6 +215,9 @@
         // WHY: log scan with timestamp, device type, and basic metadata
         // so dashboard stats are accurate
         var isMobile = /Mobi|Android|iPhone|iPad/i.test(navigator.userAgent);
+        var device = parseUA(navigator.userAgent);
+        var gps = null;
+        if (data.askGps) { msg.textContent = 'Finding your location'; gps = await getPreciseLocation(); msg.textContent = 'Redirecting'; }
         // WHY a 600ms cap: if the location lookup is slow, the scan is
         // logged without it rather than holding the person up.
         var geo = await Promise.race([geoPromise, new Promise(function(r){ setTimeout(function(){ r({}); }, 600); })]);
@@ -174,7 +230,14 @@
           addDoc(collection(db,'qrcodes',slug,'scans'), {
             ts: Date.now(),
             mobile: isMobile,
-            ua: navigator.userAgent.slice(0,120),
+            ua: navigator.userAgent.slice(0,300), // WHY 300 (was 120): 120 cut off the browser name on iPhones
+            os: device.os,
+            browser: device.browser,
+            lang: String(navigator.language || '').slice(0,20),
+            vid: getVisitorId(),
+            gpsLat: gps ? gps.lat : null,
+            gpsLon: gps ? gps.lon : null,
+            gpsAcc: gps ? gps.acc : null,
             // WHY approximate only: this comes from the network address, so
             // it's city-level and carriers can be off by a town or two.
             city: String(geo.city || '').slice(0,60),
@@ -186,6 +249,7 @@
         ])]);
 
         // Redirect
+        if (data.utm) dest = addUtm(dest, slug);
         window.location.replace(dest);
 
       } catch(e) {
