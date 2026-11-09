@@ -3,7 +3,7 @@
   Title:       QR Code Platform — I.Q. Productionz
   Author:      Hali Sarah Parsons
   Date:        2026-09-25
-  Modified By: Claude (2026-11-09: Placed At label per code, Scan Locations stat, location columns in CSV)
+  Modified By: Claude (2026-11-09: Scan Locations stat, location columns in CSV)
   Description: Full QR code platform. Static free, dynamic $25/change $5/stats.
                Custom QR renderer: dots, diamonds, triangles, ovals, stars,
                hearts, rounded corners, letters, numbers as dot shapes.
@@ -1264,13 +1264,6 @@ footer a{color:var(--muted);}footer a:hover{color:var(--white);}
         <div class="field">
           <label>QR Code Name (for your dashboard) <a href="javascript:void(0)" onclick="refreshDynamicDesign()" style="font-style:italic;text-transform:uppercase;font-size:.66rem;font-weight:700;letter-spacing:.3px;margin-left:6px;">↻ Refresh Design</a> <a href="javascript:void(0)" onclick="undoDesign('d')" id="d-undo-link" title="Undo the last design change" style="font-style:italic;text-transform:uppercase;font-size:.66rem;font-weight:700;letter-spacing:.3px;margin-left:6px;opacity:.35;pointer-events:none;">↩ Undo</a></label>
           <input type="text" id="d-name" placeholder="e.g. Restaurant Menu, Event Flyer">
-        </div>
-        <!-- WHY a "Placed At" label: scan location is only city-level, so the
-             reliable way to know which business's flyer is working is one code
-             per business, labeled here. Optional so personal codes skip it. -->
-        <div class="field">
-          <label>Placed At <span style="text-transform:none;font-weight:400;color:var(--muted);">(optional: where this code is posted)</span></label>
-          <input type="text" id="d-placed" maxlength="80" placeholder="e.g. Joe's Barbershop, FM 1960">
         </div>
         <div class="field">
           <label>Initial Destination URL</label>
@@ -10303,7 +10296,6 @@ function resetDynamicForm() {
   _editingQR = null;
   resetUndoStack('d'); // see its own WHY -- a leftover edit's Undo history must never carry into whatever loads into the Dynamic tab next
   var nameEl = document.getElementById('d-name'); if (nameEl) nameEl.value = '';
-  var placedEl = document.getElementById('d-placed'); if (placedEl) placedEl.value = ''; // WHY: a new or duplicated code must not inherit the last code's location label
   var urlEl = document.getElementById('d-url');
   if (urlEl) { urlEl.value = ''; urlEl.readOnly = false; urlEl.style.opacity = ''; }
   var lockNote = document.getElementById('d-url-lock-note');
@@ -10357,7 +10349,6 @@ function enterDesignEditMode(data) {
   _editingQR = data;
   resetUndoStack('d'); // loading a different saved code's design must start its own fresh history, not inherit whatever was being edited before
   var nameEl = document.getElementById('d-name'); if (nameEl) nameEl.value = data.name || '';
-  var placedEl = document.getElementById('d-placed'); if (placedEl) placedEl.value = data.placedAt || '';
   var urlEl = document.getElementById('d-url');
   if (urlEl) {
     urlEl.value = data.redirectUrl || '';
@@ -10383,7 +10374,6 @@ async function createDynamic() {
   if(!window._user){_pendingDynamicCreate=true;openAuthModal();return;}
   var name=document.getElementById('d-name').value.trim();
   var url=document.getElementById('d-url').value.trim();
-  var placedAt=((document.getElementById('d-placed')||{}).value||'').trim().slice(0,80); // WHY slice: keeps the dashboard line short and the doc small
   if(!name||!url){toast('Enter a name and destination URL.','err');return;}
   // WHY add https:// here too: a destination saved without it gets treated
   // by the redirect page as a folder on iqproductionz.com instead of an
@@ -10400,7 +10390,7 @@ async function createDynamic() {
       // code (iqproductionz.com/QRCode/Account/[slug]) — changing it would
       // break every code already printed. Only name + design are touched;
       // redirectUrl is deliberately left alone (see enterDesignEditMode).
-      await fb.updateDoc(fb.doc(fb.db,'qrcodes',_editingQR.slug),{name:name, design:design, placedAt:placedAt});
+      await fb.updateDoc(fb.doc(fb.db,'qrcodes',_editingQR.slug),{name:name, design:design});
       toast('Design updated!','ok');
       resetDynamicForm();
       showView('dashboard');
@@ -10420,7 +10410,7 @@ async function createDynamic() {
       slug = baseSlug+'-'+n; n++;
     }
     if (n > 50) { toast('Too many codes with that name -- try a different name.','err'); return; }
-    await fb.setDoc(fb.doc(fb.db,'qrcodes',slug),{uid:window._user.uid,name,slug,redirectUrl:url,type:'dynamic',created:Date.now(),scanCount:0,design:design,placedAt:placedAt});
+    await fb.setDoc(fb.doc(fb.db,'qrcodes',slug),{uid:window._user.uid,name,slug,redirectUrl:url,type:'dynamic',created:Date.now(),scanCount:0,design:design});
     toast('Dynamic QR code created!','ok');
     showView('dashboard');
   } catch(e){ toast('Error: '+e.message,'err'); }
@@ -11115,7 +11105,6 @@ function buildQRItem(data) {
   body.innerHTML='<button class="act-btn" style="font-size:.66rem;padding:2px 7px;margin-bottom:3px;" onclick="startRenameQR(\''+data.slug+'\')">✎ Rename</button>'
     +'<div class="qr-item-name" id="qrname-'+data.slug+'" data-name="'+escapeHtml(data.name)+'" data-type="'+data.type+'">'+escapeHtml(data.name)+'<span class="qr-item-type type-'+data.type+'">'+data.type+'</span></div>'
     +'<div class="qr-item-url">→ '+data.redirectUrl+'</div>'
-    +'<div class="qr-item-placed" id="qrplaced-'+data.slug+'" data-placed="'+escapeHtml(data.placedAt||'')+'" style="font-size:.74rem;color:var(--gold2);margin-top:3px;">'+placedLineHtml(data.slug, data.placedAt||'')+'</div>'
     +'<div style="font-size:.73rem;color:var(--muted);margin-top:4px;">Scans: '+(data.scanCount||0)+'</div>';
   div.appendChild(body);
   var actions=document.createElement('div'); actions.className='qr-item-actions';
@@ -11240,40 +11229,6 @@ async function saveRenameQR(slug) {
 // cloned the whole code (same destination, "Copy of ..." name). Now the
 // design comes along, the name and destination start blank, and Create
 // makes a brand-new code with its own new link (slug).
-// ── PLACED AT (free inline edit) ─────────────────────────────────────────────
-// WHY free and inline like Rename, not behind the $5 Redesign: it's a label
-// for the owner's own tracking, and moving a flyer to a new business
-// shouldn't cost anything to record.
-function placedLineHtml(slug, placed) {
-  return placed
-    ? 'Placed at: '+escapeHtml(placed)+' <a href="javascript:void(0)" onclick="editPlacedAt(\''+slug+'\')" style="font-size:.66rem;margin-left:4px;">edit</a>'
-    : '<a href="javascript:void(0)" onclick="editPlacedAt(\''+slug+'\')" style="font-size:.7rem;color:var(--muted);">+ Add where this is placed</a>';
-}
-function editPlacedAt(slug) {
-  var el=document.getElementById('qrplaced-'+slug); if(!el) return;
-  var cur=el.getAttribute('data-placed')||'';
-  el.innerHTML='<input type="text" id="qrplaced-in-'+slug+'" maxlength="80" value="'+escapeHtml(cur)+'" placeholder="e.g. Joe&#39;s Barbershop" style="font-size:.78rem;padding:4px 6px;width:220px;max-width:100%;"> '
-    +'<button class="act-btn" style="font-size:.66rem;padding:2px 7px;" onclick="savePlacedAt(\''+slug+'\')">Save</button> '
-    +'<button class="act-btn" style="font-size:.66rem;padding:2px 7px;" onclick="cancelPlacedAt(\''+slug+'\')">Cancel</button>';
-  var inp=document.getElementById('qrplaced-in-'+slug); if(inp) inp.focus();
-}
-function cancelPlacedAt(slug) {
-  var el=document.getElementById('qrplaced-'+slug); if(!el) return;
-  el.innerHTML=placedLineHtml(slug, el.getAttribute('data-placed')||'');
-}
-async function savePlacedAt(slug) {
-  var el=document.getElementById('qrplaced-'+slug), inp=document.getElementById('qrplaced-in-'+slug);
-  if(!el||!inp) return;
-  var val=(inp.value||'').trim().slice(0,80);
-  var fb=window._fb;
-  try {
-    await fb.updateDoc(fb.doc(fb.db,'qrcodes',slug),{placedAt:val});
-    el.setAttribute('data-placed',val);
-    el.innerHTML=placedLineHtml(slug,val);
-    toast('Saved.','ok');
-  } catch(e){ toast('Error: '+e.message,'err'); } // WHY: a rules/network failure must show, not look saved
-}
-
 function duplicateQRCode(data) {
   if (!window._user) { toast('Sign in first.','err'); return; }
   resetDynamicForm(); // WHY: clears any code being edited, so Create can't update the original
@@ -12096,20 +12051,16 @@ async function downloadAllCSV(slugs) {
   var selected = slugs || Array.from(document.querySelectorAll('.qr-select-cb:checked')).map(cb=>cb.dataset.slug);
   if(selected.length===0){toast('Select at least one QR code first.','err');return;}
   var fb=window._fb;
-  var rows=[['QR Code','Placed At','Timestamp','Date','Time','Device','User Agent','City','Region','Country']];
+  var rows=[['QR Code','Timestamp','Date','Time','Device','User Agent','City','Region','Country']];
   try {
     for(var i=0;i<selected.length;i++){
       var slug=selected[i];
-      // WHY look up Placed At per code: the export is for comparing locations, so each row should say which business it came from
-      var codeSnap=await fb.getDoc(fb.doc(fb.db,'qrcodes',slug));
-      var placed=codeSnap.exists()?(codeSnap.data().placedAt||''):'';
       var snap=await fb.getDocs(fb.collection(fb.db,'qrcodes',slug,'scans'));
       snap.forEach(function(d){
         var data=d.data();
         var dt=new Date(data.ts);
         rows.push([
           slug,
-          placed,
           data.ts,
           dt.toLocaleDateString(),
           dt.toLocaleTimeString(),
