@@ -43,7 +43,9 @@
 <meta name="twitter:title" content="Genuinely Free QR Code Generator — Static & Pay-As-You-Go Dynamic | I.Q. Productionz">
 <meta name="twitter:description" content="Genuinely free SVG QR codes — no tricks, no last-minute signup. Pay-as-you-go dynamic QR codes, no monthly subscription. Custom shapes, gradients, emoji dots, logo overlays.">
 <meta name="twitter:image" content="https://iqproductionz.com/Content/Images/Main/QRCode-og-share.jpg">
-<script type="application/ld+json">{"@context":"https://schema.org","@type":"SoftwareApplication","name":"I.Q. Productionz QR Code Platform","url":"https://iqproductionz.com/QRCode/","description":"Genuinely free SVG QR code generator — no tricks, no last-minute signup. Active 7+ years and not going anywhere. Download print-ready SVG files for car decals, vehicle wraps, and billboards. Custom dot shapes, emoji characters, multi-color gradients, logo overlays. Pay-as-you-go dynamic QR codes with redirect control and scan analytics — no monthly subscription. Houston, TX.","applicationCategory":"BusinessApplication","operatingSystem":"Web","offers":[{"@type":"Offer","name":"Static QR Code","price":"0","priceCurrency":"USD"},{"@type":"Offer","name":"Change Dynamic Redirect","price":"25","priceCurrency":"USD"},{"@type":"Offer","name":"View Scan Statistics","price":"5","priceCurrency":"USD"}],"provider":{"@type":"Organization","name":"I.Q. Productionz","url":"https://iqproductionz.com"}}</script>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"SoftwareApplication","name":"I.Q. Productionz QR Code Platform","url":"https://iqproductionz.com/QRCode/","description":"Genuinely free SVG QR code generator — no tricks, no last-minute signup. Active 7+ years and not going anywhere. Download print-ready SVG files for car decals, vehicle wraps, and billboards. Custom dot shapes, emoji characters, multi-color gradients, logo overlays. Pay-as-you-go dynamic QR codes with redirect control and scan analytics — no monthly subscription. Houston, TX.","applicationCategory":"BusinessApplication","operatingSystem":"Web","featureList":["62 vector dot shapes", "Emoji, letters and symbols as dots", "Half and quarter dot layouts", "Stretch, Vary and Connect dot sizes", "Per-corner finder eye styling and gradients", "Overall shapes: circle, diamond, heart, star and more", "Solid, multi-color and gradient fills", "Saved color palettes", "Logo upload with shaped cutouts", "PNG, JPG and SVG downloads", "Print sizes in px, in, cm or mm with 150/300/600 DPI", "Upload your own SVG dot shape", "Custom shape requests with status tracking", "Dynamic QR codes with editable destination", "Scan stats: total, today, mobile share", "Bulk CSV export", "30-step undo", "Installable web app"],"offers":[{"@type":"Offer","name":"Static QR Code","price":"0","priceCurrency":"USD"},{"@type":"Offer","name":"Change Dynamic Redirect","price":"25","priceCurrency":"USD"},{"@type":"Offer","name":"View Scan Statistics","price":"5","priceCurrency":"USD"}],"provider":{"@type":"Organization","name":"I.Q. Productionz","url":"https://iqproductionz.com"}}</script>
+<!-- WHY FAQPage data: it must match the visible FAQ section word for word, or Google ignores it. -->
+<script type="application/ld+json">{"@context": "https://schema.org", "@type": "FAQPage", "mainEntity": [{"@type": "Question", "name": "Is the static QR code really free?", "acceptedAnswer": {"@type": "Answer", "text": "Yes. You can make and download a static QR code with no account, no sign-up at the end and no fee."}}, {"@type": "Question", "name": "Do static QR codes expire?", "acceptedAnswer": {"@type": "Answer", "text": "No. The destination is built into the printed pattern, so a static code works as long as the link it points to works."}}, {"@type": "Question", "name": "What is a dynamic QR code, and what does it cost?", "acceptedAnswer": {"@type": "Answer", "text": "A dynamic code lets you change where it sends people without reprinting it. Creating one is free. There's no subscription: changing the destination is $25, and each scan stat is $5 per code."}}, {"@type": "Question", "name": "Can I put my logo in the QR code?", "acceptedAnswer": {"@type": "Answer", "text": "Yes. Upload a logo or use a vector logo in your own color, and clear space behind it with a circle, square, diamond, triangle, heart or star cutout. Use the High error correction level when you add a logo."}}, {"@type": "Question", "name": "Can I use my own shape for the dots?", "acceptedAnswer": {"@type": "Answer", "text": "Yes. When you're signed in, upload a one-color SVG and use it as dots, corner dots or both. You can also request a new shape: $5 for one added for everyone, or $50 for one made just for your account."}}, {"@type": "Question", "name": "What size and resolution should I use for printing?", "acceptedAnswer": {"@type": "Answer", "text": "Set the size in inches, centimeters, millimeters or pixels and choose 150, 300 or 600 DPI. Quick sizes cover business cards, stickers, flyers, car decals and banners. Use 300 DPI or higher for print."}}, {"@type": "Question", "name": "Will a heavily styled QR code still scan?", "acceptedAnswer": {"@type": "Answer", "text": "The generator warns you about combinations that may not scan, but always test-scan with a phone before you print."}}, {"@type": "Question", "name": "Can I install the QR Platform as an app?", "acceptedAnswer": {"@type": "Answer", "text": "Yes. On supported phones and computers, an Install App button appears in the menu."}}]}</script>
 
 <!-- Firebase -->
 <script type="module">
@@ -404,6 +406,15 @@ nav{display:flex;justify-content:space-between;align-items:center;padding:14px 2
 
 /* HOW IT WORKS */
 .how-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;}
+/* WHY <details>: answers stay in the HTML for crawlers but fold away for visitors. */
+.faq-list{display:flex;flex-direction:column;gap:10px;}
+.faq-item{background:var(--panel);border:1px solid var(--line);border-radius:var(--r);padding:14px 18px;}
+.faq-item summary{cursor:pointer;font-weight:600;font-size:.92rem;list-style:none;display:flex;justify-content:space-between;gap:12px;}
+.faq-item summary::-webkit-details-marker{display:none;}
+.faq-item summary::after{content:"+";color:var(--gold2);}
+.faq-item[open] summary::after{content:"\2013";}
+.faq-item p{font-size:.85rem;color:#ddd;margin-top:10px;line-height:1.65;}
+
 #how-grid .type-card{cursor:default;pointer-events:none;}
 @media(max-width:560px){.how-grid{grid-template-columns:1fr;}}
 
@@ -515,6 +526,8 @@ footer a{color:var(--muted);}footer a:hover{color:var(--white);}
   <div id="nav-right">
     <!-- WHY hidden: pwa-install.js shows it only where installing is actually possible. -->
     <button class="nav-btn primary" id="install-app-btn" hidden>Install App</button>
+    <!-- WHY a plain link: crawlers follow <a href>, not onclick buttons. -->
+    <a class="nav-btn" href="/QRCode/Features/">Features</a>
     <button class="nav-btn" onclick="navToGenerator()">Generator</button>
     <button class="nav-btn" id="nav-dash" style="display:none" onclick="requireAuth('dashboard')">My Codes</button>
     <!-- WHY display:none here too, re-set every renderNav() call like
@@ -1721,6 +1734,22 @@ footer a{color:var(--muted);}footer a:hover{color:var(--white);}
       </div>
     </div>
   </div>
+
+  <!-- WHY last in the home view: bottom-heavy layout, and visible FAQ text is what search engines index. -->
+  <div class="section" id="faq" style="padding-top:24px;padding-bottom:56px;">
+    <h2 class="section-title">QR code questions</h2>
+    <p class="section-sub">Straight answers about pricing, logos, custom shapes and printing. <a href="/QRCode/Features/">See every feature &rarr;</a></p>
+    <div class="faq-list">
+      <details class="faq-item"><summary>Is the static QR code really free?</summary><p>Yes. You can make and download a static QR code with no account, no sign-up at the end and no fee.</p></details>
+      <details class="faq-item"><summary>Do static QR codes expire?</summary><p>No. The destination is built into the printed pattern, so a static code works as long as the link it points to works.</p></details>
+      <details class="faq-item"><summary>What is a dynamic QR code, and what does it cost?</summary><p>A dynamic code lets you change where it sends people without reprinting it. Creating one is free. There's no subscription: changing the destination is $25, and each scan stat is $5 per code.</p></details>
+      <details class="faq-item"><summary>Can I put my logo in the QR code?</summary><p>Yes. Upload a logo or use a vector logo in your own color, and clear space behind it with a circle, square, diamond, triangle, heart or star cutout. Use the High error correction level when you add a logo.</p></details>
+      <details class="faq-item"><summary>Can I use my own shape for the dots?</summary><p>Yes. When you're signed in, upload a one-color SVG and use it as dots, corner dots or both. You can also request a new shape: $5 for one added for everyone, or $50 for one made just for your account.</p></details>
+      <details class="faq-item"><summary>What size and resolution should I use for printing?</summary><p>Set the size in inches, centimeters, millimeters or pixels and choose 150, 300 or 600 DPI. Quick sizes cover business cards, stickers, flyers, car decals and banners. Use 300 DPI or higher for print.</p></details>
+      <details class="faq-item"><summary>Will a heavily styled QR code still scan?</summary><p>The generator warns you about combinations that may not scan, but always test-scan with a phone before you print.</p></details>
+      <details class="faq-item"><summary>Can I install the QR Platform as an app?</summary><p>Yes. On supported phones and computers, an Install App button appears in the menu.</p></details>
+    </div>
+  </div>
 </div><!-- end view-home -->
 
 <!-- DASHBOARD VIEW -->
@@ -2087,6 +2116,7 @@ footer a{color:var(--muted);}footer a:hover{color:var(--white);}
 <footer>
   <div class="ftr-links">
     <a href="https://iqproductionz.com/">I.Q. Productionz</a>
+    <a href="/QRCode/Features/">QR Features</a>
     <a href="https://iqproductionz.com/About">About</a>
     <a href="https://iqproductionz.com/BookNow">Book a Service</a>
     <a href="https://Haligricity.IQProductionz.com/">Haligricity</a>
