@@ -1,7 +1,8 @@
 <!DOCTYPE html>
 <!--
   Title:       Book Now — I.Q. Productionz
-  Author:      Hali Sarah Parsons  Date: 2026  Modified By: Claude (Cowork); Claude (Anthropic), 2026-11-05: added Pay with Card
+  Author:      Hali Sarah Parsons  Date: 2026  Modified By: Claude (Cowork); Claude (Anthropic), 2026-11-05: added Pay with Card;
+               Claude (Anthropic), 2026-11-12: added the Apps card
   Description: Central booking hub. Lists every service category with its rate and
                links to that category's own intake form. Payment accepted via
                Cash App ($IQENT) or PayPal — shown once at the bottom so it isn't
@@ -86,6 +87,13 @@ body{font-family:'Raleway',sans-serif;background:var(--bg);color:var(--white);mi
 .contact-footer{text-align:center;color:var(--muted);font-size:12px;line-height:2;font-weight:300;}
 .contact-footer a{color:var(--gold-lt);text-decoration:none;}
 
+/* WHY: the top row now holds three cards (Apps, Websites, Specialty HTML); on phones they
+   stack full width instead of squeezing into thirds. !important beats the inline widths. */
+@media(max-width:720px){
+  .cat-grid{grid-template-columns:1fr !important;}
+  .cat-grid > div{flex-direction:column;}
+  .cat-grid > div > .cat-card{flex:1 1 auto !important;max-width:none !important;}
+}
 @media(max-width:540px){
   .form-header{padding:32px 18px 28px;}
   .cat-grid{grid-template-columns:1fr;}
@@ -160,6 +168,14 @@ body{font-family:'Raleway',sans-serif;background:var(--bg);color:var(--white);mi
 
   <div class="cat-grid" style="grid-template-columns:repeat(3,1fr);">
     <div style="grid-column:1/-1;display:flex;gap:18px;justify-content:center;">
+        <a class="cat-card" href="/Services/Apps/" style="flex:0 0 calc(33.333% - 9px);max-width:calc(33.333% - 9px);">
+          <div class="cat-top">
+            <div class="cat-name">Apps</div>
+            <div class="cat-price">From $500</div>
+          </div>
+          <div class="cat-desc">Home-screen &amp; app-store apps for your business — logins, forms, alerts &amp; more. Instant estimate.</div>
+          <div class="cat-cta">Book Now &rarr;</div>
+        </a>
         <a class="cat-card" href="/Services/Websites/SiteBuilderForm/" style="flex:0 0 calc(33.333% - 9px);max-width:calc(33.333% - 9px);">
           <div class="cat-top">
             <div class="cat-name">Websites</div>

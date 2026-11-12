@@ -3,7 +3,7 @@
   Title:       Rates — I.Q. Productionz
   Author:      Hali Sarah Parsons  Date: 2026  Modified By: Claude (Cowork);
                Claude (Anthropic), 2026-11-05: added the Independent Business Tools button;
-               Claude (Anthropic), 2026-11-12: added the Apps card
+               Claude (Anthropic), 2026-11-12: added the Apps card (first in the top row); softened the Independent Business Tools button
   Description: Rate-card variant of BookNow/index.html. Same layout, but each
                card links to the service's info page (/Services/...) instead of
                its booking form (/BookNow/...), so visitors can browse rates
@@ -38,8 +38,9 @@ body{font-family:'Raleway',sans-serif;background:var(--bg);color:var(--white);mi
 }
 /* WHY positioned against the header: it holds the top-right corner without
    pushing the centered logo and title out of place. */
-.tools-btn{position:absolute;top:18px;right:20px;z-index:2;padding:9px 16px;border:1px solid #ffffff;border-radius:8px;background:var(--card);color:#ffffff;font-size:13px;font-weight:600;line-height:1.2;text-decoration:none;white-space:nowrap;transition:background .2s;}
-.tools-btn:hover{background:#505050;}
+.tools-btn{position:absolute;top:18px;right:20px;z-index:2;padding:9px 16px;border:0.5px solid var(--muted);border-radius:8px;background:var(--card);color:var(--muted);font-size:13px;font-weight:400;line-height:1.2;text-decoration:none;white-space:nowrap;transition:background .2s;}
+/* WHY grey, thin and regular: matches the header blurb so the button sits quietly beside the title. */
+.tools-btn:hover{background:#505050;color:var(--white);}
 .tools-btn:focus-visible{outline:3px solid var(--white);outline-offset:2px;}
 /* WHY static on phones: in the corner it would sit on top of the centered logo. */
 @media(max-width:720px){.tools-btn{position:static;display:block;width:fit-content;margin:0 0 16px auto;font-size:12.5px;padding:8px 13px;}}
@@ -182,6 +183,14 @@ body{font-family:'Raleway',sans-serif;background:var(--bg);color:var(--white);mi
 
   <div class="cat-grid" style="grid-template-columns:repeat(3,1fr);">
     <div style="grid-column:1/-1;display:flex;gap:18px;justify-content:center;">
+        <a class="cat-card" href="/Services/Apps/" style="flex:0 0 calc(33.333% - 9px);max-width:calc(33.333% - 9px);">
+          <div class="cat-top">
+            <div class="cat-name">Apps</div>
+            <div class="cat-price">From $500</div>
+          </div>
+          <div class="cat-desc">Home-screen &amp; app-store apps for your business — logins, forms, alerts &amp; more. Instant estimate.</div>
+          <div class="cat-cta">Get an Estimate &rarr;</div>
+        </a>
         <a class="cat-card" href="/Services/HTML/" style="flex:0 0 calc(33.333% - 9px);max-width:calc(33.333% - 9px);">
           <div class="cat-top">
             <div class="cat-name">Websites</div>
@@ -200,14 +209,6 @@ body{font-family:'Raleway',sans-serif;background:var(--bg);color:var(--white);mi
           <div class="cat-cta">View Details &rarr;</div>
         </a>
 
-        <a class="cat-card" href="/Services/Apps/" style="flex:0 0 calc(33.333% - 9px);max-width:calc(33.333% - 9px);">
-          <div class="cat-top">
-            <div class="cat-name">Apps</div>
-            <div class="cat-price">From $500</div>
-          </div>
-          <div class="cat-desc">Home-screen &amp; app-store apps for your business — logins, forms, alerts &amp; more. Instant estimate.</div>
-          <div class="cat-cta">Get an Estimate &rarr;</div>
-        </a>
 
     </div>
         <a class="cat-card" href="/Services/Hosting/">
