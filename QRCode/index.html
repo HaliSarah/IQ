@@ -17,7 +17,9 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<!-- WHY viewport-fit=cover: without it, phones report a 0px status-bar height, so the
+     safe-area padding on nav/body::before below would do nothing in the installed app. -->
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <title>Genuinely Free QR Code Generator — Static & Pay-As-You-Go Dynamic | I.Q. Productionz</title>
 <meta name="description" content="Genuinely free QR codes — no tricks, no last-minute signup, no hidden fees. Pay-as-you-go dynamic QR codes: no monthly subscription, just $25 to change the redirect and $5 for scan stats. Download SVG QR codes with artistic dot shapes, gradients, and logo overlays. Houston, TX.">
 <meta name="keywords" content="free SVG QR code, SVG QR code download, QR code car decal, QR code vehicle wrap, QR code billboard, print ready QR code, high resolution QR code, custom QR code generator, unique QR code design, artistic QR code, QR code with logo, gradient QR code, heart QR code, star QR code, emoji QR code, dynamic QR code, pay as you go QR code, pay as you go dynamic QR code, pay per use QR code, static QR code, free QR code generator, no monthly fee QR code, Houston Texas">
@@ -185,13 +187,17 @@
 }
 *{box-sizing:border-box;margin:0;padding:0;}
 body{font-family:'Raleway',sans-serif;background:var(--bg);color:var(--white);min-height:100vh;display:flex;flex-direction:column;}
+/* WHY a fixed strip: in the installed app the page runs under the phone's time/battery bar;
+   this keeps that area solid header-gray so content never shows sliding behind the clock. */
+body::before{content:'';position:fixed;top:0;left:0;right:0;height:env(safe-area-inset-top);background:#222;z-index:10000;pointer-events:none;}
 a{color:var(--gold2);text-decoration:none;}
 button{cursor:pointer;}
 input,select,textarea{font-family:inherit;}
 h1,h2,h3{text-transform:none;}
 
 /* NAV */
-nav{display:flex;justify-content:space-between;align-items:center;padding:14px 28px;background:#222;border-bottom:1px solid var(--line);position:sticky;top:0;z-index:100;backdrop-filter:blur(8px);flex-wrap:wrap;gap:10px;}
+/* WHY the safe-area padding-top: pushes the nav buttons below the phone's status bar. */
+nav{display:flex;justify-content:space-between;align-items:center;padding:calc(14px + env(safe-area-inset-top)) 28px 14px;background:#222;border-bottom:1px solid var(--line);position:sticky;top:0;z-index:100;backdrop-filter:blur(8px);flex-wrap:wrap;gap:10px;}
 .nav-brand{display:flex;align-items:center;gap:10px;text-decoration:none;}
 .nav-brand img{height:32px;width:auto;filter:drop-shadow(0 0 8px rgba(201,138,46,.4));position:relative;top:-3px;}
 .nav-brand span{font-family:'Cinzel',serif;font-weight:700;font-size:1rem;color:var(--white);letter-spacing:1px;}
@@ -223,9 +229,11 @@ nav{display:flex;justify-content:space-between;align-items:center;padding:14px 2
 .type-card h3{font-family:'Cinzel',serif;font-size:1.15rem;font-weight:600;margin-bottom:8px;text-transform:none;}
 .type-card p{font-size:.86rem;color:var(--muted);line-height:1.65;margin-bottom:18px;}
 .type-feats{list-style:none;display:flex;flex-direction:column;gap:7px;}
-.type-feats li{font-size:.82rem;color:var(--muted);display:flex;align-items:center;gap:10px;}
+/* WHY block + absolute checkmark instead of display:flex: flex turned "PNG or", <strong>SVG</strong>
+   and the rest of the line into separate columns on narrow screens, stacking the sentence. */
+.type-feats li{font-size:.82rem;color:var(--muted);position:relative;padding-left:22px;line-height:1.5;}
 /* WHY: gold checkmark for included, red × for not included */
-.type-feats li::before{content:'✓';color:var(--gold2);font-weight:700;flex-shrink:0;font-size:.9rem;}
+.type-feats li::before{content:'✓';color:var(--gold2);font-weight:700;font-size:.9rem;position:absolute;left:0;top:0;}
 .type-feats li.na{color:#666;}
 .type-feats li.na::before{content:'✕';color:var(--red);font-weight:700;}
 .dynamic-card .type-feats li::before{color:var(--green);}
@@ -529,7 +537,7 @@ footer a{color:var(--muted);}footer a:hover{color:var(--white);}
 @media(max-width:600px){
   #hero{padding:52px 18px 40px;}
   .section{padding:36px 18px 0;}
-  nav{padding:12px 18px;}
+  nav{padding:calc(12px + env(safe-area-inset-top)) 18px 12px;} /* WHY: keep the status-bar padding on phones too */
   .two-col{grid-template-columns:1fr;}
   .design-grid{grid-template-columns:1fr;}
 }
@@ -555,7 +563,7 @@ footer a{color:var(--muted);}footer a:hover{color:var(--white);}
 
 <nav>
   <a class="nav-brand" href="https://iqproductionz.com/QRCode">
-    <img src="https://static.wixstatic.com/media/b63ec4_2117e26bc8e646c8ad8b0050222de71b~mv2.png/v1/fill/w_295,h_92,al_c,q_85,usm_0.66_1.00_0.01,enc_avif,quality_auto/IQ-noglow_edited_edited.png" alt="I.Q. Productionz" onerror="this.style.display='none'">
+    <img src="https://iqproductionz.com/Content/Images/Main/IQ-noglow_Updated.avif" alt="I.Q. Productionz" onerror="this.style.display='none'">
     <span>QR Platform</span>
   </a>
   <div id="nav-right">

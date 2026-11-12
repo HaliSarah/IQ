@@ -8,7 +8,7 @@
 */
 
 // WHY a version in the name: changing it is how a future deploy replaces old files.
-const CACHE_NAME = 'iq-qr-v1';
+const CACHE_NAME = 'iq-qr-v2'; // v2: new app icon (2026-11-12)
 const OFFLINE_URL = '/QRCode/offline.html';
 
 // WHY so short a list: only the offline screen needs to exist with no connection.
