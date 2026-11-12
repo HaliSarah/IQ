@@ -1,0 +1,561 @@
+<!DOCTYPE html>
+<!--
+  Title: Client Intake & App Estimator
+  Author: Hali Sarah Parsons (I.Q. Productionz)
+  Date: 2026-11-12
+  Modified By: Claude (Anthropic), for Hali Sarah Parsons
+  Description: Intake-call worksheet and price estimator for app-building clients. Prices scale
+               with team size, number of forms, content volume, complexity and rush. Required
+               fields are checked before a branded PDF quote can be downloaded.
+-->
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Client Intake &amp; App Estimator</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cinzel+Decorative:wght@700&family=Cinzel:wght@600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<style>
+  /* WHY: I.Q. Productionz brand (charcoal + gold, Cinzel) lives in variables so every part matches. */
+  :root{
+    --char:#2a2720; --char-2:#36322a; --char-3:#433e34;
+    --gold:#c98a2e; --gold-2:#e0a94f; --gold-soft:rgba(201,138,46,.14);
+    --cream:#f6efe2; --muted:#b8ad99; --line:rgba(201,138,46,.28);
+    --err:#ff7a6b; --err-bg:rgba(255,122,107,.12);
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--char);color:var(--cream);font:15px/1.5 Inter,system-ui,sans-serif}
+  .wrap{max-width:900px;margin:0 auto;padding:26px 18px 70px}
+  header{text-align:center;border-bottom:1px solid var(--line);padding-bottom:16px;margin-bottom:20px}
+  .logo{font:700 30px/1.1 "Cinzel Decorative",serif;color:var(--gold);letter-spacing:.5px}
+  .sub{font:600 13px Cinzel,serif;letter-spacing:3px;color:var(--muted);margin-top:6px}
+  h2{font:700 17px Cinzel,serif;color:var(--gold);margin:0 0 12px;letter-spacing:1px}
+  .card{background:var(--char-2);border:1px solid var(--line);border-radius:14px;padding:16px 18px;margin-bottom:14px}
+  .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:12px 16px}
+  label{display:block;font-size:13px;color:var(--muted);font-weight:500}
+  .req::after{content:" *";color:var(--gold)}
+  input[type=text],input[type=email],input[type=tel],input[type=date],input[type=number],input[type=url],select,textarea{
+    width:100%;margin-top:5px;padding:9px 11px;border:1px solid var(--line);border-radius:9px;
+    font:inherit;color:var(--cream);background:var(--char-3)}
+  textarea{min-height:64px;resize:vertical}
+  input:focus,select:focus,textarea:focus{outline:2px solid var(--gold);border-color:var(--gold)}
+  input[type=checkbox]{accent-color:var(--gold);width:16px;height:16px}
+  .checks{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:7px 14px}
+  .checks label{color:var(--cream);font-weight:400;display:flex;gap:8px;align-items:center}
+  .hint{font-size:12px;color:var(--muted)}
+  /* WHY: invalid fields get a red border plus a message right under them so nothing is missed. */
+  .invalid input,.invalid select,.invalid textarea,input.invalid{border-color:var(--err)!important;background:var(--err-bg)}
+  .invalid.checks,.invalid#lines{outline:1px solid var(--err);border-radius:10px;padding:6px;background:var(--err-bg)}
+  .errmsg{color:var(--err);font-size:12px;margin-top:4px;font-weight:500}
+  .banner{display:none;background:var(--err-bg);border:1px solid var(--err);color:var(--cream);
+    border-radius:12px;padding:12px 14px;margin-bottom:14px}
+  .banner b{color:var(--err)}
+  .banner ul{margin:6px 0 0 18px;padding:0}
+  .line{display:grid;grid-template-columns:24px 1fr 110px;gap:10px;align-items:center;padding:9px 0;border-bottom:1px dashed var(--line)}
+  .line:last-child{border-bottom:0}
+  .line .name{font-weight:500}
+  .line .desc{display:block;font-size:12px;color:var(--muted);font-weight:400}
+  .line .amt{text-align:right;font-weight:600;color:var(--gold-2)}
+  .line.off .amt{color:var(--muted);text-decoration:line-through;font-weight:400}
+  .scale{display:inline-block;margin-left:6px;font-size:11px;color:var(--char);background:var(--gold);border-radius:20px;padding:1px 7px;vertical-align:middle}
+  /* WHY: bottom-heavy layout; the estimate is the payoff, so it carries the most weight at the end. */
+  .quote{background:linear-gradient(180deg,var(--char-2),#1f1c17);border:2px solid var(--gold);border-radius:20px;padding:24px;margin-top:22px}
+  .quote h2{font-size:22px}
+  .meta{color:var(--muted);font-size:13px;margin:-4px 0 12px}
+  .qtable{width:100%;border-collapse:collapse}
+  .qtable td{padding:7px 0;border-bottom:1px solid rgba(246,239,226,.08)}
+  .qtable td:last-child{text-align:right;white-space:nowrap}
+  .totals{margin-top:12px;display:grid;gap:6px}
+  .totals div{display:flex;justify-content:space-between;align-items:baseline}
+  .big{font:700 40px Cinzel,serif;color:var(--gold)}
+  .range{font-size:13px;color:var(--muted);text-align:right}
+  .pills{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;margin-top:16px}
+  .pill{background:var(--gold-soft);border:1px solid var(--line);border-radius:12px;padding:11px 13px}
+  .pill small{display:block;color:var(--muted);font-size:12px}
+  .pill b{font-size:20px;color:var(--cream)}
+  .actions{display:flex;flex-wrap:wrap;gap:10px;margin-top:20px}
+  button{font:600 14px Inter,sans-serif;border:0;border-radius:10px;padding:12px 18px;cursor:pointer}
+  .btn-gold{background:var(--gold);color:var(--char);font-size:15px}
+  .btn-gold:hover{background:var(--gold-2)}
+  .btn-ghost{background:transparent;color:var(--cream);border:1px solid var(--line)}
+  .toast{min-height:20px;margin-top:10px;color:var(--gold-2);font-size:13px}
+  .empty{color:var(--muted);font-style:italic}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div class="logo">I.Q. Productionz</div>
+    <div class="sub">CLIENT INTAKE &amp; APP ESTIMATOR</div>
+  </header>
+
+  <div class="banner" id="banner" role="alert"></div>
+
+  <!-- 1. CLIENT -->
+  <section class="card">
+    <h2>1 · Client</h2>
+    <div class="grid">
+      <label class="req">Business name<input type="text" id="biz" placeholder="HomeCare Family"></label>
+      <label class="req">Contact name<input type="text" id="contact" placeholder="Eric"></label>
+      <label class="req">Email<input type="email" id="email"></label>
+      <label>Phone<input type="tel" id="phone"></label>
+      <label>Current website / page<input type="url" id="site" placeholder="https://"></label>
+      <label class="req">Call date<input type="date" id="date"></label>
+    </div>
+  </section>
+
+  <!-- 2. DISCOVERY -->
+  <section class="card">
+    <h2>2 · Discovery</h2>
+    <div class="grid">
+      <label class="req">Employees who will use it<input type="number" id="staff" min="1" placeholder="e.g. 40"></label>
+      <label>Staff turnover
+        <select id="turnover"><option value="">Select…</option><option>Low</option><option>Medium</option><option>High</option></select>
+      </label>
+      <label>Who updates the site now?<input type="text" id="updater"></label>
+      <label>Where should forms go?<input type="text" id="recipients" placeholder="Time off → Brian"></label>
+    </div>
+    <p class="hint req" style="margin:14px 0 6px">Tools they want staff using</p>
+    <div class="checks" id="tools">
+      <label><input type="checkbox" value="Time-off requests"> Time-off requests</label>
+      <label><input type="checkbox" value="Incident reports"> Incident reports</label>
+      <label><input type="checkbox" value="Policies & handbook"> Policies &amp; handbook</label>
+      <label><input type="checkbox" value="Important contacts"> Important contacts</label>
+      <label><input type="checkbox" value="Announcements"> Announcements</label>
+      <label><input type="checkbox" value="Schedules"> Schedules</label>
+      <label><input type="checkbox" value="Training videos"> Training videos</label>
+      <label><input type="checkbox" value="Forms & documents"> Forms &amp; documents</label>
+    </div>
+    <div class="grid" style="margin-top:12px">
+      <label>Which tools get ignored now?<textarea id="ignored"></textarea></label>
+      <label>Frustrations with how it works today<textarea id="pain"></textarea></label>
+    </div>
+    <label style="margin-top:10px">Notes<textarea id="notes"></textarea></label>
+  </section>
+
+  <!-- 3. SCALE -->
+  <section class="card">
+    <h2>3 · Scale</h2>
+    <p class="hint" style="margin-top:-6px">These drive the estimate up or down.</p>
+    <div class="grid">
+      <label class="req">Custom forms needed<input type="number" id="forms" min="0" value="2"></label>
+      <label>Pages / sections to move in<input type="number" id="pages" min="0" value="5"></label>
+      <label>Complexity
+        <select id="complexity">
+          <option value="0.9">Simple · mostly links &amp; docs</option>
+          <option value="1" selected>Standard · forms + logins</option>
+          <option value="1.25">Complex · custom logic, many roles</option>
+        </select>
+      </label>
+      <label>Timeline
+        <select id="rush">
+          <option value="1" selected>Standard</option>
+          <option value="1.25">Rush (+25%)</option>
+        </select>
+      </label>
+    </div>
+    <p class="hint" id="tierNote" style="margin:12px 0 0"></p>
+  </section>
+
+  <!-- 4. PACKAGE -->
+  <section class="card">
+    <h2>4 · Package</h2>
+    <p class="hint" style="margin-top:-6px">Check what's included. <span class="scale">scales</span> = price grows with team size.</p>
+    <div id="lines"></div>
+  </section>
+
+  <!-- 5. TERMS -->
+  <section class="card">
+    <h2>5 · Terms</h2>
+    <div class="grid">
+      <label>Discount (%)<input type="number" id="discount" min="0" max="100" value="0"></label>
+      <label>Custom adjustment ($)<input type="number" id="adjust" step="25" value="0"></label>
+      <label>Deposit (%)<input type="number" id="deposit" min="0" max="100" value="50"></label>
+      <label>Monthly upkeep
+        <select id="upkeep">
+          <option value="auto" selected>Auto (based on package + size)</option>
+          <option value="0">None</option>
+          <option value="75">$75 · Basic</option>
+          <option value="125">$125 · Standard</option>
+          <option value="200">$200 · Plus</option>
+        </select>
+      </label>
+      <label>Turnaround<input type="text" id="turnaround" value="2–3 weeks"></label>
+      <label>Quote valid for (days)<input type="number" id="valid" min="1" value="30"></label>
+    </div>
+    <div class="checks" style="margin-top:12px">
+      <label><input type="checkbox" id="storefees"> Fold app store fees into upkeep (+$9/mo)</label>
+    </div>
+  </section>
+
+  <!-- 6. ESTIMATE (bottom-heavy payoff) -->
+  <section class="quote" id="quote" aria-live="polite">
+    <h2>Estimate</h2>
+    <div class="meta" id="qmeta"></div>
+    <table class="qtable"><tbody id="qrows"></tbody></table>
+    <div class="totals" id="qtotals"></div>
+    <div class="pills" id="qpills"></div>
+    <div class="actions">
+      <button class="btn-gold" id="pdfBtn" type="button">Download quote (PDF)</button>
+      <button class="btn-ghost" id="copyBtn" type="button">Copy as text</button>
+      <button class="btn-ghost" id="resetBtn" type="button">Clear form</button>
+    </div>
+    <div class="toast" id="toast"></div>
+  </section>
+</div>
+
+<script>
+/* ---------- Pricing model ----------
+   WHY: all prices and multipliers live here so Hali can retune the estimator in one place. */
+const TIERS = [ // team-size tiers: logins, admin and per-person features cost more to support at scale
+  {max:15,  mult:1.00, upkeepAdd:0,   label:"Small team (1–15)"},
+  {max:50,  mult:1.15, upkeepAdd:25,  label:"Mid team (16–50)"},
+  {max:150, mult:1.35, upkeepAdd:50,  label:"Large team (51–150)"},
+  {max:Infinity, mult:1.60, upkeepAdd:100, label:"Enterprise (151+)"}
+];
+const ITEMS = [
+  {id:"pwa",   name:"Home-screen app",            desc:"Custom logo icon, splash screen, full-screen app view", on:true,
+   price:() => 500},
+  {id:"auth",  name:"Employee logins (Firebase)", desc:"Individual logins, stay signed in, forgot-password", on:true, scales:true,
+   price:(c) => 500 * c.tier.mult},
+  {id:"admin", name:"Admin page",                 desc:"Owner adds/removes staff in one click", on:true, scales:true,
+   price:(c) => 400 * c.tier.mult},
+  {id:"move",  name:"Content setup",              desc:"Move existing content in · 5 pages included, $40 each after", on:true,
+   price:(c) => 300 + 40 * Math.max(0, c.pages - 5)},
+  {id:"form",  name:"Custom forms",               desc:"$150 each · emails go to the right person", on:true,
+   price:(c) => 150 * c.forms},
+  {id:"push",  name:"Push notifications",         desc:"Shift alerts and announcements", on:false,
+   price:() => 400},
+  {id:"docs",  name:"Per-employee content",       desc:"Each employee sees only their own docs/schedule", on:false, scales:true,
+   price:(c) => 500 * c.tier.mult},
+  {id:"store", name:"App store version",          desc:"Google Play + Apple App Store wrapper and submission", on:false,
+   price:() => 1500},
+  {id:"fix",   name:"Website cleanup",            desc:"Fix broken menus/links on the current site", on:false,
+   price:() => 150}
+];
+
+const $ = id => document.getElementById(id);
+const money = n => "$" + Math.round(n).toLocaleString("en-US");
+const num = (v, d = 0) => { const n = parseFloat(v); return isFinite(n) ? n : d; };
+const STORE_KEY = "iq-estimator-v2";
+let downloadsApi = null; // WHY: set only inside the claude.ai viewer, where direct downloads are blocked
+
+/* Picks the size tier for a head count. WHY: one lookup keeps tier logic consistent everywhere. */
+const tierFor = staff => TIERS.find(t => staff <= t.max);
+
+/* Builds package rows. WHY: generated from ITEMS so adding a service needs no HTML edits. */
+function renderLines(){
+  $("lines").innerHTML = ITEMS.map(it => `
+    <div class="line" data-row="${it.id}">
+      <input type="checkbox" data-on="${it.id}" ${it.on ? "checked" : ""} aria-label="Include ${it.name}">
+      <span class="name">${it.name}${it.scales ? '<span class="scale">scales</span>' : ""}<span class="desc">${it.desc}</span></span>
+      <span class="amt" data-amt="${it.id}"></span>
+    </div>`).join("");
+}
+
+/* Snapshot of every field. WHY: one object feeds the estimate, validation, PDF and saved draft. */
+function readState(){
+  const s = {};
+  document.querySelectorAll("input[id],select[id],textarea[id]").forEach(el => {
+    s[el.id] = el.type === "checkbox" ? el.checked : el.value;
+  });
+  s.tools = [...document.querySelectorAll("#tools input:checked")].map(c => c.value);
+  s.on = Object.fromEntries(ITEMS.map(it => [it.id, document.querySelector(`[data-on="${it.id}"]`).checked]));
+  return s;
+}
+
+/* Restores a saved draft. WHY: an interrupted call shouldn't cost Hali her notes. */
+function writeState(s){
+  Object.keys(s).forEach(k => {
+    const el = $(k);
+    if (!el || k === "tools" || k === "on") return;
+    if (el.type === "checkbox") el.checked = !!s[k]; else el.value = s[k];
+  });
+  document.querySelectorAll("#tools input").forEach(c => c.checked = (s.tools || []).includes(c.value));
+  Object.entries(s.on || {}).forEach(([id, v]) => { const el = document.querySelector(`[data-on="${id}"]`); if (el) el.checked = v; });
+}
+
+/* The estimator. WHY: recalculates on every keystroke so the number moves live during the call. */
+function compute(){
+  const s = readState();
+  const staff = Math.max(1, Math.floor(num(s.staff, 1)));
+  const ctx = { tier: tierFor(staff), forms: Math.max(0, Math.floor(num(s.forms))), pages: Math.max(0, Math.floor(num(s.pages))) };
+  const factor = num(s.complexity, 1) * num(s.rush, 1); // complexity and rush apply to all build work
+
+  const chosen = [];
+  ITEMS.forEach(it => {
+    const amt = Math.round(it.price(ctx) * factor / 5) * 5; // round to $5 so quotes look clean
+    const row = document.querySelector(`[data-row="${it.id}"]`);
+    document.querySelector(`[data-amt="${it.id}"]`).textContent = money(amt);
+    row.classList.toggle("off", !s.on[it.id]);
+    if (s.on[it.id] && amt > 0) chosen.push({ name: it.name + (it.id === "form" ? ` × ${ctx.forms}` : ""), total: amt });
+  });
+
+  const adjust   = num(s.adjust);
+  if (adjust) chosen.push({ name: "Custom adjustment", total: adjust });
+  const subtotal = chosen.reduce((a, b) => a + b.total, 0);
+  const discPct  = Math.min(Math.max(num(s.discount), 0), 100);
+  const discount = subtotal * discPct / 100;
+  const total    = Math.max(0, subtotal - discount);
+  const depPct   = Math.min(Math.max(num(s.deposit, 50), 0), 100);
+  const deposit  = total * depPct / 100;
+
+  // WHY: auto upkeep follows what must be maintained (store/push > logins > basic) plus team-size support load.
+  let monthly;
+  if (s.upkeep === "auto") {
+    const base = (s.on.store || s.on.push) ? 200 : (s.on.auth || s.on.admin) ? 125 : (chosen.length ? 75 : 0);
+    monthly = base ? base + ctx.tier.upkeepAdd : 0;
+  } else monthly = num(s.upkeep);
+  if (s.storefees && monthly) monthly += 9;
+
+  $("tierNote").textContent = `${ctx.tier.label} · items marked "scales" ×${ctx.tier.mult.toFixed(2)}` +
+    (factor !== 1 ? ` · complexity/timeline ×${factor.toFixed(2)}` : "");
+
+  const who = [s.biz, s.contact].filter(Boolean).join(" · ") || "Client name";
+  const dateTxt = s.date ? new Date(s.date + "T12:00").toLocaleDateString("en-US", {month:"long", day:"numeric", year:"numeric"}) : "";
+  $("qmeta").textContent = [who, dateTxt, s.staff ? staff + " employees" : ""].filter(Boolean).join(" · ");
+
+  $("qrows").innerHTML = chosen.length
+    ? chosen.map(c => `<tr><td>${c.name}</td><td>${c.total < 0 ? "−" + money(-c.total) : money(c.total)}</td></tr>`).join("")
+    : `<tr><td class="empty">Check items in step 4 to build the estimate.</td><td></td></tr>`;
+
+  $("qtotals").innerHTML = `
+    <div><span>Subtotal</span><span>${money(subtotal)}</span></div>
+    ${discount ? `<div><span>Discount (${discPct}%)</span><span>−${money(discount)}</span></div>` : ""}
+    <div style="margin-top:8px"><span>Project total</span><span class="big">${money(total)}</span></div>
+    <div class="range">Typical range for this scope: ${money(total * 0.9)} – ${money(total * 1.15)}</div>`;
+
+  $("qpills").innerHTML = `
+    <div class="pill"><small>Deposit to start (${depPct}%)</small><b>${money(deposit)}</b></div>
+    <div class="pill"><small>Due at launch</small><b>${money(total - deposit)}</b></div>
+    <div class="pill"><small>Monthly upkeep</small><b>${monthly ? money(monthly) + "/mo" : "—"}</b></div>
+    <div class="pill"><small>Turnaround</small><b style="font-size:16px">${s.turnaround || "—"}</b></div>`;
+
+  // WHY: autosave is a convenience; storage may be blocked, so failures are silently ignored.
+  try { localStorage.setItem(STORE_KEY, JSON.stringify(s)); } catch (e) {}
+  return { s, staff, ctx, chosen, subtotal, discPct, discount, total, depPct, deposit, monthly, who, dateTxt };
+}
+
+/* ---------- Validation ---------- */
+const RULES = [
+  {id:"biz",     label:"Business name", test: v => v.trim() !== ""},
+  {id:"contact", label:"Contact name",  test: v => v.trim() !== ""},
+  {id:"email",   label:"Email",         test: v => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v.trim()), msg:"Enter a valid email"},
+  {id:"phone",   label:"Phone",         test: v => v.trim() === "" || v.replace(/\D/g, "").length >= 10, msg:"Phone needs at least 10 digits"},
+  {id:"date",    label:"Call date",     test: v => v !== ""},
+  {id:"staff",   label:"Employees",     test: v => num(v) >= 1, msg:"Enter how many employees (1 or more)"},
+  {id:"forms",   label:"Custom forms",  test: v => v !== "" && num(v, -1) >= 0, msg:"Enter 0 or more"}
+];
+
+/* Clears one field's error. WHY: errors disappear as soon as the field is fixed, so the form doesn't nag. */
+function clearError(el){
+  const box = el.closest("label") || el;
+  box.classList.remove("invalid");
+  const m = box.querySelector(".errmsg"); if (m) m.remove();
+}
+function setError(box, text){
+  box.classList.add("invalid");
+  if (!box.querySelector(".errmsg")) {
+    const m = document.createElement("div"); m.className = "errmsg"; m.textContent = text;
+    box.appendChild(m);
+  }
+}
+
+/* Checks everything required. WHY: a quote with missing client info or no services is not worth sending. */
+function validate(){
+  document.querySelectorAll(".invalid").forEach(b => { b.classList.remove("invalid"); const m = b.querySelector(".errmsg"); if (m) m.remove(); });
+  const missed = [];
+  RULES.forEach(r => {
+    const el = $(r.id);
+    if (!r.test(el.value)) { setError(el.closest("label"), r.msg || `${r.label} is required`); missed.push({label:r.label, el}); }
+  });
+  if (!document.querySelector("#tools input:checked")) {
+    setError($("tools"), "Pick at least one tool"); missed.push({label:"Tools they want", el:$("tools")});
+  }
+  if (!document.querySelector("#lines input:checked")) {
+    setError($("lines"), "Include at least one service"); missed.push({label:"Package items", el:$("lines")});
+  }
+  const banner = $("banner");
+  if (missed.length) {
+    banner.innerHTML = `<b>Fill in ${missed.length} missing field${missed.length > 1 ? "s" : ""} before downloading:</b><ul>${missed.map(m => `<li>${m.label}</li>`).join("")}</ul>`;
+    banner.style.display = "block";
+    banner.scrollIntoView({behavior:"smooth", block:"start"});
+    const first = missed[0].el; if (first.focus) setTimeout(() => first.focus({preventScroll:true}), 400);
+    return false;
+  }
+  banner.style.display = "none";
+  return true;
+}
+
+/* ---------- PDF ---------- */
+/* Draws the branded quote. WHY: built with jsPDF so it's a real, crisp PDF, not a screenshot. */
+function buildPdf(q){
+  const { jsPDF } = window.jspdf;
+  const doc = new jsPDF({ unit:"pt", format:"letter" });
+  const W = doc.internal.pageSize.getWidth(), H = doc.internal.pageSize.getHeight(), M = 48;
+  const GOLD = [201,138,46], CHAR = [42,39,32], GREY = [110,104,92];
+  const s = q.s;
+  const quoteNo = "IQ-" + (s.date || new Date().toISOString().slice(0,10)).replace(/-/g, "") + "-" + String(Date.now()).slice(-4);
+  const validUntil = new Date((s.date || new Date().toISOString().slice(0,10)) + "T12:00");
+  validUntil.setDate(validUntil.getDate() + Math.max(1, num(s.valid, 30)));
+
+  // Header band
+  doc.setFillColor(...CHAR); doc.rect(0, 0, W, 92, "F");
+  doc.setTextColor(...GOLD); doc.setFont("times", "bold"); doc.setFontSize(26);
+  doc.text("I.Q. PRODUCTIONZ", M, 50);
+  doc.setFont("helvetica", "normal"); doc.setFontSize(10); doc.setTextColor(246,239,226);
+  doc.text("App Building Services · Hali Sarah Parsons", M, 70);
+  doc.setFontSize(10); doc.text(`Quote ${quoteNo}`, W - M, 50, {align:"right"});
+  doc.text(q.dateTxt || "", W - M, 66, {align:"right"});
+
+  // Client block
+  let y = 128;
+  doc.setTextColor(...CHAR); doc.setFont("helvetica", "bold"); doc.setFontSize(11);
+  doc.text("PREPARED FOR", M, y);
+  doc.setFont("helvetica", "normal"); doc.setFontSize(11); y += 16;
+  [s.biz, s.contact, s.email, s.phone, s.site].filter(Boolean).forEach(t => { doc.text(String(t), M, y); y += 15; });
+
+  // Scope summary (right column)
+  let ry = 128;
+  doc.setFont("helvetica", "bold"); doc.text("SCOPE", W/2 + 10, ry); ry += 16;
+  doc.setFont("helvetica", "normal"); doc.setFontSize(10);
+  const scope = [
+    `${q.staff} employees · ${q.ctx.tier.label}`,
+    `${q.ctx.forms} custom form(s) · ${q.ctx.pages} page(s) of content`,
+    s.tools.length ? "Tools: " + s.tools.join(", ") : "",
+    s.recipients ? "Routing: " + s.recipients : ""
+  ].filter(Boolean);
+  scope.forEach(t => { doc.splitTextToSize(t, W/2 - M - 10).forEach(l => { doc.text(l, W/2 + 10, ry); ry += 13; }); });
+
+  y = Math.max(y, ry) + 18;
+
+  // Line items
+  doc.setDrawColor(...GOLD); doc.setLineWidth(1.2); doc.line(M, y, W - M, y); y += 20;
+  doc.setFont("helvetica", "bold"); doc.setFontSize(10); doc.setTextColor(...GREY);
+  doc.text("SERVICE", M, y); doc.text("AMOUNT", W - M, y, {align:"right"}); y += 8;
+  doc.setLineWidth(.5); doc.line(M, y, W - M, y); y += 18;
+  doc.setFont("helvetica", "normal"); doc.setFontSize(11); doc.setTextColor(...CHAR);
+  q.chosen.forEach(c => {
+    if (y > H - 260) { doc.addPage(); y = 60; } // WHY: long quotes spill onto a new page instead of overlapping totals
+    doc.text(c.name, M, y);
+    doc.text(c.total < 0 ? "-" + money(-c.total) : money(c.total), W - M, y, {align:"right"});
+    y += 20;
+  });
+
+  // Totals — bottom-heavy: the biggest, boldest block sits low on the page
+  y = Math.max(y + 10, H - 250);
+  doc.setDrawColor(...GOLD); doc.setLineWidth(1.2); doc.line(M, y, W - M, y); y += 22;
+  doc.setFontSize(11); doc.setTextColor(...GREY);
+  doc.text("Subtotal", W - M - 150, y); doc.text(money(q.subtotal), W - M, y, {align:"right"}); y += 17;
+  if (q.discount) { doc.text(`Discount (${q.discPct}%)`, W - M - 150, y); doc.text("-" + money(q.discount), W - M, y, {align:"right"}); y += 17; }
+
+  doc.setFillColor(...CHAR); doc.roundedRect(M, y, W - 2*M, 92, 10, 10, "F");
+  doc.setTextColor(...GOLD); doc.setFont("times", "bold"); doc.setFontSize(13);
+  doc.text("PROJECT TOTAL", M + 18, y + 30);
+  doc.setFontSize(30); doc.text(money(q.total), W - M - 18, y + 38, {align:"right"});
+  doc.setFont("helvetica", "normal"); doc.setFontSize(10); doc.setTextColor(246,239,226);
+  const col = (W - 2*M - 36) / 3;
+  [[`Deposit (${q.depPct}%)`, money(q.deposit)], ["Due at launch", money(q.total - q.deposit)],
+   ["Monthly upkeep", q.monthly ? money(q.monthly) + "/mo" : "None"]].forEach(([k, v], i) => {
+    const x = M + 18 + i * col;
+    doc.text(k, x, y + 62); doc.setFont("helvetica", "bold"); doc.text(v, x, y + 78); doc.setFont("helvetica", "normal");
+  });
+  y += 112;
+
+  // Terms + signature
+  doc.setTextColor(...GREY); doc.setFontSize(9);
+  const terms = `Turnaround: ${s.turnaround || "TBD"} after deposit. Quote valid until ${validUntil.toLocaleDateString("en-US",{month:"long",day:"numeric",year:"numeric"})}. ` +
+    `Work beyond this scope is quoted separately in writing. Upkeep covers updates, hosting checks and fixes; cancel anytime with 30 days' notice.`;
+  doc.splitTextToSize(terms, W - 2*M).forEach(l => { doc.text(l, M, y); y += 12; });
+  y += 26;
+  doc.setDrawColor(...GREY); doc.setLineWidth(.5);
+  doc.line(M, y, M + 200, y); doc.line(W - M - 200, y, W - M, y);
+  doc.text("Client signature / date", M, y + 13); doc.text("Hali Sarah Parsons · I.Q. Productionz", W - M - 200, y + 13);
+
+  const safe = (s.biz || "Client").replace(/[^\w\- ]+/g, "").trim().replace(/\s+/g, "-");
+  return { doc, filename: `IQ-Productionz-Quote-${safe}.pdf` };
+}
+
+function toast(msg){ $("toast").textContent = msg; clearTimeout(toast.t); toast.t = setTimeout(() => $("toast").textContent = "", 3500); }
+
+/* Plain-text copy. WHY: quick paste into a text or email when a PDF is overkill. */
+function quoteText(){
+  const q = compute();
+  return [
+    `ESTIMATE — I.Q. Productionz`, `${q.who}${q.dateTxt ? " · " + q.dateTxt : ""}`, ``,
+    ...q.chosen.map(c => `• ${c.name}: ${money(c.total)}`), ``,
+    `Subtotal: ${money(q.subtotal)}`,
+    ...(q.discount ? [`Discount (${q.discPct}%): −${money(q.discount)}`] : []),
+    `PROJECT TOTAL: ${money(q.total)}`,
+    `Deposit (${q.depPct}%): ${money(q.deposit)} · Due at launch: ${money(q.total - q.deposit)}`,
+    `Monthly upkeep: ${q.monthly ? money(q.monthly) + "/mo" : "None"}`,
+    `Turnaround: ${q.s.turnaround || "TBD"}`, ``, `Hali Sarah Parsons · I.Q. Productionz`
+  ].join("\n");
+}
+
+/* ---------- Startup & events ---------- */
+renderLines();
+$("date").value = new Date().toISOString().slice(0, 10);
+try { const saved = JSON.parse(localStorage.getItem(STORE_KEY) || "null"); if (saved) writeState(saved); }
+catch (e) { /* WHY: a corrupt or blocked draft must never break the form. */ }
+
+document.addEventListener("input", e => { if (e.target.matches("input,select,textarea")) { clearError(e.target);
+  if (e.target.closest("#tools")) { $("tools").classList.remove("invalid"); $("tools").querySelector(".errmsg")?.remove(); }
+  if (e.target.closest("#lines")) { $("lines").classList.remove("invalid"); $("lines").querySelector(".errmsg")?.remove(); }
+  compute(); } });
+document.addEventListener("change", compute);
+
+// WHY: inside claude.ai the page may only save files through the platform's downloads capability.
+const framed = (() => { try { return window.self !== window.top; } catch (e) { return true; } })();
+if (framed && window.claude && typeof window.claude.use === "function") {
+  window.claude.use("downloads").then(api => { downloadsApi = api; }).catch(() => {});
+}
+
+$("pdfBtn").addEventListener("click", async () => {
+  if (!validate()) return;
+  if (!window.jspdf) { toast("PDF tool didn't load — check your connection and try again."); return; }
+  const q = compute();
+  const { doc, filename } = buildPdf(q);
+  try {
+    if (framed) {
+      // WHY: in the claude.ai viewer, direct downloads are blocked; the platform asks the viewer to confirm.
+      if (!downloadsApi) { toast("Downloading isn't available in this view. Open your hosted copy to download."); return; }
+      await downloadsApi.save({ filename, data: doc.output("blob") });
+      toast("Quote saved as PDF.");
+    } else {
+      doc.save(filename); // WHY: on Hali's own hosting a normal browser download works
+      toast("Quote downloaded.");
+    }
+  } catch (e) {
+    toast(e && e.code === "declined" ? "Download canceled." : "Couldn't save the PDF. Try again.");
+  }
+});
+
+$("copyBtn").addEventListener("click", async () => {
+  // WHY: clipboard can be refused; fall back to a selectable box so the text is never lost.
+  const text = quoteText();
+  try { await navigator.clipboard.writeText(text); toast("Copied — paste it into an email or text."); }
+  catch (e) {
+    const ta = document.createElement("textarea");
+    ta.value = text; ta.style.cssText = "width:100%;min-height:200px;margin-top:8px";
+    $("toast").replaceChildren(ta); ta.select();
+  }
+});
+
+$("resetBtn").addEventListener("click", () => {
+  // WHY: two-tap confirm built into the page, because browser confirm() dialogs are blocked in some viewers.
+  const b = $("resetBtn");
+  if (!b.dataset.armed) {
+    b.dataset.armed = "1"; b.textContent = "Tap again to clear";
+    setTimeout(() => { delete b.dataset.armed; b.textContent = "Clear form"; }, 3000);
+    return;
+  }
+  try { localStorage.removeItem(STORE_KEY); } catch (e) {}
+  location.reload();
+});
+
+compute();
+</script>
+</body>
+</html>

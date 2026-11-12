@@ -2,7 +2,8 @@
 <!--
   Title:       Rates — I.Q. Productionz
   Author:      Hali Sarah Parsons  Date: 2026  Modified By: Claude (Cowork);
-               Claude (Anthropic), 2026-11-05: added the Independent Business Tools button
+               Claude (Anthropic), 2026-11-05: added the Independent Business Tools button;
+               Claude (Anthropic), 2026-11-12: added the Apps card
   Description: Rate-card variant of BookNow/index.html. Same layout, but each
                card links to the service's info page (/Services/...) instead of
                its booking form (/BookNow/...), so visitors can browse rates
@@ -93,6 +94,13 @@ body{font-family:'Raleway',sans-serif;background:var(--bg);color:var(--white);mi
 .contact-footer{text-align:center;color:var(--muted);font-size:12px;line-height:2;font-weight:300;}
 .contact-footer a{color:var(--gold-lt);text-decoration:none;}
 
+/* WHY: the top row now holds three cards (Websites, Specialty HTML, Apps); on phones they
+   stack full width instead of squeezing into thirds. !important beats the inline widths. */
+@media(max-width:720px){
+  .cat-grid{grid-template-columns:1fr !important;}
+  .cat-grid > div{flex-direction:column;}
+  .cat-grid > div > .cat-card{flex:1 1 auto !important;max-width:none !important;}
+}
 @media(max-width:540px){
   .form-header{padding:32px 18px 28px;}
   .cat-grid{grid-template-columns:1fr;}
@@ -100,17 +108,17 @@ body{font-family:'Raleway',sans-serif;background:var(--bg);color:var(--white);mi
 }
 </style>
   <!-- SEO:start (written by seo_wire.py; search data only, nothing visible) -->
-  <meta name="description" content="Rates for every I.Q. Productionz service — websites, hosting, healing, courses, photo, audio, video, graphic design, promo &amp; fashion. Houston, Texas.">
+  <meta name="description" content="Rates for every I.Q. Productionz service — websites, apps, hosting, healing, courses, photo, audio, video, graphic design, promo &amp; fashion. Houston, Texas.">
   <link rel="canonical" href="https://iqproductionz.com/Services/Rates/">
   <meta property="og:type" content="website">
   <meta property="og:site_name" content="I.Q. Productionz">
   <meta property="og:title" content="Rates | I.Q. Productionz">
-  <meta property="og:description" content="Rates for every I.Q. Productionz service — websites, hosting, healing, courses, photo, audio, video, graphic design, promo &amp; fashion. Houston, Texas.">
+  <meta property="og:description" content="Rates for every I.Q. Productionz service — websites, apps, hosting, healing, courses, photo, audio, video, graphic design, promo &amp; fashion. Houston, Texas.">
   <meta property="og:url" content="https://iqproductionz.com/Services/Rates/">
   <meta property="og:image" content="https://static.wixstatic.com/media/b63ec4_d6fad9165f744284a4b90915a9fbbbc5~mv2.jpg">
   <meta name="twitter:card" content="summary_large_image">
   <meta name="twitter:title" content="Rates | I.Q. Productionz">
-  <meta name="twitter:description" content="Rates for every I.Q. Productionz service — websites, hosting, healing, courses, photo, audio, video, graphic design, promo &amp; fashion. Houston, Texas.">
+  <meta name="twitter:description" content="Rates for every I.Q. Productionz service — websites, apps, hosting, healing, courses, photo, audio, video, graphic design, promo &amp; fashion. Houston, Texas.">
   <meta name="twitter:image" content="https://static.wixstatic.com/media/b63ec4_d6fad9165f744284a4b90915a9fbbbc5~mv2.jpg">
   <script type="application/ld+json">
 {
@@ -121,7 +129,7 @@ body{font-family:'Raleway',sans-serif;background:var(--bg);color:var(--white);mi
    "@id": "https://iqproductionz.com/Services/Rates/",
    "url": "https://iqproductionz.com/Services/Rates/",
    "name": "Rates | I.Q. Productionz",
-   "description": "Rates for every I.Q. Productionz service — websites, hosting, healing, courses, photo, audio, video, graphic design, promo & fashion. Houston, Texas.",
+   "description": "Rates for every I.Q. Productionz service — websites, apps, hosting, healing, courses, photo, audio, video, graphic design, promo & fashion. Houston, Texas.",
    "inLanguage": "en-US",
    "isPartOf": {
     "@type": "WebSite",
@@ -190,6 +198,15 @@ body{font-family:'Raleway',sans-serif;background:var(--bg);color:var(--white);mi
           </div>
           <div class="cat-desc">Interactive tools, embeds & coded features for any site — quizzes, forms, landing pages & more.</div>
           <div class="cat-cta">View Details &rarr;</div>
+        </a>
+
+        <a class="cat-card" href="/Services/Apps/" style="flex:0 0 calc(33.333% - 9px);max-width:calc(33.333% - 9px);">
+          <div class="cat-top">
+            <div class="cat-name">Apps</div>
+            <div class="cat-price">From $500</div>
+          </div>
+          <div class="cat-desc">Home-screen &amp; app-store apps for your business — logins, forms, alerts &amp; more. Instant estimate.</div>
+          <div class="cat-cta">Get an Estimate &rarr;</div>
         </a>
 
     </div>

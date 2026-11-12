@@ -1,0 +1,899 @@
+<!DOCTYPE html>
+<!--
+  Title:       Apps — I.Q. Productionz
+  Author:      Hali Sarah Parsons
+  Date:        2026-11-12
+  Modified By: Claude (Anthropic), 2026-11-12; Claude (Anthropic), 2026-11-12: added the Schedule a Call pop-up;
+               Claude (Anthropic), 2026-11-12: added discount codes (stored as fingerprints, not plain text);
+               Claude (Anthropic), 2026-11-12: added the Download Quote (PDF) button
+  Description: Client-facing app intake form and price estimator. The estimate scales with
+               team size, forms, content and timeline. Clients pay a 50% deposit by card
+               (Stripe checkout through the existing /checkout Worker route) or by Cash App /
+               PayPal with a screenshot (stored by the existing Client Files Worker), and the
+               brief is emailed to Hali through EmailJS. No Worker changes are needed.
+-->
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Apps | I.Q. Productionz</title>
+<meta name="description" content="Custom home-screen and app-store apps for your business — staff logins, forms, and more. Get an instant estimate and start your app with a 50% deposit.">
+<meta name="robots" content="index, follow">
+<link rel="canonical" href="https://iqproductionz.com/Services/Apps/">
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700&family=Raleway:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
+<script>emailjs.init("3vNjQbWmqzzOO6IK-");</script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<style>
+/* WHY these values: same palette and fonts as the Rates and Pay pages, so it reads as one site. */
+:root{
+  --bg:#333333;--surface:#3b3b3b;--card:#454545;--border:#2e2b24;
+  --gold:#c98a2e;--gold-lt:#e0a84a;--gold-dim:#7a5218;
+  --white:#f0ece3;--muted:#A9A9A9;--radius:8px;--err:#ffb4a8;--ok:#9fd8a4;
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:'Raleway',sans-serif;background:var(--bg);color:var(--white);min-height:100vh;padding-bottom:60px;line-height:1.55}
+a{color:var(--gold-lt)}
+.form-header{background:linear-gradient(160deg,#454545 0%,#333333 60%);border-bottom:1px solid var(--border);
+  padding:44px 24px 36px;text-align:center;position:relative;overflow:hidden}
+.form-header::before{content:'';position:absolute;inset:0;background:radial-gradient(ellipse at 50% 0%,rgba(201,138,46,.13) 0%,transparent 70%);pointer-events:none}
+.logo-wrap img{height:58px;width:auto;filter:drop-shadow(0 0 14px rgba(201,138,46,.45))}
+.gold-rule{width:60px;height:2px;background:linear-gradient(90deg,transparent,var(--gold),transparent);margin:16px auto}
+.form-header h1{font-family:'Cinzel',serif;font-size:clamp(24px,4.5vw,38px);font-weight:600;letter-spacing:1px;text-transform:uppercase}
+.form-header p{font-size:14px;color:var(--muted);max-width:540px;margin:10px auto 0;font-weight:300}
+
+.wrap{max-width:860px;margin:0 auto;padding:30px 20px 0}
+.start{background:var(--card);border:1px solid var(--gold-dim);border-radius:12px;padding:22px;text-align:center;margin-bottom:22px;position:relative;overflow:hidden}
+.start::before,.card::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,transparent,var(--gold),transparent)}
+.start p{font-size:15px;max-width:560px;margin:0 auto 16px}
+.start .btns{display:flex;flex-wrap:wrap;gap:12px;justify-content:center}
+.start small{display:block;margin-top:14px;color:var(--muted);font-size:12.5px}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;padding:13px 24px;border-radius:var(--radius);
+  font-family:'Cinzel',serif;font-size:13px;font-weight:700;letter-spacing:1px;text-transform:uppercase;text-decoration:none;cursor:pointer;border:0}
+.btn-gold{background:linear-gradient(135deg,var(--gold) 0%,#a87025 100%);color:#2a2720;box-shadow:0 4px 16px rgba(201,138,46,.25)}
+.btn-gold:hover{background:linear-gradient(135deg,var(--gold-lt) 0%,var(--gold) 100%)}
+.btn-line{background:var(--surface);color:var(--white);border:1px solid var(--gold-dim)}
+.btn-line:hover{border-color:var(--gold)}
+
+.card{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:20px;margin-bottom:16px;position:relative;overflow:hidden}
+h2{font-family:'Cinzel',serif;font-size:16px;font-weight:700;color:var(--gold);letter-spacing:1.2px;text-transform:uppercase;margin-bottom:12px}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:12px 16px}
+label{display:block;font-size:13px;font-weight:600}
+.req::after{content:" *";color:var(--gold)}
+.hint{font-weight:400;color:var(--muted);font-size:12px}
+input[type=text],input[type=email],input[type=tel],input[type=url],input[type=number],select,textarea{
+  width:100%;margin-top:5px;padding:11px 12px;border:1px solid var(--border);border-radius:var(--radius);
+  background:#333333;color:var(--white);font:500 15px 'Raleway',sans-serif}
+textarea{min-height:80px;resize:vertical}
+input:focus-visible,select:focus-visible,textarea:focus-visible,button:focus-visible,a:focus-visible{outline:3px solid var(--gold-lt);outline-offset:2px}
+input[type=checkbox],input[type=radio]{accent-color:var(--gold);width:17px;height:17px;flex:0 0 auto}
+.checks{display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:8px 14px;margin-top:6px}
+.checks label,.radios label{display:flex;gap:9px;align-items:center;font-weight:500}
+.radios{display:flex;flex-wrap:wrap;gap:10px 22px;margin-top:6px}
+.sublabel{margin:14px 0 4px}
+
+/* WHY: each missed field turns red with its own message, and a summary sits above Submit. */
+.invalid input,.invalid select,.invalid textarea{border-color:var(--err)!important}
+.group.invalid{outline:1px solid var(--err);border-radius:var(--radius);padding:8px}
+.errmsg{color:var(--err);font-size:12.5px;font-weight:600;margin-top:5px}
+.banner{display:none;border:1px solid var(--err);background:rgba(255,180,168,.08);border-radius:var(--radius);padding:12px 14px;margin:0 0 14px;font-size:14px}
+.banner b{color:var(--err)}
+.banner ul{margin:6px 0 0 18px}
+
+.line{display:grid;grid-template-columns:26px 1fr auto;gap:10px;align-items:center;padding:10px 0;border-bottom:1px dashed rgba(201,138,46,.25)}
+.line:last-child{border-bottom:0}
+.line .name{font-weight:600}
+.line .desc{display:block;font-size:12.5px;color:var(--muted);font-weight:400}
+.line .amt{font-family:'Cinzel',serif;font-weight:700;color:var(--gold-lt);white-space:nowrap}
+.line.off .amt{color:var(--muted);font-weight:400;text-decoration:line-through}
+
+/* WHY bottom-heavy: the estimate and deposit are the payoff, so they carry the most weight at the end. */
+.estimate{background:linear-gradient(180deg,#454545,#2a2720);border:2px solid var(--gold);border-radius:16px;padding:24px;margin:22px 0 16px}
+.estimate h2{font-size:20px}
+.qtable{width:100%;border-collapse:collapse;font-size:14px}
+.qtable td{padding:7px 0;border-bottom:1px solid rgba(240,236,227,.08)}
+.qtable td:last-child{text-align:right;white-space:nowrap}
+.total-row{display:flex;justify-content:space-between;align-items:baseline;margin-top:14px;gap:10px;flex-wrap:wrap}
+.big{font-family:'Cinzel',serif;font-size:clamp(32px,7vw,46px);font-weight:700;color:var(--gold)}
+.pills{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:10px;margin-top:14px}
+.pill{background:rgba(201,138,46,.1);border:1px solid var(--gold-dim);border-radius:10px;padding:12px}
+.pill small{display:block;color:var(--muted);font-size:12px}
+.pill b{font-family:'Cinzel',serif;font-size:21px}
+.pill.key{border-color:var(--gold);background:rgba(201,138,46,.18)}
+.promo{display:flex;gap:8px;margin-top:16px;flex-wrap:wrap}
+.promo input{flex:1 1 180px;margin:0;text-transform:uppercase;letter-spacing:1px}
+.promo .btn{padding:11px 18px}
+.promo-msg{font-size:13px;font-weight:600;margin-top:6px;min-height:18px}
+.promo-msg.ok{color:var(--ok)}.promo-msg.bad{color:var(--err)}
+.fine{font-size:12px;color:var(--muted);margin-top:12px}
+
+.pay-choice{display:flex;flex-wrap:wrap;gap:10px;margin:6px 0 4px}
+.pay-choice button{flex:1 1 200px;padding:13px;border-radius:var(--radius);border:1px solid var(--gold-dim);background:var(--surface);color:var(--white);font:700 14px 'Raleway',sans-serif;cursor:pointer}
+.pay-choice button[aria-pressed="true"]{border-color:var(--gold);background:rgba(201,138,46,.2)}
+.pay-links{display:flex;flex-wrap:wrap;gap:10px;margin:10px 0 14px}
+.upload-zone{position:relative;border:1px dashed var(--gold-dim);border-radius:var(--radius);padding:18px;text-align:center;margin-top:6px;background:#333333}
+.upload-zone input[type=file]{position:absolute;inset:0;opacity:0;cursor:pointer;width:100%}
+.upload-zone .file-name{margin-top:6px;font-size:12.5px;color:var(--ok)}
+.invalid.upload-zone{border-color:var(--err)}
+
+.submit-wrap{margin-top:18px}
+.submit-wrap .btn-line{margin-bottom:12px;padding:14px}
+.dl-msg{font-size:13px;color:var(--gold-lt);text-align:center;min-height:18px;margin:-4px 0 10px}
+.submit-wrap .btn{width:100%;padding:17px;font-size:15px}
+.submit-wrap .btn:disabled{opacity:.6;cursor:wait}
+.overlay{display:none;position:fixed;inset:0;background:rgba(20,18,14,.85);z-index:50;align-items:center;justify-content:center;flex-direction:column;gap:14px;text-align:center;padding:20px}
+.overlay.show{display:flex}
+.spinner{width:34px;height:34px;border:3px solid rgba(201,138,46,.25);border-top-color:var(--gold);border-radius:50%;animation:spin 1s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+.thanks{display:none;text-align:center;padding:40px 20px}
+.thanks h2{font-size:24px}
+/* WHY a pop-up: clients book a call without leaving the page or losing anything they've filled in. */
+.modal{display:none;position:fixed;inset:0;z-index:60;background:rgba(20,18,14,.82);align-items:center;justify-content:center;padding:18px}
+.modal.show{display:flex}
+.modal-box{width:100%;max-width:460px;max-height:92vh;overflow:auto;background:var(--card);border:1px solid var(--gold);border-radius:14px;padding:24px 22px;position:relative}
+.modal-box h2{font-size:19px;margin-bottom:4px}
+.modal-box .sub{font-size:13px;color:var(--muted);margin-bottom:16px}
+.modal-box label{margin-bottom:12px}
+.modal-close{position:absolute;top:10px;right:12px;background:none;border:0;color:var(--muted);font-size:26px;line-height:1;cursor:pointer;padding:4px 8px}
+.modal-close:hover{color:var(--white)}
+.modal-box .btn{width:100%;margin-top:6px;padding:15px}
+.modal-box .btn:disabled{opacity:.6;cursor:wait}
+.call-done{display:none;text-align:center;padding:10px 0}
+.contact-footer{text-align:center;color:var(--muted);font-size:12.5px;line-height:2;margin-top:28px}
+@media(prefers-reduced-motion:reduce){.spinner{animation:none}}
+</style>
+</head>
+<body>
+
+<div class="form-header">
+  <div class="logo-wrap"><a href="https://iqproductionz.com/"><img src="https://iqproductionz.com/Content/Images/Main/IQ-noglow_Updated.avif" alt="I.Q. Productionz" onerror="this.style.display='none'"></a></div>
+  <div class="gold-rule"></div>
+  <h1>App Production</h1>
+  <p>Turn your website into an app your team or customers can install right from their phone, with your logo, logins, forms and more.</p>
+</div>
+
+<div class="wrap" id="formWrap">
+
+  <div class="start">
+    <p><strong>Schedule a call</strong> to go over these details, or <strong>fill out the form and submit</strong> to begin your app production.</p>
+    <div class="btns">
+      <button type="button" class="btn btn-line" id="callBtn" aria-haspopup="dialog">Schedule a Call</button>
+      <a class="btn btn-gold" href="#intake">Start the Form ↓</a>
+    </div>
+    <small>Want to see one first? Open <a href="/QRCode/">our QR Code app</a> on your phone, tap Share, then "Add to Home Screen."</small>
+  </div>
+
+  <form id="intake" novalidate>
+
+    <section class="card">
+      <h2>1 · About You</h2>
+      <div class="grid">
+        <label class="req">Your name<input type="text" id="name" autocomplete="name"></label>
+        <label class="req">Business name<input type="text" id="biz" autocomplete="organization"></label>
+        <label class="req">Email<input type="email" id="email" autocomplete="email"></label>
+        <label>Phone <span class="hint">(optional)</span><input type="tel" id="phone" autocomplete="tel"></label>
+        <label>Current website <span class="hint">(optional)</span><input type="url" id="site" placeholder="https://"></label>
+      </div>
+    </section>
+
+    <section class="card">
+      <h2>2 · Your App</h2>
+      <p class="sublabel req" style="margin-top:0;font-size:13px;font-weight:600">Who will use the app?</p>
+      <div class="radios group" id="audience">
+        <label><input type="radio" name="audience" value="My staff / employees"> My staff / employees</label>
+        <label><input type="radio" name="audience" value="My customers"> My customers</label>
+        <label><input type="radio" name="audience" value="Both"> Both</label>
+      </div>
+      <p class="sublabel req" style="font-size:13px;font-weight:600">What should it do?</p>
+      <div class="checks group" id="tools">
+        <label><input type="checkbox" value="Time-off requests"> Time-off requests</label>
+        <label><input type="checkbox" value="Incident reports"> Incident reports</label>
+        <label><input type="checkbox" value="Policies & handbook"> Policies &amp; handbook</label>
+        <label><input type="checkbox" value="Important contacts"> Important contacts</label>
+        <label><input type="checkbox" value="Announcements"> Announcements</label>
+        <label><input type="checkbox" value="Schedules"> Schedules</label>
+        <label><input type="checkbox" value="Booking / appointments"> Booking / appointments</label>
+        <label><input type="checkbox" value="Menu / product catalog"> Menu / product catalog</label>
+        <label><input type="checkbox" value="Training videos"> Training videos</label>
+        <label><input type="checkbox" value="Forms & documents"> Forms &amp; documents</label>
+      </div>
+      <div class="grid" style="margin-top:14px">
+        <label>Where should form submissions go? <span class="hint">(names / emails)</span><input type="text" id="recipients" placeholder="e.g. Time off → manager@business.com"></label>
+        <label>Deadline <span class="hint">(optional)</span><input type="text" id="deadline" placeholder="e.g. Before January, ASAP"></label>
+      </div>
+      <label style="margin-top:12px">Tell us about your app <span class="hint">(what's not working now, must-haves)</span><textarea id="details"></textarea></label>
+    </section>
+
+    <section class="card">
+      <h2>3 · Size &amp; Scope</h2>
+      <div class="grid">
+        <label class="req">How many people will log in?<input type="number" id="users" min="1" inputmode="numeric" placeholder="e.g. 40"></label>
+        <label class="req">How many forms do you need?<input type="number" id="forms" min="0" inputmode="numeric" value="1"></label>
+        <label>Pages / sections of content<input type="number" id="pages" min="0" inputmode="numeric" value="5"></label>
+        <label>How custom is it?
+          <select id="complexity">
+            <option value="0.9">Simple · links, info &amp; documents</option>
+            <option value="1" selected>Standard · forms + logins</option>
+            <option value="1.25">Advanced · custom logic or many user roles</option>
+          </select>
+        </label>
+        <label>Timeline
+          <select id="rush">
+            <option value="1" selected>Standard (2–3 weeks)</option>
+            <option value="1.25">Rush (+25%)</option>
+          </select>
+        </label>
+      </div>
+    </section>
+
+    <section class="card">
+      <h2>4 · Build Your Package</h2>
+      <p class="hint" style="margin:-4px 0 8px">Prices update as you go. Login and admin prices grow with team size.</p>
+      <div class="group" id="lines"></div>
+    </section>
+
+    <!-- ESTIMATE -->
+    <section class="estimate" aria-live="polite">
+      <h2>Your Estimate</h2>
+      <table class="qtable"><tbody id="qrows"></tbody></table>
+      <div class="total-row"><span>Estimated total</span><span class="big" id="total">$0</span></div>
+      <div class="promo">
+        <input type="text" id="promoCode" placeholder="Discount code" autocomplete="off" autocapitalize="characters" spellcheck="false" aria-label="Discount code">
+        <button type="button" class="btn btn-line" id="promoBtn">Apply</button>
+      </div>
+      <div class="promo-msg" id="promoMsg" aria-live="polite"></div>
+      <div class="pills">
+        <div class="pill key"><small>50% deposit to start</small><b id="depositPill">$0</b></div>
+        <div class="pill"><small>Due at launch</small><b id="balancePill">$0</b></div>
+        <div class="pill"><small>Monthly upkeep, from</small><b id="upkeepPill">—</b></div>
+      </div>
+      <p class="fine">Your final price is confirmed with you before work begins. Your deposit counts toward the total. Upkeep covers updates, fixes and app maintenance.</p>
+    </section>
+
+    <!-- DEPOSIT -->
+    <section class="card" id="depositCard">
+      <h2>5 · Pay Your Deposit</h2>
+      <p style="font-size:14px">We begin as soon as your <strong style="color:var(--gold-lt)" id="depositText">$0</strong> deposit comes through. Choose how you'd like to pay.</p>
+      <div class="pay-choice group" id="payChoice">
+        <button type="button" id="payCardBtn" aria-pressed="false">Pay by card</button>
+        <button type="button" id="payManualBtn" aria-pressed="false">Cash App or PayPal</button>
+      </div>
+      <div id="cardPanel" hidden>
+        <p class="hint" style="font-size:13px">When you submit, your brief is sent and you'll finish on Stripe's secure checkout. No screenshot needed.</p>
+      </div>
+      <div id="manualPanel" hidden>
+        <p style="font-size:14px;margin-top:6px">Pay below, then add your screenshot.</p>
+        <div class="pay-links">
+          <a class="btn btn-line" id="cashLink" href="https://cash.app/$IQENT" target="_blank" rel="noopener">Pay with Cash App</a>
+          <a class="btn btn-line" id="paypalLink" href="https://paypal.me/IQPR" target="_blank" rel="noopener">Pay with PayPal</a>
+        </div>
+        <label class="req" for="proof">Payment screenshot</label>
+        <div class="upload-zone" id="proofZone">
+          <input type="file" id="proof" accept="image/*,.pdf">
+          <div class="hint"><strong style="color:var(--gold)">Click to upload</strong> your payment screenshot<br>Image or PDF, up to 8 MB</div>
+          <div class="file-name" id="proofName"></div>
+        </div>
+      </div>
+      <label class="group" id="agreeWrap" style="display:flex;gap:9px;align-items:flex-start;margin-top:16px;font-weight:500">
+        <input type="checkbox" id="agree" style="margin-top:2px">
+        <span class="req">I understand this is an estimate, my final price is confirmed before work begins, and my deposit counts toward the total.</span>
+      </label>
+    </section>
+
+    <div class="banner" id="banner" role="alert"></div>
+    <div class="submit-wrap">
+      <button type="button" class="btn btn-line" id="dlBtn">⤓ Download Quote for My Records</button>
+      <div class="dl-msg" id="dlMsg" aria-live="polite"></div>
+      <button type="submit" class="btn btn-gold" id="submitBtn">✦ Submit &amp; Begin My App</button></div>
+  </form>
+
+  <div class="contact-footer">
+    Questions? Email <a href="mailto:SarahParsons@IQProductionz.com">SarahParsons@IQProductionz.com</a><br>
+    <a href="/Services/Rates/">Back to Rates</a>
+  </div>
+</div>
+
+<div class="wrap thanks" id="thanks">
+  <div class="card">
+    <h2>You're All Set</h2>
+    <div class="gold-rule"></div>
+    <p>Your app brief was sent to I.Q. Productionz. We'll reach out within 24 hours to confirm your final price and timeline.</p>
+    <p id="thanksNote" style="margin-top:14px;color:var(--gold-lt)"></p>
+    <p style="margin-top:14px"><a href="/Services/Rates/">Back to Rates</a></p>
+  </div>
+</div>
+
+<div class="modal" id="callModal" role="dialog" aria-modal="true" aria-labelledby="callTitle">
+  <div class="modal-box">
+    <button type="button" class="modal-close" id="callClose" aria-label="Close">&times;</button>
+    <form id="callForm" novalidate>
+      <h2 id="callTitle">Schedule a Call</h2>
+      <p class="sub">Pick a day and time that works for you, and we'll reach out to set up your call.</p>
+      <label class="req">Best day
+        <select id="callDay">
+          <option value="">Choose a day…</option>
+          <option>Monday</option><option>Tuesday</option><option>Wednesday</option>
+          <option>Thursday</option><option>Friday</option><option>Saturday</option><option>Sunday</option>
+        </select>
+      </label>
+      <label class="req">Best time of day
+        <select id="callTime">
+          <option value="">Choose a time…</option>
+          <option>Rising (9am–12pm)</option>
+          <option>Zenith (12pm–4pm)</option>
+          <option>Astral (4pm–7pm)</option>
+        </select>
+      </label>
+      <label class="req">Your name<input type="text" id="callName" autocomplete="name"></label>
+      <label class="req">Business name<input type="text" id="callBiz" autocomplete="organization"></label>
+      <label class="req">Email <span class="hint">(we'll reply to confirm your call time)</span><input type="email" id="callContact" autocomplete="email"></label>
+      <label class="req">Phone number<input type="tel" id="callPhone" autocomplete="tel" inputmode="tel" placeholder="(000) 000-0000"></label>
+      <label>Website <span class="hint">(optional)</span><input type="url" id="callSite" placeholder="https://"></label>
+      <div class="banner" id="callBanner" role="alert"></div>
+      <button type="submit" class="btn btn-gold" id="callSubmit">✦ Request My Call</button>
+    </form>
+    <div class="call-done" id="callDone">
+      <h2>Thank You!</h2>
+      <div class="gold-rule"></div>
+      <p>Your call request has been sent.</p>
+      <p style="margin-top:10px">We'll reply to <strong id="callDoneEmail" style="color:var(--gold-lt)">your email</strong> to narrow down the exact time for your call. Keep an eye on your inbox (and spam folder, just in case).</p>
+      <button type="button" class="btn btn-line" id="callDoneBtn" style="margin-top:16px">Close</button>
+    </div>
+  </div>
+</div>
+
+<div class="overlay" id="overlay" aria-live="assertive"><div class="spinner"></div><div id="overlayText">Sending your brief…</div></div>
+
+<script>
+/* ---------- Settings ----------
+   WHY reused: same EmailJS account, Client Files Worker and checkout route as the website form and Pay page. */
+const EMAILJS_SERVICE  = 'service_wtg920o';
+const EMAILJS_TEMPLATE = 'template_nnmxioq';
+const TO_EMAIL         = 'SarahParsons@IQProductionz.com';
+const WORKER           = 'https://iq-website-files.halisarahparsons.workers.dev';
+const MAX_PROOF_BYTES  = 8 * 1024 * 1024;
+
+/* ---------- Pricing ----------
+   WHY in one place: Hali can retune every price here without touching the layout. */
+const TIERS = [
+  {max:15,  mult:1.00, upkeep:0,   label:"1–15 people"},
+  {max:50,  mult:1.15, upkeep:25,  label:"16–50 people"},
+  {max:150, mult:1.35, upkeep:50,  label:"51–150 people"},
+  {max:Infinity, mult:1.60, upkeep:100, label:"151+ people"}
+];
+const ITEMS = [
+  {id:"pwa",   name:"Home-screen app",        desc:"Your logo as the app icon, splash screen, full-screen app view", on:true,  price:() => 500},
+  {id:"auth",  name:"Personal logins",        desc:"Everyone gets their own login and stays signed in",               on:true,  price:c => 500 * c.tier.mult},
+  {id:"admin", name:"Admin page",             desc:"Add or remove users in one click",                                 on:true,  price:c => 400 * c.tier.mult},
+  {id:"move",  name:"Content setup",          desc:"Your info moved into the app · 5 pages included, $40 each after", on:true,  price:c => 300 + 40 * Math.max(0, c.pages - 5)},
+  {id:"form",  name:"Custom forms",           desc:"$150 each · submissions emailed to the right person",             on:true,  price:c => 150 * c.forms},
+  {id:"push",  name:"Push notifications",     desc:"Alerts and announcements sent to phones",                          on:false, price:() => 400},
+  {id:"docs",  name:"Personal content",       desc:"Each user sees only their own documents or schedule",              on:false, price:c => 500 * c.tier.mult},
+  {id:"store", name:"App store version",      desc:"Listed in Google Play and the Apple App Store",                    on:false, price:() => 1500}
+];
+
+const $ = id => document.getElementById(id);
+const money = n => "$" + Math.round(n).toLocaleString("en-US");
+const num = (v, d = 0) => { const n = parseFloat(v); return isFinite(n) ? n : d; };
+let paymentMethod = null;
+let current = null; // WHY: the latest estimate, so submit sends exactly what the client saw
+
+/* ---------- Discount codes ----------
+   WHY fingerprints: each code is saved as its SHA-256 fingerprint, so the code itself never
+   appears in the page source. To add a code, put its fingerprint here with a percent off.
+   (Fingerprint of a code = SHA-256 of the code in capitals.) */
+const DISCOUNTS = {
+  "012017138717015528f7cd7e6b73ebcf87dcb79a904754e9c415573d05ce6f6b": 10 // percent off
+};
+let promo = null; // { code, pct } once a valid code is applied
+
+/** Fingerprints typed text. WHY crypto.subtle: built into browsers, nothing extra to load. */
+async function fingerprint(text){
+  const bytes = new TextEncoder().encode(text);
+  const hash = await crypto.subtle.digest("SHA-256", bytes);
+  return [...new Uint8Array(hash)].map(b => b.toString(16).padStart(2, "0")).join("");
+}
+
+/** Checks and applies a code. WHY try/catch: older browsers or non-https pages lack crypto.subtle. */
+async function applyPromo(){
+  const code = $("promoCode").value.trim().toUpperCase();
+  const msg = $("promoMsg");
+  msg.className = "promo-msg";
+  if (!code) { promo = null; msg.textContent = ""; compute(); return; }
+  try {
+    const pct = DISCOUNTS[await fingerprint(code)];
+    if (pct) { promo = { code, pct }; msg.textContent = `✓ ${code} applied: ${pct}% off`; msg.classList.add("ok"); }
+    else { promo = null; msg.textContent = "That code isn't valid."; msg.classList.add("bad"); }
+  } catch (e) {
+    console.error("Discount check failed:", e);
+    promo = null; msg.textContent = "Codes can't be checked in this browser."; msg.classList.add("bad");
+  }
+  compute();
+}
+
+/** Draws the package rows. WHY generated: adding a service is one line in ITEMS. */
+function renderLines(){
+  $("lines").innerHTML = ITEMS.map(it => `
+    <label class="line" data-row="${it.id}">
+      <input type="checkbox" data-on="${it.id}" ${it.on ? "checked" : ""}>
+      <span class="name">${it.name}<span class="desc">${it.desc}</span></span>
+      <span class="amt" data-amt="${it.id}"></span>
+    </label>`).join("");
+}
+
+/** Works out the estimate. WHY on every change: clients see the price move as they choose. */
+function compute(){
+  const users = Math.max(1, Math.floor(num($("users").value, 1)));
+  const ctx = { tier: TIERS.find(t => users <= t.max), forms: Math.max(0, Math.floor(num($("forms").value))), pages: Math.max(0, Math.floor(num($("pages").value))) };
+  const factor = num($("complexity").value, 1) * num($("rush").value, 1);
+  const chosen = [];
+  const on = {};
+  ITEMS.forEach(it => {
+    const amt = Math.round(it.price(ctx) * factor / 5) * 5; // WHY $5 steps: clean, believable numbers
+    on[it.id] = document.querySelector(`[data-on="${it.id}"]`).checked;
+    document.querySelector(`[data-amt="${it.id}"]`).textContent = money(amt);
+    document.querySelector(`[data-row="${it.id}"]`).classList.toggle("off", !on[it.id]);
+    if (on[it.id] && amt > 0) chosen.push({ name: it.name + (it.id === "form" ? ` × ${ctx.forms}` : ""), total: amt });
+  });
+  const subtotal = chosen.reduce((a, b) => a + b.total, 0);
+  const discount = promo ? Math.round(subtotal * promo.pct / 100) : 0;
+  const total = subtotal - discount; // WHY: deposit and balance both come from the discounted total
+  const deposit = Math.round(total / 2); // WHY whole dollars: Cash App and PayPal links take a plain amount
+  const base = (on.store || on.push) ? 200 : (on.auth || on.admin) ? 125 : (chosen.length ? 75 : 0);
+  const upkeep = base ? base + ctx.tier.upkeep : 0;
+
+  $("qrows").innerHTML = chosen.length
+    ? chosen.map(c => `<tr><td>${c.name}</td><td>${money(c.total)}</td></tr>`).join("")
+    : `<tr><td style="color:var(--muted);font-style:italic">Choose items in step 4.</td><td></td></tr>`;
+  if (discount) $("qrows").innerHTML += `<tr><td style="color:var(--ok)">Discount · ${promo.code} (${promo.pct}% off)</td><td style="color:var(--ok)">−${money(discount)}</td></tr>`;
+  $("total").textContent = money(total);
+  $("depositPill").textContent = money(deposit);
+  $("depositText").textContent = money(deposit);
+  $("balancePill").textContent = money(total - deposit);
+  $("upkeepPill").textContent = upkeep ? money(upkeep) + "/mo" : "—";
+  $("cashLink").href = "https://cash.app/$IQENT/" + deposit;
+  $("paypalLink").href = "https://paypal.me/IQPR/" + deposit;
+  $("cashLink").textContent = `Pay ${money(deposit)} with Cash App`;
+  $("paypalLink").textContent = `Pay ${money(deposit)} with PayPal`;
+  if (paymentMethod === "card") $("submitBtn").textContent = `✦ Submit & Pay ${money(deposit)} Deposit`;
+
+  current = { users, ctx, factor, chosen, subtotal, discount, total, deposit, upkeep };
+  return current;
+}
+
+/* ---------- Validation ---------- */
+function setError(box, text){
+  box.classList.add("invalid");
+  if (!box.querySelector(":scope > .errmsg")) {
+    const m = document.createElement("div"); m.className = "errmsg"; m.textContent = text; box.appendChild(m);
+  }
+}
+/** Removes a field's error. WHY as they type: the red goes away the moment it's fixed. */
+function clearError(box){
+  if (!box) return;
+  box.classList.remove("invalid");
+  const m = box.querySelector(":scope > .errmsg"); if (m) m.remove();
+}
+
+/** Checks every required field. WHY all at once: the client sees every miss in one pass. */
+function validate(){
+  document.querySelectorAll(".invalid").forEach(clearError);
+  const missed = [];
+  const need = (ok, box, label, msg) => { if (!ok) { setError(box, msg || `${label} is required`); missed.push({label, box}); } };
+  const v = id => $(id).value.trim();
+
+  need(v("name"), $("name").closest("label"), "Your name");
+  need(v("biz"), $("biz").closest("label"), "Business name");
+  need(/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v("email")), $("email").closest("label"), "Email", "Enter a valid email");
+  need(!v("phone") || v("phone").replace(/\D/g, "").length >= 10, $("phone").closest("label"), "Phone", "Phone needs at least 10 digits");
+  need(document.querySelector('input[name="audience"]:checked'), $("audience"), "Who will use the app", "Choose who will use the app");
+  need(document.querySelector("#tools input:checked"), $("tools"), "What the app should do", "Pick at least one");
+  need(num(v("users")) >= 1, $("users").closest("label"), "Number of people", "Enter 1 or more");
+  need(v("forms") !== "" && num(v("forms"), -1) >= 0, $("forms").closest("label"), "Number of forms", "Enter 0 or more");
+  need(document.querySelector("#lines input:checked"), $("lines"), "Package items", "Choose at least one item");
+  need(paymentMethod, $("payChoice"), "Deposit payment method", "Choose how you'll pay your deposit");
+  if (paymentMethod === "manual") need($("proof").files[0], $("proofZone"), "Payment screenshot", "Add your payment screenshot");
+  need($("agree").checked, $("agreeWrap"), "Estimate agreement", "Please check this box");
+
+  const banner = $("banner");
+  if (missed.length) {
+    banner.innerHTML = `<b>Please fix ${missed.length} item${missed.length > 1 ? "s" : ""}:</b><ul>${missed.map(m => `<li>${m.label}</li>`).join("")}</ul>`;
+    banner.style.display = "block";
+    missed[0].box.scrollIntoView({ behavior: "smooth", block: "center" });
+    const f = missed[0].box.querySelector("input,select,textarea,button");
+    if (f) setTimeout(() => f.focus({ preventScroll: true }), 450);
+    return false;
+  }
+  banner.style.display = "none";
+  return true;
+}
+
+/* ---------- Payment choice ---------- */
+/** Switches between card and screenshot. WHY the button label changes: clients should know submit starts a charge. */
+function choosePayment(method){
+  paymentMethod = method;
+  clearError($("payChoice"));
+  $("payCardBtn").setAttribute("aria-pressed", method === "card");
+  $("payManualBtn").setAttribute("aria-pressed", method === "manual");
+  $("cardPanel").hidden = method !== "card";
+  $("manualPanel").hidden = method !== "manual";
+  $("submitBtn").textContent = method === "card" ? `✦ Submit & Pay ${money(current.deposit)} Deposit` : "✦ Submit & Begin My App";
+}
+
+/** Checks the screenshot when picked. WHY here: easier to fix right where the mistake happened. */
+function handleProof(input){
+  const file = input.files[0];
+  $("proofName").textContent = "";
+  clearError($("proofZone"));
+  if (!file) return;
+  if (file.size > MAX_PROOF_BYTES) { input.value = ""; setError($("proofZone"), "That file is over 8 MB. Choose a smaller screenshot."); return; }
+  $("proofName").textContent = "✓ " + file.name; // WHY textContent: file names are user input, never HTML
+}
+
+/** Shrinks big phone screenshots. WHY: a multi-MB upload on weak signal can make someone give up. */
+async function shrinkProof(file){
+  if (!file.type.startsWith("image/")) return file;
+  try {
+    const bmp = await createImageBitmap(file);
+    const scale = Math.min(1, 1600 / Math.max(bmp.width, bmp.height));
+    const c = document.createElement("canvas");
+    c.width = Math.round(bmp.width * scale); c.height = Math.round(bmp.height * scale);
+    c.getContext("2d").drawImage(bmp, 0, 0, c.width, c.height);
+    return (await new Promise(r => c.toBlob(r, "image/jpeg", 0.85))) || file;
+  } catch (e) { return file; } // WHY: some browsers can't read HEIC; the original still uploads fine
+}
+
+/** Stores the screenshot with the Client Files Worker. WHY try/catch: a failed upload must not lose the brief. */
+async function uploadProof(file){
+  try {
+    const open = await fetch(WORKER + "/intake", { method: "POST" });
+    if (!open.ok) throw new Error("Intake " + open.status);
+    const session = await open.json();
+    const body = await shrinkProof(file);
+    const q = new URLSearchParams({ intake: session.intake, secret: session.secret, name: "app-deposit-" + file.name });
+    const up = await fetch(WORKER + "/upload?" + q, { method: "POST", headers: { "Content-Type": body.type || "application/octet-stream" }, body });
+    if (!up.ok) throw new Error("Upload " + up.status);
+    return { url: (await up.json()).url, intake: session.intake, manageUrl: session.manageUrl };
+  } catch (e) {
+    console.error("Screenshot upload failed:", e);
+    return null;
+  }
+}
+
+/** Builds the brief email. WHY plain text: matches the website brief Hali already reads. */
+function brief(q, depositLine, intakeLine){
+  const g = id => $(id).value.trim() || "—";
+  const audience = document.querySelector('input[name="audience"]:checked')?.value || "—";
+  const tools = [...document.querySelectorAll("#tools input:checked")].map(c => c.value).join(", ") || "—";
+  const cx = $("complexity").selectedOptions[0].text, rush = $("rush").selectedOptions[0].text;
+  return `${intakeLine}${depositLine}
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+APP PROJECT BRIEF · I.Q. Productionz
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+CLIENT
+  Name:        ${g("name")}
+  Business:    ${g("biz")}
+  Email:       ${g("email")}
+  Phone:       ${g("phone")}
+  Website:     ${g("site")}
+
+APP
+  Users:       ${audience}
+  Features:    ${tools}
+  Routing:     ${g("recipients")}
+  Deadline:    ${g("deadline")}
+  Details:     ${g("details")}
+
+SCOPE
+  People logging in: ${q.users} (${q.ctx.tier.label})
+  Forms:       ${q.ctx.forms}
+  Pages:       ${q.ctx.pages}
+  Complexity:  ${cx}
+  Timeline:    ${rush}
+
+ESTIMATE
+${q.chosen.map(c => `  • ${c.name}: ${money(c.total)}`).join("\n")}
+${q.discount ? `  Subtotal:    ${money(q.subtotal)}\n  Discount:    ${promo.code} (${promo.pct}% off) −${money(q.discount)}\n` : ""}  TOTAL:       ${money(q.total)}
+  Deposit 50%: ${money(q.deposit)}
+  Balance:     ${money(q.total - q.deposit)}
+  Upkeep from: ${q.upkeep ? money(q.upkeep) + "/mo" : "—"}
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+Submitted via IQProductionz.com/Services/Apps
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━`;
+}
+
+function overlay(text){ $("overlayText").textContent = text; $("overlay").classList.toggle("show", !!text); }
+
+/** Sends the brief, then takes the deposit. WHY brief first for card: Hali gets the details even if checkout is abandoned. */
+async function submitForm(e){
+  e.preventDefault();
+  if (!validate()) return;
+  const q = compute();
+  const btn = $("submitBtn");
+  btn.disabled = true;
+
+  let depositLine, intakeLine = "", proof = null;
+  if (paymentMethod === "manual") {
+    overlay("Uploading your screenshot…");
+    proof = await uploadProof($("proof").files[0]);
+    intakeLine = proof ? `INTAKE NUMBER: ${proof.intake}\nDOWNLOAD OR DELETE CUSTOMER FILES: ${proof.manageUrl}\n\n` : "";
+    depositLine = proof
+      ? `DEPOSIT SCREENSHOT (${money(q.deposit)}, Cash App/PayPal): ${proof.url}`
+      : `DEPOSIT SCREENSHOT (${money(q.deposit)}): UPLOAD FAILED. Ask the client to email it.`;
+  } else {
+    depositLine = `DEPOSIT (${money(q.deposit)}): CLIENT SENT TO STRIPE CHECKOUT. Confirm the payment in your Stripe dashboard.`;
+  }
+
+  overlay("Sending your brief…");
+  const biz = $("biz").value.trim();
+  const params = {
+    to_email: TO_EMAIL,
+    subject: `New App Brief — ${biz} — ${paymentMethod === "card" ? "Card Deposit Started" : proof ? "Deposit Screenshot Received" : "Screenshot Missing"} — ${money(q.deposit)}`,
+    name: $("name").value.trim(),
+    message: brief(q, depositLine, intakeLine),
+    reply_to: $("email").value.trim()
+  };
+
+  try {
+    await emailjs.send(EMAILJS_SERVICE, EMAILJS_TEMPLATE, params);
+  } catch (err) {
+    // WHY stop here: without the brief, taking a card payment would leave Hali with money and no details.
+    console.error("EmailJS error:", err);
+    overlay("");
+    btn.disabled = false;
+    $("banner").innerHTML = `<b>Something went wrong sending your brief.</b> Please try again, or email ${TO_EMAIL}.`;
+    $("banner").style.display = "block";
+    return;
+  }
+
+  if (paymentMethod === "card") {
+    overlay("Opening secure checkout…");
+    try {
+      // WHY the existing /checkout route: it already accepts any amount, so the Worker needs no changes.
+      const res = await fetch(WORKER + "/checkout", {
+        method: "POST", headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ note: ("App deposit — " + biz).slice(0, 100), amount: q.deposit, frequency: "once" })
+      });
+      const data = await res.json();
+      if (!res.ok || !data.url) throw new Error(data.error || "Checkout failed");
+      window.location.href = data.url;
+      return;
+    } catch (err) {
+      // WHY a fallback: the brief already went through, so point them to another way to pay.
+      console.error("Checkout failed:", err);
+      overlay("");
+      showThanks(`Your brief came through, but card checkout couldn't open, and you were not charged. Pay your ${money(q.deposit)} deposit on our Pay page (iqproductionz.com/Pay) or with Cash App $IQENT.`);
+      return;
+    }
+  }
+
+  overlay("");
+  showThanks(proof ? `Your intake number is ${proof.intake}. Keep it for your records.`
+                   : `We didn't receive your payment screenshot. Please email it to ${TO_EMAIL} so we can get started.`);
+}
+
+function showThanks(note){
+  $("formWrap").style.display = "none";
+  $("thanks").style.display = "block";
+  $("thanksNote").textContent = note || "";
+  window.scrollTo({ top: 0, behavior: "smooth" });
+}
+
+/* ---------- Download quote ---------- */
+/** Checks only what a quote needs. WHY lighter than submit: clients can save a quote before deciding to pay. */
+function validateQuote(){
+  document.querySelectorAll(".invalid").forEach(clearError);
+  const missed = [];
+  const need = (ok, box, label, msg) => { if (!ok) { setError(box, msg || `${label} is required`); missed.push({label, box}); } };
+  const v = id => $(id).value.trim();
+  need(v("name"), $("name").closest("label"), "Your name");
+  need(v("biz"), $("biz").closest("label"), "Business name");
+  need(/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v("email")), $("email").closest("label"), "Email", "Enter a valid email");
+  need(num(v("users")) >= 1, $("users").closest("label"), "Number of people", "Enter 1 or more");
+  need(document.querySelector("#lines input:checked"), $("lines"), "Package items", "Choose at least one item");
+  const banner = $("banner");
+  if (missed.length) {
+    banner.innerHTML = `<b>To download your quote, fill in:</b><ul>${missed.map(m => `<li>${m.label}</li>`).join("")}</ul>`;
+    banner.style.display = "block";
+    missed[0].box.scrollIntoView({ behavior: "smooth", block: "center" });
+    return false;
+  }
+  banner.style.display = "none";
+  return true;
+}
+
+/** Builds and downloads a branded PDF quote. WHY jsPDF: a real, crisp PDF made right in the browser. */
+function downloadQuote(){
+  if (!validateQuote()) return;
+  if (!window.jspdf) { $("dlMsg").textContent = "The PDF tool didn't load. Check your connection and try again."; return; }
+  const q = compute();
+  const { jsPDF } = window.jspdf;
+  const doc = new jsPDF({ unit: "pt", format: "letter" });
+  const W = doc.internal.pageSize.getWidth(), H = doc.internal.pageSize.getHeight(), M = 48;
+  const GOLD = [201,138,46], CHAR = [42,39,32], GREY = [110,104,92], CREAM = [240,236,227];
+  const today = new Date();
+  const fmt = d => d.toLocaleDateString("en-US", { month: "long", day: "numeric", year: "numeric" });
+  const valid = new Date(today); valid.setDate(valid.getDate() + 30);
+  const quoteNo = "IQ-APP-" + today.toISOString().slice(0,10).replace(/-/g, "") + "-" + String(Date.now()).slice(-4);
+  const g = id => $(id).value.trim();
+
+  // Header band
+  doc.setFillColor(...CHAR); doc.rect(0, 0, W, 92, "F");
+  doc.setTextColor(...GOLD); doc.setFont("times", "bold"); doc.setFontSize(26);
+  doc.text("I.Q. PRODUCTIONZ", M, 50);
+  doc.setFont("helvetica", "normal"); doc.setFontSize(10); doc.setTextColor(...CREAM);
+  doc.text("App Production Estimate", M, 70);
+  doc.text("Quote " + quoteNo, W - M, 50, { align: "right" });
+  doc.text(fmt(today), W - M, 66, { align: "right" });
+
+  // Client + scope
+  let y = 128, ry = 128;
+  doc.setTextColor(...CHAR); doc.setFont("helvetica", "bold"); doc.setFontSize(11);
+  doc.text("PREPARED FOR", M, y); y += 16;
+  doc.setFont("helvetica", "normal");
+  [g("name"), g("biz"), g("email"), g("phone"), g("site")].filter(Boolean).forEach(t => { doc.text(t, M, y); y += 15; });
+  doc.setFont("helvetica", "bold"); doc.text("SCOPE", W/2 + 10, ry); ry += 16;
+  doc.setFont("helvetica", "normal"); doc.setFontSize(10);
+  const tools = [...document.querySelectorAll("#tools input:checked")].map(c => c.value).join(", ");
+  [`${q.users} people logging in (${q.ctx.tier.label})`, `${q.ctx.forms} form(s) · ${q.ctx.pages} page(s) of content`,
+   $("complexity").selectedOptions[0].text, $("rush").selectedOptions[0].text, tools ? "Features: " + tools : ""]
+    .filter(Boolean).forEach(t => doc.splitTextToSize(t, W/2 - M - 10).forEach(l => { doc.text(l, W/2 + 10, ry); ry += 13; }));
+  y = Math.max(y, ry) + 18;
+
+  // Line items
+  doc.setDrawColor(...GOLD); doc.setLineWidth(1.2); doc.line(M, y, W - M, y); y += 20;
+  doc.setFont("helvetica", "bold"); doc.setFontSize(10); doc.setTextColor(...GREY);
+  doc.text("SERVICE", M, y); doc.text("AMOUNT", W - M, y, { align: "right" }); y += 8;
+  doc.setLineWidth(.5); doc.line(M, y, W - M, y); y += 18;
+  doc.setFont("helvetica", "normal"); doc.setFontSize(11); doc.setTextColor(...CHAR);
+  q.chosen.forEach(c => { doc.text(c.name.replace("×", "x"), M, y); doc.text(money(c.total), W - M, y, { align: "right" }); y += 20; });
+
+  // Totals — WHY low on the page: the bottom-heavy layout gives the money block the most weight
+  y = Math.max(y + 10, H - 250);
+  doc.setDrawColor(...GOLD); doc.setLineWidth(1.2); doc.line(M, y, W - M, y); y += 22;
+  doc.setFontSize(11); doc.setTextColor(...GREY);
+  doc.text("Subtotal", W - M - 170, y); doc.text(money(q.subtotal), W - M, y, { align: "right" }); y += 17;
+  if (q.discount) { doc.text(`Discount ${promo.code} (${promo.pct}%)`, W - M - 170, y); doc.text("-" + money(q.discount), W - M, y, { align: "right" }); y += 17; }
+  doc.setFillColor(...CHAR); doc.roundedRect(M, y, W - 2*M, 92, 10, 10, "F");
+  doc.setTextColor(...GOLD); doc.setFont("times", "bold"); doc.setFontSize(13);
+  doc.text("ESTIMATED TOTAL", M + 18, y + 30);
+  doc.setFontSize(30); doc.text(money(q.total), W - M - 18, y + 38, { align: "right" });
+  doc.setFont("helvetica", "normal"); doc.setFontSize(10); doc.setTextColor(...CREAM);
+  const col = (W - 2*M - 36) / 3;
+  [["50% deposit to start", money(q.deposit)], ["Due at launch", money(q.total - q.deposit)],
+   ["Monthly upkeep, from", q.upkeep ? money(q.upkeep) + "/mo" : "None"]].forEach(([k, v], i) => {
+    const x = M + 18 + i * col;
+    doc.text(k, x, y + 62); doc.setFont("helvetica", "bold"); doc.text(v, x, y + 78); doc.setFont("helvetica", "normal");
+  });
+  y += 114;
+  doc.setTextColor(...GREY); doc.setFontSize(9);
+  doc.splitTextToSize(`This is an estimate. Your final price is confirmed with you before work begins, and your deposit counts toward the total. Estimate valid until ${fmt(valid)}. Questions: ${TO_EMAIL} · iqproductionz.com/Services/Apps`, W - 2*M)
+    .forEach(l => { doc.text(l, M, y); y += 12; });
+
+  const safe = (g("biz") || "Client").replace(/[^\w\- ]+/g, "").trim().replace(/\s+/g, "-");
+  // WHY try/catch: some in-app browsers block downloads; tell the client instead of failing silently.
+  try { doc.save(`IQ-Productionz-App-Quote-${safe}.pdf`); $("dlMsg").textContent = "Your quote was downloaded."; }
+  catch (e) { console.error("PDF download failed:", e); $("dlMsg").textContent = "Your browser blocked the download. Try another browser."; }
+}
+
+/* ---------- Schedule a Call pop-up ---------- */
+let lastFocus = null;
+
+/** Opens the pop-up. WHY remember focus: keyboard users land back where they were when it closes. */
+function openCall(){
+  lastFocus = document.activeElement;
+  $("callForm").style.display = "";
+  $("callDone").style.display = "none";
+  $("callModal").classList.add("show");
+  document.body.style.overflow = "hidden"; // WHY: stops the page behind from scrolling on phones
+  setTimeout(() => $("callDay").focus(), 50);
+}
+function closeCall(){
+  $("callModal").classList.remove("show");
+  document.body.style.overflow = "";
+  if (lastFocus && lastFocus.focus) lastFocus.focus();
+}
+
+/** Checks the pop-up's fields. WHY its own check: the main form's rules don't apply to a call request. */
+function validateCall(){
+  $("callForm").querySelectorAll(".invalid").forEach(clearError);
+  const missed = [];
+  const need = (ok, id, label, msg) => { if (!ok) { setError($(id).closest("label"), msg || `${label} is required`); missed.push({label, id}); } };
+  const v = id => $(id).value.trim();
+  const contact = v("callContact");
+  const okContact = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(contact);
+  need(v("callDay"), "callDay", "Best day", "Choose a day");
+  need(v("callTime"), "callTime", "Best time of day", "Choose a time of day");
+  need(v("callName"), "callName", "Your name");
+  need(v("callBiz"), "callBiz", "Business name");
+  need(okContact, "callContact", "Email", contact ? "Enter a valid email" : "Email is required");
+  const phone = v("callPhone");
+  need(phone.replace(/\D/g, "").length >= 10, "callPhone", "Phone number", phone ? "Enter a 10-digit phone number" : "Phone number is required");
+  const banner = $("callBanner");
+  if (missed.length) {
+    banner.innerHTML = `<b>Please fix ${missed.length} item${missed.length > 1 ? "s" : ""}:</b><ul>${missed.map(m => `<li>${m.label}</li>`).join("")}</ul>`;
+    banner.style.display = "block";
+    $(missed[0].id).focus();
+    return false;
+  }
+  banner.style.display = "none";
+  return true;
+}
+
+/** Emails the call request. WHY the fixed subject: Hali can filter these in her inbox. */
+async function submitCall(e){
+  e.preventDefault();
+  if (!validateCall()) return;
+  const v = id => $(id).value.trim() || "—";
+  const btn = $("callSubmit");
+  btn.disabled = true; btn.textContent = "Sending…";
+  const contact = $("callContact").value.trim();
+  const message = `━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+CLIENT CALL APP REQUEST · I.Q. Productionz
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  Best day:    ${v("callDay")}
+  Best time:   ${v("callTime")}
+  Name:        ${v("callName")}
+  Business:    ${v("callBiz")}
+  Email:       ${v("callContact")}
+  Phone:       ${v("callPhone")}
+  Website:     ${v("callSite")}
+
+Submitted via IQProductionz.com/Services/Apps`;
+  try {
+    await emailjs.send(EMAILJS_SERVICE, EMAILJS_TEMPLATE, {
+      to_email: TO_EMAIL,
+      subject: "Client Call App Request",
+      name: $("callName").value.trim(),
+      message,
+      reply_to: contact // WHY: hitting Reply goes straight to the client to settle the exact time
+    });
+    $("callDoneEmail").textContent = contact; // WHY: shows which inbox to watch, and catches a typo
+    $("callForm").reset();
+    $("callForm").style.display = "none";
+    $("callDone").style.display = "block";
+    $("callDoneBtn").focus();
+  } catch (err) {
+    // WHY keep the form open: the client can retry without retyping anything.
+    console.error("Call request failed:", err);
+    $("callBanner").innerHTML = `<b>Something went wrong.</b> Please try again, or email ${TO_EMAIL}.`;
+    $("callBanner").style.display = "block";
+  } finally {
+    btn.disabled = false; btn.textContent = "✦ Request My Call";
+  }
+}
+
+$("callBtn").addEventListener("click", openCall);
+$("callClose").addEventListener("click", closeCall);
+$("callDoneBtn").addEventListener("click", closeCall);
+$("callModal").addEventListener("click", e => { if (e.target === $("callModal")) closeCall(); }); // WHY: tapping outside closes it
+document.addEventListener("keydown", e => { if (e.key === "Escape" && $("callModal").classList.contains("show")) closeCall(); });
+$("callForm").addEventListener("input", e => clearError(e.target.closest("label")));
+$("callForm").addEventListener("submit", submitCall);
+
+/* ---------- Startup ---------- */
+renderLines();
+compute();
+$("intake").addEventListener("input", e => {
+  clearError(e.target.closest("label"));
+  ["audience", "tools", "lines", "agreeWrap"].forEach(id => { if (e.target.closest("#" + id)) clearError($(id)); });
+  compute();
+});
+$("intake").addEventListener("change", compute);
+$("payCardBtn").addEventListener("click", () => choosePayment("card"));
+$("promoBtn").addEventListener("click", applyPromo);
+$("dlBtn").addEventListener("click", downloadQuote);
+// WHY: editing the box after applying removes the discount until the new code is applied.
+$("promoCode").addEventListener("input", () => { if (promo && $("promoCode").value.trim().toUpperCase() !== promo.code) { promo = null; $("promoMsg").textContent = ""; compute(); } });
+// WHY Enter applies the code: otherwise Enter in this box would submit the whole form.
+$("promoCode").addEventListener("keydown", e => { if (e.key === "Enter") { e.preventDefault(); applyPromo(); } });
+$("payManualBtn").addEventListener("click", () => choosePayment("manual"));
+$("proof").addEventListener("change", e => handleProof(e.target));
+$("intake").addEventListener("submit", submitForm);
+</script>
+</body>
+</html>
