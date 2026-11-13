@@ -395,8 +395,11 @@ nav{display:flex;justify-content:space-between;align-items:center;padding:calc(1
 .track-opt{align-items:flex-start;}
 .track-opt label{display:flex;flex-direction:column;gap:2px;}
 .track-note{font-size:.7rem;color:var(--muted);line-height:1.4;}
-.dash-float-bar{position:fixed;left:50%;bottom:16px;transform:translate(-50%,140%);display:flex;gap:8px;flex-wrap:wrap;align-items:center;justify-content:center;max-width:calc(100vw - 24px);padding:10px 12px;background:rgba(42,42,42,.96);border:1px solid var(--gold-dim);border-radius:12px;box-shadow:0 8px 28px rgba(0,0,0,.5);z-index:900;opacity:0;pointer-events:none;transition:transform .25s ease,opacity .25s ease;}
-.dash-float-bar.show{transform:translate(-50%,0);opacity:1;pointer-events:auto;}
+/* WHY top:var(--nav-h) instead of the bottom: Hali wants the floating toolbar pinned right
+   under the main menu. --nav-h is measured from the real nav (it wraps taller on phones).
+   WHY z-index 99 (just under nav's 100): it slides down from behind the menu, not over it. */
+.dash-float-bar{position:fixed;left:0;right:0;top:var(--nav-h,60px);transform:translateY(-110%);display:flex;gap:8px;flex-wrap:wrap;align-items:center;justify-content:center;padding:10px 12px;background:#222;border-bottom:1px solid var(--gold-dim);box-shadow:0 8px 20px rgba(0,0,0,.45);z-index:99;opacity:0;pointer-events:none;transition:transform .25s ease,opacity .25s ease;}
+.dash-float-bar.show{transform:translateY(0);opacity:1;pointer-events:auto;}
 .dash-float-count{font-size:.74rem;color:var(--gold2);}
 /* WHY: on phones three stat columns overflowed the card; two fit, and min-width:0 stops long text from pushing boxes wider */
 .stats-grid>*{min-width:0;}
@@ -1827,8 +1830,8 @@ footer a{color:var(--muted);}footer a:hover{color:var(--white);}
     <p style="font-size:.74rem;color:var(--muted);margin:-10px 0 16px;">Check codes below to include them in CSV export, bulk stats, or bulk delete.</p>
     <div id="qr-list"><div class="empty-state"><p>No QR codes yet.</p></div></div>
     <!-- WHY a second, floating copy of the toolbar: with many codes, the real
-         toolbar scrolls out of reach. This one slides up from the bottom only
-         once the real one is off screen (see the IntersectionObserver near
+         toolbar scrolls out of reach. This one slides down under the main menu
+         once the real one scrolls behind it (see FLOATING TOOLBAR near
          setDashSort). Its buttons have their own ids so updateToolbarVisibility
          can keep both copies in sync. -->
     <div class="dash-float-bar" id="dash-float-bar" aria-hidden="true">
@@ -12237,18 +12240,33 @@ function setDashSort(v) {
 }
 
 // ── FLOATING TOOLBAR ─────────────────────────────────────────────────────────
-// WHY IntersectionObserver: the floating copy appears only after the real
-// toolbar scrolls off the top, so the two are never on screen together.
+// WHY measure the nav: the floating bar sits right under the main menu, and the
+// menu's height changes (it wraps on phones, and grows by the status bar in the app).
+// WHY a scroll check instead of IntersectionObserver: the real toolbar slides behind
+// the sticky menu before it leaves the screen, so "off screen" alone fires too late.
 (function(){
   function init(){
-    var bar=document.querySelector('.dash-toolbar'), fl=document.getElementById('dash-float-bar');
-    if (!bar || !fl || !('IntersectionObserver' in window)) return;
-    new IntersectionObserver(function(entries){
-      var e=entries[0];
-      var show=!e.isIntersecting && e.boundingClientRect.top<0; // WHY top<0: hidden only because it's scrolled ABOVE view, not because the dashboard is closed
+    var nav=document.querySelector('nav'), bar=document.querySelector('.dash-toolbar'), fl=document.getElementById('dash-float-bar');
+    if (!nav || !bar || !fl) return;
+    var navH=0, ticking=false;
+    function measure(){
+      navH=nav.getBoundingClientRect().height;
+      document.documentElement.style.setProperty('--nav-h', navH+'px');
+      update();
+    }
+    function update(){
+      ticking=false;
+      // WHY offsetParent: it's null while the dashboard view is hidden, so the bar never shows on other pages
+      var visible=bar.offsetParent!==null;
+      var show=visible && bar.getBoundingClientRect().bottom<=navH;
       fl.classList.toggle('show', show);
       fl.setAttribute('aria-hidden', show?'false':'true');
-    }).observe(bar);
+    }
+    // WHY requestAnimationFrame: scroll fires many times a frame; one check per frame is enough
+    window.addEventListener('scroll', function(){ if(!ticking){ ticking=true; requestAnimationFrame(update); } }, {passive:true});
+    window.addEventListener('resize', measure);
+    if ('ResizeObserver' in window) new ResizeObserver(measure).observe(nav);
+    measure();
   }
   if (document.readyState==='loading') document.addEventListener('DOMContentLoaded', init); else init();
 })();
