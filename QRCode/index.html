@@ -12798,7 +12798,7 @@ async function fulfillShapeRequest(paymentIntentId) {
 
     // WHY: build branded reply URL so Hali can reply with one click from her email
     // Pre-fills: To = customer email, Reply-To = IQProductionz, Subject = re: shape request
-    var brandedReplyUrl = 'https://iqproductionz.com/BackEnd/BrandedEmail/?' +
+    var brandedReplyUrl = 'https://iqproductionz.com/BackEnd/InHouse/BrandedEmail/?' +
       'to=' + encodeURIComponent(customerEmail || '') +
       '&reply=' + encodeURIComponent('SarahParsons@IQProductionz.com') +
       '&name=' + encodeURIComponent('QR Shape Request: ' + req.description.slice(0,40));
@@ -13120,7 +13120,7 @@ async function submitTicket(){
     // introducing a different button style. The plain-text URL stays right
     // under it as a fallback in case the email template or her mail client
     // ever strips the HTML.
-    var brandedReplyUrl = 'https://iqproductionz.com/BackEnd/BrandedEmail/?' +
+    var brandedReplyUrl = 'https://iqproductionz.com/BackEnd/InHouse/BrandedEmail/?' +
       'to=' + encodeURIComponent(email) +
       '&reply=' + encodeURIComponent(TICKET_SUPPORT_EMAIL) +
       '&name=' + encodeURIComponent('QR Platform Ticket: ' + name);

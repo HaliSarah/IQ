@@ -1,0 +1,734 @@
+<!DOCTYPE html>
+<!--
+  Title:       Quote Builder — I.Q. Productionz
+  Author:      Hali Sarah Parsons
+  Date:        2026-11-14
+  Modified By: Claude (Anthropic), 2026-11-14; Claude (Anthropic), 2026-11-14: added a Finalize button to every tab
+  Description: Internal BackEnd tool. One tab per service (rates from the BookNow pages); each tab's
+               Next button moves on, and the Total tab combines every service into one quote with
+               the 50% deposit, working hours and recurring fees. "Send Quote" emails a branded HTML
+               quote to the client through EmailJS and sends Hali a copy. The quote links to the
+               digital Studio Practices agreement, pre-filled. Kept out of search engines on purpose.
+-->
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Quote Builder — I.Q. Productionz</title>
+<meta name="robots" content="noindex, nofollow">
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700&family=Raleway:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script>
+  // WHY init right away: the key must exist even if Send is clicked before the page finishes loading.
+  var EJS_PUBLIC_KEY = '3vNjQbWmqzzOO6IK-'; // WHY var: shared with the main script below
+  if (window.emailjs) emailjs.init({ publicKey: EJS_PUBLIC_KEY });
+</script>
+<style>
+/* WHY these values: same palette and fonts as the BackEnd portal and Rates page. */
+:root{
+  --bg:#333333;--surface:#3b3b3b;--card:#454545;--border:#2e2b24;
+  --gold:#c98a2e;--gold-lt:#e0a84a;--gold-dim:#7a5218;
+  --white:#f0ece3;--muted:#A9A9A9;--radius:8px;--err:#ffb4a8;--ok:#9fd8a4;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Raleway',sans-serif;background:var(--bg);color:var(--white);min-height:100vh;padding-bottom:70px;line-height:1.55}
+a{color:var(--gold-lt)}
+.top{background:linear-gradient(160deg,#454545 0%,#333333 60%);border-bottom:1px solid var(--border);padding:28px 20px 22px;text-align:center;position:relative}
+.top::before{content:'';position:absolute;inset:0;background:radial-gradient(ellipse at 50% 0%,rgba(201,138,46,.13),transparent 70%);pointer-events:none}
+.top img{height:58px;width:auto;max-width:90%;filter:drop-shadow(0 0 14px rgba(201,138,46,.45))}
+.top .sub{font-family:'Cinzel',serif;letter-spacing:3px;font-size:12px;color:var(--muted);margin-top:10px;text-transform:uppercase}
+.back{position:absolute;top:14px;left:16px;font-size:12px;color:var(--muted);text-decoration:none}
+
+/* WHY a sticky, scrollable tab bar: 13 tabs fit on a phone and stay reachable while scrolling. */
+.tabs{position:sticky;top:0;z-index:20;background:#2f2f2f;border-bottom:1px solid var(--border);display:flex;gap:4px;overflow-x:auto;padding:8px 10px;scrollbar-width:thin}
+.tab{flex:0 0 auto;background:transparent;border:1px solid transparent;color:var(--muted);font:600 13px 'Raleway',sans-serif;padding:8px 12px;border-radius:20px;cursor:pointer;white-space:nowrap}
+.tab:hover{color:var(--white)}
+.tab[aria-selected="true"]{border-color:var(--gold);color:var(--gold-lt);background:rgba(201,138,46,.12)}
+.tab .badge{display:inline-block;margin-left:6px;font-size:11px;background:var(--gold);color:#2a2720;border-radius:10px;padding:0 6px}
+.tab.total{color:var(--gold)}
+
+.wrap{max-width:880px;margin:0 auto;padding:24px 18px 0}
+.panel{display:none}
+.panel.active{display:block}
+.card{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:20px;margin-bottom:16px;position:relative;overflow:hidden}
+.card::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,transparent,var(--gold),transparent)}
+h2{font-family:'Cinzel',serif;font-size:19px;font-weight:700;color:var(--gold);letter-spacing:1.2px;text-transform:uppercase;margin-bottom:4px}
+.lead{color:var(--muted);font-size:13.5px;margin-bottom:14px}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:12px 16px}
+label{display:block;font-size:13px;font-weight:600}
+.req:not(label)::after{content:" *";color:var(--gold)}
+/* WHY a real star element: on labels, ::after landed after the input box instead of beside the words. */
+.star{color:var(--gold);margin-left:3px}
+.hint{font-weight:400;color:var(--muted);font-size:12px}
+input[type=text],input[type=email],input[type=tel],input[type=number],input[type=date],select,textarea{
+  width:100%;margin-top:5px;padding:10px 11px;border:1px solid var(--border);border-radius:var(--radius);background:#333;color:var(--white);font:500 14.5px 'Raleway',sans-serif}
+textarea{min-height:70px;resize:vertical}
+input:focus-visible,select:focus-visible,textarea:focus-visible,button:focus-visible,a:focus-visible{outline:3px solid var(--gold-lt);outline-offset:2px}
+input[type=checkbox],input[type=radio]{accent-color:var(--gold);width:17px;height:17px;flex:0 0 auto}
+.row{display:grid;grid-template-columns:26px 1fr 74px 104px;gap:10px;align-items:center;padding:9px 0;border-bottom:1px dashed rgba(201,138,46,.22)}
+.row:last-child{border-bottom:0}
+.row .nm{font-weight:600;font-size:14px}
+.row .ds{display:block;font-size:12px;color:var(--muted);font-weight:400}
+.row input[type=number]{margin:0;text-align:right;padding:8px}
+.toggle{display:flex;gap:9px;align-items:center;font-weight:600;font-size:14px;margin-bottom:12px}
+.radios{display:grid;gap:8px;margin-top:6px}
+.radios label{display:flex;gap:9px;align-items:center;font-weight:500}
+.note{font-size:12.5px;color:var(--muted);border-left:2px solid var(--gold-dim);padding:4px 10px;margin-top:12px}
+.sub-total{display:flex;justify-content:space-between;align-items:baseline;margin-top:14px;padding-top:12px;border-top:1px solid rgba(201,138,46,.3);font-family:'Cinzel',serif}
+.sub-total b{font-size:22px;color:var(--gold-lt)}
+
+/* WHY bottom-heavy nav: Next sits at the end of each tab, where the eye lands after filling it in. */
+.nav{display:flex;gap:10px;justify-content:space-between;margin-top:18px}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;padding:13px 22px;border-radius:var(--radius);font-family:'Cinzel',serif;font-size:13px;font-weight:700;letter-spacing:1px;text-transform:uppercase;text-decoration:none;cursor:pointer;border:0}
+.btn-gold{background:linear-gradient(135deg,var(--gold) 0%,#a87025 100%);color:#2a2720;box-shadow:0 4px 16px rgba(201,138,46,.25)}
+.btn-gold:hover{background:linear-gradient(135deg,var(--gold-lt) 0%,var(--gold) 100%)}
+.btn-line{background:var(--surface);color:var(--white);border:1px solid var(--gold-dim)}
+.btn-line:hover{border-color:var(--gold)}
+.btn:disabled{opacity:.6;cursor:wait}
+
+.invalid input,.invalid select,.invalid textarea{border-color:var(--err)!important}
+.errmsg{color:var(--err);font-size:12.5px;font-weight:600;margin-top:5px}
+.banner{display:none;border:1px solid var(--err);background:rgba(255,180,168,.08);border-radius:var(--radius);padding:12px 14px;margin:0 0 14px;font-size:14px}
+.banner b{color:var(--err)}
+.banner ul{margin:6px 0 0 18px}
+.status{display:none;border:1px solid var(--ok);background:rgba(159,216,164,.08);border-radius:var(--radius);padding:12px 14px;margin-top:14px;font-size:14px}
+
+.qtable{width:100%;border-collapse:collapse;font-size:14px}
+.qtable th{text-align:left;font-family:'Cinzel',serif;font-size:12px;letter-spacing:1px;color:var(--gold);padding:12px 0 4px;border-bottom:1px solid rgba(201,138,46,.35)}
+.qtable td{padding:7px 0;border-bottom:1px solid rgba(240,236,227,.07)}
+.qtable td:last-child{text-align:right;white-space:nowrap}
+.estimate{background:linear-gradient(180deg,#454545,#2a2720);border:2px solid var(--gold);border-radius:16px;padding:22px;margin:16px 0}
+.big{font-family:'Cinzel',serif;font-size:clamp(32px,7vw,46px);font-weight:700;color:var(--gold)}
+.total-row{display:flex;justify-content:space-between;align-items:baseline;gap:10px;flex-wrap:wrap;margin-top:12px}
+.pills{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;margin-top:14px}
+.pill{background:rgba(201,138,46,.1);border:1px solid var(--gold-dim);border-radius:10px;padding:11px 12px}
+.pill.key{border-color:var(--gold);background:rgba(201,138,46,.18)}
+.pill small{display:block;color:var(--muted);font-size:12px}
+.pill b{font-family:'Cinzel',serif;font-size:19px}
+.actions{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:10px;margin-top:16px}
+.actions .btn{width:100%}
+.actions .send{grid-column:1/-1;padding:17px;font-size:15px}
+@media(max-width:560px){.row{grid-template-columns:24px 1fr 64px 90px;gap:7px}}
+</style>
+</head>
+<body>
+
+<header class="top">
+  <a class="back" href="/BackEnd/">← BackEnd</a>
+  <img src="https://iqproductionz.com/Content/Images/Main/IQ-noglow_Updated.avif" alt="I.Q. Productionz" onerror="this.style.display='none'">
+  <div class="sub">Quote Builder</div>
+</header>
+
+<nav class="tabs" id="tabs" role="tablist" aria-label="Services"></nav>
+<main class="wrap" id="panels"></main>
+
+<script>
+/* ============================================================
+   SETTINGS
+   WHY reused: same EmailJS service/template as the BrandedEmail tool, which renders HTML.
+   ============================================================ */
+const EJS_SERVICE  = 'service_wtg920o';
+const EJS_TEMPLATE = 'template_nnmxioq';
+const HALI_EMAIL   = 'SarahParsons@IQProductionz.com';
+const LOGO_URL     = 'https://iqproductionz.com/Content/Images/Main/IQ-noglow_Updated.avif';
+const AGREEMENT_URL = 'https://iqproductionz.com/Agreements/StudioPractices/';
+const STORE_KEY    = 'iq-quote-builder-v1';
+
+/* ============================================================
+   SERVICES & RATES — taken from the BookNow pages (Nov 2026).
+   WHY one table: change any rate here and every tab, total, email and PDF follows.
+   type "hourly": cost = time blocks × rate (e.g. $25 per 30 minutes).
+   type "items":  checklist of priced items with quantity; freq once / month / year.
+   agree:         which Studio Practices section this service falls under (null = none).
+   ============================================================ */
+const SERVICES = [
+  { id:'web', name:'Websites', type:'web', agree:'graphic', agreeOther:'website design',
+    lead:'$350 flat for up to 5 pages, mobile-ready, 72-hour turnaround. Extra pages are estimated per page.',
+    base:350, included:5, extraRate:50 },
+  { id:'html', name:'Specialty HTML', type:'items', agree:'graphic', agreeOther:'custom HTML features',
+    lead:'Interactive tools, embeds and coded features. Prices are "from" rates; adjust to scope.',
+    items:[
+      {id:'quiz',  name:'Interactive Quiz or Assessment', price:150},
+      {id:'emA',   name:'Branded Email Template — add-on to a new website', price:75},
+      {id:'emS',   name:'Branded Email Template — standalone', price:125},
+      {id:'emB',   name:'Communication Bundle — 3 email templates', price:225},
+      {id:'pdf',   name:'PDF Viewer / Embedded Document', price:75},
+      {id:'table', name:'Pricing or Service Comparison Table', price:100},
+      {id:'lead',  name:'Lead Capture / Contact Form', price:75},
+      {id:'count', name:'Countdown Timer or Launch Page', price:75},
+      {id:'gal',   name:'Portfolio or Gallery Grid', price:100},
+      {id:'book',  name:'Booking Widget or Intake Flow', price:150},
+      {id:'anim',  name:'Animated Product Showcase', price:125},
+      {id:'event', name:'Event Registration Page', price:100},
+      {id:'camp',  name:'Custom Campaign Landing Page', price:125},
+      {id:'other', name:'Other — custom quote', price:0}
+    ]},
+  { id:'apps', name:'Apps', type:'apps', agree:'graphic', agreeOther:'app design',
+    lead:'Home-screen and app-store apps. Login and admin prices grow with team size.' },
+  { id:'host', name:'Hosting', type:'items', agree:null,
+    lead:'Domain transfer, or domain + unlimited professional email. Deliverables begin within 24 business hours of payment.',
+    items:[
+      {id:'xfer', name:'Domain Transfer', desc:'DNS, redirects and connection to the site', price:75, freq:'once'},
+      {id:'dom',  name:'Domain + Email Hosting', desc:'New domain, unlimited forwarding email, 1 guided setup', price:99, freq:'year'},
+      {id:'mu5',  name:'Multi-User Setup — up to 5', desc:'Add-on to Domain + Email', price:20, freq:'month', qty:false},
+      {id:'mu10', name:'Multi-User Setup — up to 10', desc:'Add-on to Domain + Email', price:30, freq:'month', qty:false}
+    ]},
+  { id:'graphic', name:'Graphic', type:'hourly', agree:'graphic', rate:25, block:60, minBlocks:1,
+    lead:'Photo touch-ups, logos, album art and webpages. $25 per hour, 1 hour minimum. Free consultation available.',
+    note:'Copyright is held for 2 years from completion; renewal is $25.00 per year after that.' },
+  { id:'photo', name:'Photo', type:'hourly', agree:'photo', rate:25, block:30, minBlocks:1,
+    lead:'Photography. $25 per 30 minutes, 30-minute minimum. Free consultation available.',
+    note:'Public use is authorized for 1 year from completion; renewal is $300.00.' },
+  { id:'video', name:'Video', type:'hourly', agree:'video', rate:50, block:30, minBlocks:1,
+    lead:'Videography with storyboarding and editing. $50 per 30 minutes. Free consultation available.',
+    note:'Rights are good for 1 year; renewal is $50.00 per year or $200.00 for five years paid in full.' },
+  { id:'audio', name:'Audio', type:'hourly', agree:'audio', rate:25, block:30, minBlocks:1, rights:true,
+    lead:'Mixing or in-studio recording. $25 per 30 minutes, 30-minute minimum.' },
+  { id:'promo', name:'Promo', type:'hourly', agree:'promo', rate:13, block:15, minBlocks:1,
+    lead:'Press releases, social posting, podcast and CD promotion. $13 per 15 minutes; consultation counts toward the time.' },
+  { id:'fashion', name:'Fashion', type:'hourly', agree:'fashion', rate:25, block:30, minBlocks:1,
+    lead:'Hemming, tailoring, graphic prints and custom design. $25 per 30 minutes. Free consultation available.' },
+  { id:'heal', name:'Heal', type:'items', agree:null,
+    lead:'SELC Reiki virtual healing session.',
+    items:[{id:'reiki', name:'SELC Reiki Virtual Healing Session', price:74.99, freq:'once'}] },
+  { id:'learn', name:'Learn', type:'items', agree:null,
+    lead:'SELC Reiki certification.',
+    items:[
+      {id:'l1', name:'SELC Reiki Level 1', desc:'55 light code attunements over a year', price:999.99, freq:'once', qty:false},
+      {id:'l2', name:'SELC Reiki Level 2', desc:'44 light code attunements, Qi Gong techniques', price:555.55, freq:'once', qty:false},
+      {id:'lm', name:'SELC Reiki Master', desc:'Teach and give attunements, business management', price:444.44, freq:'once', qty:false}
+    ]}
+];
+
+/* Apps pricing (same model as the client-facing Apps page). */
+const APP_TIERS = [
+  {max:15, mult:1.00, upkeep:0, label:'1–15 people'}, {max:50, mult:1.15, upkeep:25, label:'16–50 people'},
+  {max:150, mult:1.35, upkeep:50, label:'51–150 people'}, {max:Infinity, mult:1.60, upkeep:100, label:'151+ people'}
+];
+const APP_ITEMS = [
+  {id:'pwa',   name:'Home-screen app', on:true, price:() => 500},
+  {id:'auth',  name:'Personal logins', on:true, price:c => 500 * c.tier.mult},
+  {id:'admin', name:'Admin page', on:true, price:c => 400 * c.tier.mult},
+  {id:'move',  name:'Content setup', on:true, price:c => 300 + 40 * Math.max(0, c.pages - 5)},
+  {id:'form',  name:'Custom forms', on:true, price:c => 150 * c.forms},
+  {id:'push',  name:'Push notifications', on:false, price:() => 400},
+  {id:'docs',  name:'Personal content', on:false, price:c => 500 * c.tier.mult},
+  {id:'store', name:'App store version', on:false, price:() => 1500}
+];
+
+/* ============================================================
+   HELPERS
+   ============================================================ */
+const $ = id => document.getElementById(id);
+const num = (v, d = 0) => { const n = parseFloat(v); return isFinite(n) ? n : d; };
+const money = n => '$' + (Math.round(n * 100) / 100).toLocaleString('en-US', { minimumFractionDigits: n % 1 ? 2 : 0, maximumFractionDigits: 2 });
+const esc = s => String(s).replace(/[&<>"']/g, c => ({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;' }[c]));
+const FREQ = { once:'', month:'/mo', year:'/yr' };
+const TABS = [...SERVICES.map(s => ({ id:s.id, name:s.name })), { id:'total', name:'Total' }];
+
+/* ============================================================
+   RENDER — each tab is generated from SERVICES.
+   WHY generated: adding a service or item is a data change, not new HTML.
+   ============================================================ */
+function itemRows(s){
+  return s.items.map(it => `
+    <div class="row">
+      <input type="checkbox" id="${s.id}_${it.id}_on" aria-label="Include ${esc(it.name)}">
+      <label for="${s.id}_${it.id}_on" class="nm" style="font-weight:600">${esc(it.name)}${it.desc ? `<span class="ds">${esc(it.desc)}</span>` : ''}</label>
+      ${it.qty === false ? '<span></span>' : `<input type="number" min="1" step="1" id="${s.id}_${it.id}_qty" value="1" aria-label="Quantity">`}
+      <input type="number" min="0" step="0.01" id="${s.id}_${it.id}_price" value="${it.price}" aria-label="Price">
+    </div>`).join('') + `<p class="hint" style="margin-top:8px">Columns: include · item · qty · price${s.items.some(i => i.freq && i.freq !== 'once') ? ' (yearly/monthly items are billed on repeat)' : ''}</p>`;
+}
+
+function panelBody(s){
+  if (s.type === 'web') return `
+    <label class="toggle"><input type="checkbox" id="web_on"> Include a website</label>
+    <div class="grid">
+      <label>Number of pages<input type="number" id="web_pages" min="1" value="5"></label>
+      <label>Flat rate ($, includes ${s.included} pages)<input type="number" id="web_base" min="0" value="${s.base}"></label>
+      <label>Each extra page ($)<input type="number" id="web_extra" min="0" value="${s.extraRate}"></label>
+      <label>Working hours to cover <span class="hint">(for the agreement)</span><input type="number" id="web_hours" min="0" step="0.5" value="0"></label>
+    </div>`;
+  if (s.type === 'items') return itemRows(s);
+  if (s.type === 'apps') return `
+    <label class="toggle"><input type="checkbox" id="apps_on"> Include an app</label>
+    <div class="grid">
+      <label>People logging in<input type="number" id="apps_users" min="1" value="15"></label>
+      <label>Custom forms<input type="number" id="apps_forms" min="0" value="1"></label>
+      <label>Pages of content<input type="number" id="apps_pages" min="0" value="5"></label>
+      <label>Complexity<select id="apps_cx"><option value="0.9">Simple</option><option value="1" selected>Standard</option><option value="1.25">Advanced</option></select></label>
+      <label>Timeline<select id="apps_rush"><option value="1" selected>Standard (2–3 weeks)</option><option value="1.25">Rush (+25%)</option></select></label>
+      <label>Working hours to cover<input type="number" id="apps_hours" min="0" step="0.5" value="0"></label>
+    </div>
+    <div style="margin-top:12px">${APP_ITEMS.map(it => `
+      <div class="row" style="grid-template-columns:26px 1fr 104px">
+        <input type="checkbox" id="apps_${it.id}" ${it.on ? 'checked' : ''} aria-label="Include ${it.name}">
+        <label for="apps_${it.id}" class="nm">${it.name}</label>
+        <span style="text-align:right;color:var(--gold-lt);font-weight:700" id="apps_${it.id}_amt"></span>
+      </div>`).join('')}</div>
+    <label class="toggle" style="margin-top:12px"><input type="checkbox" id="apps_upkeep" checked> Include monthly upkeep <span class="hint" id="apps_upkeep_amt"></span></label>`;
+  // hourly
+  const per = s.block === 60 ? 'hour' : s.block + ' minutes';
+  return `
+    <div class="grid">
+      <label>Hours estimated<input type="number" id="${s.id}_hours" min="0" step="0.25" value="0"></label>
+      <label>Rate ($ per ${per})<input type="number" id="${s.id}_rate" min="0" step="0.01" value="${s.rate}"></label>
+    </div>
+    <label class="toggle" style="margin-top:12px;font-weight:500"><input type="checkbox" id="${s.id}_consult"> Free consultation first</label>
+    ${s.rights ? `
+    <p style="font-size:13px;font-weight:600;margin-top:6px">Recording rights</p>
+    <div class="radios">
+      <label><input type="radio" name="audio_rights" value="free" checked> Free — audio stamped &amp; credited to I.Q. Productionz (BMI mechanical royalties)</label>
+      <label><input type="radio" name="audio_rights" value="lease"> Lease — $25.00 per month</label>
+      <label><input type="radio" name="audio_rights" value="own"> Own — $1,000.00 one time</label>
+    </div>` : ''}
+    ${s.note ? `<p class="note">${esc(s.note)}</p>` : ''}`;
+}
+
+function render(){
+  $('tabs').innerHTML = TABS.map((t, i) =>
+    `<button class="tab${t.id === 'total' ? ' total' : ''}" role="tab" id="tab_${t.id}" aria-controls="panel_${t.id}" aria-selected="${i === 0}" data-tab="${t.id}">${t.name}<span class="badge" id="badge_${t.id}" style="display:none"></span></button>`).join('');
+  $('panels').innerHTML = SERVICES.map((s, i) => `
+    <section class="panel${i === 0 ? ' active' : ''}" id="panel_${s.id}" role="tabpanel" aria-labelledby="tab_${s.id}">
+      <div class="card">
+        <h2>${s.name}</h2>
+        <p class="lead">${esc(s.lead)}</p>
+        ${panelBody(s)}
+        <div class="sub-total"><span>${s.name} subtotal</span><b id="sub_${s.id}">$0</b></div>
+      </div>
+      <div class="nav">
+        ${i ? `<button type="button" class="btn btn-line" data-go="${TABS[i - 1].id}">← Back</button>` : '<span></span>'}
+        <span style="display:flex;gap:10px;flex-wrap:wrap;justify-content:flex-end">
+          ${i < SERVICES.length - 1 ? '<button type="button" class="btn btn-line" data-finalize>Finalize ✉</button>' : ''}
+          <button type="button" class="btn btn-gold" data-go="${TABS[i + 1].id}">Next${i === SERVICES.length - 1 ? ': Total' : ''} →</button>
+        </span>
+      </div>
+    </section>`).join('') + totalPanel();
+}
+
+function totalPanel(){
+  return `
+  <section class="panel" id="panel_total" role="tabpanel" aria-labelledby="tab_total">
+    <div class="card">
+      <h2>Client</h2>
+      <div class="grid">
+        <label class="req">Client name<span class="star" aria-hidden="true">*</span><input type="text" id="c_name" autocomplete="off"></label>
+        <label>Business<input type="text" id="c_biz" autocomplete="off"></label>
+        <label class="req">Client email<span class="star" aria-hidden="true">*</span><input type="email" id="c_email" autocomplete="off"></label>
+        <label>Phone<input type="tel" id="c_phone" autocomplete="off"></label>
+        <label>Quote date<input type="date" id="c_date"></label>
+        <label>Valid for (days)<input type="number" id="c_valid" min="1" value="30"></label>
+      </div>
+      <div class="grid" style="margin-top:12px">
+        <label>Discount (%)<input type="number" id="c_disc" min="0" max="100" value="0"></label>
+        <label>Working hours covered <span class="hint">(auto from hourly services; change if needed)</span><input type="number" id="c_hours" min="0" step="0.25"></label>
+      </div>
+      <label style="margin-top:12px">Additional terms &amp; deadlines <span class="hint">(goes on the quote and the agreement)</span><textarea id="c_terms"></textarea></label>
+      <label style="margin-top:12px">Personal note to the client <span class="hint">(optional, top of the email)</span><textarea id="c_note" placeholder="Thank you for considering I.Q. Productionz! Here's the quote we discussed."></textarea></label>
+    </div>
+
+    <section class="estimate" aria-live="polite">
+      <h2>Quote Total</h2>
+      <table class="qtable"><tbody id="q_rows"></tbody></table>
+      <div class="total-row"><span>Project total (one-time)</span><span class="big" id="q_total">$0</span></div>
+      <div class="pills">
+        <div class="pill key"><small>50% due to start</small><b id="q_dep">$0</b></div>
+        <div class="pill"><small>Due at completion</small><b id="q_bal">$0</b></div>
+        <div class="pill"><small>Working hours covered</small><b id="q_hrs">0</b></div>
+        <div class="pill"><small>Recurring</small><b id="q_rec" style="font-size:15px">—</b></div>
+      </div>
+    </section>
+
+    <div class="banner" id="banner" role="alert"></div>
+    <div class="actions">
+      <button type="button" class="btn btn-gold send" id="sendBtn">✉ Send Out Quote</button>
+      <button type="button" class="btn btn-line" id="pdfBtn">⤓ Download PDF</button>
+      <button type="button" class="btn btn-line" id="linkBtn">Agreement Link</button>
+      <button type="button" class="btn btn-line" id="clearBtn">Clear Quote</button>
+    </div>
+    <div class="status" id="status" role="status"></div>
+    <div class="nav"><button type="button" class="btn btn-line" data-go="${SERVICES[SERVICES.length - 1].id}">← Back</button><span></span></div>
+  </section>`;
+}
+
+/* ============================================================
+   CALCULATE — turns every tab into line items.
+   WHY one function: tabs, badges, total, email and PDF all read the same numbers.
+   ============================================================ */
+function serviceLines(s){
+  const lines = [];
+  const val = id => $(id) ? $(id).value : '';
+  const on = id => $(id) && $(id).checked;
+  if (s.type === 'web' && on('web_on')) {
+    const pages = Math.max(1, Math.floor(num(val('web_pages'), 5)));
+    lines.push({ name:`Website — up to ${s.included} pages (flat)`, amount:num(val('web_base')), freq:'once' });
+    if (pages > s.included) lines.push({ name:`Extra pages × ${pages - s.included}`, amount:(pages - s.included) * num(val('web_extra')), freq:'once' });
+    lines.hours = num(val('web_hours'));
+  }
+  if (s.type === 'items') s.items.forEach(it => {
+    if (!on(`${s.id}_${it.id}_on`)) return;
+    const qty = it.qty === false ? 1 : Math.max(1, Math.floor(num(val(`${s.id}_${it.id}_qty`), 1)));
+    lines.push({ name:it.name + (qty > 1 ? ` × ${qty}` : ''), amount:qty * num(val(`${s.id}_${it.id}_price`)), freq:it.freq || 'once' });
+  });
+  if (s.type === 'apps') {
+    const users = Math.max(1, Math.floor(num(val('apps_users'), 1)));
+    const c = { tier:APP_TIERS.find(t => users <= t.max), forms:Math.max(0, Math.floor(num(val('apps_forms')))), pages:Math.max(0, Math.floor(num(val('apps_pages')))) };
+    const f = num(val('apps_cx'), 1) * num(val('apps_rush'), 1);
+    const picked = {};
+    APP_ITEMS.forEach(it => {
+      const amt = Math.round(it.price(c) * f / 5) * 5; // WHY $5 steps: clean, believable numbers
+      picked[it.id] = on('apps_' + it.id);
+      $('apps_' + it.id + '_amt').textContent = money(amt);
+      if (on('apps_on') && picked[it.id] && amt > 0) lines.push({ name:'App — ' + it.name + (it.id === 'form' ? ` × ${c.forms}` : ''), amount:amt, freq:'once' });
+    });
+    const base = (picked.store || picked.push) ? 200 : (picked.auth || picked.admin) ? 125 : 75;
+    const upkeep = base + c.tier.upkeep;
+    $('apps_upkeep_amt').textContent = `(${money(upkeep)}/mo for ${c.tier.label})`;
+    if (on('apps_on') && on('apps_upkeep')) lines.push({ name:'App upkeep', amount:upkeep, freq:'month' });
+    lines.hours = on('apps_on') ? num(val('apps_hours')) : 0;
+  }
+  if (s.type === 'hourly') {
+    const hours = Math.max(0, num(val(`${s.id}_hours`)));
+    if (hours > 0) {
+      const blocks = Math.max(s.minBlocks, Math.ceil(hours * 60 / s.block - 1e-9)); // WHY ceil: partial blocks bill as a full block
+      const per = s.block === 60 ? 'hr' : s.block + ' min';
+      lines.push({ name:`${s.name} — ${hours} hr (${blocks} × ${money(num(val(`${s.id}_rate`)))}/${per})`, amount:blocks * num(val(`${s.id}_rate`)), freq:'once' });
+      lines.hours = blocks * s.block / 60;
+    }
+    if (s.rights) {
+      const r = document.querySelector('input[name="audio_rights"]:checked')?.value;
+      if (hours > 0 && r === 'own') lines.push({ name:'Recording rights — owned', amount:1000, freq:'once' });
+      if (hours > 0 && r === 'lease') lines.push({ name:'Recording rights — lease', amount:25, freq:'month' });
+    }
+  }
+  return lines;
+}
+
+let hoursTouched = false; // WHY: once Hali types her own hours, auto-filling must stop overwriting them
+
+function compute(){
+  const groups = [];
+  let autoHours = 0;
+  SERVICES.forEach(s => {
+    const lines = serviceLines(s);
+    const sub = lines.filter(l => l.freq === 'once').reduce((a, l) => a + l.amount, 0);
+    const rec = lines.filter(l => l.freq !== 'once');
+    $('sub_' + s.id).textContent = money(sub) + (rec.length ? ' + ' + rec.map(l => money(l.amount) + FREQ[l.freq]).join(' + ') : '');
+    const badge = $('badge_' + s.id);
+    badge.style.display = lines.length ? '' : 'none'; // WHY style, not hidden: the badge CSS display overrides [hidden]
+    badge.textContent = sub ? money(sub) : '✓';
+    autoHours += lines.hours || 0;
+    if (lines.length) groups.push({ service:s, lines });
+  });
+
+  if (!hoursTouched) $('c_hours').value = autoHours ? Math.round(autoHours * 100) / 100 : '';
+  const once = groups.flatMap(g => g.lines).filter(l => l.freq === 'once');
+  const subtotal = once.reduce((a, l) => a + l.amount, 0);
+  const discPct = Math.min(Math.max(num($('c_disc').value), 0), 100);
+  const discount = Math.round(subtotal * discPct) / 100;
+  const total = Math.round((subtotal - discount) * 100) / 100;
+  const deposit = Math.round(total / 2 * 100) / 100;
+  const monthly = groups.flatMap(g => g.lines).filter(l => l.freq === 'month').reduce((a, l) => a + l.amount, 0);
+  const yearly = groups.flatMap(g => g.lines).filter(l => l.freq === 'year').reduce((a, l) => a + l.amount, 0);
+  const hours = num($('c_hours').value);
+
+  $('q_rows').innerHTML = groups.length ? groups.map(g => `
+      <tr><th colspan="2">${g.service.name}</th></tr>
+      ${g.lines.map(l => `<tr><td>${esc(l.name)}</td><td>${money(l.amount)}${FREQ[l.freq]}</td></tr>`).join('')}`).join('')
+    + (discount ? `<tr><td style="color:var(--ok)">Discount (${discPct}%)</td><td style="color:var(--ok)">−${money(discount)}</td></tr>` : '')
+    : `<tr><td style="color:var(--muted);font-style:italic">Fill in any service tab to build the quote.</td><td></td></tr>`;
+  $('q_total').textContent = money(total);
+  $('q_dep').textContent = money(deposit);
+  $('q_bal').textContent = money(total - deposit);
+  $('q_hrs').textContent = hours ? hours : '—';
+  $('q_rec').textContent = [monthly ? money(monthly) + '/mo' : '', yearly ? money(yearly) + '/yr' : ''].filter(Boolean).join(' + ') || '—';
+  $('badge_total').style.display = total ? '' : 'none';
+  $('badge_total').textContent = money(total);
+
+  save();
+  return { groups, subtotal, discPct, discount, total, deposit, monthly, yearly, hours };
+}
+
+/* ============================================================
+   TABS
+   ============================================================ */
+/** Shows one tab. WHY scroll to top: Next lands at the start of the next form, not mid-page. */
+function go(id){
+  document.querySelectorAll('.panel').forEach(p => p.classList.toggle('active', p.id === 'panel_' + id));
+  document.querySelectorAll('.tab').forEach(t => t.setAttribute('aria-selected', t.dataset.tab === id));
+  $('tab_' + id).scrollIntoView({ block:'nearest', inline:'center' });
+  window.scrollTo({ top:0, behavior:'smooth' });
+}
+
+/* ============================================================
+   VALIDATION
+   ============================================================ */
+function setError(box, text){
+  box.classList.add('invalid');
+  if (!box.querySelector(':scope > .errmsg')) { const m = document.createElement('div'); m.className = 'errmsg'; m.textContent = text; box.appendChild(m); }
+}
+function clearError(box){ if (!box) return; box.classList.remove('invalid'); box.querySelector(':scope > .errmsg')?.remove(); }
+
+/** Checks what a quote needs before it leaves. WHY: a quote with no email or no services can't be sent. */
+function validate(q, needEmail){
+  document.querySelectorAll('.invalid').forEach(clearError);
+  const missed = [];
+  if (!$('c_name').value.trim()) { setError($('c_name').closest('label'), 'Client name is required'); missed.push('Client name'); }
+  if (needEmail && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test($('c_email').value.trim())) { setError($('c_email').closest('label'), 'Enter a valid email'); missed.push('Client email'); }
+  if (!q.groups.length) missed.push('At least one service (fill in any tab)');
+  const b = $('banner');
+  if (missed.length) {
+    b.innerHTML = `<b>Fill in ${missed.length} item${missed.length > 1 ? 's' : ''}:</b><ul>${missed.map(m => `<li>${esc(m)}</li>`).join('')}</ul>`;
+    b.style.display = 'block'; b.scrollIntoView({ behavior:'smooth', block:'center' });
+    return false;
+  }
+  b.style.display = 'none';
+  return true;
+}
+
+/* ============================================================
+   QUOTE OUTPUTS
+   ============================================================ */
+const fmtDate = d => d.toLocaleDateString('en-US', { month:'long', day:'numeric', year:'numeric' });
+function quoteMeta(){
+  const d = $('c_date').value ? new Date($('c_date').value + 'T12:00') : new Date();
+  const valid = new Date(d); valid.setDate(valid.getDate() + Math.max(1, num($('c_valid').value, 30)));
+  const no = 'IQ-' + d.toISOString().slice(0, 10).replace(/-/g, '') + '-' + (($('c_name').value.trim().replace(/[^A-Za-z]/g, '').slice(0, 3).toUpperCase()) || 'CLT');
+  return { date:d, valid, no };
+}
+
+/** Builds the link to the digital agreement, pre-filled. WHY: the client signs exactly what was quoted. */
+function agreementLink(q){
+  const m = quoteMeta();
+  const agree = {}, other = {};
+  q.groups.forEach(g => { if (g.service.agree) { agree[g.service.agree] = 1; if (g.service.agreeOther) other[g.service.agree] = [other[g.service.agree], g.service.agreeOther].filter(Boolean).join(', '); } });
+  const p = new URLSearchParams({ n:$('c_name').value.trim(), e:$('c_email').value.trim(), t:q.total.toFixed(2), h:String(q.hours || ''), q:m.no });
+  if (Object.keys(agree).length) p.set('s', Object.keys(agree).join(','));
+  Object.entries(other).forEach(([k, v]) => p.set('o_' + k, v));
+  if ($('c_terms').value.trim()) p.set('x', $('c_terms').value.trim().slice(0, 600)); // WHY cap: keeps the link a sane length
+  return AGREEMENT_URL + '?' + p.toString();
+}
+
+/** The branded email body. WHY tables + inline styles: that's what Gmail and Outlook render reliably. */
+function quoteEmailHtml(q){
+  const m = quoteMeta();
+  const name = esc($('c_name').value.trim());
+  const note = $('c_note').value.trim();
+  const terms = $('c_terms').value.trim();
+  const row = (a, b, style = '') => `<tr><td style="padding:7px 0;border-bottom:1px solid #4a463d;color:#f0ece3;font-size:14px;${style}">${a}</td><td align="right" style="padding:7px 0;border-bottom:1px solid #4a463d;color:#f0ece3;font-size:14px;white-space:nowrap;${style}">${b}</td></tr>`;
+  const items = q.groups.map(g =>
+    `<tr><td colspan="2" style="padding:14px 0 4px;color:#c98a2e;font-family:Georgia,serif;font-size:13px;letter-spacing:1px;text-transform:uppercase;border-bottom:1px solid #7a5218">${g.service.name}</td></tr>` +
+    g.lines.map(l => row(esc(l.name), money(l.amount) + FREQ[l.freq])).join('')).join('')
+    + (q.discount ? row(`Discount (${q.discPct}%)`, '−' + money(q.discount), 'color:#9fd8a4') : '');
+  const rec = [q.monthly ? money(q.monthly) + '/month' : '', q.yearly ? money(q.yearly) + '/year' : ''].filter(Boolean).join(' + ');
+  const notes = q.groups.filter(g => g.service.note).map(g => `<li style="margin-bottom:4px">${esc(g.service.note)}</li>`).join('');
+  return `<div style="background:#2a2720;padding:24px 0;font-family:Arial,Helvetica,sans-serif">
+<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="max-width:620px;margin:0 auto;background:#333333;border:1px solid #7a5218;border-radius:12px">
+<tr><td align="center" style="padding:26px 24px 10px"><img src="${LOGO_URL}" alt="I.Q. Productionz" width="260" style="width:260px;max-width:80%;height:auto;display:block"></td></tr>
+<tr><td align="center" style="padding:0 24px 18px;color:#a9a9a9;font-size:12px;letter-spacing:3px;text-transform:uppercase">Quote ${m.no} · ${fmtDate(m.date)}</td></tr>
+<tr><td style="padding:0 28px;color:#f0ece3;font-size:15px;line-height:1.6">
+<p style="margin:0 0 12px">Hi ${name},</p>
+<p style="margin:0 0 16px">${note ? esc(note).replace(/\n/g, '<br>') : 'Thank you for considering I.Q. Productionz! Here is the quote we discussed.'}</p>
+</td></tr>
+<tr><td style="padding:0 28px"><table role="presentation" width="100%" cellpadding="0" cellspacing="0">${items}</table></td></tr>
+<tr><td style="padding:18px 28px 0">
+<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:#2a2720;border:2px solid #c98a2e;border-radius:12px">
+<tr><td style="padding:16px 18px;color:#c98a2e;font-family:Georgia,serif;font-size:14px;letter-spacing:1px;text-transform:uppercase">Project Total</td>
+<td align="right" style="padding:16px 18px;color:#c98a2e;font-family:Georgia,serif;font-size:30px;font-weight:bold">${money(q.total)}</td></tr>
+<tr><td colspan="2" style="padding:0 18px 16px;color:#f0ece3;font-size:13.5px;line-height:1.7">
+<b>${money(q.deposit)}</b> (50%) is due to start · <b>${money(q.total - q.deposit)}</b> due at completion${q.hours ? `<br>Covers <b>${q.hours}</b> working hours` : ''}${rec ? `<br>Recurring: <b>${rec}</b>` : ''}
+</td></tr></table></td></tr>
+<tr><td align="center" style="padding:22px 28px 6px">
+<a href="${agreementLink(q)}" style="display:inline-block;background:#c98a2e;color:#2a2720;text-decoration:none;font-weight:bold;font-size:14px;letter-spacing:1px;text-transform:uppercase;padding:14px 26px;border-radius:8px">Review &amp; Sign Your Agreement</a>
+</td></tr>
+<tr><td style="padding:14px 28px 0;color:#a9a9a9;font-size:12.5px;line-height:1.65">
+${terms ? `<p style="margin:0 0 10px;color:#f0ece3"><b>Additional terms &amp; deadlines:</b><br>${esc(terms).replace(/\n/g, '<br>')}</p>` : ''}
+${notes ? `<ul style="margin:0 0 10px 18px;padding:0">${notes}</ul>` : ''}
+<p style="margin:0 0 8px"><b style="color:#f0ece3">Payment:</b> card (Stripe), Cash App <b style="color:#f0ece3">$IQENT</b>, or PayPal. Half is due to begin; the deposit counts toward the total.</p>
+<p style="margin:0 0 8px"><b style="color:#f0ece3">Revisions:</b> unplanned revisions beyond the approved hours are $100.00 per hour. A progress report is sent at the halfway point of approved hours.</p>
+<p style="margin:0 0 8px"><b style="color:#f0ece3">Cancellations:</b> canceled before mid-term, unused time is refunded; at the mid-term report, no refund; after mid-term, additional fees apply for time worked.</p>
+<p style="margin:0 0 8px">Delivery is digital through Google Drive. This quote is valid until ${fmtDate(m.valid)}.</p>
+</td></tr>
+<tr><td align="center" style="padding:16px 28px 26px;color:#a9a9a9;font-size:12.5px;border-top:1px solid #4a463d">
+Questions? Reply to this email or write <a href="mailto:${HALI_EMAIL}" style="color:#e0a84a">${HALI_EMAIL}</a><br>
+<a href="https://iqproductionz.com" style="color:#e0a84a">IQProductionz.com</a> · Hali Sarah Parsons, Owner &amp; Creative Director
+</td></tr></table></div>`;
+}
+
+function status(text, isErr){
+  const s = $('status');
+  s.style.display = text ? 'block' : 'none';
+  s.style.borderColor = isErr ? 'var(--err)' : 'var(--ok)';
+  s.textContent = text;
+}
+
+/** Sends the quote to the client, then a copy to Hali. WHY two sends: the copy arrives even if the template has no CC. */
+async function sendQuote(){
+  const q = compute();
+  if (!validate(q, true)) return;
+  if (!window.emailjs) { status('Email tool did not load. Check your connection and try again.', true); return; }
+  const btn = $('sendBtn'); btn.disabled = true; btn.textContent = 'Sending…';
+  const m = quoteMeta();
+  const client = $('c_email').value.trim();
+  const subject = `Your I.Q. Productionz Quote ${m.no} — ${money(q.total)}`;
+  const html = quoteEmailHtml(q);
+  const params = to => ({ to_email:to, to_name:$('c_name').value.trim(), subject:to === HALI_EMAIL ? '[Copy] ' + subject + ' — ' + client : subject,
+                          message:html, reply_to:HALI_EMAIL, from_name:'Sarah Parsons — I.Q. Productionz' });
+  try {
+    await emailjs.send(EJS_SERVICE, EJS_TEMPLATE, params(client), { publicKey:EJS_PUBLIC_KEY });
+  } catch (e) {
+    // WHY stop here: if the client copy failed, a "sent" copy to Hali would be misleading.
+    console.error('Quote send failed:', e);
+    status('The quote did not send: ' + (e.text || e.message || 'unknown error') + '. Try again.', true);
+    btn.disabled = false; btn.textContent = '✉ Send Out Quote'; return;
+  }
+  try { await emailjs.send(EJS_SERVICE, EJS_TEMPLATE, params(HALI_EMAIL), { publicKey:EJS_PUBLIC_KEY }); }
+  catch (e) { console.error('Copy to Hali failed:', e); status(`Quote sent to ${client}, but your copy failed to send.`, true); btn.disabled = false; btn.textContent = '✉ Send Out Quote'; return; }
+  status(`✓ Quote ${m.no} sent to ${client}. A copy went to ${HALI_EMAIL}.`);
+  btn.disabled = false; btn.textContent = '✉ Send Out Quote';
+}
+
+/** Turns the AVIF logo into PNG for the PDF. WHY: PDFs can't hold AVIF; the browser decodes it for us. */
+function logoPng(){
+  return new Promise(resolve => {
+    const img = new Image();
+    img.crossOrigin = 'anonymous';
+    img.onload = () => { try { const c = document.createElement('canvas'); c.width = img.naturalWidth; c.height = img.naturalHeight;
+      c.getContext('2d').drawImage(img, 0, 0); resolve({ data:c.toDataURL('image/png'), ratio:img.naturalHeight / img.naturalWidth }); } catch (e) { resolve(null); } };
+    img.onerror = () => resolve(null); // WHY null: the PDF falls back to the brand name in text
+    img.src = LOGO_URL;
+  });
+}
+
+async function downloadPdf(){
+  const q = compute();
+  if (!validate(q, false)) return;
+  if (!window.jspdf) { status('The PDF tool did not load. Check your connection.', true); return; }
+  const m = quoteMeta();
+  const { jsPDF } = window.jspdf;
+  const doc = new jsPDF({ unit:'pt', format:'letter' });
+  const W = doc.internal.pageSize.getWidth(), H = doc.internal.pageSize.getHeight(), M = 48;
+  const GOLD = [201,138,46], CHAR = [42,39,32], GREY = [110,104,92], CREAM = [240,236,227];
+  doc.setFillColor(51,51,51); doc.rect(0, 0, W, 96, 'F');
+  const logo = await logoPng();
+  if (logo) doc.addImage(logo.data, 'PNG', M, 22, 210, 210 * logo.ratio);
+  else { doc.setTextColor(...GOLD); doc.setFont('times', 'bold'); doc.setFontSize(24); doc.text('I.Q. PRODUCTIONZ', M, 56); }
+  doc.setFont('helvetica', 'normal'); doc.setFontSize(10); doc.setTextColor(...CREAM);
+  doc.text('Quote ' + m.no, W - M, 44, { align:'right' }); doc.text(fmtDate(m.date), W - M, 60, { align:'right' });
+  let y = 128;
+  doc.setTextColor(...CHAR); doc.setFont('helvetica', 'bold'); doc.setFontSize(11); doc.text('PREPARED FOR', M, y); y += 16;
+  doc.setFont('helvetica', 'normal');
+  ['c_name', 'c_biz', 'c_email', 'c_phone'].map(id => $(id).value.trim()).filter(Boolean).forEach(t => { doc.text(t, M, y); y += 15; });
+  y += 12;
+  const ensure = need => { if (y + need > H - 60) { doc.addPage(); y = 60; } }; // WHY: long quotes continue on a new page
+  q.groups.forEach(g => {
+    ensure(40);
+    doc.setDrawColor(...GOLD); doc.setLineWidth(0.8); doc.line(M, y, W - M, y); y += 16;
+    doc.setFont('helvetica', 'bold'); doc.setFontSize(10); doc.setTextColor(...GOLD); doc.text(g.service.name.toUpperCase(), M, y); y += 16;
+    doc.setFont('helvetica', 'normal'); doc.setFontSize(11); doc.setTextColor(...CHAR);
+    g.lines.forEach(l => { ensure(20); doc.text(doc.splitTextToSize(l.name.replace(/[×—–]/g, c => ({ '×':'x', '—':'-', '–':'-' }[c])), W - 2 * M - 110)[0], M, y); doc.text(money(l.amount) + FREQ[l.freq], W - M, y, { align:'right' }); y += 18; });
+  });
+  ensure(190);
+  y = Math.max(y + 10, H - 260);
+  doc.setTextColor(...GREY); doc.setFontSize(11);
+  doc.text('Subtotal', W - M - 170, y); doc.text(money(q.subtotal), W - M, y, { align:'right' }); y += 16;
+  if (q.discount) { doc.text(`Discount (${q.discPct}%)`, W - M - 170, y); doc.text('-' + money(q.discount), W - M, y, { align:'right' }); y += 16; }
+  doc.setFillColor(...CHAR); doc.roundedRect(M, y, W - 2 * M, 96, 10, 10, 'F');
+  doc.setTextColor(...GOLD); doc.setFont('times', 'bold'); doc.setFontSize(13); doc.text('PROJECT TOTAL', M + 18, y + 30);
+  doc.setFontSize(30); doc.text(money(q.total), W - M - 18, y + 38, { align:'right' });
+  doc.setFont('helvetica', 'normal'); doc.setFontSize(10); doc.setTextColor(...CREAM);
+  const rec = [q.monthly ? money(q.monthly) + '/mo' : '', q.yearly ? money(q.yearly) + '/yr' : ''].filter(Boolean).join(' + ') || 'None';
+  [['50% due to start', money(q.deposit)], ['Due at completion', money(q.total - q.deposit)], ['Working hours', q.hours ? String(q.hours) : '-'], ['Recurring', rec]]
+    .forEach(([k, v], i) => { const x = M + 18 + i * ((W - 2 * M - 36) / 4); doc.text(k, x, y + 64); doc.setFont('helvetica', 'bold'); doc.text(v, x, y + 80); doc.setFont('helvetica', 'normal'); });
+  y += 116;
+  doc.setTextColor(...GREY); doc.setFontSize(8.5);
+  const terms = ($('c_terms').value.trim() ? 'Additional terms: ' + $('c_terms').value.trim() + '  ' : '') +
+    `Unplanned revisions beyond approved hours: $100.00/hour. Canceled before mid-term: unused time refunded; at the mid-term report: no refund; after mid-term: additional fees for time worked. Payment by card, Cash App ($IQENT) or PayPal. Valid until ${fmtDate(m.valid)}.`;
+  doc.splitTextToSize(terms, W - 2 * M).forEach(l => { doc.text(l, M, y); y += 11; });
+  const safe = ($('c_biz').value.trim() || $('c_name').value.trim() || 'Client').replace(/[^\w\- ]+/g, '').trim().replace(/\s+/g, '-');
+  doc.save(`IQ-Productionz-Quote-${safe}-${m.no}.pdf`);
+  status('✓ PDF downloaded.');
+}
+
+async function copyLink(){
+  const q = compute();
+  if (!validate(q, false)) return;
+  const link = agreementLink(q);
+  // WHY fallback: clipboard can be blocked; showing the link means it's never lost.
+  try { await navigator.clipboard.writeText(link); status('✓ Agreement link copied. It opens the Studio Practices form, pre-filled.'); }
+  catch (e) { status(link); }
+}
+
+/* ============================================================
+   DRAFT SAVE — WHY: a dropped call or closed tab shouldn't lose a half-built quote.
+   ============================================================ */
+function save(){
+  try {
+    const data = {};
+    document.querySelectorAll('#panels input, #panels select, #panels textarea').forEach(el => {
+      if (!el.id && el.type !== 'radio') return;
+      if (el.type === 'radio') { if (el.checked) data['radio:' + el.name] = el.value; }
+      else data[el.id] = el.type === 'checkbox' ? el.checked : el.value;
+    });
+    data.__hoursTouched = hoursTouched;
+    localStorage.setItem(STORE_KEY, JSON.stringify(data));
+  } catch (e) { /* WHY ignore: storage can be full or blocked; the tool still works */ }
+}
+function load(){
+  try {
+    const data = JSON.parse(localStorage.getItem(STORE_KEY) || 'null');
+    if (!data) return;
+    Object.entries(data).forEach(([k, v]) => {
+      if (k.startsWith('radio:')) { const r = document.querySelector(`input[name="${k.slice(6)}"][value="${v}"]`); if (r) r.checked = true; return; }
+      const el = $(k); if (!el) return;
+      if (el.type === 'checkbox') el.checked = !!v; else el.value = v;
+    });
+    hoursTouched = !!data.__hoursTouched;
+  } catch (e) { /* WHY ignore: a damaged draft must never stop the page loading */ }
+}
+
+/* ============================================================
+   START
+   ============================================================ */
+render();
+$('c_date').value = new Date().toISOString().slice(0, 10);
+load();
+compute();
+
+document.addEventListener('click', e => {
+  const t = e.target.closest('[data-tab],[data-go]');
+  if (t) go(t.dataset.tab || t.dataset.go);
+  if (e.target.closest('[data-finalize]')) finalize();
+});
+
+/** Jumps to the Total tab to send. WHY: client info lives there, so Send needs that tab; this skips the rest. */
+function finalize(){
+  go('total');
+  const first = ['c_name', 'c_email'].find(id => !$(id).value.trim());
+  // WHY focus the first empty field: the next thing needed to send is right under the cursor.
+  setTimeout(() => (first ? $(first) : $('sendBtn')).focus({ preventScroll:true }), 350);
+}
+$('panels').addEventListener('input', e => {
+  if (e.target.id === 'c_hours') hoursTouched = e.target.value !== '';
+  // WHY auto-check: typing a quantity or price on an item means you want it included.
+  const m = e.target.id && e.target.id.match(/^(.+)_(qty|price)$/);
+  if (m && $(m[1] + '_on') && e.target.value) $(m[1] + '_on').checked = true;
+  if (/^(web|apps)_/.test(e.target.id) && !/_on$/.test(e.target.id) && $(e.target.id.split('_')[0] + '_on')) $(e.target.id.split('_')[0] + '_on').checked = true;
+  clearError(e.target.closest('label'));
+  compute();
+});
+$('panels').addEventListener('change', compute);
+$('sendBtn').addEventListener('click', sendQuote);
+$('pdfBtn').addEventListener('click', downloadPdf);
+$('linkBtn').addEventListener('click', copyLink);
+$('clearBtn').addEventListener('click', () => {
+  // WHY two taps: a single mis-tap shouldn't wipe a whole quote (confirm dialogs are unreliable on phones).
+  const b = $('clearBtn');
+  if (!b.dataset.armed) { b.dataset.armed = '1'; b.textContent = 'Tap again to clear'; setTimeout(() => { delete b.dataset.armed; b.textContent = 'Clear Quote'; }, 3000); return; }
+  try { localStorage.removeItem(STORE_KEY); } catch (e) {}
+  location.reload();
+});
+</script>
+</body>
+</html>

@@ -1,0 +1,203 @@
+<!--
+  Title: MOV to MP4 Converter
+  Author: Hali Sarah Parsons
+  Date: 2026-11-09
+  Modified By: Claude (2026-11-11 — rebuilt without ffmpeg.wasm so it works offline in Safari from a local file); Claude 2026-11-14 — I.Q. Productionz branding + BackEnd nav; renamed to index.html
+  Description: Converts iPhone MOV (often HEVC) videos to H.264 MP4 in the browser so
+               older Macs can play them. Uses the browser's own video decoder and
+               MediaRecorder; nothing is uploaded and no internet is needed.
+-->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>MOV to MP4 Converter</title>
+<style>
+  /* Bottom-heavy layout: light header up top, the drop zone and actions carry the weight below */
+  body { margin:0; min-height:100vh; display:flex; flex-direction:column; justify-content:flex-end;
+         font-family:-apple-system, Helvetica, Arial, sans-serif; background:#f6f4f8; color:#2a2230; }
+  header { padding:24px 24px 8px; }
+  h1 { margin:0; font-size:20px; font-weight:600; }
+  header p { margin:4px 0 0; font-size:14px; color:#6b6070; }
+  main { padding:24px; display:flex; flex-direction:column; gap:16px; }
+  #drop { border:2px dashed #b9a8c4; border-radius:14px; padding:56px 20px; text-align:center;
+          background:#fff; cursor:pointer; font-size:16px; }
+  #drop.over { background:#efe7f4; border-color:#6d3f86; }
+  #preview { width:100%; max-height:260px; background:#000; border-radius:10px; display:none; }
+  progress { width:100%; height:14px; }
+  #status { font-size:14px; min-height:20px; }
+  button, a.btn { font-size:17px; padding:16px; border-radius:12px; border:none; text-align:center;
+                  background:#6d3f86; color:#fff; text-decoration:none; cursor:pointer; }
+  button:disabled { background:#c9bfd0; cursor:default; }
+  a.btn { display:none; background:#2f7d4f; }
+</style>
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700&family=Raleway:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+  /* ===== I.Q. Productionz brand layer (2026-11-14) =====
+     WHY placed after the page's own styles: later rules win, so the tool keeps its layout
+     while colors and type switch to the portal's charcoal/gold identity. */
+  :root{--iq-bg:#333;--iq-surface:#454545;--iq-deep:#3a3a3a;--iq-border:#2e2b24;--iq-gold:#c98a2e;--iq-gold-lt:#e0a84a;--iq-gold-dim:#7a5218;--iq-white:#f0ece3;--iq-muted:#A9A9A9}
+  body{background:var(--iq-bg)!important;color:var(--iq-white)!important;font-family:'Raleway',-apple-system,Helvetica,Arial,sans-serif!important;overflow-x:hidden}
+  h1{font-family:'Cinzel',Georgia,serif!important;color:var(--iq-gold-lt)!important;letter-spacing:1.5px;text-transform:uppercase;font-weight:600!important}
+  .iq-nav{align-self:stretch;margin-bottom:auto;display:flex;justify-content:space-between;align-items:center;padding:14px 24px;background:var(--iq-surface);border-bottom:1px solid var(--iq-border);position:sticky;top:0;z-index:50}
+  .iq-crumbs{font-family:'Cinzel',Georgia,serif;font-size:11px;letter-spacing:2px;text-transform:uppercase;color:var(--iq-muted)}
+  .iq-crumbs a{color:var(--iq-muted);text-decoration:none}.iq-crumbs a:hover{color:var(--iq-gold-lt)}
+  .iq-crumbs strong{color:var(--iq-gold)}
+  .iq-home{padding:8px 16px;border:1px solid var(--iq-gold-dim);border-radius:8px;color:var(--iq-gold-lt);font-family:'Cinzel',Georgia,serif;font-size:11px;letter-spacing:1.5px;text-transform:uppercase;text-decoration:none;transition:all .2s}
+  .iq-home:hover{background:var(--iq-gold);color:#333;border-color:var(--iq-gold)}
+  .iq-hdr{text-align:center;padding:22px 16px 6px}
+  .iq-hdr img{height:42px;filter:drop-shadow(0 0 12px rgba(201,138,46,.4))}
+  .iq-hdr .iq-eyebrow{font-size:10px;letter-spacing:4px;text-transform:uppercase;color:var(--iq-gold);margin-top:8px}
+
+  header p,#status{color:var(--iq-muted)!important}
+  header{text-align:center}
+  #drop{background:var(--iq-surface)!important;border-color:var(--iq-gold-dim)!important;color:var(--iq-white)}
+  #drop.over{background:rgba(201,138,46,.1)!important;border-color:var(--iq-gold)!important}
+  button{background:linear-gradient(135deg,var(--iq-gold),#a87025)!important;color:#333!important;font-family:'Cinzel',Georgia,serif;letter-spacing:1.2px;text-transform:uppercase}
+  button:disabled{background:#555!important;color:#888!important}
+  a.btn{background:#4a8c62!important}
+  progress{accent-color:var(--iq-gold)}
+</style>
+</head>
+<body>
+<nav class="iq-nav">
+  <div class="iq-crumbs"><a href="../../">BackEnd</a> / <a href="../">Design</a> / <strong>MOV → MP4</strong></div>
+  <a class="iq-home" href="../">↩ Design</a>
+</nav>
+<div class="iq-hdr">
+  <!-- WHY onerror: some of these tools run offline; hide the logo instead of showing a broken image -->
+  <img src="https://iqproductionz.com/Content/Images/Main/IQ-noglow_Updated.avif" alt="I.Q. Productionz" onerror="this.style.display='none'">
+  <div class="iq-eyebrow">BackEnd · Design</div>
+</div>
+
+<header>
+  <h1>MOV → MP4 Converter</h1>
+  <p>Makes iPhone videos playable on older Macs. Works offline; your file stays on this computer.
+     Converting takes about as long as the video itself — keep this tab open.</p>
+</header>
+<main>
+  <div id="drop">Drop a .MOV file here, or click to choose</div>
+  <input type="file" id="file" accept=".mov,video/quicktime,video/*" hidden>
+  <canvas id="preview"></canvas>
+  <progress id="bar" value="0" max="1"></progress>
+  <div id="status">Pick a file to start.</div>
+  <button id="go" disabled>Convert to MP4</button>
+  <a id="dl" class="btn">Download MP4</a>
+</main>
+
+<script>
+const $ = id => document.getElementById(id);
+let picked = null; // the File the user chose
+
+/**
+ * Picks the best MP4 recording format this browser supports.
+ * WHY: Safari and newer Chrome can record H.264 MP4, but the exact codec strings
+ * they accept differ, so we test each and use the first that works.
+ */
+function pickMime() {
+  const options = ['video/mp4;codecs=avc1.640028,mp4a.40.2', 'video/mp4;codecs=avc1,mp4a',
+                   'video/mp4;codecs=avc1', 'video/mp4'];
+  return options.find(m => window.MediaRecorder && MediaRecorder.isTypeSupported(m)) || null;
+}
+
+/** Stores the chosen file and resets the UI. WHY: one place for both click and drag-drop paths. */
+function pick(file) {
+  if (!file) return;
+  picked = file;
+  $('drop').textContent = file.name + ' (' + (file.size / 1048576).toFixed(1) + ' MB)';
+  $('go').disabled = false;
+  $('dl').style.display = 'none';
+  $('bar').value = 0;
+  $('status').textContent = 'Ready.';
+}
+
+$('drop').onclick = () => $('file').click();
+$('file').onchange = e => pick(e.target.files[0]);
+// WHY: preventDefault stops the browser from just opening the video in the tab
+['dragenter', 'dragover'].forEach(ev => $('drop').addEventListener(ev, e => { e.preventDefault(); $('drop').classList.add('over'); }));
+['dragleave', 'drop'].forEach(ev => $('drop').addEventListener(ev, e => { e.preventDefault(); $('drop').classList.remove('over'); }));
+$('drop').addEventListener('drop', e => pick(e.dataTransfer.files[0]));
+
+/**
+ * Plays the video into a canvas + audio stream and records that as MP4.
+ * WHY: the browser can already decode HEVC on this Mac; re-recording what it plays
+ * produces H.264, which older Macs can open — no external converter needed.
+ */
+async function convert(file) {
+  const mime = pickMime();
+  if (!mime) throw new Error('This browser can\'t record MP4. Open this page in Safari.');
+
+  const video = document.createElement('video');
+  video.src = URL.createObjectURL(file);
+  video.playsInline = true;
+  // WHY: wait for size/duration so the canvas matches the video exactly
+  await new Promise((ok, fail) => {
+    video.onloadedmetadata = ok;
+    video.onerror = () => fail(new Error('This browser can\'t open that video.'));
+  });
+
+  const canvas = $('preview');
+  canvas.width = video.videoWidth;
+  canvas.height = video.videoHeight;
+  canvas.style.display = 'block';
+  const ctx = canvas.getContext('2d');
+
+  // WHY: route audio through Web Audio into the recording only (not the speakers),
+  // so the conversion runs silently but the MP4 still has sound
+  const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+  const dest = audioCtx.createMediaStreamDestination();
+  audioCtx.createMediaElementSource(video).connect(dest);
+
+  const stream = canvas.captureStream(30);
+  dest.stream.getAudioTracks().forEach(t => stream.addTrack(t));
+
+  const chunks = [];
+  const rec = new MediaRecorder(stream, { mimeType: mime, videoBitsPerSecond: 8000000 });
+  rec.ondataavailable = e => { if (e.data.size) chunks.push(e.data); };
+  const stopped = new Promise(ok => rec.onstop = ok);
+
+  // WHY: copy each frame to the canvas while playing; rAF keeps it in sync with playback
+  let drawing = true;
+  const draw = () => {
+    if (!drawing) return;
+    ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+    $('bar').value = video.duration ? video.currentTime / video.duration : 0;
+    $('status').textContent = 'Converting… ' + Math.round($('bar').value * 100) + '%';
+    requestAnimationFrame(draw);
+  };
+
+  rec.start(1000); // WHY: 1s chunks so a long video doesn't build one giant buffer at the end
+  await audioCtx.resume();
+  await video.play();
+  draw();
+  await new Promise(ok => video.onended = ok);
+  drawing = false;
+  rec.stop();
+  await stopped;
+  audioCtx.close();
+  URL.revokeObjectURL(video.src); // WHY: free the memory held by the source video
+
+  return new Blob(chunks, { type: 'video/mp4' });
+}
+
+$('go').onclick = async () => {
+  $('go').disabled = true;
+  try {
+    const blob = await convert(picked);
+    const link = $('dl');
+    link.href = URL.createObjectURL(blob);
+    link.download = picked.name.replace(/\.[^.]+$/, '') + '.mp4';
+    link.style.display = 'block';
+    $('bar').value = 1;
+    $('status').textContent = 'Done! Click Download MP4.';
+  } catch (err) {
+    // WHY: show a readable reason instead of "undefined" when something fails
+    $('status').textContent = 'Error: ' + (err && err.message ? err.message : String(err));
+  } finally {
+    $('go').disabled = false;
+  }
+};
+</script>
+</body>
+</html>

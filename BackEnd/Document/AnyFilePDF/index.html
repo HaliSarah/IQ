@@ -1,0 +1,617 @@
+<!--
+Title: Any File to PDF Combiner
+Author: Claude (Anthropic)
+Date: 2026-09-06
+Modified By: Claude (Anthropic), 2026-09-09; Claude 2026-11-14 — I.Q. Productionz branding + BackEnd nav
+Description: Single-file browser tool that accepts a mix of file types
+(.pdf, .txt, .ris, .docx, .png/.jpg/.jpeg/.webp/.gif) in one drop, converts
+each non-PDF file into a PDF page (or pages) client-side, then merges
+everything into one combined PDF in the chosen order. No upload, no page
+limit. Uses pdf-lib (PDF creation/merging), mammoth (docx -> html/text
+extraction), jsPDF (text/image page rendering), and Tesseract.js (optional
+OCR text-extraction page for images), all from CDN.
+2026-09-09: fixed WEBP/GIF images rendering as blank pages (jsPDF was
+told the wrong image format based on file extension); added an optional
+OCR checkbox that appends a searchable text page after each image, plus
+a sub-option to discard the original image page and keep only the
+extracted text; added OCR status messages, a 120s timeout, and a more
+robust error handler (was printing "Error: undefined" on non-Error
+rejections). Core-engine file pinned to unpkg (jsdelivr, Tesseract's
+default, is blocked on at least one user's network).
+-->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Any File to PDF Combiner</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf-lib/1.17.1/pdf-lib.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/mammoth/1.6.0/mammoth.browser.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/tesseract.js/4.1.1/tesseract.min.js"></script>
+<style>
+  :root {
+    --plum: #4a2545;
+    --gold: #c9a24b;
+    --pink: #e8b4c8;
+    --bg: #faf7f8;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    background: linear-gradient(180deg, var(--bg) 0%, #f3e9ee 100%);
+    color: #2b1b28;
+    min-height: 100vh;
+    display: flex;
+    align-items: flex-end;
+    justify-content: center;
+    padding: 2rem 1rem;
+  }
+  .card {
+    width: 100%;
+    max-width: 580px;
+    background: #fff;
+    border-radius: 16px;
+    box-shadow: 0 10px 30px rgba(74,37,69,0.15);
+    padding: 2rem;
+    border-top: 6px solid var(--plum);
+  }
+  h1 { font-size: 1.4rem; color: var(--plum); margin: 0 0 0.25rem; }
+  p.sub { color: #6b5866; margin: 0 0 1.5rem; font-size: 0.9rem; }
+  .types {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.4rem;
+    margin-bottom: 1rem;
+  }
+  .types span {
+    background: #f3e0e8;
+    color: var(--plum);
+    font-size: 0.72rem;
+    font-weight: 600;
+    padding: 0.25rem 0.6rem;
+    border-radius: 12px;
+  }
+  .dropzone {
+    border: 2px dashed var(--pink);
+    border-radius: 12px;
+    padding: 2rem 1rem;
+    text-align: center;
+    cursor: pointer;
+    transition: 0.2s;
+    background: #fffafc;
+  }
+  .dropzone:hover, .dropzone.drag { border-color: var(--gold); background: #fff6ea; }
+  .dropzone p { margin: 0.25rem 0; color: #6b5866; }
+  input[type=file] { display: none; }
+  #fileList { margin-top: 1.25rem; }
+  .fileRow {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.65rem 1rem;
+    background: #f8f0f4;
+    border-radius: 10px;
+    margin-bottom: 0.5rem;
+    cursor: grab;
+  }
+  .fileRow.dragging { opacity: 0.4; }
+  .fileRow .order { font-weight: 700; color: var(--gold); min-width: 1.5rem; }
+  .fileRow .name {
+    flex: 1;
+    font-size: 0.87rem;
+    font-weight: 600;
+    color: var(--plum);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  .fileRow .kind {
+    font-size: 0.68rem;
+    font-weight: 700;
+    color: #fff;
+    background: var(--plum);
+    padding: 0.15rem 0.5rem;
+    border-radius: 8px;
+    text-transform: uppercase;
+  }
+  .fileRow .remove {
+    background: none;
+    border: none;
+    color: #b04a6a;
+    font-size: 1.1rem;
+    cursor: pointer;
+    line-height: 1;
+  }
+  #combineBtn {
+    margin-top: 1.25rem;
+    width: 100%;
+    padding: 0.85rem;
+    background: linear-gradient(90deg, var(--plum), #6b3564);
+    color: #fff;
+    border: none;
+    border-radius: 30px;
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+  }
+  #combineBtn:disabled { opacity: 0.4; cursor: default; }
+  #status { margin-top: 0.75rem; font-size: 0.82rem; color: #6b5866; text-align: center; min-height: 1.2em; }
+  .note { margin-top: 1rem; font-size: 0.78rem; color: #9a8894; text-align: center; }
+</style>
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700&family=Raleway:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+  /* ===== I.Q. Productionz brand layer (2026-11-14) =====
+     WHY placed after the page's own styles: later rules win, so the tool keeps its layout
+     while colors and type switch to the portal's charcoal/gold identity. */
+  :root{--iq-bg:#333;--iq-surface:#454545;--iq-deep:#3a3a3a;--iq-border:#2e2b24;--iq-gold:#c98a2e;--iq-gold-lt:#e0a84a;--iq-gold-dim:#7a5218;--iq-white:#f0ece3;--iq-muted:#A9A9A9}
+  body{background:var(--iq-bg)!important;color:var(--iq-white)!important;font-family:'Raleway',-apple-system,Helvetica,Arial,sans-serif!important;overflow-x:hidden}
+  h1{font-family:'Cinzel',Georgia,serif!important;color:var(--iq-gold-lt)!important;letter-spacing:1.5px;text-transform:uppercase;font-weight:600!important}
+  .iq-nav{align-self:stretch;margin-bottom:auto;display:flex;justify-content:space-between;align-items:center;padding:14px 24px;background:var(--iq-surface);border-bottom:1px solid var(--iq-border);position:sticky;top:0;z-index:50}
+  .iq-crumbs{font-family:'Cinzel',Georgia,serif;font-size:11px;letter-spacing:2px;text-transform:uppercase;color:var(--iq-muted)}
+  .iq-crumbs a{color:var(--iq-muted);text-decoration:none}.iq-crumbs a:hover{color:var(--iq-gold-lt)}
+  .iq-crumbs strong{color:var(--iq-gold)}
+  .iq-home{padding:8px 16px;border:1px solid var(--iq-gold-dim);border-radius:8px;color:var(--iq-gold-lt);font-family:'Cinzel',Georgia,serif;font-size:11px;letter-spacing:1.5px;text-transform:uppercase;text-decoration:none;transition:all .2s}
+  .iq-home:hover{background:var(--iq-gold);color:#333;border-color:var(--iq-gold)}
+  .iq-hdr{text-align:center;padding:22px 16px 6px}
+  .iq-hdr img{height:42px;filter:drop-shadow(0 0 12px rgba(201,138,46,.4))}
+  .iq-hdr .iq-eyebrow{font-size:10px;letter-spacing:4px;text-transform:uppercase;color:var(--iq-gold);margin-top:8px}
+
+  body{flex-direction:column!important;align-items:center!important;justify-content:flex-end!important;padding:0 0 2rem!important}
+  :root{--plum:#c98a2e;--gold:#c98a2e;--pink:#7a5218;--bg:#333}
+  .card{background:var(--iq-surface)!important;border:1px solid var(--iq-border);border-top:2px solid var(--iq-gold)!important;box-shadow:0 10px 30px rgba(0,0,0,.35)!important;width:calc(100% - 2rem)!important}
+  p.sub,.dropzone p,#status,.note,.card label,.sizeRow label,.fileInfo .meta,.resultRow .size{color:var(--iq-muted)!important}
+  .dropzone{background:var(--iq-deep)!important;border-color:var(--iq-gold-dim)!important}
+  .dropzone:hover,.dropzone.drag{border-color:var(--iq-gold)!important;background:rgba(201,138,46,.08)!important}
+  .fileInfo,.fileRow,.resultRow{background:var(--iq-deep)!important}
+  .fileInfo .name,.fileRow .name,.resultRow .name{color:var(--iq-white)!important}
+  .types span{background:rgba(201,138,46,.12)!important;color:var(--iq-gold-lt)!important;border:1px solid var(--iq-gold-dim)}
+  .fileRow .kind,.resultRow a{background:var(--iq-gold)!important;color:#333!important}
+  .sizeRow input{background:#2a2a2a!important;border-color:var(--iq-border)!important;color:var(--iq-white)!important}
+  #splitBtn,#combineBtn{background:linear-gradient(135deg,var(--iq-gold),#a87025)!important;color:#333!important;font-family:'Cinzel',Georgia,serif;letter-spacing:1.2px;text-transform:uppercase}
+  input[type=checkbox]{accent-color:var(--iq-gold)}
+</style>
+</head>
+<body>
+<nav class="iq-nav">
+  <div class="iq-crumbs"><a href="../../">BackEnd</a> / <a href="../">Document</a> / <strong>Any File → PDF</strong></div>
+  <a class="iq-home" href="../">↩ Document</a>
+</nav>
+<div class="iq-hdr">
+  <!-- WHY onerror: some of these tools run offline; hide the logo instead of showing a broken image -->
+  <img src="https://iqproductionz.com/Content/Images/Main/IQ-noglow_Updated.avif" alt="I.Q. Productionz" onerror="this.style.display='none'">
+  <div class="iq-eyebrow">BackEnd · Document</div>
+</div>
+
+<div class="card">
+  <h1>Any File &rarr; PDF, Combined</h1>
+  <p class="sub">Drop in a mix of files. Each one converts to PDF pages, then everything merges into a single combined PDF, in the order shown.</p>
+  <div class="types">
+    <span>PDF</span><span>TXT</span><span>RIS</span><span>DOCX</span><span>PNG</span><span>JPG</span><span>WEBP</span><span>GIF</span>
+  </div>
+
+  <div class="dropzone" id="dropzone">
+    <p><strong>Click to choose files</strong></p>
+    <p>or drag and drop them here</p>
+    <input type="file" id="fileInput" accept=".pdf,.txt,.ris,.docx,.png,.jpg,.jpeg,.webp,.gif" multiple>
+  </div>
+
+  <div id="fileList"></div>
+
+  <label style="display:flex;align-items:center;gap:0.5rem;font-size:0.82rem;color:#6b5866;margin:0.5rem 0 0.25rem;cursor:pointer;">
+    <input type="checkbox" id="ocrToggle">
+    Extract text from images (OCR) — adds a searchable text page after each image
+  </label>
+  <label style="display:flex;align-items:center;gap:0.5rem;font-size:0.82rem;color:#6b5866;margin:0 0 0.25rem 1.6rem;cursor:pointer;">
+    <input type="checkbox" id="dropImageToggle" disabled>
+    Discard the original image page, keep only the extracted text
+  </label>
+
+  <button id="combineBtn" disabled>Convert &amp; Combine into One PDF</button>
+  <div id="status"></div>
+  <p class="note">Everything runs in your browser &middot; no page limit &middot; drag rows to reorder</p>
+</div>
+
+<script>
+// Why: one array holds every dropped file plus its detected type, so
+// order (drag-to-reorder) and per-file conversion logic stay in sync.
+const state = { files: [] };
+
+const dropzone = document.getElementById('dropzone');
+const fileInput = document.getElementById('fileInput');
+const fileListEl = document.getElementById('fileList');
+const combineBtn = document.getElementById('combineBtn');
+const statusEl = document.getElementById('status');
+const ocrToggle = document.getElementById('ocrToggle');
+const dropImageToggle = document.getElementById('dropImageToggle');
+
+// Why: "discard original image" only makes sense once OCR is on — keep it
+// disabled and unchecked otherwise so it can't silently drop image pages
+// with no text ever extracted to replace them.
+ocrToggle.addEventListener('change', () => {
+  dropImageToggle.disabled = !ocrToggle.checked;
+  if (!ocrToggle.checked) dropImageToggle.checked = false;
+});
+
+dropzone.addEventListener('click', () => fileInput.click());
+['dragover', 'dragleave', 'drop'].forEach(evt => {
+  dropzone.addEventListener(evt, e => {
+    e.preventDefault();
+    e.stopPropagation();
+    dropzone.classList.toggle('drag', evt === 'dragover');
+  });
+});
+dropzone.addEventListener('drop', e => handleFiles(e.dataTransfer.files));
+fileInput.addEventListener('change', e => handleFiles(e.target.files));
+
+// Why: central map from extension to a short kind label — drives both
+// the UI badge and which conversion branch runs later.
+function detectKind(name) {
+  const ext = name.split('.').pop().toLowerCase();
+  if (ext === 'pdf') return 'pdf';
+  if (ext === 'txt') return 'txt';
+  if (ext === 'ris') return 'ris';
+  if (ext === 'docx') return 'docx';
+  if (['png', 'jpg', 'jpeg', 'webp', 'gif'].includes(ext)) return 'image';
+  return null;
+}
+
+function handleFiles(fileListObj) {
+  Array.from(fileListObj).forEach(f => {
+    const kind = detectKind(f.name);
+    if (kind) state.files.push({ file: f, kind });
+  });
+  renderList();
+}
+
+function renderList() {
+  fileListEl.innerHTML = '';
+  state.files.forEach((entry, i) => {
+    const row = document.createElement('div');
+    row.className = 'fileRow';
+    row.draggable = true;
+    row.dataset.i = i;
+    row.innerHTML = `
+      <span class="order">${i + 1}</span>
+      <span class="name">${entry.file.name}</span>
+      <span class="kind">${entry.kind}</span>
+      <button class="remove" data-i="${i}" title="Remove">&times;</button>
+    `;
+    fileListEl.appendChild(row);
+  });
+
+  fileListEl.querySelectorAll('.remove').forEach(btn => {
+    btn.addEventListener('click', () => {
+      state.files.splice(parseInt(btn.dataset.i), 1);
+      renderList();
+    });
+  });
+
+  attachDragReorder();
+  combineBtn.disabled = state.files.length === 0;
+}
+
+function attachDragReorder() {
+  let dragIndex = null;
+  fileListEl.querySelectorAll('.fileRow').forEach(row => {
+    row.addEventListener('dragstart', () => {
+      dragIndex = parseInt(row.dataset.i);
+      row.classList.add('dragging');
+    });
+    row.addEventListener('dragend', () => row.classList.remove('dragging'));
+    row.addEventListener('dragover', e => e.preventDefault());
+    row.addEventListener('drop', e => {
+      e.preventDefault();
+      const dropIndex = parseInt(row.dataset.i);
+      if (dragIndex === null || dragIndex === dropIndex) return;
+      const [moved] = state.files.splice(dragIndex, 1);
+      state.files.splice(dropIndex, 0, moved);
+      renderList();
+    });
+  });
+}
+
+// ---------- Per-type conversion to a pdf-lib PDFDocument ----------
+
+// Why: RIS is tag-value metadata (AU, TI, PY, ...) — map known tags to
+// readable labels so the resulting PDF page is a legible reference sheet.
+const RIS_LABELS = {
+  TY: 'Type', AU: 'Author', A2: 'Editor', TI: 'Title', T2: 'Secondary Title',
+  PY: 'Year', DA: 'Date', PB: 'Publisher', CY: 'City', SN: 'ISBN/ISSN',
+  VL: 'Volume', IS: 'Issue', SP: 'Start Page', EP: 'End Page',
+  UR: 'URL', DO: 'DOI', LA: 'Language', N1: 'Notes', AB: 'Abstract', KW: 'Keyword'
+};
+
+function parseRis(text) {
+  const lines = text.split(/\r?\n/).filter(l => l.trim().length > 0);
+  const fields = [];
+  lines.forEach(line => {
+    const match = line.match(/^([A-Z0-9]{2})\s*-\s*(.*)$/);
+    if (match) {
+      const [, tag, value] = match;
+      if (tag !== 'ER' && value.trim()) {
+        fields.push({ label: RIS_LABELS[tag] || tag, value: value.trim() });
+      }
+    }
+  });
+  return fields;
+}
+
+async function txtOrRisToPdfBytes(entry) {
+  const text = await entry.file.text();
+  const { jsPDF } = window.jspdf;
+  const doc = new jsPDF({ unit: 'pt', format: 'letter' });
+  const margin = 56;
+  let y = margin;
+
+  doc.setFont('helvetica', 'bold');
+  doc.setFontSize(14);
+  doc.text(entry.file.name, margin, y);
+  y += 26;
+  doc.setFontSize(11);
+
+  if (entry.kind === 'ris') {
+    const fields = parseRis(text);
+    fields.forEach(f => {
+      doc.setFont('helvetica', 'bold');
+      const labelText = f.label + ':';
+      doc.text(labelText, margin, y);
+      const labelWidth = doc.getTextWidth(labelText) + 8;
+      doc.setFont('helvetica', 'normal');
+      const wrapped = doc.splitTextToSize(f.value, 500 - labelWidth);
+      doc.text(wrapped, margin + labelWidth, y);
+      y += Math.max(16, wrapped.length * 14) + 6;
+      if (y > 740) { doc.addPage(); y = margin; }
+    });
+  } else {
+    doc.setFont('helvetica', 'normal');
+    const paragraphs = text.split(/\r?\n\s*\r?\n|\r?\n/);
+    paragraphs.forEach(para => {
+      if (!para.trim()) { y += 8; return; }
+      const wrapped = doc.splitTextToSize(para.trim(), 500);
+      wrapped.forEach(line => {
+        if (y > 740) { doc.addPage(); y = margin; }
+        doc.text(line, margin, y);
+        y += 15;
+      });
+      y += 6;
+    });
+  }
+
+  return doc.output('arraybuffer');
+}
+
+async function docxToPdfBytes(entry) {
+  // Why: mammoth extracts readable text from docx XML; we don't attempt
+  // to preserve rich formatting, just get real paragraph text onto pages.
+  const arrayBuffer = await entry.file.arrayBuffer();
+  const result = await mammoth.extractRawText({ arrayBuffer });
+  const text = result.value || '(No extractable text found in this document.)';
+
+  const { jsPDF } = window.jspdf;
+  const doc = new jsPDF({ unit: 'pt', format: 'letter' });
+  const margin = 56;
+  let y = margin;
+
+  doc.setFont('helvetica', 'bold');
+  doc.setFontSize(14);
+  doc.text(entry.file.name, margin, y);
+  y += 26;
+  doc.setFont('helvetica', 'normal');
+  doc.setFontSize(11);
+
+  const paragraphs = text.split(/\r?\n\s*\r?\n|\r?\n/);
+  paragraphs.forEach(para => {
+    if (!para.trim()) { y += 8; return; }
+    const wrapped = doc.splitTextToSize(para.trim(), 500);
+    wrapped.forEach(line => {
+      if (y > 740) { doc.addPage(); y = margin; }
+      doc.text(line, margin, y);
+      y += 15;
+    });
+    y += 6;
+  });
+
+  return doc.output('arraybuffer');
+}
+
+async function imageToPdfBytes(entry) {
+  // Why: draw the image scaled to fit one letter-size page (with margin)
+  // rather than stretching or cropping, so aspect ratio is preserved.
+  const dataUrl = await new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => resolve(reader.result);
+    reader.onerror = reject;
+    reader.readAsDataURL(entry.file);
+  });
+
+  const img = await new Promise((resolve, reject) => {
+    const image = new Image();
+    image.onload = () => resolve(image);
+    image.onerror = reject;
+    image.src = dataUrl;
+  });
+
+  // Why: jsPDF's addImage only decodes PNG/JPEG data itself and trusts the
+  // format flag you pass it — WEBP/GIF (and any mismatched flag) silently
+  // fail to render, producing a blank page. Re-drawing the already-decoded
+  // <img> onto a canvas and reading it back as PNG sidesteps that: by this
+  // point the browser has already decoded the source format for us.
+  const canvas = document.createElement('canvas');
+  canvas.width = img.width;
+  canvas.height = img.height;
+  const ctx = canvas.getContext('2d');
+  ctx.drawImage(img, 0, 0);
+  const pngDataUrl = canvas.toDataURL('image/png');
+
+  const { jsPDF } = window.jspdf;
+  const doc = new jsPDF({ unit: 'pt', format: 'letter' });
+  const pageW = doc.internal.pageSize.getWidth();
+  const pageH = doc.internal.pageSize.getHeight();
+  const margin = 40;
+  const maxW = pageW - margin * 2;
+  const maxH = pageH - margin * 2;
+
+  const scale = Math.min(maxW / img.width, maxH / img.height, 1);
+  const w = img.width * scale;
+  const h = img.height * scale;
+  const x = (pageW - w) / 2;
+  const y = (pageH - h) / 2;
+
+  doc.addImage(pngDataUrl, 'PNG', x, y, w, h);
+
+  return { bytes: doc.output('arraybuffer'), pngDataUrl };
+}
+
+// Why: runs the image through Tesseract's OCR engine and lays the
+// recognized text out as its own page(s), reusing the same wrap/paginate
+// logic as the txt/docx paths so a scanned image becomes searchable text
+// instead of just a picture the reader can't select or search.
+async function ocrImageToPdfBytes(entry, pngDataUrl, onProgress) {
+  // Why: Tesseract.js defaults its core-engine file to jsdelivr, which is
+  // blocked/unreachable on this network (confirmed: unpkg.com loads fine,
+  // jsdelivr does not) — that silently hangs the whole run. Point corePath
+  // at the equivalent unpkg URL instead. Worker script is left on its own
+  // default since unpkg already confirmed working there.
+  const recognizePromise = Tesseract.recognize(pngDataUrl, 'eng', {
+    corePath: 'https://unpkg.com/tesseract.js-core@v4.0.4/tesseract-core.wasm.js',
+    logger: m => {
+      if (!onProgress) return;
+      if (m.status === 'recognizing text') {
+        onProgress(`recognizing ${Math.round((m.progress || 0) * 100)}%`);
+      } else if (m.status) {
+        onProgress(m.status + (m.progress != null ? ` ${Math.round(m.progress * 100)}%` : ''));
+      }
+    }
+  });
+  const timeoutPromise = new Promise((_, reject) =>
+    setTimeout(() => reject(new Error(
+      `OCR timed out after 120s on "${entry.file.name}" — the OCR engine files ` +
+      `may be blocked or slow on this network. Try again, or uncheck OCR to continue without it.`
+    )), 120000)
+  );
+  const { data } = await Promise.race([recognizePromise, timeoutPromise]);
+  const text = (data.text || '').trim() || '(No text detected in this image.)';
+
+  const { jsPDF } = window.jspdf;
+  const doc = new jsPDF({ unit: 'pt', format: 'letter' });
+  const margin = 56;
+  let y = margin;
+
+  doc.setFont('helvetica', 'bold');
+  doc.setFontSize(12);
+  doc.text(`OCR text — ${entry.file.name}`, margin, y);
+  y += 24;
+  doc.setFont('helvetica', 'normal');
+  doc.setFontSize(11);
+
+  const paragraphs = text.split(/\r?\n\s*\r?\n|\r?\n/);
+  paragraphs.forEach(para => {
+    if (!para.trim()) { y += 8; return; }
+    const wrapped = doc.splitTextToSize(para.trim(), 500);
+    wrapped.forEach(line => {
+      if (y > 740) { doc.addPage(); y = margin; }
+      doc.text(line, margin, y);
+      y += 15;
+    });
+    y += 6;
+  });
+
+  return doc.output('arraybuffer');
+}
+
+async function fileToPdfLibDocs(entry, opts) {
+  // Why: PDFs pass through untouched (loaded directly); everything else
+  // is rendered to PDF bytes first, then loaded the same way — this keeps
+  // the merge step below identical regardless of source type. Returns an
+  // array because an OCR'd image contributes two documents (image page +
+  // text page) instead of one.
+  if (entry.kind === 'pdf') {
+    const bytes = await entry.file.arrayBuffer();
+    return [await PDFLib.PDFDocument.load(bytes, { ignoreEncryption: true })];
+  }
+  if (entry.kind === 'txt' || entry.kind === 'ris') {
+    const bytes = await txtOrRisToPdfBytes(entry);
+    return [await PDFLib.PDFDocument.load(bytes, { ignoreEncryption: true })];
+  }
+  if (entry.kind === 'docx') {
+    const bytes = await docxToPdfBytes(entry);
+    return [await PDFLib.PDFDocument.load(bytes, { ignoreEncryption: true })];
+  }
+  if (entry.kind === 'image') {
+    const { bytes, pngDataUrl } = await imageToPdfBytes(entry);
+    const imageDoc = await PDFLib.PDFDocument.load(bytes, { ignoreEncryption: true });
+    const docs = [];
+    // Why: keep the image page unless the user asked to drop it AND OCR
+    // is actually running this time — never silently discard the only
+    // representation of the file.
+    if (!(opts && opts.ocr && opts.dropImage)) docs.push(imageDoc);
+    if (opts && opts.ocr) {
+      const ocrBytes = await ocrImageToPdfBytes(entry, pngDataUrl, opts.onOcrProgress);
+      docs.push(await PDFLib.PDFDocument.load(ocrBytes, { ignoreEncryption: true }));
+    }
+    return docs;
+  }
+  return [];
+}
+
+combineBtn.addEventListener('click', async () => {
+  combineBtn.disabled = true;
+  const merged = await PDFLib.PDFDocument.create();
+
+  try {
+    // Why: sequential loop (not Promise.all) so status text reflects real
+    // progress and so one slow/large file doesn't block others from
+    // starting their own memory-heavy rendering simultaneously.
+    const doOcr = ocrToggle.checked;
+    for (let i = 0; i < state.files.length; i++) {
+      const entry = state.files[i];
+      statusEl.textContent = `Converting ${i + 1} of ${state.files.length}: ${entry.file.name}`;
+      const srcDocs = await fileToPdfLibDocs(entry, {
+        ocr: doOcr && entry.kind === 'image',
+        dropImage: dropImageToggle.checked,
+        onOcrProgress: statusText => {
+          statusEl.textContent = `OCR (${statusText}) — ${i + 1} of ${state.files.length}: ${entry.file.name}`;
+        }
+      });
+      for (const srcDoc of srcDocs) {
+        const pageIndices = srcDoc.getPageIndices();
+        const copiedPages = await merged.copyPages(srcDoc, pageIndices);
+        copiedPages.forEach(page => merged.addPage(page));
+      }
+    }
+
+    statusEl.textContent = 'Finalizing combined PDF...';
+    const mergedBytes = await merged.save();
+    const blob = new Blob([mergedBytes], { type: 'application/pdf' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'combined.pdf';
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    URL.revokeObjectURL(url);
+    statusEl.textContent = `Done — combined ${state.files.length} file(s), ${merged.getPageCount()} pages total.`;
+  } catch (err) {
+    // Why: not every rejection is a real Error object — Tesseract's worker
+    // can reject with a plain string, an ErrorEvent, or an object with no
+    // .message — so err.message alone can silently print "undefined".
+    // Fall through several shapes, and always log the raw error so it's
+    // inspectable in the console even when the on-page text is generic.
+    console.error('Combine failed:', err);
+    const readable =
+      (err && err.message) ||
+      (typeof err === 'string' && err) ||
+      (err && err.error && err.error.message) ||
+      (() => { try { return JSON.stringify(err); } catch (e) { return null; } })() ||
+      String(err);
+    statusEl.textContent = 'Error: ' + readable + ' (see browser console for details)';
+  }
+
+  combineBtn.disabled = false;
+});
+</script>
+</body>
+</html>

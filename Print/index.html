@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<!--
+  Title:       Print — I.Q. Productionz
+  Author:      Hali Sarah Parsons
+  Date:        2026-11-14
+  Modified By: Claude (Anthropic), 2026-11-14
+  Description: Ink-friendly, black-and-white printable version of a quote or a Studio Practices
+               agreement. The Quote Builder, the agreement page and the emails open this page with
+               the document's details packed into the link (#d=...), so nothing is stored on a server.
+               The black I.Q. Productionz logo is redrawn in SVG so it prints crisp at any size.
+-->
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Print | I.Q. Productionz</title>
+<!-- WHY noindex: each print view holds one client's details. -->
+<meta name="robots" content="noindex, nofollow">
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@700&family=Oswald:wght@500;700&family=Raleway:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+/* WHY pure black on white with thin rules: easy on ink and readable on any printer. */
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:#e9e9e9;color:#000;font-family:'Raleway',Arial,sans-serif;font-size:11pt;line-height:1.5}
+.toolbar{position:sticky;top:0;background:#111;color:#fff;display:flex;gap:12px;align-items:center;justify-content:center;padding:10px;font-size:13px;z-index:5}
+.toolbar button{background:#fff;color:#000;border:0;border-radius:6px;padding:9px 18px;font:700 13px 'Raleway',sans-serif;cursor:pointer}
+.sheet{width:8.5in;max-width:100%;min-height:11in;margin:20px auto;background:#fff;padding:0.6in 0.65in;box-shadow:0 2px 12px rgba(0,0,0,.15)}
+.head{display:flex;justify-content:space-between;align-items:flex-end;gap:20px;border-bottom:2px solid #000;padding-bottom:12px;margin-bottom:18px}
+.logo{width:2.9in;height:auto;display:block}
+.doc-title{text-align:right;font-family:'Oswald',sans-serif;font-weight:700;font-size:15pt;letter-spacing:2px;text-transform:uppercase}
+.doc-title small{display:block;font-family:'Raleway',sans-serif;font-weight:400;font-size:9.5pt;letter-spacing:0;text-transform:none}
+h3{font-family:'Oswald',sans-serif;font-weight:700;font-size:11pt;letter-spacing:1.5px;text-transform:uppercase;margin:16px 0 6px}
+.two{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+table{width:100%;border-collapse:collapse}
+td,th{padding:5px 0;border-bottom:1px solid #bbb;text-align:left;vertical-align:top}
+td.amt,th.amt{text-align:right;white-space:nowrap}
+th{font-family:'Oswald',sans-serif;font-weight:500;font-size:9.5pt;letter-spacing:1.2px;text-transform:uppercase;border-bottom:1.5px solid #000;padding-top:12px}
+.totalbox{border:2px solid #000;border-radius:6px;padding:12px 16px;margin-top:18px}
+.totalbox .row{display:flex;justify-content:space-between;align-items:baseline}
+.totalbox .big{font-family:'Oswald',sans-serif;font-weight:700;font-size:24pt}
+.facts{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-top:8px;font-size:9.5pt}
+.facts b{display:block;font-size:11pt}
+.fine{font-size:9pt;margin-top:14px}
+.fine p{margin-bottom:5px}
+.svc{display:grid;grid-template-columns:0.55in 0.3in 1fr;gap:8px;margin-bottom:9px;page-break-inside:avoid}
+.ini{border-bottom:1px solid #000;text-align:center;font-weight:700;height:1.4em}
+.box{width:0.2in;height:0.2in;border:1.5px solid #000;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:10pt;margin-top:1px}
+.svc .t{font-size:10pt}
+.svc .t b{font-size:10.5pt}
+.fill{border-bottom:1px solid #000;padding:0 4px;font-weight:600}
+.sigrow{display:grid;grid-template-columns:1.2fr 1.6fr 0.9fr;gap:14px;margin-top:22px;page-break-inside:avoid}
+.sigrow .line{border-bottom:1px solid #000;min-height:0.62in;display:flex;align-items:flex-end;padding-bottom:3px}
+.sigrow .line svg{width:100%;height:0.6in}
+.sigrow small{display:block;font-size:8pt;letter-spacing:1px;text-transform:uppercase;margin-top:3px}
+.idrow{display:flex;justify-content:space-between;font-size:10pt;margin-bottom:12px}
+.msg{max-width:520px;margin:80px auto;text-align:center;font-size:15px;background:#fff;padding:30px;border-radius:8px}
+@media print{
+  body{background:#fff}
+  .toolbar{display:none}
+  .sheet{margin:0;box-shadow:none;width:auto;min-height:0;padding:0}
+  @page{size:letter;margin:0.55in}
+}
+</style>
+</head>
+<body>
+<div class="toolbar"><button type="button" id="printBtn">🖨 Print</button><span>Black &amp; white, ink-friendly copy</span></div>
+<main id="out"></main>
+
+<script>
+/* ---------- Black I.Q. Productionz logo, redrawn in SVG ----------
+   WHY SVG instead of the image file: vectors stay sharp on paper, and outlined letters save ink.
+   textLength pins each word's width so the layout holds even if a font is slow to load. */
+const LOGO_SVG = `
+<svg class="logo" viewBox="0 0 560 150" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="I.Q. Productionz">
+  <polyline points="96,40 104,10 120,28 132,4 142,30 160,14 158,44" fill="none" stroke="#000" stroke-width="3.2" stroke-linejoin="round"/>
+  <text x="2" y="132" font-family="Cinzel, Georgia, serif" font-weight="700" font-size="128" fill="#fff" stroke="#000" stroke-width="3" textLength="58" lengthAdjust="spacingAndGlyphs">I</text>
+  <text x="58" y="132" font-family="Cinzel, Georgia, serif" font-weight="700" font-size="128" fill="#fff" stroke="#000" stroke-width="3" textLength="118" lengthAdjust="spacingAndGlyphs">Q</text>
+  <text x="190" y="66" font-family="Oswald, Arial Narrow, sans-serif" font-weight="500" font-size="27" fill="#000" textLength="362" lengthAdjust="spacing">INNER QUALITY</text>
+  <text x="188" y="128" font-family="Oswald, Arial Narrow, sans-serif" font-weight="700" font-size="64" fill="#000" textLength="366" lengthAdjust="spacingAndGlyphs">PRODUCTIONZ</text>
+</svg>`;
+
+/* Studio Practices wording (from the agreement PDF). WHY a copy here: the print view stands on its own. */
+const SERVICES = [
+  { id:'graphic', name:'Graphic Design', text:'This includes: logos, website design, photo edits, album art and/or other {OTHER}. You will obtain graphic design work copyright for two years from the completion date on this agreement. After two years, a renewal fee of $25.00 will need to be paid yearly to have this work remain in public.' },
+  { id:'photo', name:'Photography', text:'This includes photos only. Photos can be received in any format and used in any way. Photos for public use are only authorized for use up to one year from the completion date on this agreement unless renewed for a fee of $300.00. If photos are found in use after this time without documentation of renewal, a fine up to $3,000.00 will be applied.' },
+  { id:'video', name:'Videography', text:'This includes any motion pictures. Examples of work could be music videos, website introductories, interviews, skits or specifically, {OTHER}. Video work rights are good for one year from the completion date on this agreement. Renewal fees for the continued public use of this content can be paid yearly at the price of $50.00 or consolidated into a five year plan if paid in full for $200.00.' },
+  { id:'audio', name:'Recordings', text:'This includes any audio work. Recordings can be received as whole working files, finished productions or other {OTHER}. Rights can be leased for $25.00 monthly or owned for $1000.00. If the recording is audio stamped with I.Q. Productionz and credited in text, rights are free with the understanding that I.Q Productionz will receive mechanical royalties through BMI under PARSONS HALI SARAH (MS) 550238287.' },
+  { id:'fashion', name:'Fashion', text:'This includes wardrobe assistance, tech packs, custom creations, alterations and/or other {OTHER}. All works of this nature only receive protective right in that the work may not be repeated without consultation.' },
+  { id:'promo', name:'Promotion', text:'This includes setting-up/management of social media accounts, writing press releases, finding touring venues, managing merchandise production and or other {OTHER}.' }
+];
+
+const esc = s => String(s == null ? '' : s).replace(/[&<>"']/g, c => ({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;' }[c]));
+const money = n => '$' + (Math.round(n * 100) / 100).toLocaleString('en-US', { minimumFractionDigits: n % 1 ? 2 : 0, maximumFractionDigits: 2 });
+const FREQ = { once:'', month:'/mo', year:'/yr' };
+
+/** Unpacks the link data. WHY deflate: keeps links with signatures short enough for email. */
+async function unpack(str){
+  const b64 = str.slice(1).replace(/-/g, '+').replace(/_/g, '/');
+  let bytes = Uint8Array.from(atob(b64 + '==='.slice((b64.length + 3) % 4)), c => c.charCodeAt(0));
+  if (str[0] === 'z') {
+    if (!window.DecompressionStream) throw new Error('This browser is too old to open the link. Try Chrome, Safari or Edge.');
+    bytes = new Uint8Array(await new Response(new Blob([bytes]).stream().pipeThrough(new DecompressionStream('deflate-raw'))).arrayBuffer());
+  }
+  return JSON.parse(new TextDecoder().decode(bytes));
+}
+
+/** Turns saved signature strokes into a crisp SVG. WHY vectors: they print sharp, unlike a photo of a signature. */
+function sigSvg(sig){
+  if (!sig || !sig.s || !sig.s.length) return '';
+  const h = Math.round(1000 * (sig.a || 0.3));
+  const paths = sig.s.map(st => { let d = ''; for (let i = 0; i < st.length; i += 2) d += (i ? 'L' : 'M') + st[i] + ' ' + Math.round(st[i + 1] * (sig.a || 0.3)); return `<path d="${d}"/>`; }).join('');
+  return `<svg viewBox="0 0 1000 ${h}" preserveAspectRatio="xMinYMax meet"><g fill="none" stroke="#000" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" vector-effect="non-scaling-stroke">${paths}</g></svg>`;
+}
+
+function quoteHtml(d){
+  const rows = (d.groups || []).map(g => `<tr><th colspan="2">${esc(g.n)}</th></tr>` +
+    g.l.map(l => `<tr><td>${esc(l.n)}</td><td class="amt">${money(l.a)}${FREQ[l.f] || ''}</td></tr>`).join('')).join('');
+  const rec = [d.mo ? money(d.mo) + '/mo' : '', d.yr ? money(d.yr) + '/yr' : ''].filter(Boolean).join(' + ') || 'None';
+  return `<div class="sheet">
+    <div class="head">${LOGO_SVG}<div class="doc-title">Quote<small>${esc(d.no)}<br>${esc(d.date)}</small></div></div>
+    <div class="two">
+      <div><h3 style="margin-top:0">Prepared for</h3>${[d.name, d.biz, d.email, d.phone].filter(Boolean).map(esc).join('<br>')}</div>
+      <div style="text-align:right"><h3 style="margin-top:0">Client ID</h3><span style="font-family:'Oswald',sans-serif;font-size:16pt;font-weight:700;letter-spacing:2px">${esc(d.cid || '—')}</span><br><small>Use this ID on your Studio Practices agreement.</small></div>
+    </div>
+    <table style="margin-top:10px">${rows}${d.disc ? `<tr><td>Discount (${esc(d.discPct)}%)</td><td class="amt">−${money(d.disc)}</td></tr>` : ''}</table>
+    <div class="totalbox">
+      <div class="row"><span style="font-family:'Oswald',sans-serif;font-weight:700;letter-spacing:1.5px">PROJECT TOTAL</span><span class="big">${money(d.total)}</span></div>
+      <div class="facts"><div>50% due to start<b>${money(d.dep)}</b></div><div>Due at completion<b>${money(d.total - d.dep)}</b></div><div>Working hours<b>${d.hrs || '—'}</b></div><div>Recurring<b>${rec}</b></div></div>
+    </div>
+    <div class="fine">
+      ${d.terms ? `<p><b>Additional terms &amp; deadlines:</b> ${esc(d.terms)}</p>` : ''}
+      ${(d.notes || []).map(n => `<p>${esc(n)}</p>`).join('')}
+      <p><b>Payment:</b> card, Cash App ($IQENT) or PayPal. Half is due to begin; the deposit counts toward the total.</p>
+      <p><b>Revisions:</b> unplanned revisions beyond the approved hours are $100.00 per hour. A progress report is sent at the halfway point of approved hours.</p>
+      <p><b>Cancellations:</b> canceled before mid-term, unused time is refunded; at the mid-term report, no refund; after mid-term, additional fees apply for time worked.</p>
+      <p>Delivery is digital through Google Drive. This quote is valid until ${esc(d.valid)}.</p>
+      <p style="margin-top:12px">I.Q. Productionz · Hali Sarah Parsons, Owner &amp; Creative Director · SarahParsons@IQProductionz.com · IQProductionz.com</p>
+    </div>
+  </div>`;
+}
+
+function agreementHtml(d){
+  const chosen = {}; (d.s || []).forEach(x => chosen[x.id] = x);
+  const svcs = SERVICES.map(s => {
+    const c = chosen[s.id];
+    const text = esc(s.text).replace('{OTHER}', c && c.o ? `<span class="fill">${esc(c.o)}</span>` : '__________');
+    return `<div class="svc"><div class="ini">${c ? esc(c.i) : ''}</div><div class="box">${c ? '✓' : ''}</div><div class="t"><b>${s.name}.</b> ${text}</div></div>`;
+  }).join('');
+  return `<div class="sheet">
+    <div class="head">${LOGO_SVG}<div class="doc-title">Studio Practices<br>Agreement</div></div>
+    <div class="idrow"><span><b>Date:</b> ${esc(d.date)}</span><span><b>Client ID:</b> ${esc(d.cid || '—')}${d.q ? ` · <b>Quote:</b> ${esc(d.q)}` : ''}</span></div>
+    <p>I, <span class="fill">${esc(d.n)}</span> am choosing to receive the following initialed services from I.Q. Productionz:</p>
+    <div style="margin-top:10px">${svcs}</div>
+    <h3>Delivery</h3><p>Services will be delivered digitally via google drive sharing/editing. If services are not digital, a PDF will be created that outlines the final output and may include pictures or links.</p>
+    <h3>Payment</h3><p>The initialed service(s) above will cost a total of <span class="fill">${esc(d.t)}</span>. On today's date: <span class="fill">${esc(d.date)}</span>, half of the payment is due to proceed with the project. We accept card, Cash App or PayPal. This payment will be good for <span class="fill">${esc(d.h || '____')}</span> working hours.</p>
+    <h3>Revisions</h3><p>Any additional hours for unplanned revisions of a project will result in $100.00 per hour. When half of the approved hours above have been used, a progress report will be compiled and sent to you via email. From there, we will decide if the project will be completed with our original timeline, or if we should make a new agreement. The only circumstance hourly revision fees will acquire is at the end of a project term.</p>
+    <h3>Cancelations</h3><p>If a project is canceled by you at the mid-term progress report, there will be no refund. If a project is canceled before project mid-term, you will be refunded for the time that has not been used. Cancelation after the mid-term will result in additional fees for the time of continued working.</p>
+    <h3>Additional terms including deadlines</h3><p style="min-height:0.5in;border-bottom:1px solid #bbb">${esc(d.x || '')}</p>
+    <div class="svc" style="margin-top:16px"><div class="ini">${esc(d.ack || '')}</div><div></div><div class="t">I.Q. Productionz has taken the time to answer any questions I have about this agreement and I fully understand the terms and conditions written here in.</div></div>
+    <div class="sigrow"><div><div class="line">${esc(d.cn || '')}</div><small>Full written name (client)</small></div><div><div class="line">${sigSvg(d.sig)}</div><small>Signature</small></div><div><div class="line">${esc(d.date || '')}</div><small>Date</small></div></div>
+    <div class="sigrow"><div><div class="line">${esc(d.pn || '')}</div><small>Full written name (provider)</small></div><div><div class="line">${sigSvg(d.psig)}</div><small>Signature</small></div><div><div class="line">${esc(d.pdate || '')}</div><small>Date</small></div></div>
+  </div>`;
+}
+
+/** Reads the link and draws the right document. WHY try/catch: a broken or cut-off link should explain itself. */
+async function start(){
+  const out = document.getElementById('out');
+  const raw = new URLSearchParams(location.hash.slice(1)).get('d');
+  try {
+    if (!raw) throw new Error('This print link is missing its details.');
+    const d = await unpack(raw);
+    out.innerHTML = d.type === 'agreement' ? agreementHtml(d) : quoteHtml(d);
+    document.title = (d.type === 'agreement' ? 'Studio Practices Agreement' : 'Quote ' + (d.no || '')) + ' | I.Q. Productionz';
+  } catch (e) {
+    console.error('Print view failed:', e);
+    out.innerHTML = `<div class="msg"><b>We couldn't open this document.</b><br>${esc(e.message)}<br><br>If you copied the link, make sure you copied all of it.</div>`;
+  }
+}
+document.getElementById('printBtn').addEventListener('click', () => window.print());
+window.addEventListener('hashchange', start);
+start();
+</script>
+</body>
+</html>

@@ -1,0 +1,613 @@
+<!DOCTYPE html>
+<!--
+  Title:       Studio Practices Agreement — I.Q. Productionz
+  Author:      Hali Sarah Parsons
+  Date:        2026-11-14
+  Modified By: Claude (Anthropic), 2026-11-14; Claude (Anthropic), 2026-11-14: Client ID + date row,
+               Submit flow, designer countersign mode, Print button, payment wording updated;
+               removed the "find this on your quote" note (the ID is carried over from the quote)
+  Description: Digital Studio Practices Agreement. CLIENT MODE: clients check and initial services,
+               enter their Client ID (from their quote), sign, and Submit; Hali gets an email with a
+               "Review & Countersign" link. DESIGNER MODE (opened from that link, #sign=...): Hali
+               reviews, signs, and sends the fully signed agreement back to the client, with a PDF
+               and an ink-friendly print link. A quote link pre-fills the client's details.
+-->
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Studio Practices Agreement | I.Q. Productionz</title>
+<!-- WHY noindex: this is a signing form for clients, not a page to find in search. -->
+<meta name="robots" content="noindex, nofollow">
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700&family=Raleway:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script>
+  var EJS_PUBLIC_KEY = '3vNjQbWmqzzOO6IK-'; // WHY var + init now: shared with the main script, ready before any click
+  if (window.emailjs) emailjs.init({ publicKey: EJS_PUBLIC_KEY });
+</script>
+<style>
+/* WHY these values: same palette and fonts as the Rates, Pay and Apps pages. */
+:root{
+  --bg:#333333;--surface:#3b3b3b;--card:#454545;--border:#2e2b24;
+  --gold:#c98a2e;--gold-lt:#e0a84a;--gold-dim:#7a5218;
+  --white:#f0ece3;--muted:#A9A9A9;--radius:8px;--err:#ffb4a8;--ok:#9fd8a4;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Raleway',sans-serif;background:var(--bg);color:var(--white);min-height:100vh;padding-bottom:60px;line-height:1.65}
+a{color:var(--gold-lt)}
+.top{background:linear-gradient(160deg,#454545 0%,#333333 60%);border-bottom:1px solid var(--border);padding:36px 20px 28px;text-align:center;position:relative;overflow:hidden}
+.top::before{content:'';position:absolute;inset:0;background:radial-gradient(ellipse at 50% 0%,rgba(201,138,46,.13),transparent 70%);pointer-events:none}
+.top img{height:62px;width:auto;max-width:90%;filter:drop-shadow(0 0 14px rgba(201,138,46,.45))}
+.gold-rule{width:60px;height:2px;background:linear-gradient(90deg,transparent,var(--gold),transparent);margin:16px auto}
+.top h1{font-family:'Cinzel',serif;font-size:clamp(22px,4.5vw,34px);font-weight:600;letter-spacing:1px;text-transform:uppercase}
+.top p{color:var(--muted);font-size:13.5px;max-width:520px;margin:8px auto 0}
+.mode{display:none;max-width:820px;margin:18px auto 0;padding:12px 16px;border:1px solid var(--gold);border-radius:10px;background:rgba(201,138,46,.12);font-size:14px}
+
+.wrap{max-width:820px;margin:0 auto;padding:24px 18px 0}
+.card{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:22px;margin-bottom:16px;position:relative;overflow:hidden}
+.card::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,transparent,var(--gold),transparent)}
+h2{font-family:'Cinzel',serif;font-size:16px;font-weight:700;color:var(--gold);letter-spacing:1.4px;text-transform:uppercase;margin-bottom:10px}
+p.body{font-size:14.5px;margin-bottom:10px}
+label{display:block;font-size:13px;font-weight:600}
+.star{color:var(--gold);margin-left:3px}
+.hint{font-weight:400;color:var(--muted);font-size:12px}
+input[type=text],input[type=email],textarea{width:100%;margin-top:5px;padding:10px 11px;border:1px solid var(--border);border-radius:var(--radius);background:#333;color:var(--white);font:500 15px 'Raleway',sans-serif}
+input[readonly],textarea[readonly]{background:#2f2f2f;color:var(--gold-lt);border-color:var(--gold-dim)}
+textarea{min-height:90px;resize:vertical}
+input:focus-visible,textarea:focus-visible,button:focus-visible,a:focus-visible{outline:3px solid var(--gold-lt);outline-offset:2px}
+input[type=checkbox]{accent-color:var(--gold);width:20px;height:20px;flex:0 0 auto}
+.inline{display:inline-block;width:auto;min-width:220px;max-width:100%;margin:0 4px}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:12px 16px}
+/* WHY date left, Client ID right: mirrors a paper form header and keeps the ID easy to spot. */
+.idrow{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:16px}
+.idrow .right{text-align:right}
+.idrow .right input{text-align:right;text-transform:uppercase;letter-spacing:2px;font-weight:700}
+
+.svc{border:1px solid var(--border);border-radius:10px;padding:14px;margin-bottom:12px;background:var(--surface);transition:border-color .2s}
+.svc.on{border-color:var(--gold)}
+.svc-head{display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+.svc-head .t{font-family:'Cinzel',serif;font-weight:700;color:var(--gold-lt);font-size:15px;letter-spacing:1px;flex:1}
+.initials{width:90px!important;margin:0!important;text-align:center;text-transform:uppercase;letter-spacing:2px;font-weight:700}
+.svc .terms{font-size:13.5px;color:#dcd6ca;margin-top:8px}
+.svc .other{margin-top:8px}
+
+.sig-box{position:relative;margin-top:6px;border:1px dashed var(--gold-dim);border-radius:var(--radius);background:#fdfbf6;touch-action:none}
+.sig-box canvas{display:block;width:100%;height:160px;cursor:crosshair;border-radius:var(--radius)}
+.sig-box.locked canvas{cursor:default}
+.sig-box .ph{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;color:#b8ad99;font-size:14px;pointer-events:none}
+.sig-tools{display:flex;justify-content:space-between;align-items:center;margin-top:6px;font-size:12px;color:var(--muted);gap:10px}
+.linkbtn{background:none;border:0;color:var(--gold-lt);font:600 13px 'Raleway',sans-serif;cursor:pointer;padding:4px}
+.pending{border:1px dashed var(--gold-dim);border-radius:var(--radius);padding:16px;color:var(--muted);font-size:13.5px;margin-top:10px;text-align:center}
+
+.invalid input,.invalid textarea,.invalid.sig-box{border-color:var(--err)!important}
+.svc.invalid{border-color:var(--err)}
+.errmsg{color:var(--err);font-size:12.5px;font-weight:600;margin-top:5px}
+.banner{display:none;border:1px solid var(--err);background:rgba(255,180,168,.08);border-radius:var(--radius);padding:12px 14px;margin:0 0 14px;font-size:14px}
+.banner b{color:var(--err)}
+.banner ul{margin:6px 0 0 18px}
+.status{display:none;border:1px solid var(--ok);background:rgba(159,216,164,.08);border-radius:var(--radius);padding:12px 14px;margin-top:14px;font-size:14px}
+
+/* WHY bottom-heavy: signatures and the submit button carry the most weight at the end. */
+.sign{border:2px solid var(--gold);background:linear-gradient(180deg,#454545,#2a2720)}
+.btn{display:flex;width:100%;align-items:center;justify-content:center;gap:8px;padding:17px 22px;border-radius:var(--radius);font-family:'Cinzel',serif;font-size:15px;font-weight:700;letter-spacing:1px;text-transform:uppercase;cursor:pointer;border:0;margin-top:18px;
+  background:linear-gradient(135deg,var(--gold) 0%,#a87025 100%);color:#2a2720;box-shadow:0 4px 16px rgba(201,138,46,.25)}
+.btn:hover{background:linear-gradient(135deg,var(--gold-lt) 0%,var(--gold) 100%)}
+.btn:disabled{opacity:.6;cursor:wait}
+.btn-line{background:var(--surface);color:var(--white);border:1px solid var(--gold-dim);box-shadow:none;margin-top:10px;padding:13px;font-size:13px}
+.btn-line:hover{background:var(--surface);border-color:var(--gold)}
+.after{font-size:13px;color:var(--muted);text-align:center;margin-top:10px}
+.foot{text-align:center;color:var(--muted);font-size:12.5px;margin-top:26px;line-height:2}
+</style>
+</head>
+<body>
+
+<header class="top">
+  <a href="https://iqproductionz.com/"><img src="https://iqproductionz.com/Content/Images/Main/IQ-noglow_Updated.avif" alt="I.Q. Productionz" onerror="this.style.display='none'"></a>
+  <div class="gold-rule"></div>
+  <h1>Studio Practices Agreement</h1>
+  <p id="subtitle">Check and initial each service you're choosing, review the terms, then sign and submit at the bottom.</p>
+</header>
+<div class="mode" id="modeBar" role="note"></div>
+
+<main class="wrap">
+  <form id="agreement" novalidate>
+
+    <section class="card">
+      <div class="idrow">
+        <label>Date<input type="text" id="topDate" readonly></label>
+        <label class="right" id="cidWrap">Client ID<span class="star" aria-hidden="true">*</span><input type="text" id="clientId" maxlength="12" autocomplete="off" placeholder="IQC-XXXXXX"></label>
+      </div>
+      <p class="body" id="nameLine">I, <input type="text" class="inline" id="clientNameTop" aria-label="Your full name" autocomplete="name"> am choosing to receive the following initialed services from I.Q. Productionz:</p>
+      <div id="services"></div>
+    </section>
+
+    <section class="card">
+      <h2>Delivery</h2>
+      <p class="body">Services will be delivered digitally via google drive sharing/editing. If services are not digital, a PDF will be created that outlines the final output and may include pictures or links.</p>
+    </section>
+
+    <section class="card">
+      <h2>Payment</h2>
+      <div class="grid">
+        <label>The initialed service(s) above will cost a total of<input type="text" id="total" inputmode="decimal" placeholder="$0.00"></label>
+        <label>On today's date<input type="text" id="todayPay" readonly></label>
+        <label>This payment will be good for (working hours)<input type="text" id="hours" inputmode="decimal" placeholder="0"></label>
+      </div>
+      <p class="body" style="margin-top:10px">Half of the payment is due to proceed with the project. We accept card, Cash App or PayPal. <span id="halfNote" class="hint"></span></p>
+    </section>
+
+    <section class="card">
+      <h2>Revisions</h2>
+      <p class="body">Any additional hours for unplanned revisions of a project will result in $100.00 per hour. When half of the approved hours above have been used, a progress report will be compiled and sent to you via email. From there, we will decide if the project will be completed with our original timeline, or if we should make a new agreement. The only circumstance hourly revision fees will acquire is at the end of a project term.</p>
+    </section>
+
+    <section class="card">
+      <h2>Cancelations</h2>
+      <p class="body">If a project is canceled by you at the mid-term progress report, there will be no refund. If a project is canceled before project mid-term, you will be refunded for the time that has not been used. Cancelation after the mid-term will result in additional fees for the time of continued working.</p>
+    </section>
+
+    <section class="card">
+      <h2>Additional Terms <span class="hint" style="text-transform:none;letter-spacing:0">including deadlines</span></h2>
+      <textarea id="terms" aria-label="Additional terms including deadlines"></textarea>
+    </section>
+
+    <section class="card sign">
+      <div class="svc" id="ackWrap" style="background:transparent">
+        <div class="svc-head">
+          <input type="text" class="initials" id="ackInitials" maxlength="4" aria-label="Your initials" placeholder="Initials">
+          <span class="body" style="flex:1;font-size:14px">I.Q. Productionz has taken the time to answer any questions I have about this agreement and I fully understand the terms and conditions written here in.</span>
+        </div>
+      </div>
+
+      <h2 style="margin-top:16px">Client</h2>
+      <div class="grid">
+        <label>Full written name<span class="star" aria-hidden="true">*</span><input type="text" id="clientName" autocomplete="name"></label>
+        <label>Email<span class="star" aria-hidden="true">*</span> <span class="hint">(your signed copy is sent here)</span><input type="email" id="clientEmail" autocomplete="email"></label>
+        <label>Date<input type="text" id="signDate" readonly></label>
+      </div>
+      <label style="margin-top:12px">Signature<span class="star" aria-hidden="true">*</span> <span class="hint" id="sigHint">(sign with your finger or mouse)</span></label>
+      <div class="sig-box" id="sigBox"><canvas id="sig" aria-label="Client signature"></canvas><div class="ph" id="sigPh">Sign here</div></div>
+      <div class="sig-tools" id="sigTools"><span>By signing, you agree to this Studio Practices Agreement.</span><button type="button" class="linkbtn" id="sigClear">Clear</button></div>
+
+      <h2 style="margin-top:20px">Designer</h2>
+      <div class="grid">
+        <label>Full written name<input type="text" id="providerName" value="Hali Sarah Parsons" readonly></label>
+        <label>Date<input type="text" id="providerDate" readonly placeholder="Added when signed"></label>
+      </div>
+      <div id="providerPending" class="pending">The designer signs here after you submit, then sends the fully signed agreement to your email for your records.</div>
+      <div id="providerSign" hidden>
+        <label style="margin-top:12px">Designer signature<span class="star" aria-hidden="true">*</span> <span class="hint">(sign with your finger or mouse)</span></label>
+        <div class="sig-box" id="psigBox"><canvas id="psig" aria-label="Designer signature"></canvas><div class="ph" id="psigPh">Sign here</div></div>
+        <div class="sig-tools"><span>Countersigning sends the signed agreement to the client.</span><button type="button" class="linkbtn" id="psigClear">Clear</button></div>
+      </div>
+
+      <div class="banner" id="banner" role="alert" style="margin-top:16px"></div>
+      <button type="submit" class="btn" id="mainBtn">✦ Submit</button>
+      <p class="after" id="afterNote">After you submit, the designer will review, sign and send the agreement back to you for your records.</p>
+      <button type="button" class="btn btn-line" id="printBtn">🖨 Print (black &amp; white)</button>
+      <div class="status" id="status" role="status"></div>
+    </section>
+  </form>
+
+  <div class="foot">Questions? Email <a href="mailto:SarahParsons@IQProductionz.com">SarahParsons@IQProductionz.com</a><br><a href="https://iqproductionz.com/Services/Rates/">View Rates</a></div>
+</main>
+
+<script>
+/* ---------- Settings ----------
+   WHY reused: same EmailJS service/template and Client Files Worker as the website intake form. */
+const EJS_SERVICE  = 'service_wtg920o';
+const EJS_TEMPLATE = 'template_nnmxioq';
+const HALI_EMAIL   = 'SarahParsons@IQProductionz.com';
+const WORKER       = 'https://iq-website-files.halisarahparsons.workers.dev';
+const LOGO_URL     = 'https://iqproductionz.com/Content/Images/Main/IQ-noglow_Updated.avif';
+const PAGE_URL     = 'https://iqproductionz.com/Agreements/StudioPractices/';
+const PRINT_URL    = 'https://iqproductionz.com/Print/';
+
+/* ---------- Agreement services (wording from the Studio Practices PDF) ----------
+   WHY {OTHER}: marks where the paper form has a write-in blank. */
+const SERVICES = [
+  { id:'graphic', name:'Graphic Design', text:'This includes: logos, website design, photo edits, album art and/or other {OTHER}. You will obtain graphic design work copyright for two years from the completion date on this agreement. After two years, a renewal fee of $25.00 will need to be paid yearly to have this work remain in public.' },
+  { id:'photo', name:'Photography', text:'This includes photos only. Photos can be received in any format and used in any way. Photos for public use are only authorized for use up to one year from the completion date on this agreement unless renewed for a fee of $300.00. If photos are found in use after this time without documentation of renewal, a fine up to $3,000.00 will be applied.' },
+  { id:'video', name:'Videography', text:'This includes any motion pictures. Examples of work could be music videos, website introductories, interviews, skits or specifically, {OTHER}. Video work rights are good for one year from the completion date on this agreement. Renewal fees for the continued public use of this content can be paid yearly at the price of $50.00 or consolidated into a five year plan if paid in full for $200.00.' },
+  { id:'audio', name:'Recordings', text:'This includes any audio work. Recordings can be received as whole working files, finished productions or other {OTHER}. Rights can be leased for $25.00 monthly or owned for $1000.00. If the recording is audio stamped with I.Q. Productionz and credited in text, rights are free with the understanding that I.Q Productionz will receive mechanical royalties through BMI under PARSONS HALI SARAH (MS) 550238287.' },
+  { id:'fashion', name:'Fashion', text:'This includes wardrobe assistance, tech packs, custom creations, alterations and/or other {OTHER}. All works of this nature only receive protective right in that the work may not be repeated without consultation.' },
+  { id:'promo', name:'Promotion', text:'This includes setting-up/management of social media accounts, writing press releases, finding touring venues, managing merchandise production and or other {OTHER}.' }
+];
+
+const $ = id => document.getElementById(id);
+const esc = s => String(s == null ? '' : s).replace(/[&<>"']/g, c => ({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;' }[c]));
+const TODAY_TXT = new Date().toLocaleDateString('en-US', { month:'long', day:'numeric', year:'numeric' });
+const params = new URLSearchParams(location.search);
+let MODE = 'client';     // 'client' signs and submits; 'designer' countersigns and sends back
+let submitted = null;    // the client's submission, when opened in designer mode
+
+/* ---------- Link packing ----------
+   WHY deflate + base64url: a whole agreement (with signature strokes) rides in an email link,
+   so nothing has to be stored on a server. */
+const b64url = bytes => { let s = ''; for (let i = 0; i < bytes.length; i += 0x8000) s += String.fromCharCode.apply(null, bytes.subarray(i, i + 0x8000)); return btoa(s).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, ''); };
+async function pack(obj){
+  const bytes = new TextEncoder().encode(JSON.stringify(obj));
+  // WHY try/catch: older browsers lack CompressionStream; plain packing still works, just longer.
+  try { if (window.CompressionStream) return 'z' + b64url(new Uint8Array(await new Response(new Blob([bytes]).stream().pipeThrough(new CompressionStream('deflate-raw'))).arrayBuffer())); } catch (e) {}
+  return 'j' + b64url(bytes);
+}
+async function unpack(str){
+  const b64 = str.slice(1).replace(/-/g, '+').replace(/_/g, '/');
+  let bytes = Uint8Array.from(atob(b64 + '==='.slice((b64.length + 3) % 4)), c => c.charCodeAt(0));
+  if (str[0] === 'z') bytes = new Uint8Array(await new Response(new Blob([bytes]).stream().pipeThrough(new DecompressionStream('deflate-raw'))).arrayBuffer());
+  return JSON.parse(new TextDecoder().decode(bytes));
+}
+
+/* ---------- Signature pads ----------
+   WHY strokes, not just pixels: strokes are tiny to send in a link and redraw crisp anywhere.
+   Points are stored 0–1000 across and down the pad, so they fit any screen size. */
+function SigPad(canvasId, boxId, phId){
+  const pad = { canvas:$(canvasId), box:$(boxId), ph:$(phId), strokes:[], length:0, drawing:false, locked:false, last:null, ctx:null };
+  const rect = () => pad.canvas.getBoundingClientRect();
+  pad.size = () => {
+    const r = rect(), dpr = window.devicePixelRatio || 1;
+    if (!r.width) return; // WHY: a hidden pad has no size yet; it's sized again when shown
+    pad.canvas.width = Math.round(r.width * dpr); pad.canvas.height = Math.round(r.height * dpr);
+    pad.ctx = pad.canvas.getContext('2d'); pad.ctx.scale(dpr, dpr);
+    pad.ctx.lineWidth = 2.4; pad.ctx.lineCap = 'round'; pad.ctx.lineJoin = 'round'; pad.ctx.strokeStyle = '#1d1a14';
+    pad.redraw();
+  };
+  pad.redraw = () => {
+    if (!pad.ctx) return;
+    const r = rect();
+    pad.ctx.clearRect(0, 0, r.width, r.height);
+    pad.strokes.forEach(st => { pad.ctx.beginPath(); for (let i = 0; i < st.length; i += 2) { const x = st[i] / 1000 * r.width, y = st[i + 1] / 1000 * r.height; i ? pad.ctx.lineTo(x, y) : pad.ctx.moveTo(x, y); } pad.ctx.stroke(); });
+    pad.ph.style.display = pad.strokes.length ? 'none' : '';
+  };
+  const pt = e => { const r = rect(); return [Math.round((e.clientX - r.left) / r.width * 1000), Math.round((e.clientY - r.top) / r.height * 1000)]; };
+  pad.canvas.addEventListener('pointerdown', e => {
+    if (pad.locked) return;
+    e.preventDefault(); pad.canvas.setPointerCapture(e.pointerId); pad.drawing = true;
+    const p = pt(e); pad.strokes.push([p[0], p[1]]); pad.last = p; pad.ph.style.display = 'none'; clearError(pad.box);
+  });
+  pad.canvas.addEventListener('pointermove', e => {
+    if (!pad.drawing) return;
+    e.preventDefault();
+    const p = pt(e), d = Math.hypot(p[0] - pad.last[0], p[1] - pad.last[1]);
+    if (d < 3) return; // WHY skip tiny moves: keeps the stroke data small with no visible loss
+    pad.strokes[pad.strokes.length - 1].push(p[0], p[1]);
+    pad.length += d; pad.last = p; pad.redraw();
+  });
+  ['pointerup', 'pointercancel', 'pointerleave'].forEach(ev => pad.canvas.addEventListener(ev, () => { pad.drawing = false; }));
+  pad.clear = () => { if (pad.locked) return; pad.strokes = []; pad.length = 0; pad.redraw(); };
+  pad.data = () => { const r = rect(); return { s:pad.strokes, a:r.width ? Math.round(r.height / r.width * 1000) / 1000 : 0.3 }; };
+  pad.load = d => { pad.strokes = (d && d.s) || []; pad.length = pad.strokes.length ? 999 : 0; pad.redraw(); };
+  /** Renders strokes to a PNG for the PDF. WHY a fresh canvas: the PDF needs a clean, high-resolution copy. */
+  pad.png = (aspect) => {
+    aspect = aspect || 0.32;
+    const c = document.createElement('canvas'); c.width = 1000; c.height = Math.round(1000 * aspect);
+    const x = c.getContext('2d'); x.lineWidth = 4; x.lineCap = 'round'; x.lineJoin = 'round'; x.strokeStyle = '#000';
+    pad.strokes.forEach(st => { x.beginPath(); for (let i = 0; i < st.length; i += 2) { const px = st[i], py = st[i + 1] * aspect; i ? x.lineTo(px, py) : x.moveTo(px, py); } x.stroke(); });
+    return c.toDataURL('image/png');
+  };
+  return pad;
+}
+let clientPad, designerPad;
+
+/* ---------- Page setup ---------- */
+function renderServices(){
+  $('services').innerHTML = SERVICES.map(s => {
+    const [before, after] = s.text.split('{OTHER}');
+    return `<div class="svc" id="svc_${s.id}">
+      <div class="svc-head">
+        <input type="checkbox" id="on_${s.id}" aria-label="Choose ${s.name}">
+        <label class="t" for="on_${s.id}">${s.name}</label>
+        <input type="text" class="initials" id="ini_${s.id}" maxlength="4" placeholder="Initials" aria-label="Initials for ${s.name}">
+      </div>
+      <p class="terms">${esc(before)}${after !== undefined ? `<em style="color:var(--gold-lt)">(your details below)</em>${esc(after)}` : ''}</p>
+      ${after !== undefined ? `<label class="other">Other / specifically <span class="hint">(optional)</span><input type="text" id="other_${s.id}"></label>` : ''}
+    </div>`;
+  }).join('');
+}
+
+/** Fills what the quote link sent. WHY readonly: the client signs exactly what was quoted. */
+function prefillFromQuote(){
+  const n = params.get('n'), e = params.get('e'), t = params.get('t'), h = params.get('h'), x = params.get('x'), c = params.get('c');
+  if (n) { $('clientNameTop').value = n; $('clientName').value = n; }
+  if (e) $('clientEmail').value = e;
+  if (c) { $('clientId').value = c.toUpperCase(); $('clientId').readOnly = true; }
+  if (t && isFinite(parseFloat(t))) { $('total').value = '$' + parseFloat(t).toFixed(2); $('total').readOnly = true; }
+  if (h) { $('hours').value = h; $('hours').readOnly = true; }
+  if (x) $('terms').value = x;
+  (params.get('s') || '').split(',').filter(Boolean).forEach(id => { if ($('on_' + id)) { $('on_' + id).checked = true; $('svc_' + id).classList.add('on'); } });
+  SERVICES.forEach(s => { const o = params.get('o_' + s.id); if (o && $('other_' + s.id)) $('other_' + s.id).value = o; });
+}
+
+function updateHalf(){
+  const t = parseFloat(String($('total').value).replace(/[^0-9.]/g, ''));
+  $('halfNote').textContent = t > 0 ? `Half due today: $${(t / 2).toFixed(2)}.` : '';
+}
+
+/** Collects the client's side. WHY one object: it feeds the email link, the print view and the PDF. */
+function collect(){
+  return {
+    v:1, type:'agreement',
+    date: submitted ? submitted.date : TODAY_TXT,
+    cid: $('clientId').value.trim().toUpperCase(),
+    q: submitted ? submitted.q : (params.get('q') || ''),
+    n: $('clientNameTop').value.trim(),
+    s: SERVICES.filter(s => $('on_' + s.id).checked).map(s => ({ id:s.id, i:$('ini_' + s.id).value.trim().toUpperCase(), o:$('other_' + s.id) ? $('other_' + s.id).value.trim() : '' })),
+    t: $('total').value.trim(), h: $('hours').value.trim(), x: $('terms').value.trim(),
+    ack: $('ackInitials').value.trim().toUpperCase(),
+    cn: $('clientName').value.trim(), ce: $('clientEmail').value.trim(),
+    sig: clientPad.data()
+  };
+}
+
+/** Designer mode: shows the client's submission locked and opens Hali's signature pad. */
+function enterDesignerMode(d){
+  MODE = 'designer'; submitted = d;
+  $('modeBar').style.display = 'block';
+  $('modeBar').innerHTML = `<b>Countersign mode.</b> Review ${esc(d.cn)}'s agreement, sign as the designer, then send. The signed copy goes to <b>${esc(d.ce)}</b>.`;
+  $('subtitle').textContent = 'Designer review and countersignature.';
+  $('topDate').value = d.date; $('signDate').value = d.date; $('todayPay').value = d.date;
+  $('clientId').value = d.cid; $('clientNameTop').value = d.n; $('total').value = d.t; $('hours').value = d.h; $('terms').value = d.x;
+  $('ackInitials').value = d.ack; $('clientName').value = d.cn; $('clientEmail').value = d.ce;
+  SERVICES.forEach(s => { $('on_' + s.id).checked = false; $('svc_' + s.id).classList.remove('on'); });
+  (d.s || []).forEach(x => { if ($('on_' + x.id)) { $('on_' + x.id).checked = true; $('ini_' + x.id).value = x.i; if ($('other_' + x.id)) $('other_' + x.id).value = x.o; $('svc_' + x.id).classList.add('on'); } });
+  // WHY lock everything: the designer signs what the client submitted, not an edited version.
+  document.querySelectorAll('#agreement input, #agreement textarea').forEach(el => { if (!el.closest('#providerSign')) { el.readOnly = true; if (el.type === 'checkbox') el.disabled = true; } });
+  clientPad.load(d.sig); clientPad.locked = true; $('sigBox').classList.add('locked');
+  $('sigTools').style.display = 'none'; $('sigHint').textContent = '(signed by the client)';
+  $('providerPending').hidden = true; $('providerSign').hidden = false; $('providerDate').value = TODAY_TXT;
+  designerPad.size();
+  $('mainBtn').textContent = '✦ Sign & Send to Client';
+  $('afterNote').textContent = 'The client receives the fully signed agreement by email, with a PDF and a print-friendly copy.';
+  updateHalf();
+}
+
+/* ---------- Validation ---------- */
+function setError(box, text){
+  box.classList.add('invalid');
+  if (text && !box.querySelector(':scope > .errmsg')) { const m = document.createElement('div'); m.className = 'errmsg'; m.textContent = text; box.appendChild(m); }
+}
+function clearError(box){ if (!box) return; box.classList.remove('invalid'); box.querySelector(':scope > .errmsg')?.remove(); }
+
+function showMissed(missed){
+  const b = $('banner');
+  if (!missed.length) { b.style.display = 'none'; return true; }
+  b.innerHTML = `<b>Please complete ${missed.length} item${missed.length > 1 ? 's' : ''}:</b><ul>${missed.map(m => `<li>${esc(m.label)}</li>`).join('')}</ul>`;
+  b.style.display = 'block';
+  missed[0].el.scrollIntoView({ behavior:'smooth', block:'center' });
+  return false;
+}
+
+/** Client checks. WHY all at once: the client sees every miss in one pass. */
+function validateClient(){
+  document.querySelectorAll('.invalid').forEach(clearError);
+  const missed = [];
+  const chosen = SERVICES.filter(s => $('on_' + s.id).checked);
+  if (!/^[A-Z0-9-]{4,12}$/i.test($('clientId').value.trim())) { setError($('cidWrap'), 'Enter the Client ID from your quote.'); missed.push({ label:'Client ID (on your quote)', el:$('cidWrap') }); }
+  if (!$('clientNameTop').value.trim()) { setError($('nameLine'), 'Enter your full name.'); missed.push({ label:'Your name (top of the agreement)', el:$('nameLine') }); }
+  if (!chosen.length) { setError($('services'), 'Check at least one service.'); missed.push({ label:'At least one service', el:$('services') }); }
+  chosen.forEach(s => { if ($('ini_' + s.id).value.trim().length < 2) { setError($('svc_' + s.id), `Initial ${s.name} to choose it.`); missed.push({ label:`Initials for ${s.name}`, el:$('svc_' + s.id) }); } });
+  // WHY: initials on an unchecked service would be ambiguous on a signed record.
+  SERVICES.filter(s => !$('on_' + s.id).checked && $('ini_' + s.id).value.trim()).forEach(s => { setError($('svc_' + s.id), `Check ${s.name} or remove your initials.`); missed.push({ label:`${s.name}: check it or clear the initials`, el:$('svc_' + s.id) }); });
+  if (!(parseFloat(String($('total').value).replace(/[^0-9.]/g, '')) > 0)) { setError($('total').closest('label'), 'Enter the total from your quote.'); missed.push({ label:'Total cost', el:$('total') }); }
+  if ($('ackInitials').value.trim().length < 2) { setError($('ackWrap'), 'Initial to confirm you understand the terms.'); missed.push({ label:'Acknowledgment initials', el:$('ackWrap') }); }
+  if (!$('clientName').value.trim()) { setError($('clientName').closest('label'), 'Full written name is required'); missed.push({ label:'Full written name', el:$('clientName') }); }
+  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test($('clientEmail').value.trim())) { setError($('clientEmail').closest('label'), 'Enter a valid email'); missed.push({ label:'Email', el:$('clientEmail') }); }
+  if (clientPad.length < 40) { setError($('sigBox'), ''); missed.push({ label:'Signature', el:$('sigBox') }); }
+  return showMissed(missed);
+}
+
+/* ---------- Emails ---------- */
+const emailShell = (title, inner) => `<div style="background:#2a2720;padding:22px 0;font-family:Arial,Helvetica,sans-serif">
+<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="max-width:600px;margin:0 auto;background:#333;border:1px solid #7a5218;border-radius:12px">
+<tr><td align="center" style="padding:24px 24px 6px"><img src="${LOGO_URL}" alt="I.Q. Productionz" width="240" style="width:240px;max-width:80%;height:auto"></td></tr>
+<tr><td align="center" style="padding:0 24px 16px;color:#c98a2e;font-family:Georgia,serif;font-size:15px;letter-spacing:2px;text-transform:uppercase">${title}</td></tr>
+${inner}
+<tr><td align="center" style="padding:14px 26px 22px;color:#a9a9a9;font-size:12px;border-top:1px solid #4a463d">I.Q. Productionz · <a href="https://iqproductionz.com" style="color:#e0a84a">IQProductionz.com</a> · ${HALI_EMAIL}</td></tr>
+</table></div>`;
+const btnHtml = (href, text, solid = true) => `<a href="${href}" style="display:inline-block;margin:4px;${solid ? 'background:#c98a2e;color:#2a2720' : 'background:#3b3b3b;color:#f0ece3;border:1px solid #7a5218'};text-decoration:none;font-weight:bold;font-size:13px;letter-spacing:1px;text-transform:uppercase;padding:13px 20px;border-radius:8px">${text}</a>`;
+
+/** Summary rows. WHY in the email: the key terms are visible without opening anything. */
+function summaryRows(d){
+  const name = id => (SERVICES.find(s => s.id === id) || {}).name || id;
+  const row = (k, v) => `<tr><td style="padding:6px 10px 6px 0;color:#a9a9a9;font-size:13px;vertical-align:top;white-space:nowrap">${k}</td><td style="padding:6px 0;color:#f0ece3;font-size:14px">${v}</td></tr>`;
+  return `<tr><td style="padding:0 26px 10px"><table role="presentation" cellpadding="0" cellspacing="0" width="100%">
+    ${row('Client', esc(d.cn))}${row('Email', esc(d.ce))}${row('Client ID', '<b>' + esc(d.cid) + '</b>')}${d.q ? row('Quote', esc(d.q)) : ''}${row('Signed', esc(d.date))}
+    ${row('Services', d.s.map(x => `${esc(name(x.id))} — initialed <b>${esc(x.i)}</b>${x.o ? ` (${esc(x.o)})` : ''}`).join('<br>'))}
+    ${row('Total', esc(d.t))}${row('Working hours', esc(d.h || '—'))}${row('Terms', esc(d.x || 'None').replace(/\n/g, '<br>'))}
+  </table></td></tr>`;
+}
+
+function status(text, isErr){ const s = $('status'); s.style.display = 'block'; s.style.borderColor = isErr ? 'var(--err)' : 'var(--ok)'; s.textContent = text; }
+
+/** Client submit: emails Hali a countersign link. WHY a link instead of storage: no database needed. */
+async function clientSubmit(){
+  if (!validateClient()) return;
+  const btn = $('mainBtn'); btn.disabled = true; btn.textContent = 'Submitting…';
+  const d = collect();
+  try {
+    const packed = await pack(d);
+    const signLink = PAGE_URL + '#sign=' + packed;
+    const printLink = PRINT_URL + '#d=' + packed;
+    const inner = summaryRows(d) + `<tr><td align="center" style="padding:6px 26px 22px">${btnHtml(signLink, 'Review &amp; Countersign')}${btnHtml(printLink, 'Print View', false)}
+      <p style="color:#a9a9a9;font-size:12px;margin:12px 0 0">Countersigning sends the fully signed agreement to ${esc(d.ce)}.</p></td></tr>`;
+    await emailjs.send(EJS_SERVICE, EJS_TEMPLATE, {
+      to_email:HALI_EMAIL, to_name:'Sarah', from_name:d.cn,
+      subject:`Sign: Studio Practices — ${d.cn} — ${d.cid}`,
+      message:emailShell('Agreement Ready to Countersign', inner), reply_to:d.ce
+    }, { publicKey:EJS_PUBLIC_KEY });
+    status('✓ Submitted! The designer will review, sign and send the agreement back to your email for your records.');
+    btn.textContent = '✓ Submitted';
+  } catch (e) {
+    // WHY re-enable: nothing was sent, so the client can try again without retyping.
+    console.error('Submit failed:', e);
+    status(`Your agreement didn't send. Please try again, or email ${HALI_EMAIL}.`, true);
+    btn.disabled = false; btn.textContent = '✦ Submit';
+  }
+}
+
+/** Turns the AVIF logo into PNG for the PDF. WHY: PDFs can't hold AVIF; the browser decodes it for us. */
+function logoPng(){
+  return new Promise(resolve => {
+    const img = new Image(); img.crossOrigin = 'anonymous';
+    img.onload = () => { try { const c = document.createElement('canvas'); c.width = img.naturalWidth; c.height = img.naturalHeight; c.getContext('2d').drawImage(img, 0, 0); resolve({ data:c.toDataURL('image/png'), ratio:img.naturalHeight / img.naturalWidth }); } catch (e) { resolve(null); } };
+    img.onerror = () => resolve(null);
+    img.src = LOGO_URL;
+  });
+}
+
+/** Fully signed PDF. WHY plain section order: it mirrors the paper Studio Practices form. */
+async function buildPdf(d){
+  const { jsPDF } = window.jspdf;
+  const doc = new jsPDF({ unit:'pt', format:'letter' });
+  const W = doc.internal.pageSize.getWidth(), H = doc.internal.pageSize.getHeight(), M = 50;
+  const GOLD = [201,138,46], CHAR = [42,39,32], GREY = [100,95,85];
+  let y = 0;
+  const ensure = need => { if (y + need > H - 50) { doc.addPage(); y = 56; } }; // WHY: long text flows onto new pages
+  const para = (text, size = 10.5, bold = false) => { doc.setFont('helvetica', bold ? 'bold' : 'normal'); doc.setFontSize(size); doc.setTextColor(...CHAR);
+    doc.splitTextToSize(text, W - 2 * M).forEach(l => { ensure(15); doc.text(l, M, y); y += size * 1.38; }); };
+  const heading = t => { y += 8; ensure(30); doc.setFont('helvetica', 'bold'); doc.setFontSize(11.5); doc.setTextColor(...GOLD); doc.text(t, M, y); y += 16; };
+
+  doc.setFillColor(51,51,51); doc.rect(0, 0, W, 92, 'F');
+  const logo = await logoPng();
+  if (logo) doc.addImage(logo.data, 'PNG', M, 20, 200, 200 * logo.ratio);
+  else { doc.setTextColor(...GOLD); doc.setFont('times', 'bold'); doc.setFontSize(24); doc.text('I.Q. PRODUCTIONZ', M, 54); }
+  doc.setTextColor(240,236,227); doc.setFont('helvetica', 'normal'); doc.setFontSize(10);
+  doc.text('STUDIO PRACTICES AGREEMENT', W - M, 40, { align:'right' });
+  doc.text('Date: ' + d.date, W - M, 56, { align:'right' });
+  doc.text('Client ID: ' + d.cid + (d.q ? '  ·  Quote ' + d.q : ''), W - M, 72, { align:'right' });
+  y = 124;
+  para(`I, ${d.n}, am choosing to receive the following initialed services from I.Q. Productionz:`, 11);
+  y += 4;
+  SERVICES.forEach(s => {
+    const c = d.s.find(x => x.id === s.id);
+    ensure(40);
+    doc.setFont('helvetica', 'bold'); doc.setFontSize(10.5); doc.setTextColor(...(c ? CHAR : GREY));
+    doc.text(`${c ? c.i : '____'}   ${c ? '[X]' : '[  ]'} ${s.name}`, M, y); y += 14;
+    doc.setFont('helvetica', 'normal'); doc.setFontSize(9.5);
+    doc.splitTextToSize(s.text.replace('{OTHER}', (c && c.o) || '________'), W - 2 * M - 24).forEach(l => { ensure(13); doc.text(l, M + 24, y); y += 12.5; });
+    y += 6;
+  });
+  heading('DELIVERY'); para('Services will be delivered digitally via google drive sharing/editing. If services are not digital, a PDF will be created that outlines the final output and may include pictures or links.');
+  heading('PAYMENT'); para(`The initialed service(s) above will cost a total of ${d.t}. On today's date: ${d.date}, half of the payment is due to proceed with the project. We accept card, Cash App or PayPal. This payment will be good for ${d.h || '____'} working hours.`);
+  heading('REVISIONS'); para('Any additional hours for unplanned revisions of a project will result in $100.00 per hour. When half of the approved hours above have been used, a progress report will be compiled and sent to you via email. From there, we will decide if the project will be completed with our original timeline, or if we should make a new agreement. The only circumstance hourly revision fees will acquire is at the end of a project term.');
+  heading('CANCELATIONS'); para('If a project is canceled by you at the mid-term progress report, there will be no refund. If a project is canceled before project mid-term, you will be refunded for the time that has not been used. Cancelation after the mid-term will result in additional fees for the time of continued working.');
+  heading('ADDITIONAL TERMS (including deadlines)'); para(d.x || 'None.');
+  y += 10; ensure(250);
+  para(`${d.ack}   I.Q. Productionz has taken the time to answer any questions I have about this agreement and I fully understand the terms and conditions written here in.`, 10.5, true);
+  // WHY keep each pad's own shape (aspect): a stretched signature looks forged.
+  const sigRow = (name, png, aspect, date, who) => {
+    y += 16;
+    const h = Math.min(70, 200 * (aspect || 0.32));
+    if (png) doc.addImage(png, 'PNG', M + 175, y + 66 - h, 200, h);
+    y += 66;
+    doc.setDrawColor(...GREY); doc.setLineWidth(.6);
+    doc.line(M, y, M + 160, y); doc.line(M + 175, y, M + 375, y); doc.line(M + 390, y, W - M, y);
+    doc.setFont('helvetica', 'normal'); doc.setFontSize(10.5); doc.setTextColor(...CHAR);
+    doc.text(name, M, y - 6); doc.text(date, M + 390, y - 6);
+    doc.setFontSize(8); doc.setTextColor(...GREY);
+    doc.text(`FULL WRITTEN NAME (${who})`, M, y + 11); doc.text('SIGNATURE', M + 175, y + 11); doc.text('DATE', M + 390, y + 11);
+    y += 16;
+  };
+  sigRow(d.cn, clientPad.png(d.sig && d.sig.a), d.sig && d.sig.a, d.date, 'client');
+  sigRow(d.pn, designerPad.png(d.psig && d.psig.a), d.psig && d.psig.a, d.pdate, 'provider');
+  return doc;
+}
+
+/** Stores the signed PDF with the Client Files Worker. WHY try/catch: if it fails, the print link still carries everything. */
+async function uploadPdf(blob, name){
+  try {
+    const open = await fetch(WORKER + '/intake', { method:'POST' });
+    if (!open.ok) throw new Error('Intake ' + open.status);
+    const s = await open.json();
+    const q = new URLSearchParams({ intake:s.intake, secret:s.secret, name });
+    const up = await fetch(WORKER + '/upload?' + q, { method:'POST', headers:{ 'Content-Type':'application/pdf' }, body:blob });
+    if (!up.ok) throw new Error('Upload ' + up.status);
+    return (await up.json()).url;
+  } catch (e) { console.error('Agreement upload failed:', e); return null; }
+}
+
+/** Designer countersign: signs, saves a PDF for Hali, and emails the client the signed agreement. */
+async function designerSend(){
+  document.querySelectorAll('.invalid').forEach(clearError);
+  if (designerPad.length < 40) { setError($('psigBox'), ''); showMissed([{ label:'Designer signature', el:$('psigBox') }]); return; }
+  showMissed([]);
+  if (!window.jspdf) { status('The PDF tool did not load. Check your connection and try again.', true); return; }
+  const btn = $('mainBtn'); btn.disabled = true; btn.textContent = 'Signing…';
+  const d = { ...submitted, pn:$('providerName').value.trim(), pdate:TODAY_TXT, psig:designerPad.data() };
+  const doc = await buildPdf(d);
+  const filename = `IQ-Productionz-Studio-Practices-${d.cid}-${d.cn.replace(/[^\w\- ]+/g, '').trim().replace(/\s+/g, '-')}.pdf`;
+  try { doc.save(filename); } catch (e) { console.error('Your PDF download was blocked:', e); }
+  btn.textContent = 'Sending to client…';
+  const pdfUrl = await uploadPdf(doc.output('blob'), filename);
+  const printLink = PRINT_URL + '#d=' + await pack(d);
+  const inner = `<tr><td style="padding:0 26px 12px;color:#f0ece3;font-size:15px;line-height:1.6"><p style="margin:0 0 10px">Hi ${esc(d.cn)},</p><p style="margin:0">Thank you! Your Studio Practices Agreement is now signed by both of us. Keep this email for your records.</p></td></tr>`
+    + summaryRows(d)
+    + `<tr><td align="center" style="padding:6px 26px 22px">${pdfUrl ? btnHtml(pdfUrl, 'Download Signed Agreement') : ''}${btnHtml(printLink, 'Print for Your Records', !pdfUrl)}
+       <p style="color:#a9a9a9;font-size:12.5px;margin:12px 0 0">Next step: your 50% deposit to begin. Card, Cash App ($IQENT) or PayPal.</p></td></tr>`;
+  try {
+    await emailjs.send(EJS_SERVICE, EJS_TEMPLATE, {
+      to_email:d.ce, to_name:d.cn, from_name:'Sarah Parsons — I.Q. Productionz',
+      // WHY "Re:" + the quote number: keeps it in the same email thread as their quote where possible.
+      subject: d.q ? `Re: Your I.Q. Productionz Quote ${d.q} — Signed Agreement` : `Your Signed Studio Practices Agreement — ${d.cid}`,
+      message:emailShell('Signed Studio Practices Agreement', inner), reply_to:HALI_EMAIL
+    }, { publicKey:EJS_PUBLIC_KEY });
+    status(`✓ Signed and sent to ${d.ce}. Your PDF copy was downloaded${pdfUrl ? '' : ' (the online PDF didn’t upload, so the client got the print link)'}.`);
+    btn.textContent = '✓ Sent';
+  } catch (e) {
+    console.error('Send to client failed:', e);
+    status('The signed agreement did not send. Try again; your PDF copy was downloaded.', true);
+    btn.disabled = false; btn.textContent = '✦ Sign & Send to Client';
+  }
+}
+
+/** Opens the black-and-white print page. WHY a new tab: the form stays open behind it. */
+async function openPrint(){
+  const d = MODE === 'designer'
+    ? { ...submitted, pn:$('providerName').value.trim(), pdate:designerPad.length >= 40 ? TODAY_TXT : '', psig:designerPad.length >= 40 ? designerPad.data() : null }
+    : collect();
+  const w = window.open('about:blank', '_blank'); // WHY open first: browsers block pop-ups opened after an await
+  const url = PRINT_URL + '#d=' + await pack(d);
+  if (w) w.location.href = url; else location.href = url;
+}
+
+/* ---------- Start ---------- */
+renderServices();
+clientPad = SigPad('sig', 'sigBox', 'sigPh');
+designerPad = SigPad('psig', 'psigBox', 'psigPh');
+$('topDate').value = TODAY_TXT; $('todayPay').value = TODAY_TXT; $('signDate').value = TODAY_TXT;
+prefillFromQuote();
+clientPad.size();
+updateHalf();
+
+(async () => {
+  const sign = new URLSearchParams(location.hash.slice(1)).get('sign');
+  if (!sign) return;
+  // WHY try/catch: a cut-off email link should explain itself instead of showing a blank form.
+  try { enterDesignerMode(await unpack(sign)); }
+  catch (e) { console.error('Countersign link failed:', e); status('This countersign link could not be opened. It may have been cut off; open it from the original email.', true); }
+})();
+
+window.addEventListener('resize', () => { clientPad.size(); designerPad.size(); });
+$('sigClear').addEventListener('click', clientPad.clear);
+$('psigClear').addEventListener('click', designerPad.clear);
+$('total').addEventListener('input', updateHalf);
+$('clientNameTop').addEventListener('change', () => { if (!$('clientName').value.trim()) $('clientName').value = $('clientNameTop').value; }); // WHY: saves typing the name twice
+$('agreement').addEventListener('input', e => {
+  const svc = e.target.closest('.svc');
+  if (svc && svc.id.startsWith('svc_')) {
+    const id = svc.id.slice(4);
+    if (e.target.id === 'ini_' + id && e.target.value.trim()) $('on_' + id).checked = true; // WHY: initialing a service means choosing it
+    svc.classList.toggle('on', $('on_' + id).checked);
+    clearError(svc); clearError($('services'));
+  }
+  if (e.target.id === 'ackInitials') clearError($('ackWrap'));
+  if (e.target.id === 'clientNameTop') clearError($('nameLine'));
+  if (e.target.id === 'clientId') clearError($('cidWrap'));
+  clearError(e.target.closest('label'));
+});
+$('agreement').addEventListener('submit', e => { e.preventDefault(); MODE === 'designer' ? designerSend() : clientSubmit(); });
+$('printBtn').addEventListener('click', openPrint);
+</script>
+</body>
+</html>

@@ -3,7 +3,7 @@
   Title:       IQ Email Brand — Branded Email Sender
   Author:      Hali Sarah Parsons
   Date:        2026-10-16
-  Modified By: Claude (Anthropic)
+  Modified By: Claude (Anthropic); 2026-11-14 — prefill from URL params (QR Code reply links)
   Description: Internal BackEnd tool for sending branded I.Q. Productionz emails via EmailJS.
                Adds a formatting toolbar (bold, italic, bulleted list, numbered list) and a
                greeting picker (default "Salutations", presets, custom or none). Kept out of search engines on purpose (noindex, no SEO tags).
@@ -861,6 +861,27 @@ function clearAttach() {
   document.getElementById('attachFileName').textContent = 'Choose file to attach…';
   document.getElementById('attachClear').style.display = 'none';
 }
+
+/**
+ * Prefills the form from the URL (?to=&reply=&name=&subject=&client=).
+ * WHY: the QR Code page emails Hali a "reply" link carrying the customer's address and the
+ * request title, so one click opens this sender ready to answer instead of a blank form.
+ * WHY URLSearchParams: it decodes the encodeURIComponent values the QR page sends.
+ */
+function prefillFromUrl(){
+  const q = new URLSearchParams(location.search);
+  const set = (id, v) => { if (v) document.getElementById(id).value = v; };
+  set('clientEmail', q.get('to'));
+  set('consultantEmail', q.get('reply'));
+  set('clientName', q.get('client'));
+  // WHY "Re:": the QR link's `name` is the request title, so it becomes a reply subject
+  const subj = q.get('subject') || (q.get('name') ? 'Re: ' + q.get('name') : '');
+  set('emailSubject', subj);
+}
+window.addEventListener('load', function(){
+  prefillFromUrl();
+  updateGreetingPreview(); // WHY: a prefilled client name should show in the greeting preview right away
+});
 
 </script>
 </body>

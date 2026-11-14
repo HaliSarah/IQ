@@ -1,0 +1,368 @@
+<!--
+Title: PDF Splitter (Size-Based)
+Author: Claude (Anthropic)
+Date: 2026-09-06
+Modified By: N/A; Claude 2026-11-14 — I.Q. Productionz branding + BackEnd nav
+Description: Single-file browser tool that splits a large PDF into multiple
+smaller PDFs, each kept under a target file size (default 30MB). Runs
+entirely client-side using pdf-lib from a CDN — no upload, no server.
+Since PDF page byte-size varies (images vs text), splitting works by
+estimating bytes-per-page from the whole file, then greedily grouping
+consecutive pages until adding another would exceed the target, with a
+real-size check (re-saving that chunk) to correct for estimation error
+before locking each chunk in.
+-->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PDF Splitter</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf-lib/1.17.1/pdf-lib.min.js"></script>
+<style>
+  :root {
+    --plum: #4a2545;
+    --gold: #c9a24b;
+    --pink: #e8b4c8;
+    --bg: #faf7f8;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    background: linear-gradient(180deg, var(--bg) 0%, #f3e9ee 100%);
+    color: #2b1b28;
+    min-height: 100vh;
+    display: flex;
+    align-items: flex-end;
+    justify-content: center;
+    padding: 2rem 1rem;
+  }
+  .card {
+    width: 100%;
+    max-width: 560px;
+    background: #fff;
+    border-radius: 16px;
+    box-shadow: 0 10px 30px rgba(74,37,69,0.15);
+    padding: 2rem;
+    border-top: 6px solid var(--plum);
+  }
+  h1 { font-size: 1.4rem; color: var(--plum); margin: 0 0 0.25rem; }
+  p.sub { color: #6b5866; margin: 0 0 1.5rem; font-size: 0.9rem; }
+  .dropzone {
+    border: 2px dashed var(--pink);
+    border-radius: 12px;
+    padding: 2rem 1rem;
+    text-align: center;
+    cursor: pointer;
+    transition: 0.2s;
+    background: #fffafc;
+  }
+  .dropzone:hover, .dropzone.drag { border-color: var(--gold); background: #fff6ea; }
+  .dropzone p { margin: 0.25rem 0; color: #6b5866; }
+  input[type=file] { display: none; }
+
+  .fileInfo {
+    margin-top: 1.25rem;
+    padding: 0.85rem 1rem;
+    background: #f8f0f4;
+    border-radius: 10px;
+    display: none;
+  }
+  .fileInfo .name { font-size: 0.9rem; font-weight: 600; color: var(--plum); }
+  .fileInfo .meta { font-size: 0.8rem; color: #8a7686; margin-top: 0.2rem; }
+
+  .sizeRow {
+    margin-top: 1.25rem;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+  }
+  .sizeRow label { font-size: 0.85rem; color: #6b5866; white-space: nowrap; }
+  .sizeRow input {
+    flex: 1;
+    padding: 0.5rem 0.75rem;
+    border: 1px solid #e3d2da;
+    border-radius: 8px;
+    font-size: 0.9rem;
+  }
+
+  #splitBtn {
+    margin-top: 1.25rem;
+    width: 100%;
+    padding: 0.85rem;
+    background: linear-gradient(90deg, var(--plum), #6b3564);
+    color: #fff;
+    border: none;
+    border-radius: 30px;
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+  }
+  #splitBtn:disabled { opacity: 0.4; cursor: default; }
+
+  #status { margin-top: 0.9rem; font-size: 0.82rem; color: #6b5866; text-align: center; min-height: 1.2em; }
+
+  #results { margin-top: 1rem; }
+  .resultRow {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0.65rem 1rem;
+    background: #f8f0f4;
+    border-radius: 10px;
+    margin-bottom: 0.5rem;
+  }
+  .resultRow .name { font-size: 0.87rem; font-weight: 600; color: var(--plum); }
+  .resultRow .size { font-size: 0.78rem; color: #8a7686; }
+  .resultRow a {
+    background: var(--plum);
+    color: #fff;
+    text-decoration: none;
+    padding: 0.35rem 0.85rem;
+    border-radius: 18px;
+    font-size: 0.8rem;
+  }
+  .resultRow a:hover { background: #5c2f56; }
+
+  .note { margin-top: 1rem; font-size: 0.78rem; color: #9a8894; text-align: center; }
+</style>
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700&family=Raleway:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+  /* ===== I.Q. Productionz brand layer (2026-11-14) =====
+     WHY placed after the page's own styles: later rules win, so the tool keeps its layout
+     while colors and type switch to the portal's charcoal/gold identity. */
+  :root{--iq-bg:#333;--iq-surface:#454545;--iq-deep:#3a3a3a;--iq-border:#2e2b24;--iq-gold:#c98a2e;--iq-gold-lt:#e0a84a;--iq-gold-dim:#7a5218;--iq-white:#f0ece3;--iq-muted:#A9A9A9}
+  body{background:var(--iq-bg)!important;color:var(--iq-white)!important;font-family:'Raleway',-apple-system,Helvetica,Arial,sans-serif!important;overflow-x:hidden}
+  h1{font-family:'Cinzel',Georgia,serif!important;color:var(--iq-gold-lt)!important;letter-spacing:1.5px;text-transform:uppercase;font-weight:600!important}
+  .iq-nav{align-self:stretch;margin-bottom:auto;display:flex;justify-content:space-between;align-items:center;padding:14px 24px;background:var(--iq-surface);border-bottom:1px solid var(--iq-border);position:sticky;top:0;z-index:50}
+  .iq-crumbs{font-family:'Cinzel',Georgia,serif;font-size:11px;letter-spacing:2px;text-transform:uppercase;color:var(--iq-muted)}
+  .iq-crumbs a{color:var(--iq-muted);text-decoration:none}.iq-crumbs a:hover{color:var(--iq-gold-lt)}
+  .iq-crumbs strong{color:var(--iq-gold)}
+  .iq-home{padding:8px 16px;border:1px solid var(--iq-gold-dim);border-radius:8px;color:var(--iq-gold-lt);font-family:'Cinzel',Georgia,serif;font-size:11px;letter-spacing:1.5px;text-transform:uppercase;text-decoration:none;transition:all .2s}
+  .iq-home:hover{background:var(--iq-gold);color:#333;border-color:var(--iq-gold)}
+  .iq-hdr{text-align:center;padding:22px 16px 6px}
+  .iq-hdr img{height:42px;filter:drop-shadow(0 0 12px rgba(201,138,46,.4))}
+  .iq-hdr .iq-eyebrow{font-size:10px;letter-spacing:4px;text-transform:uppercase;color:var(--iq-gold);margin-top:8px}
+
+  body{flex-direction:column!important;align-items:center!important;justify-content:flex-end!important;padding:0 0 2rem!important}
+  :root{--plum:#c98a2e;--gold:#c98a2e;--pink:#7a5218;--bg:#333}
+  .card{background:var(--iq-surface)!important;border:1px solid var(--iq-border);border-top:2px solid var(--iq-gold)!important;box-shadow:0 10px 30px rgba(0,0,0,.35)!important;width:calc(100% - 2rem)!important}
+  p.sub,.dropzone p,#status,.note,.card label,.sizeRow label,.fileInfo .meta,.resultRow .size{color:var(--iq-muted)!important}
+  .dropzone{background:var(--iq-deep)!important;border-color:var(--iq-gold-dim)!important}
+  .dropzone:hover,.dropzone.drag{border-color:var(--iq-gold)!important;background:rgba(201,138,46,.08)!important}
+  .fileInfo,.fileRow,.resultRow{background:var(--iq-deep)!important}
+  .fileInfo .name,.fileRow .name,.resultRow .name{color:var(--iq-white)!important}
+  .types span{background:rgba(201,138,46,.12)!important;color:var(--iq-gold-lt)!important;border:1px solid var(--iq-gold-dim)}
+  .fileRow .kind,.resultRow a{background:var(--iq-gold)!important;color:#333!important}
+  .sizeRow input{background:#2a2a2a!important;border-color:var(--iq-border)!important;color:var(--iq-white)!important}
+  #splitBtn,#combineBtn{background:linear-gradient(135deg,var(--iq-gold),#a87025)!important;color:#333!important;font-family:'Cinzel',Georgia,serif;letter-spacing:1.2px;text-transform:uppercase}
+  input[type=checkbox]{accent-color:var(--iq-gold)}
+</style>
+</head>
+<body>
+<nav class="iq-nav">
+  <div class="iq-crumbs"><a href="../../">BackEnd</a> / <a href="../">Document</a> / <strong>PDF Splitter</strong></div>
+  <a class="iq-home" href="../">↩ Document</a>
+</nav>
+<div class="iq-hdr">
+  <!-- WHY onerror: some of these tools run offline; hide the logo instead of showing a broken image -->
+  <img src="https://iqproductionz.com/Content/Images/Main/IQ-noglow_Updated.avif" alt="I.Q. Productionz" onerror="this.style.display='none'">
+  <div class="iq-eyebrow">BackEnd · Document</div>
+</div>
+
+<div class="card">
+  <h1>PDF Splitter</h1>
+  <p class="sub">Drop in one large PDF and it splits into several smaller PDFs, each kept under your target size.</p>
+
+  <div class="dropzone" id="dropzone">
+    <p><strong>Click to choose a PDF</strong></p>
+    <p>or drag and drop it here</p>
+    <input type="file" id="fileInput" accept="application/pdf">
+  </div>
+
+  <div class="fileInfo" id="fileInfo">
+    <div class="name" id="fileName"></div>
+    <div class="meta" id="fileMeta"></div>
+  </div>
+
+  <div class="sizeRow">
+    <label for="targetSize">Max size per file (MB)</label>
+    <input type="number" id="targetSize" value="30" min="1" step="1">
+  </div>
+
+  <button id="splitBtn" disabled>Split PDF</button>
+  <div id="status"></div>
+  <div id="results"></div>
+
+  <p class="note">Runs entirely in your browser &middot; nothing is uploaded &middot; pages never split mid-page</p>
+</div>
+
+<script>
+// Why: hold the loaded source doc + its raw bytes so we can re-slice
+// pages into chunk documents without re-reading the file from disk.
+const state = { file: null, bytes: null, doc: null, pageCount: 0 };
+
+const dropzone = document.getElementById('dropzone');
+const fileInput = document.getElementById('fileInput');
+const fileInfo = document.getElementById('fileInfo');
+const fileNameEl = document.getElementById('fileName');
+const fileMetaEl = document.getElementById('fileMeta');
+const targetSizeInput = document.getElementById('targetSize');
+const splitBtn = document.getElementById('splitBtn');
+const statusEl = document.getElementById('status');
+const resultsEl = document.getElementById('results');
+
+dropzone.addEventListener('click', () => fileInput.click());
+['dragover', 'dragleave', 'drop'].forEach(evt => {
+  dropzone.addEventListener(evt, e => {
+    e.preventDefault();
+    e.stopPropagation();
+    dropzone.classList.toggle('drag', evt === 'dragover');
+  });
+});
+dropzone.addEventListener('drop', e => {
+  if (e.dataTransfer.files.length) loadFile(e.dataTransfer.files[0]);
+});
+fileInput.addEventListener('change', e => {
+  if (e.target.files.length) loadFile(e.target.files[0]);
+});
+
+function formatMB(bytes) {
+  return (bytes / (1024 * 1024)).toFixed(1) + ' MB';
+}
+
+async function loadFile(file) {
+  if (!file.name.toLowerCase().endsWith('.pdf') && file.type !== 'application/pdf') {
+    alert('Please choose a PDF file.');
+    return;
+  }
+  statusEl.textContent = 'Loading PDF...';
+  resultsEl.innerHTML = '';
+  splitBtn.disabled = true;
+
+  const bytes = await file.arrayBuffer();
+  const doc = await PDFLib.PDFDocument.load(bytes, { ignoreEncryption: true });
+
+  state.file = file;
+  state.bytes = bytes;
+  state.doc = doc;
+  state.pageCount = doc.getPageCount();
+
+  fileNameEl.textContent = file.name;
+  fileMetaEl.textContent = `${formatMB(bytes.byteLength)} · ${state.pageCount} pages`;
+  fileInfo.style.display = 'block';
+  statusEl.textContent = '';
+  splitBtn.disabled = false;
+}
+
+splitBtn.addEventListener('click', async () => {
+  const targetMB = parseFloat(targetSizeInput.value) || 30;
+  const targetBytes = targetMB * 1024 * 1024;
+
+  if (state.bytes.byteLength <= targetBytes) {
+    statusEl.textContent = `This file is already under ${targetMB} MB — no split needed. Downloading as-is.`;
+    downloadBytes(state.bytes, state.file.name);
+    return;
+  }
+
+  splitBtn.disabled = true;
+  resultsEl.innerHTML = '';
+
+  try {
+    // Why: rough per-page byte estimate from the whole file gives a
+    // starting guess for how many pages fit in one chunk; this is refined
+    // below by actually re-saving each chunk and backing off if it runs
+    // over, since embedded images make pages very unequal in size.
+    const avgBytesPerPage = state.bytes.byteLength / state.pageCount;
+    let guessPagesPerChunk = Math.max(1, Math.floor(targetBytes / avgBytesPerPage));
+
+    const chunks = [];
+    let startPage = 0;
+
+    while (startPage < state.pageCount) {
+      let pagesInChunk = Math.min(guessPagesPerChunk, state.pageCount - startPage);
+      let chunkBytes = null;
+
+      // Why: shrink the candidate chunk until its real saved size fits
+      // the target, or it's down to a single page (can't split further).
+      while (pagesInChunk >= 1) {
+        statusEl.textContent =
+          `Building chunk ${chunks.length + 1}: testing pages ${startPage + 1}-${startPage + pagesInChunk} of ${state.pageCount}...`;
+
+        const candidate = await PDFLib.PDFDocument.create();
+        const indices = Array.from({ length: pagesInChunk }, (_, i) => startPage + i);
+        const copied = await candidate.copyPages(state.doc, indices);
+        copied.forEach(p => candidate.addPage(p));
+        chunkBytes = await candidate.save();
+
+        if (chunkBytes.byteLength <= targetBytes || pagesInChunk === 1) break;
+        // Why: back off proportionally to the overage instead of just
+        // decrementing by one, so oversized chunks converge quickly.
+        const shrinkFactor = targetBytes / chunkBytes.byteLength;
+        const nextCount = Math.max(1, Math.floor(pagesInChunk * shrinkFactor * 0.95));
+        pagesInChunk = nextCount < pagesInChunk ? nextCount : pagesInChunk - 1;
+      }
+
+      chunks.push({ bytes: chunkBytes, startPage, pageCount: pagesInChunk });
+      startPage += pagesInChunk;
+    }
+
+    renderResults(chunks);
+    statusEl.textContent = `Done — split into ${chunks.length} file(s).`;
+  } catch (err) {
+    statusEl.textContent = 'Error: ' + err.message;
+  }
+
+  splitBtn.disabled = false;
+});
+
+function renderResults(chunks) {
+  resultsEl.innerHTML = '';
+  const baseName = state.file.name.replace(/\.pdf$/i, '');
+
+  chunks.forEach((chunk, i) => {
+    const blob = new Blob([chunk.bytes], { type: 'application/pdf' });
+    const url = URL.createObjectURL(blob);
+    const partName = `${baseName}_part${i + 1}of${chunks.length}.pdf`;
+
+    const row = document.createElement('div');
+    row.className = 'resultRow';
+    row.innerHTML = `
+      <div>
+        <div class="name">${partName}</div>
+        <div class="size">${formatMB(chunk.bytes.byteLength)} · pages ${chunk.startPage + 1}-${chunk.startPage + chunk.pageCount}</div>
+      </div>
+      <a href="${url}" download="${partName}">Download</a>
+    `;
+    resultsEl.appendChild(row);
+  });
+
+  // Why: also offer a "download all" convenience that just triggers each
+  // link in sequence, since browsers don't reliably auto-download from
+  // dynamically created anchors without a user gesture per file.
+  const allBtn = document.createElement('button');
+  allBtn.textContent = 'Download All';
+  allBtn.style.cssText = 'margin-top:0.5rem;width:100%;padding:0.6rem;border:none;border-radius:20px;background:var(--gold);color:#3a2a10;font-weight:600;cursor:pointer;';
+  allBtn.addEventListener('click', () => {
+    resultsEl.querySelectorAll('a').forEach((a, i) => {
+      setTimeout(() => a.click(), i * 300);
+    });
+  });
+  resultsEl.appendChild(allBtn);
+}
+
+function downloadBytes(bytes, name) {
+  const blob = new Blob([bytes], { type: 'application/pdf' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = name;
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+  URL.revokeObjectURL(url);
+}
+</script>
+</body>
+</html>

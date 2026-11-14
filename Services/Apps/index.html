@@ -5,7 +5,8 @@
   Date:        2026-11-12
   Modified By: Claude (Anthropic), 2026-11-12; Claude (Anthropic), 2026-11-12: added the Schedule a Call pop-up;
                Claude (Anthropic), 2026-11-12: added discount codes (stored as fingerprints, not plain text);
-               Claude (Anthropic), 2026-11-12: added the Download Quote (PDF) button
+               Claude (Anthropic), 2026-11-12: added the Download Quote (PDF) button;
+               Claude (Anthropic), 2026-11-14: required-field stars now sit beside the label text
   Description: Client-facing app intake form and price estimator. The estimate scales with
                team size, forms, content and timeline. Clients pay a 50% deposit by card
                (Stripe checkout through the existing /checkout Worker route) or by Cash App /
@@ -59,7 +60,9 @@ a{color:var(--gold-lt)}
 h2{font-family:'Cinzel',serif;font-size:16px;font-weight:700;color:var(--gold);letter-spacing:1.2px;text-transform:uppercase;margin-bottom:12px}
 .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:12px 16px}
 label{display:block;font-size:13px;font-weight:600}
-.req::after{content:" *";color:var(--gold)}
+.req:not(label)::after{content:" *";color:var(--gold)}
+/* WHY a real star element: on labels, ::after landed after the input box instead of beside the words. */
+.star{color:var(--gold);margin-left:3px}
 .hint{font-weight:400;color:var(--muted);font-size:12px}
 input[type=text],input[type=email],input[type=tel],input[type=url],input[type=number],select,textarea{
   width:100%;margin-top:5px;padding:11px 12px;border:1px solid var(--border);border-radius:var(--radius);
@@ -168,9 +171,9 @@ input[type=checkbox],input[type=radio]{accent-color:var(--gold);width:17px;heigh
     <section class="card">
       <h2>1 · About You</h2>
       <div class="grid">
-        <label class="req">Your name<input type="text" id="name" autocomplete="name"></label>
-        <label class="req">Business name<input type="text" id="biz" autocomplete="organization"></label>
-        <label class="req">Email<input type="email" id="email" autocomplete="email"></label>
+        <label class="req">Your name<span class="star" aria-hidden="true">*</span><input type="text" id="name" autocomplete="name"></label>
+        <label class="req">Business name<span class="star" aria-hidden="true">*</span><input type="text" id="biz" autocomplete="organization"></label>
+        <label class="req">Email<span class="star" aria-hidden="true">*</span><input type="email" id="email" autocomplete="email"></label>
         <label>Phone <span class="hint">(optional)</span><input type="tel" id="phone" autocomplete="tel"></label>
         <label>Current website <span class="hint">(optional)</span><input type="url" id="site" placeholder="https://"></label>
       </div>
@@ -207,8 +210,8 @@ input[type=checkbox],input[type=radio]{accent-color:var(--gold);width:17px;heigh
     <section class="card">
       <h2>3 · Size &amp; Scope</h2>
       <div class="grid">
-        <label class="req">How many people will log in?<input type="number" id="users" min="1" inputmode="numeric" placeholder="e.g. 40"></label>
-        <label class="req">How many forms do you need?<input type="number" id="forms" min="0" inputmode="numeric" value="1"></label>
+        <label class="req">How many people will log in?<span class="star" aria-hidden="true">*</span><input type="number" id="users" min="1" inputmode="numeric" placeholder="e.g. 40"></label>
+        <label class="req">How many forms do you need?<span class="star" aria-hidden="true">*</span><input type="number" id="forms" min="0" inputmode="numeric" value="1"></label>
         <label>Pages / sections of content<input type="number" id="pages" min="0" inputmode="numeric" value="5"></label>
         <label>How custom is it?
           <select id="complexity">
@@ -310,24 +313,24 @@ input[type=checkbox],input[type=radio]{accent-color:var(--gold);width:17px;heigh
       <h2 id="callTitle">Schedule a Call</h2>
       <p class="sub">Pick a day and time that works for you, and we'll reach out to set up your call.</p>
       <label class="req">Best day
-        <select id="callDay">
+        <span class="star" aria-hidden="true">*</span><select id="callDay">
           <option value="">Choose a day…</option>
           <option>Monday</option><option>Tuesday</option><option>Wednesday</option>
           <option>Thursday</option><option>Friday</option><option>Saturday</option><option>Sunday</option>
         </select>
       </label>
       <label class="req">Best time of day
-        <select id="callTime">
+        <span class="star" aria-hidden="true">*</span><select id="callTime">
           <option value="">Choose a time…</option>
           <option>Rising (9am–12pm)</option>
           <option>Zenith (12pm–4pm)</option>
           <option>Astral (4pm–7pm)</option>
         </select>
       </label>
-      <label class="req">Your name<input type="text" id="callName" autocomplete="name"></label>
-      <label class="req">Business name<input type="text" id="callBiz" autocomplete="organization"></label>
-      <label class="req">Email <span class="hint">(we'll reply to confirm your call time)</span><input type="email" id="callContact" autocomplete="email"></label>
-      <label class="req">Phone number<input type="tel" id="callPhone" autocomplete="tel" inputmode="tel" placeholder="(000) 000-0000"></label>
+      <label class="req">Your name<span class="star" aria-hidden="true">*</span><input type="text" id="callName" autocomplete="name"></label>
+      <label class="req">Business name<span class="star" aria-hidden="true">*</span><input type="text" id="callBiz" autocomplete="organization"></label>
+      <label class="req">Email <span class="star" aria-hidden="true">*</span> <span class="hint">(we'll reply to confirm your call time)</span><input type="email" id="callContact" autocomplete="email"></label>
+      <label class="req">Phone number<span class="star" aria-hidden="true">*</span><input type="tel" id="callPhone" autocomplete="tel" inputmode="tel" placeholder="(000) 000-0000"></label>
       <label>Website <span class="hint">(optional)</span><input type="url" id="callSite" placeholder="https://"></label>
       <div class="banner" id="callBanner" role="alert"></div>
       <button type="submit" class="btn btn-gold" id="callSubmit">✦ Request My Call</button>
