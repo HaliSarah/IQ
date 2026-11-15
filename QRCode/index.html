@@ -211,6 +211,14 @@ nav{display:flex;justify-content:space-between;align-items:center;padding:calc(1
 
 /* HERO */
 #hero{text-align:center;padding:72px 24px 56px;background:linear-gradient(160deg,#3a3a3a 0%,#2a2a2a 60%);position:relative;overflow:hidden;border-bottom:1px solid var(--line);}
+/* WHY positioned against the hero: same corner button as the Rates page, holding the
+   top-right spot under the menu without pushing the centered title out of place. */
+.tut-btn{position:absolute;top:18px;right:20px;z-index:2;padding:9px 16px;border:0.5px solid var(--muted);border-radius:8px;background:var(--panel);color:var(--muted);font-size:13px;font-weight:400;line-height:1.2;text-decoration:none;white-space:nowrap;transition:background .2s;}
+.tut-btn:hover{background:#505050;color:var(--white);}
+.tut-btn:focus-visible{outline:3px solid var(--white);outline-offset:2px;}
+/* WHY static on phones: in the corner it would sit on top of the centered headline. */
+@media(max-width:720px){.tut-btn{position:static;display:block;width:fit-content;margin:0 0 16px auto;font-size:12.5px;padding:8px 13px;}}
+@media(prefers-reduced-motion:reduce){.tut-btn{transition:none;}}
 #hero::before{content:'';position:absolute;inset:0;background:radial-gradient(ellipse 80% 50% at 50% -10%,rgba(201,138,46,.18) 0%,transparent 70%);pointer-events:none;}
 .hero-eyebrow{display:inline-block;padding:5px 16px;border-radius:20px;border:1px solid rgba(201,138,46,.4);background:rgba(201,138,46,.08);font-size:.72rem;font-weight:600;letter-spacing:.08em;color:var(--gold2);margin-bottom:22px;font-family:'Cinzel',serif;text-transform:uppercase;}
 #hero h1{font-family:'Cinzel',serif;font-size:clamp(1.8rem,4.5vw,3rem);font-weight:600;line-height:1.2;max-width:680px;margin:0 auto 18px;color:var(--white);text-transform:none;}
@@ -598,6 +606,8 @@ footer a{color:var(--muted);}footer a:hover{color:var(--white);}
 <div class="view active" id="view-home">
 
   <section id="hero">
+    <!-- WHY new tab: viewers keep their QR design open while watching the tutorial. -->
+    <a class="tut-btn" href="https://youtu.be/S0T22BuV7_A" target="_blank" rel="noopener">Watch Tutorial</a>
     <div class="hero-eyebrow">Free SVG Download · Print-Ready · Car Decals · Dynamic with Tracking</div>
     <h1>QR codes as <em>unique</em><br>as your brand</h1>
     <p>Custom shapes, gradients, emoji dots, logo overlays — free SVG download for print, decals, and wraps. Dynamic codes with redirect control and scan tracking.</p>
