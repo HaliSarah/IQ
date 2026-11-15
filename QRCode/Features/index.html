@@ -36,10 +36,12 @@
 *{box-sizing:border-box;margin:0;padding:0;}
 body{font-family:'Raleway',sans-serif;background:var(--bg);color:var(--white);min-height:100vh;display:flex;flex-direction:column;line-height:1.6;}
 a{color:var(--gold2);text-decoration:none;}
-nav{display:flex;justify-content:space-between;align-items:center;padding:14px 28px;background:#222;border-bottom:1px solid var(--line);position:sticky;top:0;z-index:10;flex-wrap:wrap;gap:10px;}
-.nav-brand{display:flex;align-items:center;gap:10px;}
-.nav-brand img{height:32px;filter:drop-shadow(0 0 8px rgba(201,138,46,.4));}
-.nav-brand span{font-family:'Cinzel',serif;font-weight:700;color:var(--white);letter-spacing:1px;}
+/* WHY these nav rules are copied from QRCode/index.html: so the logo and "QR Platform"
+   sit in exactly the same spot as on the generator page. */
+nav{display:flex;justify-content:space-between;align-items:center;padding:calc(14px + env(safe-area-inset-top)) 28px 14px;background:#222;border-bottom:1px solid var(--line);position:sticky;top:0;z-index:100;backdrop-filter:blur(8px);flex-wrap:wrap;gap:10px;}
+.nav-brand{display:flex;align-items:center;gap:10px;text-decoration:none;}
+.nav-brand img{height:32px;width:auto;filter:drop-shadow(0 0 8px rgba(201,138,46,.4));position:relative;top:-3px;}
+.nav-brand span{font-family:'Cinzel',serif;font-weight:700;font-size:1rem;color:var(--white);letter-spacing:1px;}
 .nav-btn{padding:7px 16px;border-radius:7px;font-size:.82rem;border:1px solid var(--line);color:var(--muted);transition:all .2s;}
 .nav-btn:hover{border-color:var(--gold);color:var(--white);}
 .nav-btn.primary{background:linear-gradient(135deg,var(--gold),#a87025);color:#222;border-color:var(--gold);font-weight:700;}
@@ -256,6 +258,7 @@ footer a{color:var(--muted);} footer a:hover{color:var(--white);}
   <div class="ftr-links">
     <a href="https://iqproductionz.com/">I.Q. Productionz</a>
     <a href="/QRCode/">QR Generator</a>
+    <a href="/QRCode/Compare/">Compare</a>
     <a href="https://iqproductionz.com/About">About</a>
     <a href="https://iqproductionz.com/BookNow">Book a Service</a>
     <a href="https://Haligricity.IQProductionz.com/">Haligricity</a>

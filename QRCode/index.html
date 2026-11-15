@@ -3,7 +3,7 @@
   Title:       QR Code Platform — I.Q. Productionz
   Author:      Hali Sarah Parsons
   Date:        2026-09-25
-  Modified By: Claude (2026-11-09: Scan Locations + unique/time/hours/devices/map stats, date range,
+  Modified By: Claude (2026-11-15: corners default to Match Body, incl. solid color; 2026-11-09: Scan Locations + unique/time/hours/devices/map stats, date range,
                name sort that follows renames, floating toolbar, tracking settings, CSV columns)
   Description: Full QR code platform. Static free, dynamic $25/change $5/stats.
                Custom QR renderer: dots, diamonds, triangles, ovals, stars,
@@ -1103,12 +1103,12 @@ footer a{color:var(--muted);}footer a:hover{color:var(--white);}
               <label>Corner Style</label>
               <div class="shape-grid" id="finder-style-grid" style="max-height:none;"></div>
               <div class="grad-toggle" style="margin-top:10px;flex-wrap:wrap;">
-                <button id="c-finder-outer-mode-solid" class="active" onclick="setFinderColorMode('outer','solid','s')">Solid</button>
+                <button id="c-finder-outer-mode-solid" onclick="setFinderColorMode('outer','solid','s')">Solid</button>
                 <button id="c-finder-outer-mode-grad2" onclick="setFinderColorMode('outer','grad2','s')">2-color</button>
                 <button id="c-finder-outer-mode-grad4" onclick="setFinderColorMode('outer','grad4','s')">4-color</button>
-                <button id="c-finder-outer-mode-match" onclick="setFinderColorMode('outer','match','s')">Match Body</button>
+                <button id="c-finder-outer-mode-match" class="active" onclick="setFinderColorMode('outer','match','s')">Match Body</button>
               </div>
-              <div id="c-finder-outer-color-solid">
+              <div id="c-finder-outer-color-solid" style="display:none;">
                 <div class="grad-stop"><input type="color" id="c-finder-outer" value="#000000"><span>Color</span></div>
               </div>
               <div id="c-finder-outer-color-grad2" style="display:none;">
@@ -1136,7 +1136,7 @@ footer a{color:var(--muted);}footer a:hover{color:var(--white);}
                 </div>
                 <label style="display:flex;align-items:center;cursor:pointer;margin-top:8px;"><input type="checkbox" id="c-finder-outer-g4-gradient" onchange="onFinderColorEdited('outer','s')" style="width:14px;height:14px;min-width:14px;flex:0 0 14px;margin:0 7px 0 0;padding:0;vertical-align:middle;">Gradient</label>
               </div>
-              <p id="c-finder-outer-match-note" style="display:none;font-size:.72rem;color:var(--muted);margin-top:6px;">Picks up the overall design's own gradient color at this corner's position (gradient Color Modes only — shows as a flat color while the overall Color Mode is Solid).</p>
+              <p id="c-finder-outer-match-note" style="font-size:.72rem;color:var(--muted);margin-top:6px;">Matches the body: the dot color when Color Mode is Solid, or the body's gradient color at this corner's position.</p>
             </div>
 
             <!-- INNER DOT STYLE — the small center "eye" of each finder,
@@ -1167,12 +1167,12 @@ footer a{color:var(--muted);}footer a:hover{color:var(--white);}
               </div>
               <div id="s-finder-shape-reflect-row" class="stretch-dir-row" style="display:none;margin-top:8px;flex-wrap:wrap;gap:6px;"></div>
               <div class="grad-toggle" style="margin-top:10px;flex-wrap:wrap;">
-                <button id="c-finder-inner-mode-solid" class="active" onclick="setFinderColorMode('inner','solid','s')">Solid</button>
+                <button id="c-finder-inner-mode-solid" onclick="setFinderColorMode('inner','solid','s')">Solid</button>
                 <button id="c-finder-inner-mode-grad2" onclick="setFinderColorMode('inner','grad2','s')">2-color</button>
                 <button id="c-finder-inner-mode-grad4" onclick="setFinderColorMode('inner','grad4','s')">4-color</button>
-                <button id="c-finder-inner-mode-match" onclick="setFinderColorMode('inner','match','s')">Match Body</button>
+                <button id="c-finder-inner-mode-match" class="active" onclick="setFinderColorMode('inner','match','s')">Match Body</button>
               </div>
-              <div id="c-finder-inner-color-solid">
+              <div id="c-finder-inner-color-solid" style="display:none;">
                 <div class="grad-stop"><input type="color" id="c-finder-inner" value="#000000"><span>Color</span></div>
               </div>
               <div id="c-finder-inner-color-grad2" style="display:none;">
@@ -1200,7 +1200,7 @@ footer a{color:var(--muted);}footer a:hover{color:var(--white);}
                 </div>
                 <label style="display:flex;align-items:center;cursor:pointer;margin-top:8px;"><input type="checkbox" id="c-finder-inner-g4-gradient" onchange="onFinderColorEdited('inner','s')" style="width:14px;height:14px;min-width:14px;flex:0 0 14px;margin:0 7px 0 0;padding:0;vertical-align:middle;">Gradient</label>
               </div>
-              <p id="c-finder-inner-match-note" style="display:none;font-size:.72rem;color:var(--muted);margin-top:6px;">Picks up the overall design's own gradient color at this corner's position (gradient Color Modes only — shows as a flat color while the overall Color Mode is Solid).</p>
+              <p id="c-finder-inner-match-note" style="font-size:.72rem;color:var(--muted);margin-top:6px;">Matches the body: the dot color when Color Mode is Solid, or the body's gradient color at this corner's position.</p>
             </div>
 
             <!-- OVERALL SHAPE — wraps the real, untouched square QR in a
@@ -1628,12 +1628,12 @@ footer a{color:var(--muted);}footer a:hover{color:var(--white);}
               <label>Corner Style</label>
               <div class="shape-grid" id="d-finder-style-grid" style="max-height:none;"></div>
               <div class="grad-toggle" style="margin-top:10px;flex-wrap:wrap;">
-                <button id="d-c-finder-outer-mode-solid" class="active" onclick="setFinderColorMode('outer','solid','d')">Solid</button>
+                <button id="d-c-finder-outer-mode-solid" onclick="setFinderColorMode('outer','solid','d')">Solid</button>
                 <button id="d-c-finder-outer-mode-grad2" onclick="setFinderColorMode('outer','grad2','d')">2-color</button>
                 <button id="d-c-finder-outer-mode-grad4" onclick="setFinderColorMode('outer','grad4','d')">4-color</button>
-                <button id="d-c-finder-outer-mode-match" onclick="setFinderColorMode('outer','match','d')">Match Body</button>
+                <button id="d-c-finder-outer-mode-match" class="active" onclick="setFinderColorMode('outer','match','d')">Match Body</button>
               </div>
-              <div id="d-c-finder-outer-color-solid">
+              <div id="d-c-finder-outer-color-solid" style="display:none;">
                 <div class="grad-stop"><input type="color" id="d-c-finder-outer" value="#000000"><span>Color</span></div>
               </div>
               <div id="d-c-finder-outer-color-grad2" style="display:none;">
@@ -1661,7 +1661,7 @@ footer a{color:var(--muted);}footer a:hover{color:var(--white);}
                 </div>
                 <label style="display:flex;align-items:center;cursor:pointer;margin-top:8px;"><input type="checkbox" id="d-c-finder-outer-g4-gradient" onchange="onFinderColorEdited('outer','d')" style="width:14px;height:14px;min-width:14px;flex:0 0 14px;margin:0 7px 0 0;padding:0;vertical-align:middle;">Gradient</label>
               </div>
-              <p id="d-c-finder-outer-match-note" style="display:none;font-size:.72rem;color:var(--muted);margin-top:6px;">Picks up the overall design's own gradient color at this corner's position (gradient Color Modes only — shows as a flat color while the overall Color Mode is Solid).</p>
+              <p id="d-c-finder-outer-match-note" style="font-size:.72rem;color:var(--muted);margin-top:6px;">Matches the body: the dot color when Color Mode is Solid, or the body's gradient color at this corner's position.</p>
             </div>
 
             <!-- INNER DOT STYLE — mirrors the Static tab's; see its WHY on
@@ -1682,12 +1682,12 @@ footer a{color:var(--muted);}footer a:hover{color:var(--white);}
               </div>
               <div id="d-finder-shape-reflect-row" class="stretch-dir-row" style="display:none;margin-top:8px;flex-wrap:wrap;gap:6px;"></div>
               <div class="grad-toggle" style="margin-top:10px;flex-wrap:wrap;">
-                <button id="d-c-finder-inner-mode-solid" class="active" onclick="setFinderColorMode('inner','solid','d')">Solid</button>
+                <button id="d-c-finder-inner-mode-solid" onclick="setFinderColorMode('inner','solid','d')">Solid</button>
                 <button id="d-c-finder-inner-mode-grad2" onclick="setFinderColorMode('inner','grad2','d')">2-color</button>
                 <button id="d-c-finder-inner-mode-grad4" onclick="setFinderColorMode('inner','grad4','d')">4-color</button>
-                <button id="d-c-finder-inner-mode-match" onclick="setFinderColorMode('inner','match','d')">Match Body</button>
+                <button id="d-c-finder-inner-mode-match" class="active" onclick="setFinderColorMode('inner','match','d')">Match Body</button>
               </div>
-              <div id="d-c-finder-inner-color-solid">
+              <div id="d-c-finder-inner-color-solid" style="display:none;">
                 <div class="grad-stop"><input type="color" id="d-c-finder-inner" value="#000000"><span>Color</span></div>
               </div>
               <div id="d-c-finder-inner-color-grad2" style="display:none;">
@@ -1715,7 +1715,7 @@ footer a{color:var(--muted);}footer a:hover{color:var(--white);}
                 </div>
                 <label style="display:flex;align-items:center;cursor:pointer;margin-top:8px;"><input type="checkbox" id="d-c-finder-inner-g4-gradient" onchange="onFinderColorEdited('inner','d')" style="width:14px;height:14px;min-width:14px;flex:0 0 14px;margin:0 7px 0 0;padding:0;vertical-align:middle;">Gradient</label>
               </div>
-              <p id="d-c-finder-inner-match-note" style="display:none;font-size:.72rem;color:var(--muted);margin-top:6px;">Picks up the overall design's own gradient color at this corner's position (gradient Color Modes only — shows as a flat color while the overall Color Mode is Solid).</p>
+              <p id="d-c-finder-inner-match-note" style="font-size:.72rem;color:var(--muted);margin-top:6px;">Matches the body: the dot color when Color Mode is Solid, or the body's gradient color at this corner's position.</p>
             </div>
 
             <!-- OVERALL SHAPE — mirrors the Static tab's. -->
@@ -6690,8 +6690,12 @@ function populateHalfSelects(prefix) {
 // mirror-the-body behavior as one of the four choices instead of removing
 // it. See buildFinderGradientStyle's WHY in the render code for how a
 // mode's colors actually turn into pixels, scoped to just that one corner.
-var _finderOuterColorMode = 'solid', _finderOuterColorModeD = 'solid';
-var _finderInnerColorMode = 'solid', _finderInnerColorModeD = 'solid';
+// WHY 'match' by default now: Hali, 2026-11-15 -- "fix the generator to
+// automatically match the corners to the body." A fresh design's corners
+// follow the body's color/gradient until she picks Solid/2-color/4-color.
+// Saved designs keep their own stored mode (see the load code's fallback).
+var _finderOuterColorMode = 'match', _finderOuterColorModeD = 'match';
+var _finderInnerColorMode = 'match', _finderInnerColorModeD = 'match';
 // WHY a separate GLOBAL snapshot cache (not just "whatever's in the DOM"
 // like every other shared field in this file): the color panel's DOM
 // fields now get repurposed to show a specific CORNER's own colors while
@@ -8216,8 +8220,8 @@ async function renderQRCore(canvas, url, size, ec, prefix) {
   // inner and outer corners" (she wants each one able to carry its own
   // actual gradient, not just mirror the body's). 'match' keeps the
   // original "mirror the body gradient" behavior as one of the four modes.
-  var finderOuterMode = settings.finderOuterColorMode || 'solid';
-  var finderInnerMode = settings.finderInnerColorMode || 'solid';
+  var finderOuterMode = settings.finderOuterColorMode || 'match';
+  var finderInnerMode = settings.finderInnerColorMode || 'match';
 
   // Overall Shape (frame) — a bigger decorative silhouette (non-scanning
   // filler dots + thin outline) drawn first so the real matrix/finders/logo
@@ -9007,8 +9011,10 @@ async function renderQRCore(canvas, url, size, ec, prefix) {
     var oc = (settings.asymmetricCorners && settings.finderOuterColorCorner && settings.finderOuterColorCorner[corner]) || outerGlobalSnap;
     var ic = (settings.asymmetricCorners && settings.finderInnerColorCorner && settings.finderInnerColorCorner[corner]) || innerGlobalSnap;
     var out = { outer: oc.solid, inner: ic.solid, innerGrad: null };
+    // WHY fg under Solid: "Match Body" used to fall back to the corner's own
+    // color picker (black) here, so corners didn't match a solid-colored body.
     if (oc.mode === 'match') {
-      if (settings.colorMode !== 'solid') out.outer = gradientColorAt(fx + cellSize*3.5, fy + cellSize*3.5);
+      out.outer = (settings.colorMode !== 'solid') ? gradientColorAt(fx + cellSize*3.5, fy + cellSize*3.5) : fg;
     } else if (oc.mode === 'grad2' || oc.mode === 'grad4') {
       out.outer = buildFinderGradientStyle(ctx, fx, fy, boxSize, oc.mode, {
         g2_1: oc.g2_1, g2_2: oc.g2_2, g2_dir: oc.g2_dir, g2_gradient: oc.g2_gradient,
@@ -9016,7 +9022,7 @@ async function renderQRCore(canvas, url, size, ec, prefix) {
       });
     }
     if (ic.mode === 'match') {
-      if (settings.colorMode !== 'solid') out.inner = gradientColorAt(fx + cellSize*3.5, fy + cellSize*3.5);
+      out.inner = (settings.colorMode !== 'solid') ? gradientColorAt(fx + cellSize*3.5, fy + cellSize*3.5) : fg;
     } else if (ic.mode === 'grad2' || ic.mode === 'grad4') {
       var innerColors = {
         g2_1: ic.g2_1, g2_2: ic.g2_2, g2_dir: ic.g2_dir, g2_gradient: ic.g2_gradient,
