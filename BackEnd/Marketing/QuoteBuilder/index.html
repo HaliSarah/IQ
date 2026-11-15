@@ -3,7 +3,11 @@
   Title:       Quote Builder — I.Q. Productionz
   Author:      Hali Sarah Parsons
   Date:        2026-11-14
-  Modified By: Claude (Anthropic), 2026-11-14; Claude (Anthropic), 2026-11-14: added a Finalize button to every tab
+  Modified By: Claude (Anthropic), 2026-11-14; Claude (Anthropic), 2026-11-14: added a Finalize button to every tab;
+               Claude (Anthropic), 2026-11-14: Client ID, Print button, email buttons (Print for Your Records,
+               Sign the Service Agreement), single send (no duplicate copy);
+               Claude (Anthropic), 2026-11-14: upkeep scales per login, cloud-cost pass-through, website
+               feature-heavy pages, member logins under Specialty HTML
   Description: Internal BackEnd tool. One tab per service (rates from the BookNow pages); each tab's
                Next button moves on, and the Total tab combines every service into one quote with
                the 50% deposit, working hours and recurring fees. "Send Quote" emails a branded HTML
@@ -115,7 +119,7 @@ input[type=checkbox],input[type=radio]{accent-color:var(--gold);width:17px;heigh
 <body>
 
 <header class="top">
-  <a class="back" href="/BackEnd/">← BackEnd</a>
+  <a class="back" href="/BackEnd/Marketing/">← Marketing</a>
   <img src="https://iqproductionz.com/Content/Images/Main/IQ-noglow_Updated.avif" alt="I.Q. Productionz" onerror="this.style.display='none'">
   <div class="sub">Quote Builder</div>
 </header>
@@ -134,6 +138,7 @@ const HALI_EMAIL   = 'SarahParsons@IQProductionz.com';
 const LOGO_URL     = 'https://iqproductionz.com/Content/Images/Main/IQ-noglow_Updated.avif';
 const AGREEMENT_URL = 'https://iqproductionz.com/Agreements/StudioPractices/';
 const STORE_KEY    = 'iq-quote-builder-v1';
+const PRINT_URL    = 'https://iqproductionz.com/Print/';
 
 /* ============================================================
    SERVICES & RATES — taken from the BookNow pages (Nov 2026).
@@ -201,6 +206,18 @@ const SERVICES = [
     ]}
 ];
 
+/* LOGIN SCALING — WHY: every login adds support work (adding/removing people, resets, access
+   issues), so upkeep grows with head count. First 15 logins are included in the base plan. */
+const LOGINS_INCLUDED = 15;
+const PER_LOGIN = 1.00;        // $ per login per month, logins 16–150
+const PER_LOGIN_BULK = 0.50;   // $ per login per month above 150 (bulk rate)
+/** Monthly upkeep for a login system. WHY tiered: large teams get a fair bulk rate instead of a runaway bill. */
+function loginUpkeep(base, users){
+  const extra = Math.max(0, users - LOGINS_INCLUDED);
+  const mid = Math.min(extra, 150 - LOGINS_INCLUDED), bulk = Math.max(0, extra - mid);
+  return Math.round(base + mid * PER_LOGIN + bulk * PER_LOGIN_BULK);
+}
+
 /* Apps pricing (same model as the client-facing Apps page). */
 const APP_TIERS = [
   {max:15, mult:1.00, upkeep:0, label:'1–15 people'}, {max:50, mult:1.15, upkeep:25, label:'16–50 people'},
@@ -225,6 +242,33 @@ const num = (v, d = 0) => { const n = parseFloat(v); return isFinite(n) ? n : d;
 const money = n => '$' + (Math.round(n * 100) / 100).toLocaleString('en-US', { minimumFractionDigits: n % 1 ? 2 : 0, maximumFractionDigits: 2 });
 const esc = s => String(s).replace(/[&<>"']/g, c => ({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;' }[c]));
 const FREQ = { once:'', month:'/mo', year:'/yr' };
+/** Makes a random Client ID like IQC-7KQ2MX. WHY no 0/O/1/I: clients copy it by hand onto the agreement. */
+function newClientId(){
+  const A = 'ABCDEFGHJKMNPQRSTUVWXYZ23456789';
+  const r = new Uint32Array(6); (window.crypto || {}).getRandomValues ? crypto.getRandomValues(r) : r.forEach((_, i) => r[i] = Math.random() * 1e9);
+  return 'IQC-' + [...r].map(n => A[n % A.length]).join('');
+}
+
+/* WHY deflate + base64url: a whole quote rides in the print link, so nothing is stored on a server. */
+const b64url = bytes => { let s = ''; for (let i = 0; i < bytes.length; i += 0x8000) s += String.fromCharCode.apply(null, bytes.subarray(i, i + 0x8000)); return btoa(s).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, ''); };
+async function pack(obj){
+  const bytes = new TextEncoder().encode(JSON.stringify(obj));
+  // WHY try/catch: older browsers lack CompressionStream; plain packing still works, just longer.
+  try { if (window.CompressionStream) return 'z' + b64url(new Uint8Array(await new Response(new Blob([bytes]).stream().pipeThrough(new CompressionStream('deflate-raw'))).arrayBuffer())); } catch (e) {}
+  return 'j' + b64url(bytes);
+}
+
+/** The quote in compact form for the print page. WHY short keys: keeps the link short. */
+function printData(q){
+  const m = quoteMeta();
+  return { type:'quote', no:m.no, date:fmtDate(m.date), valid:fmtDate(m.valid), cid:$('c_cid').value,
+    name:$('c_name').value.trim(), biz:$('c_biz').value.trim(), email:$('c_email').value.trim(), phone:$('c_phone').value.trim(),
+    groups:q.groups.map(g => ({ n:g.service.name, l:g.lines.map(l => ({ n:l.name, a:l.amount, f:l.freq })) })),
+    disc:q.discount, discPct:q.discPct, total:q.total, dep:q.deposit, hrs:q.hours, mo:q.monthly, yr:q.yearly,
+    terms:$('c_terms').value.trim(), notes:q.groups.filter(g => g.service.note).map(g => g.service.note) };
+}
+const printLink = async q => PRINT_URL + '#d=' + await pack(printData(q));
+
 const TABS = [...SERVICES.map(s => ({ id:s.id, name:s.name })), { id:'total', name:'Total' }];
 
 /* ============================================================
@@ -248,9 +292,21 @@ function panelBody(s){
       <label>Number of pages<input type="number" id="web_pages" min="1" value="5"></label>
       <label>Flat rate ($, includes ${s.included} pages)<input type="number" id="web_base" min="0" value="${s.base}"></label>
       <label>Each extra page ($)<input type="number" id="web_extra" min="0" value="${s.extraRate}"></label>
+      <label>Feature-heavy pages <span class="hint">(booking, galleries, forms, lots going on)</span><input type="number" id="web_heavy" min="0" value="0"></label>
+      <label>Extra per feature-heavy page ($)<input type="number" id="web_heavyRate" min="0" value="75"></label>
       <label>Working hours to cover <span class="hint">(for the agreement)</span><input type="number" id="web_hours" min="0" step="0.5" value="0"></label>
-    </div>`;
-  if (s.type === 'items') return itemRows(s);
+    </div>
+    <p class="note">Need member or staff logins on the site? Add them under Specialty HTML → Member logins.</p>`;
+  if (s.type === 'items') return itemRows(s) + (s.id === 'html' ? `
+    <div class="card" style="margin:16px 0 0;background:var(--surface)">
+      <label class="toggle"><input type="checkbox" id="html_login_on"> Member logins <span class="hint">(staff or customer accounts on a website)</span></label>
+      <div class="grid">
+        <label>About how many logins?<input type="number" id="html_login_users" min="1" value="15"></label>
+        <label>Setup base ($, scales with team size)<input type="number" id="html_login_base" min="0" value="500"></label>
+        <label>Monthly upkeep base ($)<input type="number" id="html_login_upkeep" min="0" value="50"></label>
+      </div>
+      <p class="hint" style="margin-top:8px" id="html_login_note"></p>
+    </div>` : '');
   if (s.type === 'apps') return `
     <label class="toggle"><input type="checkbox" id="apps_on"> Include an app</label>
     <div class="grid">
@@ -260,6 +316,7 @@ function panelBody(s){
       <label>Complexity<select id="apps_cx"><option value="0.9">Simple</option><option value="1" selected>Standard</option><option value="1.25">Advanced</option></select></label>
       <label>Timeline<select id="apps_rush"><option value="1" selected>Standard (2–3 weeks)</option><option value="1.25">Rush (+25%)</option></select></label>
       <label>Working hours to cover<input type="number" id="apps_hours" min="0" step="0.5" value="0"></label>
+      <label>Cloud costs at cost ($/mo) <span class="hint">(only if Firebase/Cloudflare go past free plans)</span><input type="number" id="apps_cloud" min="0" step="1" value="0"></label>
     </div>
     <div style="margin-top:12px">${APP_ITEMS.map(it => `
       <div class="row" style="grid-template-columns:26px 1fr 104px">
@@ -319,6 +376,9 @@ function totalPanel(){
         <label>Phone<input type="tel" id="c_phone" autocomplete="off"></label>
         <label>Quote date<input type="date" id="c_date"></label>
         <label>Valid for (days)<input type="number" id="c_valid" min="1" value="30"></label>
+        <label>Client ID <span class="hint">(goes on the quote and the agreement)</span>
+          <span style="display:flex;gap:8px;align-items:center"><input type="text" id="c_cid" readonly style="letter-spacing:2px;font-weight:700;color:var(--gold-lt)"><button type="button" class="btn btn-line" id="newCid" style="padding:10px 12px;margin-top:5px;font-size:11px">New</button></span>
+        </label>
       </div>
       <div class="grid" style="margin-top:12px">
         <label>Discount (%)<input type="number" id="c_disc" min="0" max="100" value="0"></label>
@@ -343,6 +403,7 @@ function totalPanel(){
     <div class="banner" id="banner" role="alert"></div>
     <div class="actions">
       <button type="button" class="btn btn-gold send" id="sendBtn">✉ Send Out Quote</button>
+      <button type="button" class="btn btn-line" id="printBtn">🖨 Print</button>
       <button type="button" class="btn btn-line" id="pdfBtn">⤓ Download PDF</button>
       <button type="button" class="btn btn-line" id="linkBtn">Agreement Link</button>
       <button type="button" class="btn btn-line" id="clearBtn">Clear Quote</button>
@@ -364,6 +425,8 @@ function serviceLines(s){
     const pages = Math.max(1, Math.floor(num(val('web_pages'), 5)));
     lines.push({ name:`Website — up to ${s.included} pages (flat)`, amount:num(val('web_base')), freq:'once' });
     if (pages > s.included) lines.push({ name:`Extra pages × ${pages - s.included}`, amount:(pages - s.included) * num(val('web_extra')), freq:'once' });
+    const heavy = Math.max(0, Math.floor(num(val('web_heavy'))));
+    if (heavy) lines.push({ name:`Feature-heavy pages × ${heavy}`, amount:heavy * num(val('web_heavyRate')), freq:'once' });
     lines.hours = num(val('web_hours'));
   }
   if (s.type === 'items') s.items.forEach(it => {
@@ -371,6 +434,17 @@ function serviceLines(s){
     const qty = it.qty === false ? 1 : Math.max(1, Math.floor(num(val(`${s.id}_${it.id}_qty`), 1)));
     lines.push({ name:it.name + (qty > 1 ? ` × ${qty}` : ''), amount:qty * num(val(`${s.id}_${it.id}_price`)), freq:it.freq || 'once' });
   });
+  if (s.id === 'html') {
+    const users = Math.max(1, Math.floor(num(val('html_login_users'), 1)));
+    const tier = APP_TIERS.find(t => users <= t.max);
+    const setup = Math.round(num(val('html_login_base')) * tier.mult / 5) * 5;
+    const monthly = loginUpkeep(num(val('html_login_upkeep')), users);
+    $('html_login_note').textContent = `${tier.label}: setup ${money(setup)}, upkeep ${money(monthly)}/mo (${LOGINS_INCLUDED} logins included, then $${PER_LOGIN.toFixed(2)} each; $${PER_LOGIN_BULK.toFixed(2)} each over 150).`;
+    if (on('html_login_on')) {
+      lines.push({ name:`Member logins setup — ${users} logins`, amount:setup, freq:'once' });
+      lines.push({ name:`Member login upkeep — ${users} logins`, amount:monthly, freq:'month' });
+    }
+  }
   if (s.type === 'apps') {
     const users = Math.max(1, Math.floor(num(val('apps_users'), 1)));
     const c = { tier:APP_TIERS.find(t => users <= t.max), forms:Math.max(0, Math.floor(num(val('apps_forms')))), pages:Math.max(0, Math.floor(num(val('apps_pages')))) };
@@ -383,9 +457,11 @@ function serviceLines(s){
       if (on('apps_on') && picked[it.id] && amt > 0) lines.push({ name:'App — ' + it.name + (it.id === 'form' ? ` × ${c.forms}` : ''), amount:amt, freq:'once' });
     });
     const base = (picked.store || picked.push) ? 200 : (picked.auth || picked.admin) ? 125 : 75;
-    const upkeep = base + c.tier.upkeep;
-    $('apps_upkeep_amt').textContent = `(${money(upkeep)}/mo for ${c.tier.label})`;
-    if (on('apps_on') && on('apps_upkeep')) lines.push({ name:'App upkeep', amount:upkeep, freq:'month' });
+    const upkeep = loginUpkeep(base, users);
+    $('apps_upkeep_amt').textContent = `(${money(upkeep)}/mo: ${money(base)} base + ${users} logins, ${LOGINS_INCLUDED} included)`;
+    if (on('apps_on') && on('apps_upkeep')) lines.push({ name:`App upkeep — ${users} logins`, amount:upkeep, freq:'month' });
+    const cloud = num(val('apps_cloud'));
+    if (on('apps_on') && cloud > 0) lines.push({ name:'Cloud services (Firebase / Cloudflare), at cost', amount:cloud, freq:'month' });
     lines.hours = on('apps_on') ? num(val('apps_hours')) : 0;
   }
   if (s.type === 'hourly') {
@@ -503,7 +579,7 @@ function agreementLink(q){
   const m = quoteMeta();
   const agree = {}, other = {};
   q.groups.forEach(g => { if (g.service.agree) { agree[g.service.agree] = 1; if (g.service.agreeOther) other[g.service.agree] = [other[g.service.agree], g.service.agreeOther].filter(Boolean).join(', '); } });
-  const p = new URLSearchParams({ n:$('c_name').value.trim(), e:$('c_email').value.trim(), t:q.total.toFixed(2), h:String(q.hours || ''), q:m.no });
+  const p = new URLSearchParams({ n:$('c_name').value.trim(), e:$('c_email').value.trim(), c:$('c_cid').value, t:q.total.toFixed(2), h:String(q.hours || ''), q:m.no });
   if (Object.keys(agree).length) p.set('s', Object.keys(agree).join(','));
   Object.entries(other).forEach(([k, v]) => p.set('o_' + k, v));
   if ($('c_terms').value.trim()) p.set('x', $('c_terms').value.trim().slice(0, 600)); // WHY cap: keeps the link a sane length
@@ -511,7 +587,7 @@ function agreementLink(q){
 }
 
 /** The branded email body. WHY tables + inline styles: that's what Gmail and Outlook render reliably. */
-function quoteEmailHtml(q){
+function quoteEmailHtml(q, printUrl){
   const m = quoteMeta();
   const name = esc($('c_name').value.trim());
   const note = $('c_note').value.trim();
@@ -526,7 +602,7 @@ function quoteEmailHtml(q){
   return `<div style="background:#2a2720;padding:24px 0;font-family:Arial,Helvetica,sans-serif">
 <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="max-width:620px;margin:0 auto;background:#333333;border:1px solid #7a5218;border-radius:12px">
 <tr><td align="center" style="padding:26px 24px 10px"><img src="${LOGO_URL}" alt="I.Q. Productionz" width="260" style="width:260px;max-width:80%;height:auto;display:block"></td></tr>
-<tr><td align="center" style="padding:0 24px 18px;color:#a9a9a9;font-size:12px;letter-spacing:3px;text-transform:uppercase">Quote ${m.no} · ${fmtDate(m.date)}</td></tr>
+<tr><td align="center" style="padding:0 24px 18px;color:#a9a9a9;font-size:12px;letter-spacing:3px;text-transform:uppercase">Quote ${m.no} · ${fmtDate(m.date)}<br><span style="color:#e0a84a;letter-spacing:2px">Client ID: <b>${esc($('c_cid').value)}</b></span></td></tr>
 <tr><td style="padding:0 28px;color:#f0ece3;font-size:15px;line-height:1.6">
 <p style="margin:0 0 12px">Hi ${name},</p>
 <p style="margin:0 0 16px">${note ? esc(note).replace(/\n/g, '<br>') : 'Thank you for considering I.Q. Productionz! Here is the quote we discussed.'}</p>
@@ -539,9 +615,6 @@ function quoteEmailHtml(q){
 <tr><td colspan="2" style="padding:0 18px 16px;color:#f0ece3;font-size:13.5px;line-height:1.7">
 <b>${money(q.deposit)}</b> (50%) is due to start · <b>${money(q.total - q.deposit)}</b> due at completion${q.hours ? `<br>Covers <b>${q.hours}</b> working hours` : ''}${rec ? `<br>Recurring: <b>${rec}</b>` : ''}
 </td></tr></table></td></tr>
-<tr><td align="center" style="padding:22px 28px 6px">
-<a href="${agreementLink(q)}" style="display:inline-block;background:#c98a2e;color:#2a2720;text-decoration:none;font-weight:bold;font-size:14px;letter-spacing:1px;text-transform:uppercase;padding:14px 26px;border-radius:8px">Review &amp; Sign Your Agreement</a>
-</td></tr>
 <tr><td style="padding:14px 28px 0;color:#a9a9a9;font-size:12.5px;line-height:1.65">
 ${terms ? `<p style="margin:0 0 10px;color:#f0ece3"><b>Additional terms &amp; deadlines:</b><br>${esc(terms).replace(/\n/g, '<br>')}</p>` : ''}
 ${notes ? `<ul style="margin:0 0 10px 18px;padding:0">${notes}</ul>` : ''}
@@ -549,6 +622,11 @@ ${notes ? `<ul style="margin:0 0 10px 18px;padding:0">${notes}</ul>` : ''}
 <p style="margin:0 0 8px"><b style="color:#f0ece3">Revisions:</b> unplanned revisions beyond the approved hours are $100.00 per hour. A progress report is sent at the halfway point of approved hours.</p>
 <p style="margin:0 0 8px"><b style="color:#f0ece3">Cancellations:</b> canceled before mid-term, unused time is refunded; at the mid-term report, no refund; after mid-term, additional fees apply for time worked.</p>
 <p style="margin:0 0 8px">Delivery is digital through Google Drive. This quote is valid until ${fmtDate(m.valid)}.</p>
+</td></tr>
+<tr><td align="center" style="padding:16px 22px 24px">
+<a href="${printUrl}" style="display:inline-block;margin:4px;background:#3b3b3b;color:#f0ece3;border:1px solid #7a5218;text-decoration:none;font-weight:bold;font-size:13px;letter-spacing:1px;text-transform:uppercase;padding:13px 20px;border-radius:8px">Print for Your Records</a>
+<a href="${agreementLink(q)}" style="display:inline-block;margin:4px;background:#c98a2e;color:#2a2720;text-decoration:none;font-weight:bold;font-size:13px;letter-spacing:1px;text-transform:uppercase;padding:13px 20px;border-radius:8px">Sign the Service Agreement</a>
+<p style="margin:10px 0 0;color:#a9a9a9;font-size:12px">Your Client ID (${esc($('c_cid').value)}) is filled in for you on the agreement.</p>
 </td></tr>
 <tr><td align="center" style="padding:16px 28px 26px;color:#a9a9a9;font-size:12.5px;border-top:1px solid #4a463d">
 Questions? Reply to this email or write <a href="mailto:${HALI_EMAIL}" style="color:#e0a84a">${HALI_EMAIL}</a><br>
@@ -563,7 +641,7 @@ function status(text, isErr){
   s.textContent = text;
 }
 
-/** Sends the quote to the client, then a copy to Hali. WHY two sends: the copy arrives even if the template has no CC. */
+/** Sends the quote to the client. WHY one send: Hali's email template already copies her, so a second send would duplicate it. */
 async function sendQuote(){
   const q = compute();
   if (!validate(q, true)) return;
@@ -572,20 +650,17 @@ async function sendQuote(){
   const m = quoteMeta();
   const client = $('c_email').value.trim();
   const subject = `Your I.Q. Productionz Quote ${m.no} — ${money(q.total)}`;
-  const html = quoteEmailHtml(q);
-  const params = to => ({ to_email:to, to_name:$('c_name').value.trim(), subject:to === HALI_EMAIL ? '[Copy] ' + subject + ' — ' + client : subject,
-                          message:html, reply_to:HALI_EMAIL, from_name:'Sarah Parsons — I.Q. Productionz' });
+  const html = quoteEmailHtml(q, await printLink(q));
   try {
-    await emailjs.send(EJS_SERVICE, EJS_TEMPLATE, params(client), { publicKey:EJS_PUBLIC_KEY });
+    await emailjs.send(EJS_SERVICE, EJS_TEMPLATE, { to_email:client, to_name:$('c_name').value.trim(), subject,
+      message:html, reply_to:HALI_EMAIL, from_name:'Sarah Parsons — I.Q. Productionz' }, { publicKey:EJS_PUBLIC_KEY });
   } catch (e) {
-    // WHY stop here: if the client copy failed, a "sent" copy to Hali would be misleading.
+    // WHY keep the button live: nothing went out, so Hali can retry right away.
     console.error('Quote send failed:', e);
     status('The quote did not send: ' + (e.text || e.message || 'unknown error') + '. Try again.', true);
     btn.disabled = false; btn.textContent = '✉ Send Out Quote'; return;
   }
-  try { await emailjs.send(EJS_SERVICE, EJS_TEMPLATE, params(HALI_EMAIL), { publicKey:EJS_PUBLIC_KEY }); }
-  catch (e) { console.error('Copy to Hali failed:', e); status(`Quote sent to ${client}, but your copy failed to send.`, true); btn.disabled = false; btn.textContent = '✉ Send Out Quote'; return; }
-  status(`✓ Quote ${m.no} sent to ${client}. A copy went to ${HALI_EMAIL}.`);
+  status(`✓ Quote ${m.no} sent to ${client} (Client ID ${$('c_cid').value}).`);
   btn.disabled = false; btn.textContent = '✉ Send Out Quote';
 }
 
@@ -615,7 +690,8 @@ async function downloadPdf(){
   if (logo) doc.addImage(logo.data, 'PNG', M, 22, 210, 210 * logo.ratio);
   else { doc.setTextColor(...GOLD); doc.setFont('times', 'bold'); doc.setFontSize(24); doc.text('I.Q. PRODUCTIONZ', M, 56); }
   doc.setFont('helvetica', 'normal'); doc.setFontSize(10); doc.setTextColor(...CREAM);
-  doc.text('Quote ' + m.no, W - M, 44, { align:'right' }); doc.text(fmtDate(m.date), W - M, 60, { align:'right' });
+  doc.text('Quote ' + m.no, W - M, 40, { align:'right' }); doc.text(fmtDate(m.date), W - M, 56, { align:'right' });
+  doc.text('Client ID: ' + $('c_cid').value, W - M, 72, { align:'right' });
   let y = 128;
   doc.setTextColor(...CHAR); doc.setFont('helvetica', 'bold'); doc.setFontSize(11); doc.text('PREPARED FOR', M, y); y += 16;
   doc.setFont('helvetica', 'normal');
@@ -649,6 +725,15 @@ async function downloadPdf(){
   const safe = ($('c_biz').value.trim() || $('c_name').value.trim() || 'Client').replace(/[^\w\- ]+/g, '').trim().replace(/\s+/g, '-');
   doc.save(`IQ-Productionz-Quote-${safe}-${m.no}.pdf`);
   status('✓ PDF downloaded.');
+}
+
+/** Opens the black-and-white print page. WHY open the tab first: browsers block pop-ups opened after an await. */
+async function openPrint(){
+  const q = compute();
+  if (!validate(q, false)) return;
+  const w = window.open('about:blank', '_blank');
+  const url = await printLink(q);
+  if (w) w.location.href = url; else location.href = url;
 }
 
 async function copyLink(){
@@ -694,6 +779,7 @@ function load(){
 render();
 $('c_date').value = new Date().toISOString().slice(0, 10);
 load();
+if (!$('c_cid').value) $('c_cid').value = newClientId(); // WHY only when empty: a saved draft keeps its ID
 compute();
 
 document.addEventListener('click', e => {
@@ -714,6 +800,7 @@ $('panels').addEventListener('input', e => {
   // WHY auto-check: typing a quantity or price on an item means you want it included.
   const m = e.target.id && e.target.id.match(/^(.+)_(qty|price)$/);
   if (m && $(m[1] + '_on') && e.target.value) $(m[1] + '_on').checked = true;
+  if (/^html_login_/.test(e.target.id) && e.target.id !== 'html_login_on') $('html_login_on').checked = true; // WHY: entering a login count means you want logins
   if (/^(web|apps)_/.test(e.target.id) && !/_on$/.test(e.target.id) && $(e.target.id.split('_')[0] + '_on')) $(e.target.id.split('_')[0] + '_on').checked = true;
   clearError(e.target.closest('label'));
   compute();
@@ -721,6 +808,8 @@ $('panels').addEventListener('input', e => {
 $('panels').addEventListener('change', compute);
 $('sendBtn').addEventListener('click', sendQuote);
 $('pdfBtn').addEventListener('click', downloadPdf);
+$('printBtn').addEventListener('click', openPrint);
+$('newCid').addEventListener('click', () => { $('c_cid').value = newClientId(); compute(); });
 $('linkBtn').addEventListener('click', copyLink);
 $('clearBtn').addEventListener('click', () => {
   // WHY two taps: a single mis-tap shouldn't wipe a whole quote (confirm dialogs are unreliable on phones).
