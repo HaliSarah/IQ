@@ -6,7 +6,8 @@
   Modified By: Claude (Anthropic), 2026-11-12; Claude (Anthropic), 2026-11-12: added the Schedule a Call pop-up;
                Claude (Anthropic), 2026-11-12: added discount codes (stored as fingerprints, not plain text);
                Claude (Anthropic), 2026-11-12: added the Download Quote (PDF) button;
-               Claude (Anthropic), 2026-11-14: required-field stars now sit beside the label text
+               Claude (Anthropic), 2026-11-14: required-field stars now sit beside the label text;
+               Claude (Anthropic), 2026-11-14: header line break before "can install right from their…"
   Description: Client-facing app intake form and price estimator. The estimate scales with
                team size, forms, content and timeline. Clients pay a 50% deposit by card
                (Stripe checkout through the existing /checkout Worker route) or by Cash App /
@@ -41,7 +42,9 @@ a{color:var(--gold-lt)}
 .logo-wrap img{height:58px;width:auto;filter:drop-shadow(0 0 14px rgba(201,138,46,.45))}
 .gold-rule{width:60px;height:2px;background:linear-gradient(90deg,transparent,var(--gold),transparent);margin:16px auto}
 .form-header h1{font-family:'Cinzel',serif;font-size:clamp(24px,4.5vw,38px);font-weight:600;letter-spacing:1px;text-transform:uppercase}
-.form-header p{font-size:14px;color:var(--muted);max-width:540px;margin:10px auto 0;font-weight:300}
+.form-header p{font-size:14px;color:var(--muted);max-width:620px;margin:10px auto 0;font-weight:300}
+/* WHY a forced break: keeps "can install right from their…" starting line two on wider screens; phones wrap naturally. */
+@media(max-width:600px){.hero-br{display:none}}
 
 .wrap{max-width:860px;margin:0 auto;padding:30px 20px 0}
 .start{background:var(--card);border:1px solid var(--gold-dim);border-radius:12px;padding:22px;text-align:center;margin-bottom:22px;position:relative;overflow:hidden}
@@ -152,7 +155,7 @@ input[type=checkbox],input[type=radio]{accent-color:var(--gold);width:17px;heigh
   <div class="logo-wrap"><a href="https://iqproductionz.com/"><img src="https://iqproductionz.com/Content/Images/Main/IQ-noglow_Updated.avif" alt="I.Q. Productionz" onerror="this.style.display='none'"></a></div>
   <div class="gold-rule"></div>
   <h1>App Production</h1>
-  <p>Turn your website into an app your team or customers can install right from their phone, with your logo, logins, forms and more.</p>
+  <p>Turn your website into an app your team or customers<br class="hero-br">can install right from their phone, with your logo, logins, forms and more.</p>
 </div>
 
 <div class="wrap" id="formWrap">
