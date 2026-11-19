@@ -2,7 +2,7 @@
 <!--
   Title:       Reply Converter
   Author:      Hali Sarah Parsons (I.Q. Productionz)
-  Date:        2026-11-06
+  Date:        2026-11-15
   Modified By: Claude — 10/30: "I found interesting", expanded "your point" swaps,; Claude 2026-11-14 — I.Q. Productionz branding + BackEnd nav
                "later", "earlier", "makes sense", rotating "regarding", the "I hadn't
                thought about X until Y" restructure, "Like you said".
@@ -35,6 +35,15 @@
                "including", "and" keeps 5 words or fewer together, "That is the
                scenario where", "not a sufficient explanation", "In my project",
                "That is why X mattered beyond Y", dash before a full clause splits.
+               11/15: words between two dashes → parentheses, "Framing" → "Setting
+               up", vague "something" named or flagged, "are not automatically
+               better", "and perform worse", "for the sake of it", "made the X feel
+               more meaningful", "felt like", "without errors", "made that clear",
+               "hardest", "easy", "are very different", reaction + dash → "because",
+               "I hadn't connected X, but it makes sense —" and "— helping users
+               who are ..." restructures, repeated words around a replacement
+               removed, "this approach" no longer swapped for the wrong subject,
+               "The X you touched on" → "Your take on the X" in replies.
   Description: Paste a discussion-reply draft; the page applies Hali's wording rules
                (swaps, negative cuts, sentence splits, dash/equation fixes) and flags
                anything that needs a human call.
@@ -362,6 +371,12 @@
     ["whole new", "fresh"],
     ["one thing that", "what"],
     ["one thing", "what"],
+    ["hardest", "more difficult"],
+    ["easy", "simple"],
+    ["felt like", "seemed"],
+    ["feels like", "seems"],
+    ["are very different", "vary greatly"],
+    ["is very different", "varies greatly"],
     ["it's one thing to say", "When people say"],
     ["it's another", "it's very different"],
     ["the point you made", "what you wrote"],
@@ -840,7 +855,7 @@
 
   // Rules whose source word is an adjective, adverb or function word (or whose
   // target starts with a verb form) — conjugating these produces junk.
-  const NO_EXPAND = new Set(["connects","good","causes","about","regarding","later","earlier","nearly","more","help","why","means","entirely","too","close","well","hard","wrong","real","where","when","if","simple","genuinely","correctly","seriously"]);
+  const NO_EXPAND = new Set(["easy","hardest","connects","good","causes","about","regarding","later","earlier","nearly","more","help","why","means","entirely","too","close","well","hard","wrong","real","where","when","if","simple","genuinely","correctly","seriously"]);
 
   // Nouns only take a plural form ("points" → "ideas"), never -ed/-ing.
   const NOUN_ONLY = new Set(["wall","point","part","job","piece","meaning"]);
@@ -967,6 +982,129 @@
       const replaced = matchCase(m[0], m[2] ? "places to begin" : "place to begin");
       return {text: replaced, type: "fixed", note: '"starting point" → "place to begin"'};
     });
+
+    // ===== 11/15 rules =====
+
+    // Q1. Words between two dashes are an aside → parentheses.
+    // "The loop — deploy, monitor, adjust, redeploy — never ends." →
+    // "The loop (deploy, monitor, adjust, redeploy) never ends."
+    applyToPlainSegments(/\s*—\s*([^—.?!\n]+?)\s*—\s*/g, (m) => {
+      return [{text: " (", type: "fixed", note: "dash pair → parentheses"}, {text: m[1].trim(), type: "plain"}, {text: ") ", type: "fixed", note: "dash pair → parentheses"}];
+    });
+
+    // Q2. A sentence opening with "Framing" → "Setting up" ("Framing it as" →
+    // "Setting it up as", so the pronoun sits where it reads naturally).
+    applyToPlainSegments(/(^|(?<=[.?!]\s))Framing\b(\s+(?:it|this|that|them)\b)?/g, (m) => {
+      const out = m[2] ? `Setting${m[2]} up` : "Setting up";
+      return {text: out, type: "fixed", note: '"Framing" → "Setting up"'};
+    });
+
+    // Q3. Vague "something" ("It clarifies something that is easy to conflate
+    // when reading about them together"). If the sentences before name two
+    // things, they replace "something"/"them"; otherwise "something" is
+    // flagged so the real thing gets named.
+    applyToPlainSegments(/\b(clarifies|clarified|explains|explained|highlights|highlighted|shows|showed|illustrates|illustrated|captures|captured)\s+something\s+(?:that|which)\s+(?:is|was|are|were)\s+(easy|hard|simple|difficult)\s+to\s+(conflate|confuse|mix up|blur|overlook|miss)\b([^.?!]*)/gi, (m, segText, prefix) => {
+      const prior = prefix.slice(-400);
+      const pair = prior.match(/\b(?:between\s+)?((?:[A-Za-z-]+\s+){0,2}[A-Za-z-]+)\s+(?:and|versus|vs\.?)\s+((?:[A-Za-z-]+\s+){0,2}[A-Za-z-]+)(?=[.,;?!)]|\s+(?:is|are|was|were|both|each)\b)/i);
+      if(pair){
+        const tail = m[4].replace(/\s+when\s+reading\s+about\s+them\s+together/i, " when read together").replace(/\bthem\b/i, `${pair[1]} and ${pair[2]}`);
+        return {text: `${m[1]} the difference between ${pair[1]} and ${pair[2]}, which ${/^(easy|simple)$/i.test(m[2]) ? "are easy" : "are hard"} to ${m[3]}${tail}`, type: "fixed", note: '"something" named'};
+      }
+      notes.push({tag:'Vague "something"', snippet: m[0].trim().slice(0,70), detail:'say exactly what it clarifies — "something" and "them" never name the thing'});
+      return [{text: m[1] + " ", type: "plain"}, {text: "something", type: "flag", note: "name the thing"}, {text: m[0].slice(m[1].length + " something".length), type: "plain"}];
+    });
+    // Any other "something that/which" is flagged instead of silently dropped.
+    applyToPlainSegments(/\bsomething(?=\s+(?:that|which)\b)/gi, (m) => {
+      notes.push({tag:'Vague "something"', snippet: m[0], detail:"name the actual thing"});
+      return {text: m[0], type: "flag", note: "name the thing"};
+    });
+
+    // Q4. Phrases with negatives or words that have their own rules — handled
+    // first so the phrase wins over the single-word swaps.
+    const EARLY_PHRASES = [
+      [/\b(are|is)\s+not\s+automatically\s+better\b/gi, (m) => (m[1].toLowerCase() === "is" ? "has" : "have") + " no improved guarantee"],
+      [/,?\s+and\s+(?:perform|performs|performed)\s+worse\b/gi, () => ", resulting in declined performance"],
+      [/\bwhere\s+(?:the\s+)?improvement\s+is\s+real\b/gi, () => "that causes actual improvement"],
+      [/,?\s*not\s+just\s+([a-z]+ing)(?:\s+(?:it|things))?\s+for\s+the\s+sake\s+of\s+it\b/gi, (m) => ` and ${m[1]} it with purpose`],
+      [/\bmade\s+((?:the|this|that|my|our|your)\s+[a-z -]+?)\s+feel\s+(?:more\s+|much\s+more\s+)?(?:meaningful|valuable|worthwhile|important|real|useful|purposeful)\b/gi, (m) => `gave ${m[1]} a better outlook`],
+      [/\bmade\s+(that|this|it)\s+clear\s+from\s+the\s+(?:start|beginning|outset)\b/gi, (m) => `outlined ${m[1]} clearly from the beginning`],
+      [/\bmade\s+(that|this|it)\s+clear\b/gi, (m) => `outlined ${m[1]} clearly`],
+      [/\b(ran|runs|run|went|goes|go|worked|works|work|executed|executes|compiled|finished|completed|loaded|deployed)\s+without\s+(?:any\s+)?errors?\b/gi, (m) => `${m[1]} smoothly`],
+      [/\bwithout\s+(?:any\s+)?errors?\b/gi, () => "smooth"],
+    ];
+    for(const [re, fn] of EARLY_PHRASES){
+      applyToPlainSegments(re, (m) => {
+        const out = fn(m);
+        return {text: /^[A-Z]/.test(m[0].trim()) ? out.charAt(0).toUpperCase() + out.slice(1) : out, type: "fixed", note: `"${m[0].trim()}" → "${out.trim()}"`};
+      });
+    }
+
+    // Q5. A reaction followed by a dash and its reason → "because".
+    // "... is the part I found particularly valuable—automated flags and
+    // automated diagnoses are very different." → "... valuable because ...".
+    applyToPlainSegments(/\b((?:I\s+)?found\s+(?:particularly\s+|really\s+|most\s+)?(?:valuable|useful|interesting|helpful|insightful)|resonated\s+with\s+me|stood\s+out(?:\s+to\s+me)?|drew\s+my\s+attention|struck\s+me|caught\s+my\s+(?:eye|attention)|stuck\s+with\s+me)\s*—\s*(?=[a-z])/gi, (m) => {
+      // The reaction is kept as written so the "I found particularly valuable"
+      // swap can't break the sentence around the new "because".
+      return [{text: m[1], type: "keep"}, {text: " because ", type: "fixed", note: "dash after a reaction → because"}];
+    });
+
+    // Q6. "I had not connected X to Y, but it makes sense — [reason]" →
+    // "Although it was easy to translate, connecting X to Y was a missed
+    // connection on my account—[reason]". The admission turns into a positive
+    // statement and the reason stays on the dash.
+    applyToPlainSegments(/(^|(?<=[.?!]\s))I\s+(?:had not|hadn't|never|did not|didn't|have not|haven't)\s+([a-z]+ed)\s+([^.?!]+?),\s*but\s+it\s+(?:makes|made)\s+(?:a lot of |total |perfect )?sense\s*[—,:]\s*([^.?!]+)([.?!])/g, (m) => {
+      const ing = inflect(ingToBase(m[2].replace(/ed$/, "ing")), "ing");
+      notes.push({tag:'"I hadn\'t connected ... but it makes sense" reworded', snippet: m[0].trim().slice(0,70), detail:"admission turned into a positive statement"});
+      return [
+        {text: `Although it was easy to translate, ${ing} `, type: "fixed", note: "restructured"},
+        {text: m[3].trim(), type: "plain"},
+        {text: " was a missed connection on my account—", type: "fixed", note: "restructured"},
+        {text: m[4].trim(), type: "plain"},
+        {text: m[5], type: "fixed", note: "sentence end"}
+      ];
+    });
+
+    // Q7. "— helping [users] who are [unfamiliar ...] get [the info they
+    // need ...], without needing [an analyst ...]." → ". Users definitely need
+    // aid when they are unfamiliar .... Many people may need an analyst ...
+    // when getting the info ...". The run-on aside becomes two statements and
+    // the "without needing" negative becomes "may need".
+    applyToPlainSegments(/\s*—\s*(?:helping|aiding)\s+([a-z]+(?:\s+[a-z]+)?)\s+who\s+(are|is)\s+([^,—]+?)\s+(get|find|reach|access|understand|use|see|obtain)\s+([^,.?!]+?)(?:,\s*without\s+(?:needing|requiring|having)\s+([^.?!]+?))?([.?!])/gi, (m) => {
+      const grp = m[1].charAt(0).toUpperCase() + m[1].slice(1);
+      const what = m[5].replace(/\s+(?:they|you|we)\s+(?:need|want)\b/i, "");
+      const pieces = [
+        {text: `. ${grp} definitely need aid when they ${m[2]} `, type: "fixed", note: "aside → statement"},
+        {text: m[3].trim(), type: "plain"},
+        {text: ".", type: "fixed", note: "sentence end"}
+      ];
+      if(m[6]){
+        pieces.push({text: " Many people may need ", type: "fixed", note: '"without needing" → "may need"'});
+        pieces.push({text: m[6].trim(), type: "plain"});
+        pieces.push({text: ` when ${inflect(m[4], "ing")} `, type: "fixed", note: "restructured"});
+        pieces.push({text: what.trim(), type: "plain"});
+        pieces.push({text: m[7], type: "fixed", note: "sentence end"});
+      }
+      notes.push({tag:"Aside split into statements", snippet: m[0].trim().slice(0,70), detail:"check the two new sentences say what you mean"});
+      return pieces;
+    });
+
+    // Q8. A trailing "without a/an/the ..." at the end of a reason is a
+    // negative tag that only restates the point — cut (listed for review).
+    applyToPlainSegments(/\s+without\s+(?:a|an|the|any)\s+[^.?!,]+(?=[.?!]|$)/gi, (m) => {
+      notes.push({tag:'Trailing "without" cut', snippet: m[0].trim().slice(0,70), detail:"negative tag removed — add it back as a positive if it matters"});
+      return {text: "", type: "fixed", note: 'trailing "without ..." cut'};
+    });
+
+    // Q9. In a reply, "the X you touched on / mentioned / raised ..." → "your
+    // take on the X" — it's theirs, and naming the X keeps it specific.
+    if(looksLikeReplyRaw){
+      applyToPlainSegments(/(^|(?<=[.?!]\s)|(?<=^[A-Z][a-z]+,\s))([Tt])he\s+((?!point\b|idea\b)[a-z-]+(?:\s+[a-z-]+)?)\s+you\s+(?:touched on|mentioned|raised|described|brought up|outlined|shared|discussed|pointed out|noted|highlighted)\b/g, (m) => {
+        const lead = nextAlternative("your take", "take on, note about, explanation of");
+        return [{text: `${m[2] === "T" ? "Your" : "your"} ${lead} the `, type: "fixed", note: '"the X you touched on" → "your take on the X"'}, {text: m[3], type: "plain"}];
+      });
+    }
+
+    // ===== end 11/15 rules =====
 
     // ===== 11/6 (pm) rules =====
 
@@ -1275,12 +1413,15 @@
       const parts = splitSubject(first);
       return parts ? parts[0].replace(/^(the|a|an|this|that|my|your|our)\s+/i, "") : null;
     }
-    applyToPlainSegments(/\b(that|this)\s+(step|process|stage|approach|method|technique|concept)\b/gi, (m, segText, prefix) => {
+    // Only "that step / this process / that stage" — "this approach" is often
+    // exactly what's meant. And only when the sentence before has a real noun
+    // subject (never "What struck me" or a pronoun).
+    applyToPlainSegments(/\b(that|this)\s+(step|process|stage)\b/gi, (m, segText, prefix) => {
       const idx = (prefix.match(/\n\s*\n/g) || []).length;
       // The sentence right before is usually what "that step" points back to.
       const prevSent = ((prefix.replace(/[^.?!]*$/, "").match(/[^.?!]+[.?!]\s*$/) || [""])[0]).trim().replace(/^[A-Z][a-z]+,\s+/, "");
       const prevParts = prevSent ? splitSubject(prevSent.replace(/[.?!]$/, "")) : null;
-      let subj = prevParts && prevParts[0].split(/\s+/).length <= 4 ? lowerStart(prevParts[0]) : paragraphSubject(idx);
+      let subj = prevParts && prevParts[0].split(/\s+/).length <= 4 && !/\b(what|i|me|you|it|this|that|we|they|he|she)\b/i.test(prevParts[0]) ? lowerStart(prevParts[0]) : null;
       if(subj && !sentenceTail(prefix).trim()) subj = subj.charAt(0).toUpperCase() + subj.slice(1);
       if(!subj) return {text: m[0], type: "plain"};
       notes.push({tag:"General term replaced", snippet: m[0], detail:`→ "${subj}" (the paragraph's subject) — check it's the right one`});
@@ -1464,7 +1605,9 @@
 
     // -1c5. In a reply, "The part that ..." is about their post: "Your idea that ...".
     // "was your mention of X" → "stemmed from when you mentioned X".
-    applyToPlainSegments(/(^|(?<=[.?!]\s))The\s+(part|thing|piece|aspect|bit)\s+that\b/g, (m) => {
+    // Only in a reply (name greeting, or the sentence talks to "you"); otherwise
+    // "The part that resonated with me" keeps its "The" and "part" rotates.
+    applyToPlainSegments(/(^|(?<=[.?!]\s))The\s+(part|thing|piece|aspect|bit)\s+that\b(?=[^.?!]*\byour?\b)/g, (m) => {
       return {text: "Your idea that", type: "fixed", note: '"The part that" → "Your idea that"'};
     });
     applyToPlainSegments(/\b(?:was|is)\s+your\s+mention\s+of\b/gi, (m) => {
@@ -2169,7 +2312,22 @@
       if(!from || !to) continue;
       const re = new RegExp("\\b" + escapeRegex(from) + "\\b", "gi");
       applyToPlainSegments(re, (m, segText, prefix) => {
-        const chosen = nextAlternative(from, to);
+        let chosen = nextAlternative(from, to);
+        // If the replacement ends with words that already follow it ("connect
+        // for me in a concrete way" + "for me by ..."), or starts with words
+        // that already come before it, the repeat is dropped.
+        const after = segText.slice(m.index + m[0].length).replace(/^\s+/, "").toLowerCase();
+        const before = prefix.replace(/\s+$/, "").toLowerCase();
+        const cw = chosen.split(/\s+/);
+        for(let k = Math.min(3, cw.length - 1); k >= 1; k--){
+          const tail = cw.slice(-k).join(" ").toLowerCase();
+          if((k > 1 || !STOPWORDS.has(tail)) && (after === tail || after.startsWith(tail + " ") || new RegExp("^" + escapeRegex(tail) + "\\b").test(after))){ chosen = cw.slice(0, -k).join(" "); break; }
+        }
+        const cw2 = chosen.split(/\s+/);
+        for(let k = Math.min(3, cw2.length - 1); k >= 1; k--){
+          const head = cw2.slice(0, k).join(" ").toLowerCase();
+          if((k > 1 || !STOPWORDS.has(head)) && before.endsWith(" " + head)){ chosen = cw2.slice(k).join(" "); break; }
+        }
         let replaced = matchCase(m[0], chosen);
         if(/^I\b/.test(m[0]) && !/^i\b/i.test(chosen)){
           const initial = !sentenceTail(prefix).trim();
@@ -2534,6 +2692,10 @@
     t = t.replace(/(?<!\.)\.\s*\.(?!\.)/g, "."); // ".." or ". ." → "."
     t = t.replace(/([!?])\s*\.(?!\.)/g, "$1");     // "!." / "?." → "!" / "?"
     t = t.replace(/\b(\w+)([ ]+)\1\b/gi, "$1"); // collapse immediate duplicate words (e.g. "is is")
+    t = t.replace(/\b(\w+ \w+(?: \w+)?) \1\b/gi, "$1"); // and repeated phrases ("for me for me")
+    // A replacement that brings its own "for me" (or "to me", "in my mind"...)
+    // makes the one already in the sentence a repeat — the second one goes.
+    t = t.replace(/\b((?:for|to|with) (?:me|us)|in my mind)\b([^.?!]{1,80}?)\s+\1\b/gi, "$1$2");
     t = t.replace(/([.?!])([A-Za-z])/g, "$1 $2"); // space after sentence-end punctuation
     t = t.replace(/(^\s*|[.?!]\s+)((?:⟦⟧\s*)*⟦?)([a-z])/g, (m, p1, p2, p3) => p1 + p2 + p3.toUpperCase()); // capitalize sentence starts
     t = t.replace(/,\s*,/g, ",");
