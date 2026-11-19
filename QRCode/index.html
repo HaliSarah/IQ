@@ -3,7 +3,9 @@
   Title:       QR Code Platform — I.Q. Productionz
   Author:      Hali Sarah Parsons
   Date:        2026-09-25
-  Modified By: Claude (2026-11-15: corners default to Match Body, incl. solid color; 2026-11-09: Scan Locations + unique/time/hours/devices/map stats, date range,
+  Modified By: Claude (2026-11-18: Heart/frame edge clipping fix; Random dot colors 2-10 w/ count dropdown + Shuffle;
+               asymmetric corners no longer turn black when one corner switches to Solid;
+               2026-11-15: corners default to Match Body, incl. solid color; 2026-11-09: Scan Locations + unique/time/hours/devices/map stats, date range,
                name sort that follows renames, floating toolbar, tracking settings, CSV columns)
   Description: Full QR code platform. Static free, dynamic $25/change $5/stats.
                Custom QR renderer: dots, diamonds, triangles, ovals, stars,
@@ -922,7 +924,13 @@ footer a{color:var(--muted);}footer a:hover{color:var(--white);}
                 <button id="mode-solid" class="active" onclick="setColorMode('solid')">Solid</button>
                 <button id="mode-grad2" onclick="setColorMode('grad2')">2-color gradient</button>
                 <button id="mode-grad4" onclick="setColorMode('grad4')">4-color gradient</button>
+                <button id="mode-random" onclick="setColorMode('random')">Random</button>
               </div>
+              <!-- RANDOM DOT COLORS -- Hali: "randomize dot color with up to
+                   ten colors. drop down with arrow to choose color number."
+                   Filled in by buildRandomColorUI('s') so both tabs share one
+                   builder instead of two hand-copied blocks of 10 pickers. -->
+              <div id="color-random" style="display:none;"></div>
 
               <div id="color-solid">
                 <div style="display:flex;gap:14px;">
@@ -1517,7 +1525,9 @@ footer a{color:var(--muted);}footer a:hover{color:var(--white);}
                 <button id="d-mode-solid" class="active" onclick="setColorMode('solid','d')">Solid</button>
                 <button id="d-mode-grad2" onclick="setColorMode('grad2','d')">2-color</button>
                 <button id="d-mode-grad4" onclick="setColorMode('grad4','d')">4-color</button>
+                <button id="d-mode-random" onclick="setColorMode('random','d')">Random</button>
               </div>
+              <div id="d-color-random" style="display:none;"></div>
               <div id="d-color-solid">
                 <div style="display:flex;gap:14px;">
                   <div class="grad-stop"><input type="color" id="d-c-fg" value="#000000"><span>Dot color</span></div>
@@ -2553,6 +2563,16 @@ function gradientColorAt(absX, absY) {
   if (!g) return '#000000';
   absX -= (g.ox||0); absY -= (g.oy||0);
   var c = g.colors;
+  // WHY: transform-based shapes and "Match Body" finders sample a flat
+  // color here instead of using the fg pattern -- look up the same cell
+  // color buildRandomDotPattern painted. gx0/gy0/cell are set by
+  // renderQRCore; the contrast checker has no grid, so it falls back to
+  // a 25-cell grid just to sample palette colors.
+  if (g.colorMode === 'random') {
+    var pal = randomPalette(c), cell = g.cell || (g.size/25);
+    var ci = Math.floor((absX - (g.gx0||0)) / cell), cj = Math.floor((absY - (g.gy0||0)) / cell);
+    return pal[randomCellIndex(ci, cj, c.rnd_seed || 1, pal.length)];
+  }
   function hx(h) {
     h = (h||'#000000').replace('#','');
     if (h.length===3) h = h[0]+h[0]+h[1]+h[1]+h[2]+h[2];
@@ -5599,6 +5619,8 @@ document.addEventListener('DOMContentLoaded', function() {
   // number/keyboard accordion's id and silently broke their open/close toggle.)
   buildCharPicker('s');
   buildCharPicker('d');
+  buildRandomColorUI('s');
+  buildRandomColorUI('d');
   setColorMode('solid','d');
   switchTab('dynamic');
 
@@ -5676,10 +5698,126 @@ document.addEventListener('DOMContentLoaded', function() {
 // ── COLOR MODE ────────────────────────────────────────────────────────────────
 var _colorModeD = 'solid';
 
+// ── RANDOM DOT COLORS ────────────────────────────────────────────────────────
+// WHY a fixed default palette of 10 fairly dark, distinct colors: Hali asked
+// for "up to ten colors"; starting every slot already filled means picking a
+// bigger number from the dropdown instantly shows more variety with no extra
+// clicks, and keeping them dark keeps the code scannable on a light
+// background (scanners need dark-on-light contrast on EVERY module).
+var RANDOM_DOT_DEFAULTS = ['#4A1060','#c98a2e','#6B2D8E','#1f5f8b','#2e7d4f',
+                           '#b03a5b','#8a4b08','#283593','#00695c','#5d4037'];
+var RANDOM_DOT_MAX = 10;
+
+// WHY build the controls in JS: the Static and Dynamic tabs need identical
+// sets (a count dropdown + 10 pickers + Shuffle); one builder keeps the two
+// from drifting apart the way hand-copied HTML blocks tend to.
+function buildRandomColorUI(prefix) {
+  var host = document.getElementById(prefix==='s' ? 'color-random' : 'd-color-random');
+  if (!host || host.dataset.built) return;
+  host.dataset.built = '1';
+  var p = prefix==='s' ? '' : 'd-';
+  var opts = '';
+  for (var n=2; n<=RANDOM_DOT_MAX; n++) opts += '<option value="'+n+'"'+(n===3?' selected':'')+'>'+n+' colors</option>';
+  var pickers = '';
+  for (var i=1; i<=RANDOM_DOT_MAX; i++) {
+    pickers += '<div class="grad-stop" id="'+p+'rnd-wrap-'+i+'"><input type="color" id="'+p+'rnd-'+i+'" value="'+RANDOM_DOT_DEFAULTS[i-1]+'"><span>Color '+i+'</span></div>';
+  }
+  host.innerHTML =
+    '<div class="grad-row" style="align-items:center;margin-bottom:8px;">' +
+      '<div class="field" style="flex:1;min-width:110px;margin-bottom:0;"><select id="'+p+'rnd-count">'+opts+'</select></div>' +
+      '<button type="button" class="btn-ghost" id="'+p+'rnd-shuffle" title="Re-roll which dot gets which color" style="padding:5px 12px;border-radius:6px;border:1px solid var(--line);background:transparent;color:var(--muted);font-size:.72rem;cursor:pointer;">Shuffle</button>' +
+      '<input type="hidden" id="'+p+'rnd-seed" value="1">' +
+    '</div>' +
+    '<div class="grad-row" style="flex-wrap:wrap;">'+pickers+'</div>';
+  var countEl = document.getElementById(p+'rnd-count');
+  countEl.addEventListener('change', function(){ syncRandomColorUI(prefix); scheduleLivePreview(prefix); });
+  for (var j=1; j<=RANDOM_DOT_MAX; j++) {
+    document.getElementById(p+'rnd-'+j).addEventListener('input', function(){ scheduleLivePreview(prefix); });
+  }
+  // WHY a stored seed instead of Math.random() at draw time: the preview
+  // re-renders on every keystroke/slider drag, and true randomness there
+  // would make every dot flicker to a new color each time. A seed keeps the
+  // pattern stable (and identical in the saved design + downloads) until
+  // Shuffle is clicked on purpose.
+  document.getElementById(p+'rnd-shuffle').addEventListener('click', function(){
+    document.getElementById(p+'rnd-seed').value = String(1 + Math.floor(Math.random()*2147483646));
+    scheduleLivePreview(prefix);
+  });
+  syncRandomColorUI(prefix);
+}
+// WHY hide the unused pickers instead of rebuilding: their chosen colors
+// survive dropping from 6 to 3 and back to 6.
+function syncRandomColorUI(prefix) {
+  var p = prefix==='s' ? '' : 'd-';
+  var countEl = document.getElementById(p+'rnd-count');
+  var n = countEl ? parseInt(countEl.value,10) || 3 : 3;
+  for (var i=1; i<=RANDOM_DOT_MAX; i++) {
+    var w = document.getElementById(p+'rnd-wrap-'+i);
+    if (w) w.style.display = i<=n ? '' : 'none';
+  }
+}
+// Reads the random-color fields into the colors object every save/render
+// path already carries (see captureDesignSettings).
+function captureRandomColors(prefix) {
+  var p = prefix==='s' ? '' : 'd-';
+  function v(id, d) { var el = document.getElementById(p+id); return el ? el.value : d; }
+  var out = { rnd_count: parseInt(v('rnd-count','3'),10) || 3, rnd_seed: parseInt(v('rnd-seed','1'),10) || 1 };
+  for (var i=1; i<=RANDOM_DOT_MAX; i++) out['rnd_'+i] = v('rnd-'+i, RANDOM_DOT_DEFAULTS[i-1]);
+  return out;
+}
+function applyRandomColors(prefix, c) {
+  buildRandomColorUI(prefix);
+  var p = prefix==='s' ? '' : 'd-';
+  function set(id, val) { var el = document.getElementById(p+id); if (el && val != null) el.value = val; }
+  set('rnd-count', String(c.rnd_count || 3));
+  set('rnd-seed', String(c.rnd_seed || 1));
+  for (var i=1; i<=RANDOM_DOT_MAX; i++) set('rnd-'+i, c['rnd_'+i] || RANDOM_DOT_DEFAULTS[i-1]);
+  syncRandomColorUI(prefix);
+}
+function randomPalette(c) {
+  var n = Math.max(1, Math.min(RANDOM_DOT_MAX, parseInt(c.rnd_count,10) || 3)), pal = [];
+  for (var i=1; i<=n; i++) pal.push(c['rnd_'+i] || RANDOM_DOT_DEFAULTS[i-1]);
+  return pal;
+}
+// WHY an integer hash of (column, row, seed) instead of a running random
+// stream: any module can look up its own color directly, in any draw order
+// (frame filler, real modules, transform shapes), and always get the same
+// answer -- so a dot never changes color just because something else got
+// drawn first.
+function randomCellIndex(ci, cj, seed, n) {
+  var h = (Math.imul(ci|0, 73856093) ^ Math.imul(cj|0, 19349663) ^ Math.imul(seed|0, 83492791)) >>> 0;
+  h = Math.imul(h ^ (h >>> 15), 2246822507) >>> 0;
+  h = Math.imul(h ^ (h >>> 13), 3266489909) >>> 0;
+  h = (h ^ (h >>> 16)) >>> 0;
+  return h % n;
+}
+// WHY a CanvasPattern painted one solid color per module cell: every dot
+// shape already fills with the shared `fg` style, so handing them a pattern
+// whose cells line up exactly with the QR grid gives each dot ONE flat
+// color with no change to the dozens of shape draw functions.
+function buildRandomDotPattern(ctx, size, gx0, gy0, cell, c) {
+  var pal = randomPalette(c), seed = c.rnd_seed || 1;
+  var off = document.createElement('canvas');
+  off.width = off.height = size;
+  var octx = off.getContext('2d');
+  var startI = Math.floor(-gx0/cell) - 1, startJ = Math.floor(-gy0/cell) - 1;
+  var endI = Math.ceil((size-gx0)/cell) + 1, endJ = Math.ceil((size-gy0)/cell) + 1;
+  for (var j=startJ; j<endJ; j++) {
+    for (var i=startI; i<endI; i++) {
+      octx.fillStyle = pal[randomCellIndex(i, j, seed, pal.length)];
+      // WHY floor/ceil with 1px overlap: avoids hairline seams of the
+      // wrong color between cells at fractional cell sizes.
+      var x = Math.floor(gx0 + i*cell), y = Math.floor(gy0 + j*cell);
+      octx.fillRect(x, y, Math.ceil(cell)+1, Math.ceil(cell)+1);
+    }
+  }
+  return ctx.createPattern(off, 'no-repeat');
+}
+
 function setColorMode(mode, prefix) {
   prefix = prefix || 's';
   if (prefix==='s') _colorMode=mode; else _colorModeD=mode;
-  ['solid','grad2','grad4'].forEach(m=>{
+  ['solid','grad2','grad4','random'].forEach(m=>{
     var ce=document.getElementById((prefix==='s'?'color-':'d-color-')+m);
     var me=document.getElementById((prefix==='s'?'mode-':'d-mode-')+m);
     if(ce) ce.style.display=m===mode?'':'none';
@@ -5872,6 +6010,14 @@ var _finderInnerColorCorner = { s: {tl:null,tr:null,bl:null}, d: {tl:null,tr:nul
 
 function setAsymmetricCorners(prefix, checked) {
   prefix = prefix || 's';
+  // WHY seed the shared color snapshots before switching on: they stay
+  // null until a non-asymmetric color edit happens, and once the panel
+  // starts showing a single corner, the DOM no longer holds the shared
+  // colors/mode -- so this is the last moment they can be read correctly.
+  if (checked && !_asymmetricCorners[prefix]) {
+    if (!_finderOuterColorGlobal[prefix]) _finderOuterColorGlobal[prefix] = captureFinderColorSnapshot('outer', prefix);
+    if (!_finderInnerColorGlobal[prefix]) _finderInnerColorGlobal[prefix] = captureFinderColorSnapshot('inner', prefix);
+  }
   _asymmetricCorners[prefix] = !!checked;
   syncAsymmetricCornersUI(prefix);
   if (typeof scheduleLivePreview==='function') scheduleLivePreview(prefix);
@@ -7170,6 +7316,10 @@ function resolveRenderSettings(prefix) {
         fg: c.fg||'#000000', bg: c.bg||'#ffffff',
         g2_1: c.g2_1||'#c98a2e', g2_2: c.g2_2||'#4A1060', g2_bg: c.g2_bg||'#ffffff', g2_dir: c.g2_dir||'horizontal',
         g4_1: c.g4_1||'#c98a2e', g4_2: c.g4_2||'#e0a84a', g4_3: c.g4_3||'#4A1060', g4_4: c.g4_4||'#6B2D8E', g4_bg: c.g4_bg||'#ffffff', g4_dir: c.g4_dir||'diagonal',
+        // Random dot colors -- see buildRandomColorUI's WHY.
+        rnd_count: c.rnd_count||3, rnd_seed: c.rnd_seed||1,
+        rnd_1: c.rnd_1||RANDOM_DOT_DEFAULTS[0], rnd_2: c.rnd_2||RANDOM_DOT_DEFAULTS[1], rnd_3: c.rnd_3||RANDOM_DOT_DEFAULTS[2], rnd_4: c.rnd_4||RANDOM_DOT_DEFAULTS[3], rnd_5: c.rnd_5||RANDOM_DOT_DEFAULTS[4],
+        rnd_6: c.rnd_6||RANDOM_DOT_DEFAULTS[5], rnd_7: c.rnd_7||RANDOM_DOT_DEFAULTS[6], rnd_8: c.rnd_8||RANDOM_DOT_DEFAULTS[7], rnd_9: c.rnd_9||RANDOM_DOT_DEFAULTS[8], rnd_10: c.rnd_10||RANDOM_DOT_DEFAULTS[9],
         // WHY 'solid' fallback: a design saved before Background Mode
         // existed only ever had a flat background -- keep it that way.
         bgMode: c.bgMode||'solid',
@@ -7257,6 +7407,7 @@ function resolveRenderSettings(prefix) {
       fg: val('c-fg','#000000'), bg: val('c-bg','#ffffff'),
       g2_1: val('g2-1','#c98a2e'), g2_2: val('g2-2','#4A1060'), g2_bg: val('g2-bg','#ffffff'), g2_dir: val('g2-dir','horizontal'), g2_gradient: checkedVal('g2-gradient', true),
       g4_1: val('g4-1','#c98a2e'), g4_2: val('g4-2','#e0a84a'), g4_3: val('g4-3','#4A1060'), g4_4: val('g4-4','#6B2D8E'), g4_bg: val('g4-bg','#ffffff'), g4_dir: val('g4-dir','diagonal'), g4_gradient: checkedVal('g4-gradient', true),
+      ...captureRandomColors(prefix),
       // WHY bgMode lives inside colors: see setBgMode's WHY -- every save/
       // load path already copies colors wholesale, so the background mode
       // and its own colors travel with the design automatically.
@@ -7279,8 +7430,15 @@ function resolveRenderSettings(prefix) {
       finderInnerG2_1: finderInnerGlobal.g2_1, finderInnerG2_2: finderInnerGlobal.g2_2, finderInnerG2_dir: finderInnerGlobal.g2_dir, finderInnerG2_gradient: finderInnerGlobal.g2_gradient,
       finderInnerG4_1: finderInnerGlobal.g4_1, finderInnerG4_2: finderInnerGlobal.g4_2, finderInnerG4_3: finderInnerGlobal.g4_3, finderInnerG4_4: finderInnerGlobal.g4_4, finderInnerG4_gradient: finderInnerGlobal.g4_gradient
     },
-    finderOuterColorMode: prefix==='s' ? _finderOuterColorMode : _finderOuterColorModeD,
-    finderInnerColorMode: prefix==='s' ? _finderInnerColorMode : _finderInnerColorModeD
+    // WHY the shared snapshot's own mode first: Hali -- "when you have
+    // asymmetric corners selected and change one corner to a solid color
+    // instead of match body, they all change black." The live
+    // _finderOuterColorMode var tracks whichever corner is on screen, so the
+    // untouched corners were inheriting THAT corner's "Solid" mode paired
+    // with the shared (black) solid color. The shared fallback must carry
+    // its own mode, just like it already carries its own colors.
+    finderOuterColorMode: finderOuterGlobal.mode || (prefix==='s' ? _finderOuterColorMode : _finderOuterColorModeD),
+    finderInnerColorMode: finderInnerGlobal.mode || (prefix==='s' ? _finderInnerColorMode : _finderInnerColorModeD)
   };
 }
 
@@ -7658,6 +7816,19 @@ function drawLogoCutout(ctx, shapeKey, cx, cy, contentSize, cutoutSize, bg, draw
 
   ctx.drawImage(off, cx-cutoutSize/2, cy-cutoutSize/2);
 }
+// WHY a frame edge pad: Hali -- "the heart main shape right corner is
+// getting cut off slightly." The frame silhouette was fitted flush to the
+// canvas (box 0..size), so the outline ring's outer edge sat ON the canvas
+// border -- a heart's widest lobe points then lose their anti-aliased edge
+// pixels and read as flatly sliced off (most visible on hi-DPI screens and
+// on the right, where sub-pixel rounding lands). Insetting every frame
+// silhouette draw (mask, ring, clip) by the same small pad keeps them all
+// lined up while giving the outline room to finish its curve.
+function frameEdgePad(size) { return Math.max(2, Math.round(size*0.012)); }
+function drawFrameSilhouette(ctx, shapeKey, size, bbox, extraInset) {
+  var pad = frameEdgePad(size) + (extraInset || 0);
+  drawShapeFitted(ctx, shapeKey, pad, pad, size - pad*2, bbox);
+}
 function buildShapeMask(shapeKey, size) {
   var bbox = getShapeBBoxRatio(shapeKey);
   var off = document.createElement('canvas');
@@ -7665,7 +7836,7 @@ function buildShapeMask(shapeKey, size) {
   var octx = off.getContext('2d');
   _qrModuleRenderMode = true; // solid silhouette, same as real modules — see drawSVGLayered WHY
   octx.fillStyle = '#000';
-  drawShapeFitted(octx, shapeKey, 0, 0, size, bbox);
+  drawFrameSilhouette(octx, shapeKey, size, bbox);
   _qrModuleRenderMode = false;
   return { data: octx.getImageData(0, 0, size, size).data, bbox: bbox };
 }
@@ -7874,11 +8045,14 @@ function drawFrame(ctx, size, innerX0, innerY0, innerX1, innerY1, cellSize, fg, 
   // flattened to a single sampled color the way a small per-cell shape
   // needs to be (see _activeGradient's WHY). Restored right after.
   var _savedGradForRing = _activeGradient; _activeGradient = null;
-  dctx.fillStyle = fg;
-  drawShapeFitted(dctx, shapeKey, 0, 0, size, bbox);
+  // WHY Color 1 for the outline in Random mode: the ring is one continuous
+  // line, and painting it through the per-cell pattern would chop it into
+  // a confetti of colored segments.
+  dctx.fillStyle = (_savedGradForRing && _savedGradForRing.colorMode==='random') ? randomPalette(_savedGradForRing.colors)[0] : fg;
+  drawFrameSilhouette(dctx, shapeKey, size, bbox);
   dctx.globalCompositeOperation = 'destination-out';
   dctx.fillStyle = '#000';
-  drawShapeFitted(dctx, shapeKey, strokeW, strokeW, size-strokeW*2, bbox);
+  drawFrameSilhouette(dctx, shapeKey, size, bbox, strokeW);
   dctx.globalCompositeOperation = 'source-over';
   _activeGradient = _savedGradForRing;
   _qrModuleRenderMode = false;
@@ -8144,7 +8318,7 @@ function drawFrame(ctx, size, innerX0, innerY0, innerX1, innerY1, cellSize, fg, 
   dctx.globalCompositeOperation = 'destination-in';
   dctx.fillStyle = '#000';
   _qrModuleRenderMode = true;
-  drawShapeFitted(dctx, shapeKey, 0, 0, size, bbox);
+  drawFrameSilhouette(dctx, shapeKey, size, bbox);
   _qrModuleRenderMode = false;
   dctx.globalCompositeOperation = 'source-over';
   ctx.drawImage(deco, 0, 0);
@@ -8209,6 +8383,10 @@ async function renderQRCore(canvas, url, size, ec, prefix) {
   _activeGradient = settings.colorMode !== 'solid' ? { colorMode: settings.colorMode, colors: c, size: size } : null;
 
   var cellSize = (box.x1 - box.x0) / modules;
+  if (settings.colorMode === 'random') {
+    fg = buildRandomDotPattern(ctx, size, box.x0, box.y0, cellSize, c);
+    _activeGradient.gx0 = box.x0; _activeGradient.gy0 = box.y0; _activeGradient.cell = cellSize;
+  }
   var finderOuter = c.finderOuter || '#000000';
   var finderInner = c.finderInner || '#000000';
   // WHY a mode each, not a flat color + one checkbox: Hali went through a
@@ -9542,6 +9720,12 @@ function buildForegroundStyle(ctx, size, settings) {
   if (settings.colorMode==='solid') {
     return c.fg || '#000000';
   }
+  // WHY just Color 1 here: the real per-dot pattern needs the QR grid,
+  // which only renderQRCore knows -- it swaps this for
+  // buildRandomDotPattern right after computing cellSize.
+  if (settings.colorMode==='random') {
+    return c.rnd_1 || RANDOM_DOT_DEFAULTS[0];
+  }
   if (settings.colorMode==='grad2') {
     var d = c.g2_dir || 'horizontal';
     var grad;
@@ -9898,6 +10082,7 @@ function captureDesignSettings(prefix) {
       fg: val('c-fg','#000000'), bg: val('c-bg','#ffffff'),
       g2_1: val('g2-1','#c98a2e'), g2_2: val('g2-2','#4A1060'), g2_bg: val('g2-bg','#ffffff'), g2_dir: val('g2-dir','horizontal'), g2_gradient: checkedVal('g2-gradient', true),
       g4_1: val('g4-1','#c98a2e'), g4_2: val('g4-2','#e0a84a'), g4_3: val('g4-3','#4A1060'), g4_4: val('g4-4','#6B2D8E'), g4_bg: val('g4-bg','#ffffff'), g4_dir: val('g4-dir','diagonal'), g4_gradient: checkedVal('g4-gradient', true),
+      ...captureRandomColors(prefix),
       // WHY bgMode lives inside colors: see setBgMode's WHY -- every save/
       // load path already copies colors wholesale, so the background mode
       // and its own colors travel with the design automatically.
@@ -9920,8 +10105,15 @@ function captureDesignSettings(prefix) {
       finderInnerG2_1: finderInnerGlobal.g2_1, finderInnerG2_2: finderInnerGlobal.g2_2, finderInnerG2_dir: finderInnerGlobal.g2_dir, finderInnerG2_gradient: finderInnerGlobal.g2_gradient,
       finderInnerG4_1: finderInnerGlobal.g4_1, finderInnerG4_2: finderInnerGlobal.g4_2, finderInnerG4_3: finderInnerGlobal.g4_3, finderInnerG4_4: finderInnerGlobal.g4_4, finderInnerG4_gradient: finderInnerGlobal.g4_gradient
     },
-    finderOuterColorMode: prefix==='s' ? _finderOuterColorMode : _finderOuterColorModeD,
-    finderInnerColorMode: prefix==='s' ? _finderInnerColorMode : _finderInnerColorModeD
+    // WHY the shared snapshot's own mode first: Hali -- "when you have
+    // asymmetric corners selected and change one corner to a solid color
+    // instead of match body, they all change black." The live
+    // _finderOuterColorMode var tracks whichever corner is on screen, so the
+    // untouched corners were inheriting THAT corner's "Solid" mode paired
+    // with the shared (black) solid color. The shared fallback must carry
+    // its own mode, just like it already carries its own colors.
+    finderOuterColorMode: finderOuterGlobal.mode || (prefix==='s' ? _finderOuterColorMode : _finderOuterColorModeD),
+    finderInnerColorMode: finderInnerGlobal.mode || (prefix==='s' ? _finderInnerColorMode : _finderInnerColorModeD)
   };
 }
 
@@ -10261,6 +10453,7 @@ function applyDesignSettings(prefix, design) {
   // a hard split it was never designed with.
   setChecked('g2-gradient', c.g2_gradient !== false);
   set('g4-1', c.g4_1); set('g4-2', c.g4_2); set('g4-3', c.g4_3); set('g4-4', c.g4_4); set('g4-bg', c.g4_bg); set('g4-dir', c.g4_dir);
+  applyRandomColors(prefix, c);
   setChecked('g4-gradient', c.g4_gradient !== false);
   set('bg2-1', c.bg2_1); set('bg2-2', c.bg2_2); set('bg2-dir', c.bg2_dir);
   setChecked('bg2-gradient', c.bg2_gradient !== false);
@@ -11536,6 +11729,8 @@ async function buildDashSVG(slug,url,design) {
       defs='<linearGradient id="fg" x1="0%" y1="0%" x2="'+x24+'" y2="'+y24+'">'+stops4+'</linearGradient>';
     }
     fillAttr='fill="url(#fg)"';
+  } else if (colorMode==='random') {
+    fillAttr = ''; // each module gets its own fill below
   } else if (colorMode==='grad4' && hard4) {
     // WHY no shared <linearGradient> def here at all: a single SVG
     // gradient only ever varies along one axis, so it can't produce 4 real
@@ -11549,7 +11744,13 @@ async function buildDashSVG(slug,url,design) {
     for(var col=0; col<n; col++){
       if (!matrix[row][col]) continue;
       if (isFinderModule(row,col,n)) continue; // finders drawn separately below, in their own colors
-      if (colorMode==='grad4' && hard4) {
+      if (colorMode==='random') {
+        // WHY the same hash as the canvas: the paid vector file must give
+        // each module the same color the preview/PNG shows. Grid origin is
+        // the module grid itself here, matching renderQRCore's box.x0/y0.
+        var rPal = randomPalette(c);
+        rects+='<rect x="'+col+'" y="'+row+'" width="1" height="1" fill="'+rPal[randomCellIndex(col, row, c.rnd_seed||1, rPal.length)]+'"/>';
+      } else if (colorMode==='grad4' && hard4) {
         var qColor = (row < n/2) ? (col < n/2 ? c.g4_1 : c.g4_2) : (col < n/2 ? c.g4_3 : c.g4_4);
         rects+='<rect x="'+col+'" y="'+row+'" width="1" height="1" fill="'+(qColor||'#000')+'"/>';
       } else {
