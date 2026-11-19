@@ -5,6 +5,8 @@
   Date:        2026-09-25
   Modified By: Claude (2026-11-18: Heart/frame edge clipping fix; Random dot colors 2-10 w/ count dropdown + Shuffle;
                asymmetric corners no longer turn black when one corner switches to Solid;
+               floating corner picker while Asymmetric Corners is on;
+               removed 4 Rounded·Point overall shapes; $5/$50 Overall Shape requests + exclusive-shape log/flags;
                2026-11-15: corners default to Match Body, incl. solid color; 2026-11-09: Scan Locations + unique/time/hours/devices/map stats, date range,
                name sort that follows renames, floating toolbar, tracking settings, CSV columns)
   Description: Full QR code platform. Static free, dynamic $25/change $5/stats.
@@ -525,6 +527,13 @@ nav{display:flex;justify-content:space-between;align-items:center;padding:calc(1
 .corner-tab-btn{padding:7px 12px;border:1px solid var(--line);border-radius:6px;background:var(--navy);color:var(--white);font-size:.72rem;cursor:pointer;font-family:'Raleway',sans-serif;transition:all .2s;}
 .corner-tab-btn:hover{border-color:var(--gold);}
 .corner-tab-btn.active{background:var(--gold);border-color:var(--gold);color:#fff;font-weight:600;}
+/* WHY a floating copy of the corner tabs: Hali -- "float the corner picker
+   when asymmetric is selected so we don't have to keep scrolling back."
+   Pinned bottom-center (her bottom-heavy layout preference, and clear of the
+   draggable floating preview) and shown only while the real tab row is
+   scrolled out of view. */
+.corner-float-bar{position:fixed;left:50%;bottom:16px;transform:translateX(-50%);z-index:999;display:none;align-items:center;gap:6px;padding:8px 10px;background:var(--panel);border:1px solid var(--gold);border-radius:10px;box-shadow:0 8px 30px rgba(0,0,0,.45);}
+.corner-float-bar span{font-size:.65rem;color:var(--muted);margin-right:2px;white-space:nowrap;}
 .char-options{display:flex;flex-wrap:wrap;gap:5px;}
 .char-opt{width:36px;height:36px;border-radius:6px;border:1px solid var(--line);background:var(--panel);display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:.95rem;transition:all .2s;user-select:none;}
 .char-opt:hover{border-color:var(--gold);}
@@ -1912,6 +1921,8 @@ footer a{color:var(--muted);}footer a:hover{color:var(--white);}
           <label style="font-size:.72rem;color:var(--muted);display:inline-flex;align-items:center;gap:6px;cursor:pointer;"><input type="checkbox" id="admin-req-show-closed" onchange="adminLoadShapeRequests()" style="width:14px;height:14px;min-width:14px;"> Show delivered / declined</label>
         </div>
         <div id="admin-requests-list"><p style="color:var(--muted);font-size:.82rem;">Loading requests…</p></div>
+        <!-- WHY: adds $50 requests made before the exclusive log existed, so their ideas are protected too (see adminRebuildExclusiveLog). Safe to click again; it skips ones already logged. -->
+        <button class="act-btn" style="margin-top:6px;font-size:.72rem;" onclick="adminRebuildExclusiveLog()">Add past $50 requests to exclusive log</button>
       </div>
 
       <h3 style="font-family:Cinzel,serif;font-size:1rem;margin:0 0 12px;border-top:1px solid var(--line);padding-top:22px;">Assign a Shape to an Account</h3>
@@ -1956,6 +1967,8 @@ footer a{color:var(--muted);}footer a:hover{color:var(--white);}
             <canvas id="admin-shape-preview" width="56" height="56" style="background:#f0ece3;border-radius:6px;"></canvas>
           </div>
         </div>
+        <!-- WHY: delivers a $50 exclusive Overall Shape -- it shows only in this account's Overall Shape picker (see appendCustomFrameTiles). -->
+        <label style="display:inline-flex;align-items:center;gap:6px;cursor:pointer;font-size:.78rem;margin:4px 0 10px;"><input type="checkbox" id="admin-shape-as-frame" style="width:14px;height:14px;min-width:14px;"> Use as Overall Shape (not a dot)</label><br>
         <button class="nav-btn primary" onclick="adminAssignShape()">Assign Shape to This Account</button>
       </div>
     </div>
@@ -4106,16 +4119,10 @@ var FRAME_SHAPE_OPTIONS = [
   { key:'hexagon', label:'Hexagon' },
   { key:'octagon', label:'Octagon' },
   { key:'star5',   label:'Star' },
-  { key:'heart',   label:'Heart' },
-  // WHY 4 separate tiles instead of 1 shape + a separate orientation
-  // control: Hali -- "offer this with the option to change orientation so
-  // the user can pick which corner gets the point." Clicking the tile for
-  // the corner she wants IS picking the orientation -- same picker, same
-  // one click, no second control to add or keep in sync.
-  { key:'round_point_tl', label:'Rounded · Point TL' },
-  { key:'round_point_tr', label:'Rounded · Point TR' },
-  { key:'round_point_br', label:'Rounded · Point BR' },
-  { key:'round_point_bl', label:'Rounded · Point BL' }
+  { key:'heart',   label:'Heart' }
+  // WHY the four "Rounded · Point TL/TR/BR/BL" tiles were removed
+  // (2026-11-18): Hali -- "they are too much like a square." Their SHAPES
+  // entries are kept, so any design already saved with one still renders.
 ];
 
 // WHY its own lightweight builder instead of reusing buildShapePickerFor:
@@ -4124,7 +4131,11 @@ var FRAME_SHAPE_OPTIONS = [
 function buildFrameShapePickerFor(gridId, prefix, onSelect) {
   var grid = document.getElementById(gridId);
   if (!grid) return;
+  // WHY keep onSelect: appendCustomFrameTiles adds a client's exclusive
+  // frame shapes later (after sign-in) and needs the same click behavior.
+  _frameOnSelect[prefix] = onSelect;
   var row = document.createElement('div');
+  row.dataset.frameRow = '1';
   row.style.cssText = 'display:flex;flex-wrap:wrap;gap:5px;';
   grid.appendChild(row);
 
@@ -4170,6 +4181,138 @@ function buildFrameShapePickerFor(gridId, prefix, onSelect) {
       _qrModuleRenderMode = false;
     });
   });
+  buildFrameRequestSection(grid, prefix);
+}
+
+// ── OVERALL SHAPE REQUESTS ───────────────────────────────────────────────────
+// WHY its own request block under the Overall Shape picker: Hali -- "add a
+// $5 request overall shape public share or $50 custom overall shape never
+// shared." Same two tiers and same payment/tracking flow as the dot-shape
+// requests (requestShape / fulfillShapeRequest), tagged kind:'frame' so the
+// admin queue and emails say which kind of shape is being asked for.
+var _frameOnSelect = { s: null, d: null };
+function buildFrameRequestSection(grid, prefix) {
+  var wrap = document.createElement('div');
+  wrap.style.cssText = 'width:100%;margin-top:14px;padding-top:10px;border-top:1px solid var(--line);';
+  var inputCss = 'flex:1;padding:7px 10px;background:var(--navy);border:1px solid var(--line);border-radius:6px;color:var(--white);font-family:Raleway,sans-serif;font-size:.8rem;outline:none;';
+  wrap.innerHTML =
+    '<div style="font-family:Cinzel,serif;font-size:.68rem;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);margin-bottom:6px;">Request an Overall Shape</div>' +
+    '<div style="font-size:.7rem;color:var(--muted);margin-bottom:6px;line-height:1.5;"><strong style="color:var(--gold2);">$5</strong> &#8212; Shared with everyone in the Overall Shape list. Added within 7 business days.</div>' +
+    '<div style="display:flex;gap:8px;margin-bottom:10px;">' +
+      '<input type="text" id="'+prefix+'-frame-request" placeholder="Describe an overall shape for everyone (e.g. pumpkin)" style="'+inputCss+'">' +
+      '<button type="button" class="act-btn" style="white-space:nowrap;border-color:var(--gold);color:var(--gold2);font-size:.75rem;" onclick="requestShape(\''+prefix+'\',\'generic\',\'frame\')">Request &#8212; $5</button>' +
+    '</div>' +
+    '<div style="font-size:.7rem;color:var(--muted);margin-bottom:6px;line-height:1.5;"><strong style="color:var(--green);">$50</strong> &#8212; Exclusive custom overall shape, yours only. Never shared, and never made again for anyone else.</div>' +
+    '<div style="display:flex;gap:8px;margin-bottom:6px;">' +
+      '<input type="text" id="'+prefix+'-frame-request-custom" placeholder="Describe your exclusive overall shape" style="'+inputCss+'">' +
+      '<button type="button" class="act-btn" style="white-space:nowrap;border-color:var(--green);color:var(--green);font-size:.75rem;" onclick="requestShape(\''+prefix+'\',\'custom\',\'frame\')">Request &#8212; $50</button>' +
+    '</div>';
+  grid.appendChild(wrap);
+}
+
+// WHY a client's exclusive frame shapes get their own tiles here: a $50
+// exclusive Overall Shape is delivered by assigning it to that one account
+// (Admin Tools -> "Use as Overall Shape"), so it must show up in THAT
+// account's frame picker only -- never in FRAME_SHAPE_OPTIONS, which every
+// visitor sees.
+function appendCustomFrameTiles(gridId, prefix, list) {
+  var grid = document.getElementById(gridId);
+  if (!grid) return;
+  grid.querySelectorAll('[data-custom-shape-group]').forEach(function(el){ el.remove(); });
+  var row = grid.querySelector('[data-frame-row]');
+  if (!row || !list.length) return;
+  list.forEach(function(cs){
+    var def = SHAPES[cs.key];
+    if (!def) return;
+    var btn = document.createElement('div');
+    btn.className = 'shape-opt';
+    btn.dataset.customShapeGroup = '1';
+    btn.dataset.frameKey = cs.key;
+    btn.title = (cs.label||cs.key) + ' (yours only)';
+    btn.style.cssText = 'width:auto;height:auto;flex-direction:column;padding:6px 8px;gap:2px;border-color:var(--green);';
+    var cv = document.createElement('canvas');
+    cv.width = 56; cv.height = 56; cv.style.cssText = 'width:36px;height:36px;';
+    var cctx = cv.getContext('2d');
+    cctx.fillStyle = '#f0ece3';
+    _qrModuleRenderMode = true;
+    drawShapeFitted(cctx, cs.key, 4, 4, 48, getShapeBBoxRatio(cs.key));
+    _qrModuleRenderMode = false;
+    btn.appendChild(cv);
+    var lbl = document.createElement('div');
+    lbl.style.cssText = 'font-size:.58rem;color:var(--green);text-align:center;white-space:nowrap;';
+    lbl.textContent = cs.label || cs.key.replace(/^client_/,'').replace(/_/g,' ');
+    btn.appendChild(lbl);
+    btn.onclick = function(){
+      grid.querySelectorAll('.shape-opt').forEach(function(b){ b.classList.remove('selected'); });
+      btn.classList.add('selected');
+      if (_frameOnSelect[prefix]) _frameOnSelect[prefix](cs.key);
+    };
+    row.appendChild(btn);
+  });
+}
+
+// ── EXCLUSIVE SHAPE LOG ──────────────────────────────────────────────────────
+// WHY a separate public log instead of searching shape_requests: Hali --
+// "if someone else makes that same request like a pumpkin shape at the $50
+// price ... we have a log of the higher ranked additions so that a shape
+// like that will be flagged as already done so that the sender and admin
+// both know it would infringe on our guarantee." Customers can't read each
+// other's shape_requests (emails, private notes), so every paid $50 request
+// also writes ONLY its subject keywords + kind here -- no email, no uid, no
+// full description -- which any visitor's browser can check before paying.
+// Firestore rule needed (see QR-Platform-Handoff.md):
+//   match /exclusive_shape_log/{id} { allow read: if true; allow create: if request.auth != null; allow update, delete: if <admin>; }
+var SHAPE_KEYWORD_STOP = ('a an the and or of in on for to with without my our your me i we it its this that ' +
+  'shape shapes shaped outline frame overall qr code logo design custom exclusive private public like ' +
+  'style kind sort type please want would make made big small little large tiny cute simple fancy ' +
+  'cool nice one some new version icon image picture silhouette symbol looking look looks').split(' ');
+// WHY simple keyword matching (not exact text): "pumpkin", "a pumpkin
+// shape" and "Halloween pumpkins with a face" are the same idea to a
+// customer, so a shared subject word is what counts. Plural "s" is trimmed
+// so pumpkin/pumpkins match.
+function shapeKeywords(text) {
+  return String(text||'').toLowerCase().replace(/[^a-z0-9\s]+/g,' ').split(/\s+/)
+    .filter(function(w){ return w.length > 2 && SHAPE_KEYWORD_STOP.indexOf(w) === -1; })
+    .map(function(w){ return (w.length > 4 && /[^s]s$/.test(w)) ? w.slice(0,-1) : w; })
+    .filter(function(w, i, arr){ return arr.indexOf(w) === i; });
+}
+// Returns the matched words (empty when the idea is free to make).
+async function findExclusiveConflict(description, kind) {
+  var words = shapeKeywords(description);
+  if (!words.length || !window._fb) return [];
+  var fb = window._fb;
+  // WHY array-contains-any on the stored keywords: one indexed query
+  // instead of downloading the whole log; Firestore caps it at 10 values.
+  var snap = await fb.getDocs(fb.query(fb.collection(fb.db,'exclusive_shape_log'),
+    fb.where('keywords','array-contains-any', words.slice(0,10))));
+  var hits = [];
+  snap.forEach(function(d){
+    var e = d.data();
+    if ((e.kind||'dot') !== kind) return; // a pumpkin DOT is a different product from a pumpkin FRAME
+    (e.keywords||[]).forEach(function(k){ if (words.indexOf(k) > -1 && hits.indexOf(k) === -1) hits.push(k); });
+  });
+  return hits;
+}
+// WHY tell the admin even though no money moved: she asked that "the sender
+// and admin both know" -- a blocked attempt is also a sign of demand for
+// that idea, and lets her answer the customer personally if needed.
+function notifyAdminOfExclusiveConflict(description, kind, tier, words) {
+  try {
+    if (!window.emailjs) return;
+    emailjs.send('service_75wx6fk', 'template_nnmxioq', {
+      to_email: 'SarahParsons@IQProductionz.com',
+      subject: 'FLAGGED: shape request matches an exclusive -- ' + description.slice(0,40),
+      message: [
+        'A customer tried to request a shape that matches an existing $50 exclusive.',
+        'The request was blocked BEFORE payment (nothing charged).',
+        '',
+        'Requested: ' + description,
+        'Kind: ' + (kind==='frame' ? 'Overall Shape' : 'Dot shape') + ' · Tier tried: ' + (tier==='custom' ? '$50 exclusive' : '$5 public'),
+        'Matched exclusive keyword(s): ' + words.join(', '),
+        'Requested by: ' + (window._user ? window._user.email : 'not signed in')
+      ].join('\n')
+    });
+  } catch(e) { console.warn('conflict notice email failed', e && e.message); }
 }
 
 function setFrameGridSelection(gridId, key) {
@@ -6036,6 +6179,8 @@ function syncAsymmetricCornersUI(prefix) {
   var sizeRow = document.getElementById(prefix+'-corner-size-row');
   var randomRow = document.getElementById(prefix+'-random-sizing-row');
   if (tabsRow) tabsRow.style.display = on ? 'flex' : 'none';
+  buildFloatingCornerBar(prefix);
+  scheduleFloatingCornerUpdate();
   if (sizeRow) sizeRow.style.display = on ? 'block' : 'none';
   if (randomRow) randomRow.style.display = on ? 'block' : 'none';
   if (on) {
@@ -6115,8 +6260,64 @@ function syncCornerTabButtons(prefix) {
   ['tl','tr','bl'].forEach(function(c){
     var btn = document.getElementById(prefix+'-corner-tab-'+c);
     if (btn) btn.classList.toggle('active', c===active);
+    // Keep the floating copy's highlight in step with the real tabs.
+    var fbtn = document.getElementById(prefix+'-corner-float-'+c);
+    if (fbtn) fbtn.classList.toggle('active', c===active);
+  });
+  if (typeof updateFloatingCornerBars === 'function') updateFloatingCornerBars();
+}
+
+// ── FLOATING CORNER PICKER ──────────────────────────────────────────────────
+// WHY buttons that call the same setActiveCornerEdit as the real tabs (not
+// a moved/cloned DOM node): the real row stays in place for anyone already
+// scrolled up there, and both copies share one code path, so picking a
+// corner from either one updates every style/color/size panel identically.
+function buildFloatingCornerBar(prefix) {
+  if (document.getElementById(prefix+'-corner-float-bar')) return;
+  var bar = document.createElement('div');
+  bar.id = prefix+'-corner-float-bar';
+  bar.className = 'corner-float-bar';
+  bar.innerHTML = '<span>Editing</span>' + [['tl','Corner 1'],['tr','Corner 2'],['bl','Corner 3']].map(function(c){
+    return '<button type="button" id="'+prefix+'-corner-float-'+c[0]+'" class="corner-tab-btn'+(_activeCornerEdit[prefix]===c[0]?' active':'')+'">'+c[1]+'</button>';
+  }).join('');
+  document.body.appendChild(bar);
+  ['tl','tr','bl'].forEach(function(c){
+    document.getElementById(prefix+'-corner-float-'+c).addEventListener('click', function(){ setActiveCornerEdit(prefix, c); });
   });
 }
+// WHY three conditions: Asymmetric must be on (otherwise there's nothing
+// per-corner to pick), the tab must be the one on screen (offsetParent is
+// null while its tab panel is hidden), and the real tab row must be out of
+// view while the generator card itself is still in view -- so the bar only
+// shows up when it actually saves a scroll, and never floats over other
+// parts of the page like the FAQ or footer.
+function updateFloatingCornerBars() {
+  ['s','d'].forEach(function(prefix){
+    var bar = document.getElementById(prefix+'-corner-float-bar');
+    var row = document.getElementById(prefix+'-corner-tabs-row');
+    if (!bar || !row) return;
+    var show = false;
+    if (_asymmetricCorners[prefix] && row.offsetParent !== null) {
+      var vh = window.innerHeight || document.documentElement.clientHeight;
+      var r = row.getBoundingClientRect();
+      var rowVisible = r.bottom > 0 && r.top < vh;
+      var card = row.closest('.gen-card') || row.parentElement;
+      var cr = card.getBoundingClientRect();
+      var cardVisible = cr.bottom > 80 && cr.top < vh - 80;
+      show = !rowVisible && cardVisible;
+    }
+    bar.style.display = show ? 'flex' : 'none';
+  });
+}
+// WHY requestAnimationFrame throttling: scroll fires dozens of times a
+// second; measuring layout once per frame keeps scrolling smooth.
+var _cornerFloatRaf = 0;
+function scheduleFloatingCornerUpdate() {
+  if (_cornerFloatRaf) return;
+  _cornerFloatRaf = requestAnimationFrame(function(){ _cornerFloatRaf = 0; updateFloatingCornerBars(); });
+}
+window.addEventListener('scroll', scheduleFloatingCornerUpdate, { passive: true });
+window.addEventListener('resize', scheduleFloatingCornerUpdate);
 
 function setCornerSize(prefix, val) {
   prefix = prefix || 's';
@@ -9960,6 +10161,8 @@ function showView(name) {
 }
 function requireAuth(dest) { if(!window._user){openAuthModal();return;} showView(dest); }
 function switchTab(t) {
+  // WHY: the other tab's floating corner bar must hide/show with its tab.
+  if (typeof scheduleFloatingCornerUpdate === 'function') setTimeout(scheduleFloatingCornerUpdate, 0);
   document.getElementById('panel-static').style.display  = t==='static' ?'':'none';
   document.getElementById('panel-dynamic').style.display = t==='dynamic'?'':'none';
   document.getElementById('tab-static').classList.toggle('active', t==='static');
@@ -10911,8 +11114,12 @@ async function adminAssignShape() {
   var fb = window._fb;
   try {
     var updated = _adminTargetShapes.slice();
-    updated.push({ key: key, label: label, d: d, vbW: vbW, vbH: vbH, assignedAt: Date.now() });
+    var asFrameEl = document.getElementById('admin-shape-as-frame');
+    var entry = { key: key, label: label, d: d, vbW: vbW, vbH: vbH, assignedAt: Date.now() };
+    if (asFrameEl && asFrameEl.checked) entry.showIn = ['frame']; // WHY explicit: only Overall Shape, never a dot
+    updated.push(entry);
     await fb.updateDoc(fb.doc(fb.db,'users',_adminTargetUid), { customShapes: updated });
+    if (asFrameEl) asFrameEl.checked = false;
     _adminTargetShapes = updated;
     renderAdminTargetPanel({ username: null, customShapes: updated });
     document.getElementById('admin-shape-key').value = '';
@@ -11119,6 +11326,9 @@ async function myShapeAssign() {
 // WHY a helper: shapes saved before this option existed have no showIn
 // field, and those keep appearing in both places like they did before.
 function customShapeShowsIn(cs, where) {
+  // WHY 'frame' needs an explicit opt-in: shapes saved before frame
+  // delivery existed (no showIn) were meant as dots, not Overall Shapes.
+  if (where === 'frame') return Array.isArray(cs.showIn) && cs.showIn.indexOf('frame') > -1;
   return !Array.isArray(cs.showIn) || cs.showIn.indexOf(where) > -1;
 }
 
@@ -11192,6 +11402,9 @@ function injectCustomShapesForUser(list) {
   Object.keys(added).forEach(function(key){ SHAPES[key] = added[key]; });
   _customDotKeys = list.filter(function(cs){ return cs && added[cs.key] && customShapeShowsIn(cs,'dot'); }).map(function(cs){ return cs.key; });
   _customInnerKeys = list.filter(function(cs){ return cs && added[cs.key] && customShapeShowsIn(cs,'inner'); }).map(function(cs){ return cs.key; });
+  var frameList = list.filter(function(cs){ return cs && added[cs.key] && customShapeShowsIn(cs,'frame'); });
+  appendCustomFrameTiles('frame-shape-grid', 's', frameList);
+  appendCustomFrameTiles('d-frame-shape-grid', 'd', frameList);
   appendCustomShapeGroupToMainGrid('shape-grid', _selectedShape, function(){ scheduleLivePreview('s'); syncDotSizeButtons('s'); syncCrescentOrientationTiles('s'); syncShapeReflectButtons('s'); });
   appendCustomShapeGroupToMainGrid('d-shape-grid', _selectedShapeD, function(){ scheduleLivePreview('d'); syncDotSizeButtons('d'); syncCrescentOrientationTiles('d'); syncShapeReflectButtons('d'); });
   appendCustomShapeGroupToInnerGrid('finder-dot-style-grid', function(key){
@@ -11221,7 +11434,7 @@ function clearCustomShapesForUser() {
     Object.keys(SHAPE_GROUPS[GROUP]).forEach(function(key){ delete SHAPES[key]; });
     delete SHAPE_GROUPS[GROUP];
   }
-  ['shape-grid','d-shape-grid','finder-dot-style-grid','d-finder-dot-style-grid'].forEach(function(gridId){
+  ['shape-grid','d-shape-grid','finder-dot-style-grid','d-finder-dot-style-grid','frame-shape-grid','d-frame-shape-grid'].forEach(function(gridId){
     var grid = document.getElementById(gridId);
     if (!grid) return;
     grid.querySelectorAll('[data-custom-shape-group]').forEach(function(el){ el.remove(); });
@@ -12833,14 +13046,34 @@ async function adminLoadShapeRequests() {
       .filter(function(r){ var k = shapeReqStatusKey(r); return showClosed || (k!=='delivered' && k!=='declined'); })
       .sort(function(a,b){ return (b.created||0) - (a.created||0); });
     if (!_adminRequests.length) { out.innerHTML = '<p style="color:var(--muted);font-size:.82rem;">No open requests.</p>'; return; }
+    // WHY re-check every open request against the exclusive log here: the
+    // before-payment check can miss (rule not published yet, network blip,
+    // two people paying at the same moment). The admin is the last stop
+    // before a shape gets made, so the flag must show up here too.
+    var exLog = [];
+    try {
+      var exSnap = await fb.getDocs(fb.collection(fb.db,'exclusive_shape_log'));
+      exSnap.forEach(function(d){ exLog.push(d.data()); });
+    } catch(e) { console.warn('exclusive log read failed:', e && e.message); }
+    function conflictFor(r) {
+      var words = shapeKeywords(r.description), hits = [];
+      exLog.forEach(function(e){
+        if (e.requestId === r.id || (e.kind||'dot') !== (r.kind||'dot')) return; // never flag a request against its own entry
+        (e.keywords||[]).forEach(function(k){ if (words.indexOf(k) > -1 && hits.indexOf(k) === -1) hits.push(k); });
+      });
+      return hits;
+    }
     out.innerHTML = _adminRequests.map(function(r, i){
       var k = shapeReqStatusKey(r);
+      var hits = conflictFor(r);
+      var flag = hits.length ? '<div style="font-size:.74rem;color:var(--red);font-weight:600;margin-bottom:8px;">&#9888; Matches an existing $50 exclusive ("' + escapeHtml(hits.join('", "')) + '") -- making this would break the exclusivity guarantee. Consider declining + refunding.</div>' : '';
       var opts = Object.keys(SHAPE_REQUEST_STATUS).map(function(key){
         return '<option value="'+key+'"'+(key===k?' selected':'')+'>'+SHAPE_REQUEST_STATUS[key].label+'</option>';
       }).join('');
       return '<div style="padding:14px;border:1px solid var(--line);border-radius:8px;margin-bottom:12px;background:var(--panel);">'
         + '<div style="font-size:.86rem;margin-bottom:4px;">'+escapeHtml(r.description||'')+'</div>'
-        + '<div style="font-size:.7rem;color:var(--muted);margin-bottom:10px;">'+escapeHtml(r.email||'unknown')+' · '+escapeHtml((r.tier||'generic')==='custom'?'Custom (private)':'Generic (public)')+' · '+new Date(r.created||Date.now()).toLocaleString()+'</div>'
+        + flag
+        + '<div style="font-size:.7rem;color:var(--muted);margin-bottom:10px;">'+escapeHtml(r.email||'unknown')+' · '+(r.kind==='frame'?'Overall Shape · ':'Dot shape · ')+escapeHtml((r.tier||'generic')==='custom'?'Custom (private)':'Generic (public)')+' · '+new Date(r.created||Date.now()).toLocaleString()+'</div>'
         + '<div style="display:flex;gap:10px;flex-wrap:wrap;">'
         + '<div class="field" style="flex:1;min-width:140px;margin:0;"><label>Status</label><select id="adm-req-status-'+i+'">'+opts+'</select></div>'
         + '<div class="field" style="flex:1;min-width:140px;margin:0;"><label>Promise date</label><input type="date" id="adm-req-date-'+i+'" value="'+escapeHtml(r.promiseDate||'')+'"></div>'
@@ -12910,17 +13143,71 @@ function adminAssignFromRequest(i) {
 // ── SHAPE REQUEST ────────────────────────────────────────────────────────────
 var _pendingShapeRequest = null;
 
-async function requestShape(prefix, tier) {
+async function logExclusiveShape(description, kind, requestId) {
+  try {
+    var fb = window._fb;
+    await fb.addDoc(fb.collection(fb.db,'exclusive_shape_log'), {
+      keywords: shapeKeywords(description), kind: kind || 'dot',
+      requestId: requestId || '', created: Date.now()
+    });
+  } catch(e) { console.warn('exclusive log write failed:', e && e.message); } // WHY: the request itself already saved; the admin queue still flags overlaps
+}
+
+// WHY an admin backfill: $50 requests made before this log existed aren't in
+// it yet, so their ideas wouldn't be protected until logged once.
+async function adminRebuildExclusiveLog() {
+  if (!window._isAdmin) return;
+  var fb = window._fb;
+  try {
+    var logSnap = await fb.getDocs(fb.collection(fb.db,'exclusive_shape_log'));
+    var have = {};
+    logSnap.forEach(function(d){ var e = d.data(); if (e.requestId) have[e.requestId] = 1; });
+    var reqSnap = await fb.getDocs(fb.collection(fb.db,'shape_requests'));
+    var added = 0;
+    for (var i=0; i<reqSnap.docs.length; i++) {
+      var d = reqSnap.docs[i], r = d.data();
+      if (r.tier !== 'custom' || have[d.id] || shapeReqStatusKey(r) === 'declined') continue;
+      await logExclusiveShape(r.description, r.kind || 'dot', d.id);
+      added++;
+    }
+    toast('Exclusive log updated -- ' + added + ' past $50 request' + (added===1?'':'s') + ' added.','ok');
+    adminLoadShapeRequests();
+  } catch(e) { toast('Could not update the exclusive log: ' + e.message,'err'); }
+}
+
+async function requestShape(prefix, tier, kind) {
   // WHY: two tiers — $5 generic (published to all users), $50 custom (private, unpublished)
   tier = tier || 'generic';
-  var inputId = tier === 'custom' ? prefix+'-shape-request-custom' : prefix+'-shape-request';
+  // WHY kind: 'dot' (Dot Type requests, the original) or 'frame' (Overall
+  // Shape requests). Separate inputs, same payment + tracking flow.
+  kind = kind || 'dot';
+  var base = kind === 'frame' ? prefix+'-frame-request' : prefix+'-shape-request';
+  var inputId = tier === 'custom' ? base+'-custom' : base;
   var input = document.getElementById(inputId);
   var description = input ? input.value.trim() : '';
   if (!description) { toast('Describe the shape you want first.','err'); return; }
   // WHY sign-in first: the finished shape is delivered into the requester's
   // account and its status shows on their dashboard, so there has to be one.
   if (!window._user) { toast('Sign in first -- your shape gets delivered to your account.','err'); openAuthModal(); return; }
-  _pendingShapeRequest = { description, prefix, tier };
+  // WHY check BEFORE payment, for both tiers: a $50 exclusive is promised
+  // to never be made again -- not as another exclusive, and not as a $5
+  // public shape either. Blocking here means nobody pays for something we
+  // can't deliver.
+  try {
+    var conflict = await findExclusiveConflict(description, kind);
+    if (conflict.length) {
+      notifyAdminOfExclusiveConflict(description, kind, tier, conflict);
+      toast('Sorry -- a "' + conflict.join('", "') + '" ' + (kind==='frame'?'overall shape':'shape') + ' is already an exclusive design for another customer, and our exclusivity guarantee means we can\'t make it again. Please try a different idea. Nothing was charged.', 'err');
+      return;
+    }
+  } catch(e) {
+    // WHY continue on a lookup error: a missing rule or network blip
+    // shouldn't block every request. The admin queue re-checks each request
+    // against the log (see adminLoadShapeRequests), so a miss here still
+    // gets flagged before she makes the shape.
+    console.warn('exclusive log check failed:', e && e.message);
+  }
+  _pendingShapeRequest = { description, prefix, tier, kind };
   // WHY the amount comes from the tier: custom (private) requests are $50,
   // generic ones $5. Before this, both paths charged $5 because
   // confirmPayment fell back to its $5 default when no amount was set.
@@ -12928,8 +13215,8 @@ async function requestShape(prefix, tier) {
   _pendingShapeRequest.price = price;
   _pendingAction = { type: 'shape_request', amount: price };
   document.getElementById('pay-amount').textContent = '$' + price + '.00';
-  document.getElementById('pay-desc').textContent = 'Custom shape request: ' + description;
-  document.getElementById('pay-title').textContent = 'Request a Custom Shape';
+  document.getElementById('pay-desc').textContent = (kind==='frame' ? 'Overall shape request' : 'Custom shape request') + (tier==='custom' ? ' (exclusive)' : '') + ': ' + description;
+  document.getElementById('pay-title').textContent = kind==='frame' ? 'Request an Overall Shape' : 'Request a Custom Shape';
   openModal('pay-modal');
   if(!stripe){ toast('Payment system loading — try again in a moment.','err'); return; }
   if(!cardElement){
@@ -12950,7 +13237,8 @@ async function fulfillShapeRequest(paymentIntentId) {
 
   try {
     // Log to Firestore so Hali can see all pending requests in one place
-    await fb.addDoc(fb.collection(fb.db,'shape_requests'), {
+    var reqRef = await fb.addDoc(fb.collection(fb.db,'shape_requests'), {
+      kind: req.kind || 'dot',
       description: req.description,
       payment_intent: paymentIntentId,
       uid: window._user ? window._user.uid : 'anonymous',
@@ -12964,6 +13252,9 @@ async function fulfillShapeRequest(paymentIntentId) {
       note: '',
       updated: Date.now()
     });
+    // WHY right after the request is saved: from this moment the idea is
+    // taken -- see the EXCLUSIVE SHAPE LOG WHY.
+    if (req.tier === 'custom') await logExclusiveShape(req.description, req.kind || 'dot', reqRef && reqRef.id);
 
     // WHY: send directly via EmailJS with a clear subject so Hali can
     // find shape requests instantly in her inbox without opening each email
@@ -12971,7 +13262,7 @@ async function fulfillShapeRequest(paymentIntentId) {
       to_email: 'SarahParsons@IQProductionz.com',
       subject: 'QR Code Shape Request — ' + req.description.slice(0,40),
       message: [
-        'NEW SHAPE REQUEST — $' + (req.price||5) + ' PAID (' + (req.tier==='custom'?'custom/private':'generic/public') + ')',
+        'NEW ' + (req.kind==='frame' ? 'OVERALL SHAPE' : 'SHAPE') + ' REQUEST — $' + (req.price||5) + ' PAID (' + (req.tier==='custom'?'custom/private — EXCLUSIVE, logged':'generic/public') + ')',
         'Payment ID: ' + paymentIntentId,
         '',
         'Shape requested: ' + req.description,
@@ -13041,7 +13332,10 @@ async function fulfillShapeRequest(paymentIntentId) {
 
   toast('Shape requested! You&#39;ll see it in the library within 7 business days.', 'ok');
   if (_pendingShapeRequest && _pendingShapeRequest.prefix) {
-    var input = document.getElementById(_pendingShapeRequest.prefix+'-shape-request');
+    // WHY clear the exact box used: four request boxes now (dot/frame x $5/$50).
+    var pr = _pendingShapeRequest;
+    var base = pr.kind === 'frame' ? pr.prefix+'-frame-request' : pr.prefix+'-shape-request';
+    var input = document.getElementById(pr.tier === 'custom' ? base+'-custom' : base);
     if (input) input.value = '';
   }
   _pendingShapeRequest = null;

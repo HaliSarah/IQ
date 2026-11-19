@@ -3,7 +3,7 @@
   Title:       QR Platform — Features
   Author:      Hali Sarah Parsons
   Date:        2026-11-09
-  Modified By: Claude (Anthropic), 2026-11-09
+  Modified By: Claude (Anthropic), 2026-11-09; 2026-11-18 (heading split onto two lines)
   Description: Public, crawlable list of every QR Platform feature and price.
                Deploy to: QRCode/Features/index.html
                WHY a real visible page (not a hidden one): search engines only
@@ -49,6 +49,11 @@ nav{display:flex;justify-content:space-between;align-items:center;padding:calc(1
 header{text-align:center;padding:44px 24px 20px;}
 .eyebrow{font-family:'Cinzel',serif;font-size:.7rem;letter-spacing:.1em;text-transform:uppercase;color:var(--gold2);}
 h1{font-family:'Cinzel',serif;font-size:clamp(1.5rem,3.6vw,2.3rem);font-weight:600;margin:10px auto 10px;max-width:720px;}
+/* WHY block spans: each phrase gets its own line. WHY nowrap + min(1em,5.4vw)
+   on line two: it must never break, so on narrow phones it shrinks a little
+   instead of wrapping or running off the screen. */
+.h1-line{display:block;}
+.h1-nowrap{white-space:nowrap;font-size:min(1em,5.4vw);}
 header p{color:var(--muted);max-width:620px;margin:0 auto;font-size:.95rem;}
 main{max-width:1000px;margin:0 auto;padding:20px 24px 0;width:100%;}
 .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(290px,1fr));gap:16px;}
@@ -93,7 +98,8 @@ footer a{color:var(--muted);} footer a:hover{color:var(--white);}
 
 <header>
   <div class="eyebrow">Free Static · Pay-As-You-Go Dynamic · No Subscription</div>
-  <h1>Every feature of the QR Code Platform</h1>
+  <!-- WHY two forced lines: Hali -- "every feature" on line one, "of the QR Code Platform" kept together on line two. -->
+  <h1><span class="h1-line">Every feature</span><span class="h1-line h1-nowrap">of the QR Code Platform</span></h1>
   <p>What you can design, download and track with I.Q. Productionz QR codes, and what each paid action costs.</p>
 </header>
 
