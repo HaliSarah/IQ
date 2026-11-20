@@ -88,6 +88,10 @@ footer a{color:var(--muted);} footer a:hover{color:var(--white);}
 .modal h3{font-family:'Cinzel',serif;color:var(--gold2);margin-bottom:12px;}
 .modal label{display:block;font-size:.78rem;color:var(--muted);margin:10px 0 4px;}
 .modal input,.modal textarea{width:100%;padding:9px 11px;border-radius:7px;border:1px solid #666;background:#333;color:var(--white);font-family:inherit;font-size:.88rem;}
+/* WHY: Speak button sits under the description; red while listening. */
+.mic-btn{margin-top:6px;padding:5px 12px;border-radius:6px;font-size:.74rem;border:1px solid #777;background:transparent;color:var(--white);cursor:pointer;font-family:inherit;}
+.mic-btn:hover{border-color:var(--gold);}
+.mic-btn.rec-on{border-color:#e05c5c;color:#e05c5c;}
 #toast{display:none;position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:#1f1f1f;border:1px solid var(--gold);color:var(--white);padding:10px 18px;border-radius:8px;font-size:.84rem;z-index:600;}
 @media(max-width:600px){nav{padding:12px 18px;}.cta-box{padding:26px 20px;}}
 </style>
@@ -124,6 +128,7 @@ footer a{color:var(--muted);} footer a:hover{color:var(--white);}
     <label for="r-type">Request</label>
     <select id="r-type"><option>Remove my design</option><option>Change the title or description</option><option>Other</option></select>
     <label for="r-msg">Details</label><textarea id="r-msg" rows="4" maxlength="1000" placeholder="What should change?"></textarea>
+    <button type="button" class="mic-btn" id="r-mic">🎤 Speak</button>
     <button type="button" class="act-btn gold" style="margin-top:14px;padding:10px 18px;font-size:.84rem;" id="r-send" onclick="sendRequest()">Send Request</button>
   </section>
 
@@ -147,6 +152,7 @@ footer a{color:var(--muted);} footer a:hover{color:var(--white);}
     <h3>Title &amp; Description</h3>
     <label for="e-title">Title</label><input type="text" id="e-title" maxlength="80">
     <label for="e-desc">Description</label><textarea id="e-desc" maxlength="300" rows="4"></textarea>
+    <button type="button" class="mic-btn" id="e-mic">🎤 Speak</button>
     <div style="display:flex;gap:10px;margin-top:16px;">
       <button class="act-btn" style="flex:1;" onclick="closeEdit(false)">Cancel</button>
       <button class="act-btn gold" style="flex:1;" onclick="closeEdit(true)">Save</button>
@@ -284,6 +290,49 @@ footer a{color:var(--muted);} footer a:hover{color:var(--white);}
     if (posts.length) render();
   });
   load();
+</script>
+<script>
+// ── VOICE TO TEXT FOR DESCRIPTIONS ──────────────────────────────────────────
+// WHY the browser's built-in speech recognition: Hali asked for a voice
+// option for the description. It types what you say into the box, no
+// recording is stored. WHY hide the button where unsupported (e.g. Firefox):
+// a button that does nothing would just confuse people.
+function setupDictation(btnId, fieldId) {
+  var SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+  var btn = document.getElementById(btnId), field = document.getElementById(fieldId);
+  if (!btn || !field) return;
+  if (!SR) { btn.style.display = 'none'; return; }
+  var rec = null, base = '';
+  function stop(){ if (rec) { try { rec.stop(); } catch(e){} } }
+  btn.addEventListener('click', function(){
+    if (rec) { stop(); return; }
+    rec = new SR();
+    rec.lang = navigator.language || 'en-US';
+    rec.interimResults = true; // WHY: words appear while talking, not only at the end
+    rec.continuous = true;
+    base = field.value ? field.value.replace(/\s*$/, ' ') : '';
+    rec.onresult = function(ev){
+      var text = '';
+      for (var i = 0; i < ev.results.length; i++) text += ev.results[i][0].transcript;
+      var max = parseInt(field.getAttribute('maxlength'), 10) || 1000;
+      field.value = (base + text).slice(0, max);
+    };
+    rec.onend = function(){ rec = null; btn.classList.remove('rec-on'); btn.textContent = '🎤 Speak'; };
+    rec.onerror = function(ev){
+      if (ev.error === 'not-allowed' || ev.error === 'service-not-allowed') alertMic();
+    };
+    try { rec.start(); btn.classList.add('rec-on'); btn.textContent = '■ Stop'; }
+    catch(e){ rec = null; }
+  });
+  // WHY stop when the pop-up closes: otherwise the mic keeps listening.
+  var modal = btn.closest('.modal-bg');
+  if (modal) new MutationObserver(function(){ if (!modal.classList.contains('open')) stop(); }).observe(modal, { attributes: true, attributeFilter: ['class'] });
+}
+function alertMic(){
+  var msg = 'Microphone is blocked. Allow it in your browser settings to use Speak.';
+  var t=document.getElementById('toast'); if (t) { t.textContent=msg; t.style.display='block'; setTimeout(function(){ t.style.display='none'; }, 3500); }
+}
+setupDictation('e-mic','e-desc'); setupDictation('r-mic','r-msg');
 </script>
 </body>
 </html>

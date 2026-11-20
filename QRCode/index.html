@@ -352,6 +352,10 @@ nav{display:flex;justify-content:space-between;align-items:center;padding:calc(1
 .comm-btn:hover{background:#505050;color:var(--white);}
 .comm-btn:focus-visible{outline:3px solid var(--white);outline-offset:2px;}
 .comm-btn-top{margin-left:auto;align-self:center;}
+/* WHY: Speak button sits under the description; red while listening. */
+.mic-btn{margin-top:6px;padding:5px 12px;border-radius:6px;font-size:.74rem;border:1px solid #777;background:transparent;color:var(--white);cursor:pointer;font-family:inherit;}
+.mic-btn:hover{border-color:var(--gold);}
+.mic-btn.rec-on{border-color:#e05c5c;color:#e05c5c;}
 .comm-btn-full{width:100%;padding:13px;margin:10px 0 4px;}
 .comm-meta{font-size:.68rem;color:var(--muted);}
 .comm-title{font-family:'Cinzel',serif;font-weight:600;font-size:.92rem;color:var(--gold2);text-align:center;}
@@ -2227,7 +2231,7 @@ footer a{color:var(--muted);}footer a:hover{color:var(--white);}
     <h3 id="comm-info-head">Title &amp; Description</h3>
     <p id="comm-info-note" style="display:none;font-size:.8rem;line-height:1.55;color:var(--gold2);margin-top:8px;"></p>
     <div class="field" style="margin-top:14px;"><label>Title</label><input type="text" id="comm-info-title" maxlength="80" placeholder="e.g. Holiday Bakery Flyer"></div>
-    <div class="field"><label>Description</label><textarea id="comm-info-desc" maxlength="300" rows="4" placeholder="What it's for, colors or shapes you used…" style="width:100%;"></textarea></div>
+    <div class="field"><label>Description</label><textarea id="comm-info-desc" maxlength="300" rows="4" placeholder="What it's for, colors or shapes you used…" style="width:100%;"></textarea><button type="button" class="mic-btn" id="comm-info-mic">🎤 Speak</button></div>
     <div style="display:flex;gap:10px;">
       <button class="act-btn" style="flex:1;" onclick="resolveCommInfo(null)">Cancel</button>
       <button class="act-btn act-btn-gold" style="flex:1;" id="comm-info-btn" onclick="resolveCommInfo(true)">Post</button>
@@ -14040,6 +14044,48 @@ var _confirmResolve = null;
 // WHY promise-based like brandedConfirm: the add flows just await one
 // result -- null = cancelled, otherwise {title, desc} (may be empty).
 var _commPostResolve = null, _commInfoResolve = null;
+
+// ── VOICE TO TEXT FOR DESCRIPTIONS ──────────────────────────────────────────
+// WHY the browser's built-in speech recognition: Hali asked for a voice
+// option for the description. It types what you say into the box, no
+// recording is stored. WHY hide the button where unsupported (e.g. Firefox):
+// a button that does nothing would just confuse people.
+function setupDictation(btnId, fieldId) {
+  var SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+  var btn = document.getElementById(btnId), field = document.getElementById(fieldId);
+  if (!btn || !field) return;
+  if (!SR) { btn.style.display = 'none'; return; }
+  var rec = null, base = '';
+  function stop(){ if (rec) { try { rec.stop(); } catch(e){} } }
+  btn.addEventListener('click', function(){
+    if (rec) { stop(); return; }
+    rec = new SR();
+    rec.lang = navigator.language || 'en-US';
+    rec.interimResults = true; // WHY: words appear while talking, not only at the end
+    rec.continuous = true;
+    base = field.value ? field.value.replace(/\s*$/, ' ') : '';
+    rec.onresult = function(ev){
+      var text = '';
+      for (var i = 0; i < ev.results.length; i++) text += ev.results[i][0].transcript;
+      var max = parseInt(field.getAttribute('maxlength'), 10) || 1000;
+      field.value = (base + text).slice(0, max);
+    };
+    rec.onend = function(){ rec = null; btn.classList.remove('rec-on'); btn.textContent = '🎤 Speak'; };
+    rec.onerror = function(ev){
+      if (ev.error === 'not-allowed' || ev.error === 'service-not-allowed') alertMic();
+    };
+    try { rec.start(); btn.classList.add('rec-on'); btn.textContent = '■ Stop'; }
+    catch(e){ rec = null; }
+  });
+  // WHY stop when the pop-up closes: otherwise the mic keeps listening.
+  var modal = btn.closest('.modal-bg');
+  if (modal) new MutationObserver(function(){ if (!modal.classList.contains('open')) stop(); }).observe(modal, { attributes: true, attributeFilter: ['class'] });
+}
+function alertMic(){
+  var msg = 'Microphone is blocked. Allow it in your browser settings to use Speak.';
+  if (typeof toast === 'function') { try { toast(msg, 'err'); return; } catch(e){} }
+}
+window.addEventListener('DOMContentLoaded', function(){ setupDictation('comm-info-mic','comm-info-desc'); });
 function communityPostDialog(message) {
   return new Promise(function(resolve){
     document.getElementById('comm-post-msg').textContent = message;
