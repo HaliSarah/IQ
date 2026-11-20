@@ -5,7 +5,7 @@
   Date:        2026-09-25
   Modified By: Claude (2026-11-18: Heart/frame edge clipping fix; Random dot colors 2-10 w/ count dropdown + Shuffle;
                asymmetric corners no longer turn black when one corner switches to Solid;
-               floating corner picker while Asymmetric Corners is on;
+               floating corner picker while Asymmetric Corners is on (2026-11-19: moved to top, under nav);
                removed 4 Rounded·Point overall shapes; $5/$50 Overall Shape requests + exclusive-shape log/flags;
                2026-11-15: corners default to Match Body, incl. solid color; 2026-11-09: Scan Locations + unique/time/hours/devices/map stats, date range,
                name sort that follows renames, floating toolbar, tracking settings, CSV columns)
@@ -529,10 +529,12 @@ nav{display:flex;justify-content:space-between;align-items:center;padding:calc(1
 .corner-tab-btn.active{background:var(--gold);border-color:var(--gold);color:#fff;font-weight:600;}
 /* WHY a floating copy of the corner tabs: Hali -- "float the corner picker
    when asymmetric is selected so we don't have to keep scrolling back."
-   Pinned bottom-center (her bottom-heavy layout preference, and clear of the
-   draggable floating preview) and shown only while the real tab row is
-   scrolled out of view. */
-.corner-float-bar{position:fixed;left:50%;bottom:16px;transform:translateX(-50%);z-index:999;display:none;align-items:center;gap:6px;padding:8px 10px;background:var(--panel);border:1px solid var(--gold);border-radius:10px;box-shadow:0 8px 30px rgba(0,0,0,.45);}
+   Pinned top-center just under the sticky nav (Hali, 2026-11-19: "floats at
+   the bottom of the screen, not the top" -- she wants it at the top, where
+   the real tabs sit above the panels) and shown only while the real tab
+   row is scrolled out of view. --nav-h is measured in
+   updateFloatingCornerBars so it never hides under the nav. */
+.corner-float-bar{position:fixed;left:50%;top:calc(var(--nav-h,64px) + 10px);transform:translateX(-50%);z-index:999;display:none;align-items:center;gap:6px;padding:8px 10px;background:var(--panel);border:1px solid var(--gold);border-radius:10px;box-shadow:0 8px 30px rgba(0,0,0,.45);}
 .corner-float-bar span{font-size:.65rem;color:var(--muted);margin-right:2px;white-space:nowrap;}
 .char-options{display:flex;flex-wrap:wrap;gap:5px;}
 .char-opt{width:36px;height:36px;border-radius:6px;border:1px solid var(--line);background:var(--panel);display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:.95rem;transition:all .2s;user-select:none;}
@@ -6299,8 +6301,13 @@ function updateFloatingCornerBars() {
     var show = false;
     if (_asymmetricCorners[prefix] && row.offsetParent !== null) {
       var vh = window.innerHeight || document.documentElement.clientHeight;
+      // WHY measure the nav: it's sticky, so the bar must sit below it, and a
+      // tab row tucked UNDER the nav counts as out of view.
+      var nav = document.querySelector('nav');
+      var navH = nav ? nav.getBoundingClientRect().height : 0;
+      document.documentElement.style.setProperty('--nav-h', navH + 'px');
       var r = row.getBoundingClientRect();
-      var rowVisible = r.bottom > 0 && r.top < vh;
+      var rowVisible = r.bottom > navH && r.top < vh;
       var card = row.closest('.gen-card') || row.parentElement;
       var cr = card.getBoundingClientRect();
       var cardVisible = cr.bottom > 80 && cr.top < vh - 80;
