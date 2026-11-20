@@ -8,6 +8,7 @@
                add from the generator (Static: no account; Dynamic: from My
                Codes). View only. Dynamic owners can edit/delete their own
                posts; the admin can edit/delete any (written removal requests).
+               Static posts: change/removal request form at the bottom (EmailJS).
                Deploy to: QRCode/Community/index.html
 -->
 <html lang="en">
@@ -30,10 +31,13 @@
 <link rel="icon" href="/QRCode/icons/icon-192.png">
 <!-- WHY breadcrumb data: lets Google show "iqproductionz.com › QRCode › Community" in results. -->
 <script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"I.Q. Productionz","item":"https://iqproductionz.com/"},{"@type":"ListItem","position":2,"name":"QR Code Platform","item":"https://iqproductionz.com/QRCode/"},{"@type":"ListItem","position":3,"name":"Community Inspiration","item":"https://iqproductionz.com/QRCode/Community/"}]}</script>
+<!-- WHY EmailJS: the same service/template the generator already uses for request emails. -->
+<script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
+<script>window.addEventListener('load', function(){ if (window.emailjs) emailjs.init('3vNjQbWmqzzOO6IK-'); });</script>
 <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700&family=Raleway:wght@300;400;500;600&display=swap" rel="stylesheet">
 <style>
 /* WHY the same variables and nav as QRCode/index.html and Features: one site. */
-:root{--bg:#2a2a2a;--panel:#454545;--line:#2e2b24;--gold:#c98a2e;--gold2:#e0a84a;--white:#f0ece3;--muted:#A9A9A9;--red:#e05c5c;--r:10px;}
+:root{--bg:#2a2a2a;--panel:#454545;--line:#2e2b24;--gold:#c98a2e;--gold2:#e0a84a;--white:#f0ece3;--muted:#A9A9A9;--red:#e05c5c;--green:#6abf7b;--r:10px;}
 *{box-sizing:border-box;margin:0;padding:0;}
 body{font-family:'Raleway',sans-serif;background:var(--bg);color:var(--white);min-height:100vh;display:flex;flex-direction:column;line-height:1.6;}
 a{color:var(--gold2);text-decoration:none;}
@@ -63,6 +67,13 @@ main{max-width:1100px;margin:0 auto;padding:20px 24px 0;width:100%;flex:1;}
 .act-btn{padding:6px 12px;border-radius:6px;font-size:.72rem;border:1px solid #666;background:transparent;color:var(--white);cursor:pointer;font-family:inherit;}
 .act-btn:hover{border-color:var(--gold);}
 .act-btn.danger{color:var(--red);border-color:var(--red);}
+/* WHY green: Hali -- Edit styled like Delete, in the same green as the Dynamic tag. */
+.act-btn.green{color:var(--green);border-color:var(--green);}
+.req-link{font-size:.68rem;color:var(--muted);text-decoration:underline;cursor:pointer;background:none;border:none;font-family:inherit;}
+.req-box{margin:40px auto 0;max-width:720px;background:var(--panel);border:1px solid var(--line);border-radius:var(--r);padding:24px;}
+.req-box h2{font-family:'Cinzel',serif;font-size:1.1rem;color:var(--gold2);margin-bottom:6px;}
+.req-box label{display:block;font-size:.78rem;color:var(--muted);margin:10px 0 4px;}
+.req-box input,.req-box select,.req-box textarea{width:100%;padding:9px 11px;border-radius:7px;border:1px solid #666;background:#333;color:var(--white);font-family:inherit;font-size:.88rem;}
 .act-btn.gold{background:var(--gold);border-color:var(--gold);color:#fff;font-weight:600;}
 /* WHY the heaviest block last: bottom-heavy, ending on the action we want. */
 .cta-box{margin:56px auto 0;max-width:720px;background:#1f1f1f;border:2px solid var(--gold);border-radius:14px;padding:32px;text-align:center;}
@@ -104,6 +115,17 @@ footer a{color:var(--muted);} footer a:hover{color:var(--white);}
 <main>
   <div id="status">Loading designs…</div>
   <div class="grid" id="grid"></div>
+
+  <section class="req-box" id="req-box">
+    <h2>Request a Change or Removal</h2>
+    <p style="font-size:.84rem;color:var(--muted);">Static posts can't be edited or deleted by visitors. Use this form and we'll take care of it. Dynamic code owners can edit or delete their own posts while signed in.</p>
+    <label for="r-email">Your email</label><input type="email" id="r-email" maxlength="120" placeholder="you@example.com">
+    <label for="r-post">Which design (use "Request a change or removal" under it to fill this in)</label><input type="text" id="r-post" maxlength="200" placeholder="Design title or date posted">
+    <label for="r-type">Request</label>
+    <select id="r-type"><option>Remove my design</option><option>Change the title or description</option><option>Other</option></select>
+    <label for="r-msg">Details</label><textarea id="r-msg" rows="4" maxlength="1000" placeholder="What should change?"></textarea>
+    <button type="button" class="act-btn gold" style="margin-top:14px;padding:10px 18px;font-size:.84rem;" id="r-send" onclick="sendRequest()">Send Request</button>
+  </section>
 
   <section class="cta-box">
     <h2>Make Your Own</h2>
@@ -177,6 +199,24 @@ footer a{color:var(--muted);} footer a:hover{color:var(--white);}
   function askDelete(){ document.getElementById('confirm-modal').classList.add('open'); return new Promise(r=>confirmResolve=r); }
   window.closeConfirm=function(ok){ document.getElementById('confirm-modal').classList.remove('open'); if (confirmResolve){ const r=confirmResolve; confirmResolve=null; r(ok); } };
 
+  window.sendRequest=async function(){
+    const email=document.getElementById('r-email').value.trim(), post=document.getElementById('r-post').value.trim();
+    const type=document.getElementById('r-type').value, msg=document.getElementById('r-msg').value.trim();
+    if (!/^\S+@\S+\.\S+$/.test(email)) { toast('Enter your email so we can reply.'); return; }
+    if (!post) { toast('Tell us which design.'); return; }
+    const btn=document.getElementById('r-send'); btn.disabled=true;
+    try {
+      if (!window.emailjs) throw new Error('no emailjs');
+      await emailjs.send('service_75wx6fk','template_nnmxioq',{
+        to_email:'SarahParsons@IQProductionz.com',
+        subject:'Community board request — ' + type,
+        message:['COMMUNITY BOARD REQUEST','Request: '+type,'Design: '+post,'From: '+email,'','Details:',msg||'(none)'].join('\n')
+      });
+      toast('Request sent. We will follow up by email.');
+      ['r-post','r-msg'].forEach(id=>document.getElementById(id).value='');
+    } catch(e){ toast('Could not send right now. Please email SarahParsons@IQProductionz.com.'); }
+    btn.disabled=false;
+  };
   // WHY the native share sheet first: on phones that's how people actually
   // pass a page along; desktop falls back to copying the link.
   window.sharePage=async function(){
@@ -192,18 +232,26 @@ footer a{color:var(--muted);} footer a:hover{color:var(--white);}
       const card=document.createElement('div'); card.className='card';
       const img=document.createElement('img'); img.src=p.image; img.loading='lazy';
       img.alt = p.title ? ('QR code design: ' + p.title) : 'Community QR code design';
-      card.appendChild(img);
+      // WHY title above the QR and description below it: Hali's layout.
       // WHY textContent: titles and descriptions are typed by the public.
       if (p.title){ const t=document.createElement('div'); t.className='c-title'; t.textContent=p.title; card.appendChild(t); }
+      card.appendChild(img);
       if (p.desc){ const d=document.createElement('div'); d.className='c-desc'; d.textContent=p.desc; card.appendChild(d); }
       const m=document.createElement('div'); m.className='c-meta';
       m.textContent=(p.type==='dynamic'?'Dynamic':'Static') + (p.created ? ' · ' + new Date(p.created).toLocaleDateString() : '');
       card.appendChild(m);
+      // WHY a request link on static posts: they have no owner account, so a
+      // written request is the only way to change or remove them (Hali).
+      if (p.type!=='dynamic'){
+        const rq=document.createElement('button'); rq.type='button'; rq.className='req-link'; rq.textContent='Request a change or removal';
+        rq.onclick=()=>{ document.getElementById('r-post').value=p.id + (p.title ? ' (' + p.title + ')' : ''); document.getElementById('req-box').scrollIntoView({behavior:'smooth'}); document.getElementById('r-email').focus(); };
+        card.appendChild(rq);
+      }
       // WHY owner-only for dynamic posts (Hali), plus admin for written removal requests.
       const mine = user && p.uid && p.uid===user.uid;
       if (mine || isAdmin){
         const row=document.createElement('div'); row.style.cssText='display:flex;gap:8px;';
-        const e=document.createElement('button'); e.className='act-btn'; e.textContent='Edit';
+        const e=document.createElement('button'); e.className='act-btn green'; e.textContent='Edit';
         e.onclick=async ()=>{
           const v=await openEdit(p.title,p.desc); if(!v) return;
           try { await updateDoc(doc(db,'community_posts',p.id),{title:v.title,desc:v.desc}); p.title=v.title; p.desc=v.desc; render(); toast('Saved.'); }

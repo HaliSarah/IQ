@@ -1338,7 +1338,9 @@ footer a{color:var(--muted);}footer a:hover{color:var(--white);}
         </div><!-- end design-grid -->
 
         <!-- WHY here, full width, before the scan warning: Hali's placement for Static (no account needed to post). -->
-        <button type="button" class="comm-btn comm-btn-full" onclick="addStaticToCommunity()">Add my design to the community</button>
+        <button type="button" class="comm-btn comm-btn-full" id="s-comm-btn" onclick="addStaticToCommunity()">Add my design to the community</button>
+        <!-- WHY: Hali -- after posting, a green "Your QR code has been posted" shows where the button was. -->
+        <div id="s-comm-posted" style="display:none;width:100%;padding:13px;margin:10px 0 4px;border:1px solid var(--green);border-radius:8px;background:rgba(106,191,123,.12);color:var(--green);text-align:center;font-weight:600;font-size:.9rem;">Your QR code has been posted. <a href="/QRCode/Community/" style="color:var(--green);text-decoration:underline;">See it on the board</a></div>
         <div class="scan-warning">Make sure code scans before you download (some combinations don't work)</div>
         <button class="gen-btn" onclick="generateCustomQR()">Generate QR Code</button>
 
@@ -2223,6 +2225,7 @@ footer a{color:var(--muted);}footer a:hover{color:var(--white);}
   <div class="modal">
     <button class="modal-close" onclick="resolveCommInfo(null)">✕</button>
     <h3 id="comm-info-head">Title &amp; Description</h3>
+    <p id="comm-info-note" style="display:none;font-size:.8rem;line-height:1.55;color:var(--gold2);margin-top:8px;"></p>
     <div class="field" style="margin-top:14px;"><label>Title</label><input type="text" id="comm-info-title" maxlength="80" placeholder="e.g. Holiday Bakery Flyer"></div>
     <div class="field"><label>Description</label><textarea id="comm-info-desc" maxlength="300" rows="4" placeholder="What it's for, colors or shapes you used…" style="width:100%;"></textarea></div>
     <div style="display:flex;gap:10px;">
@@ -13214,13 +13217,17 @@ async function communityImageFrom(url, ec, designOrPrefix) {
 async function addStaticToCommunity() {
   var url = (document.getElementById('s-url').value || '').trim();
   if (!url) { toast('Enter your URL or text first.','err'); return; }
-  var info = await communityPostDialog('Add this design to the Community Inspiration board? It will be public and scan just like your printed or shared code does. Static posts can only be removed by written request.');
+  // WHY straight to the title/description pop-up for Static: visitors have no
+  // account, so this is their only chance to set them (Hali).
+  var info = await communityInfoDialog('', '', 'Post',
+    'Add a title and description before you post. Static QR codes can\'t be edited later: once posted, you won\'t be able to change or delete it unless you submit a request at the bottom of the Community page. It will be public and scan just like your printed or shared code does.');
   if (!info) return;
   try {
     var ecEl = document.getElementById('s-ec');
     var img = await communityImageFrom(url, ecEl ? ecEl.value : 'M', 's');
     await window._fb.addDoc(window._fb.collection(window._fb.db,'community_posts'), { image: img, type: 'static', title: info.title, desc: info.desc, created: Date.now() });
-    toast('Added to the Community board: iqproductionz.com/QRCode/Community/','ok');
+    document.getElementById('s-comm-btn').style.display = 'none';
+    document.getElementById('s-comm-posted').style.display = 'block';
   } catch(e) { toast('Could not add it to the Community board. Please try again.','err'); }
 }
 // WHY doc id dyn_<slug>: one post per dynamic code -- adding again just
@@ -14051,8 +14058,10 @@ function commPostAddInfo() {
   closeModal('comm-post-modal');
   communityInfoDialog('', '', 'Post').then(function(v){ if (r) r(v); });
 }
-function communityInfoDialog(title, desc, btnLabel) {
+function communityInfoDialog(title, desc, btnLabel, note) {
   return new Promise(function(resolve){
+    var noteEl = document.getElementById('comm-info-note');
+    noteEl.textContent = note || ''; noteEl.style.display = note ? 'block' : 'none';
     document.getElementById('comm-info-title').value = title || '';
     document.getElementById('comm-info-desc').value = desc || '';
     document.getElementById('comm-info-btn').textContent = btnLabel || 'Save';
