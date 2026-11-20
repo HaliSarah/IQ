@@ -13202,7 +13202,7 @@ async function communityImageFrom(url, ec, designOrPrefix) {
 async function addStaticToCommunity() {
   var url = (document.getElementById('s-url').value || '').trim();
   if (!url) { toast('Enter your URL or text first.','err'); return; }
-  var ok = await brandedConfirm('Add this design to the Community Inspiration board? It will be public and scan to: ' + url + '. Static posts can only be removed by written request.', 'Add to Community');
+  var ok = await brandedConfirm('Add this design to the Community Inspiration board? It will be public and scan just like your printed or shared code does. Static posts can only be removed by written request.', 'Add to Community');
   if (!ok) return;
   try {
     var ecEl = document.getElementById('s-ec');
@@ -13215,7 +13215,7 @@ async function addStaticToCommunity() {
 // refreshes it with the current design instead of making duplicates.
 async function addDynamicToCommunity(data) {
   if (!window._user) { openAuthModal(); return; }
-  var ok = await brandedConfirm('Add "' + (data.name||'this code') + '" to the Community Inspiration board? It will be public and scan to your code. You can delete it from the board any time.', 'Add to Community');
+  var ok = await brandedConfirm('Add "' + (data.name||'this code') + '" to the Community Inspiration board? It will be public and scan just like your printed or shared code does. You can delete it from the board any time.', 'Add to Community');
   if (!ok) return;
   try {
     var img = await communityImageFrom(BASE_REDIRECT + data.slug, (data.design && data.design.ec) || 'M', data.design || DEFAULT_DESIGN);
