@@ -960,9 +960,7 @@ footer a{color:var(--muted);}footer a:hover{color:var(--white);}
 
               <div id="color-solid">
                 <div style="display:flex;gap:14px;">
-                  <div class="grad-stop"><input type="color" id="c-fg" value="#000000"><span>YOUR dot colors</span></div>
-                  <!-- WHY: Hali -- "make a note next to color square to click square for all colors" (the square opens the full color picker). -->
-                  <span style="align-self:center;font-size:.72rem;color:var(--muted);font-style:italic;">Click the square for all colors</span>
+                  <div class="grad-stop"><input type="color" id="c-fg" value="#000000"><span>Dot color</span></div>
                   
                 </div>
               </div>
@@ -1563,9 +1561,7 @@ footer a{color:var(--muted);}footer a:hover{color:var(--white);}
               <div id="d-color-random" style="display:none;"></div>
               <div id="d-color-solid">
                 <div style="display:flex;gap:14px;">
-                  <div class="grad-stop"><input type="color" id="d-c-fg" value="#000000"><span>YOUR dot colors</span></div>
-                  <!-- WHY: Hali -- "make a note next to color square to click square for all colors" (the square opens the full color picker). -->
-                  <span style="align-self:center;font-size:.72rem;color:var(--muted);font-style:italic;">Click the square for all colors</span>
+                  <div class="grad-stop"><input type="color" id="d-c-fg" value="#000000"><span>Dot color</span></div>
                   
                 </div>
               </div>
@@ -14501,6 +14497,13 @@ function hideQRZoomLens() {
      can't add anything to. The ▾ sits right next to it instead. */
   .cp-toggle{margin-top:2px;width:40px;height:18px;border:1px solid var(--line);border-radius:5px;background:var(--navy);color:var(--muted);font-size:.6rem;line-height:1;cursor:pointer;padding:0;}
   .cp-toggle:hover,.cp-toggle.open{border-color:var(--gold);color:var(--gold2);}
+  /* WHY: Hali -- "Your colors should be under all drop down arrows" and
+     "Click square for all colors ... next to all color square sections." */
+  .cp-your{display:block;font-size:.55rem;color:var(--gold2);white-space:nowrap;margin-top:1px;cursor:pointer;}
+  /* WHY top-aligned with a 36px line box: the square is 36px tall and sits at
+     the top of its stop, so this centers the note on the square itself, not
+     on the whole stop (square + arrow + captions), which sat it too low. */
+  .cp-section-note{align-self:flex-start;height:36px;line-height:36px;font-size:.68rem;color:var(--muted);font-style:italic;white-space:nowrap;}
   #cp-card{position:absolute;z-index:1300;width:290px;max-width:calc(100vw - 32px);background:var(--panel);border:1px solid var(--gold);border-radius:10px;box-shadow:0 12px 34px rgba(0,0,0,.5);padding:12px 12px 10px;font-family:'Raleway',sans-serif;color:var(--white);display:none;}
   #cp-card h4{font-family:Cinzel,serif;font-size:.68rem;letter-spacing:.08em;color:var(--muted);margin:0 0 6px;text-transform:uppercase;font-weight:600;}
   .cp-row{display:flex;gap:6px;flex-wrap:wrap;align-items:center;}
@@ -14760,6 +14763,28 @@ function hideQRZoomLens() {
         open(inp, btn);
       });
       inp.insertAdjacentElement('afterend', btn);
+      // WHY a caption that also opens the card: the ▾ alone didn't say what it
+      // holds; clicking the words does the same as the arrow.
+      var cap = document.createElement('span');
+      cap.className = 'cp-your';
+      cap.textContent = 'Your colors';
+      cap.addEventListener('click', function(ev){ ev.preventDefault(); ev.stopPropagation(); btn.click(); });
+      btn.insertAdjacentElement('afterend', cap);
+    });
+    // WHY one note per group (the squares' shared parent), placed after the
+    // group's last square: a note on every single square would be clutter.
+    var groups = [];
+    document.querySelectorAll('.grad-stop').forEach(function(st){
+      if (st.querySelector('input[type=color]') && groups.indexOf(st.parentElement) < 0) groups.push(st.parentElement);
+    });
+    groups.forEach(function(g){
+      if (g.querySelector(':scope > .cp-section-note')) return;
+      var stops = g.querySelectorAll(':scope > .grad-stop');
+      if (!stops.length) return;
+      var note = document.createElement('span');
+      note.className = 'cp-section-note';
+      note.textContent = 'Click square for all colors';
+      stops[stops.length-1].insertAdjacentElement('afterend', note);
     });
   }
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', enhance); else enhance();
