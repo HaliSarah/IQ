@@ -357,6 +357,8 @@ nav{display:flex;justify-content:space-between;align-items:center;padding:calc(1
 .comm-card{background:var(--panel);border:1px solid var(--line);border-radius:var(--r);padding:14px;display:flex;flex-direction:column;align-items:center;gap:8px;}
 .comm-card img{width:100%;height:auto;background:#fff;border-radius:6px;}
 .comm-meta{font-size:.68rem;color:var(--muted);}
+.comm-title{font-family:'Cinzel',serif;font-weight:600;font-size:.92rem;color:var(--gold2);text-align:center;}
+.comm-desc{font-size:.78rem;color:var(--white);text-align:center;line-height:1.45;overflow-wrap:anywhere;}
 .scan-warning{color:#c0392b;font-weight:800;text-transform:uppercase;text-align:center;font-size:.8rem;letter-spacing:.03em;line-height:1.5;margin:10px 0;}
 
 /* QR RESULT */
@@ -2219,6 +2221,35 @@ footer a{color:var(--muted);}footer a:hover{color:var(--white);}
      match the app instead of the browser's native confirm() box. Promise-
      based so callers can just `if (!(await brandedConfirm('…'))) return;`
      exactly where a confirm() call used to sit. -->
+<!-- COMMUNITY POST + TITLE/DESCRIPTION MODALS — Hali: the add-to-community
+     alert should offer "add a title and description" as a button that opens
+     a second pop-up with both fields; the board's Edit button reuses that
+     second pop-up. Driven by communityPostDialog / communityInfoDialog. -->
+<div class="modal-bg" id="comm-post-modal">
+  <div class="modal">
+    <button class="modal-close" onclick="resolveCommPost(null)">✕</button>
+    <h3>Add to Community</h3>
+    <p id="comm-post-msg" style="font-size:.92rem;line-height:1.6;margin:14px 0 22px;"></p>
+    <div style="display:flex;gap:10px;flex-wrap:wrap;">
+      <button class="act-btn" style="flex:1;" onclick="resolveCommPost(null)">Cancel</button>
+      <button class="act-btn" style="flex:1;white-space:nowrap;" onclick="commPostAddInfo()">Add title &amp; description</button>
+      <button class="act-btn act-btn-gold" style="flex:1;" onclick="resolveCommPost({title:'',desc:''})">Add to Community</button>
+    </div>
+  </div>
+</div>
+<div class="modal-bg" id="comm-info-modal">
+  <div class="modal">
+    <button class="modal-close" onclick="resolveCommInfo(null)">✕</button>
+    <h3 id="comm-info-head">Title &amp; Description</h3>
+    <div class="field" style="margin-top:14px;"><label>Title</label><input type="text" id="comm-info-title" maxlength="80" placeholder="e.g. Holiday Bakery Flyer"></div>
+    <div class="field"><label>Description</label><textarea id="comm-info-desc" maxlength="300" rows="4" placeholder="What it's for, colors or shapes you used…" style="width:100%;"></textarea></div>
+    <div style="display:flex;gap:10px;">
+      <button class="act-btn" style="flex:1;" onclick="resolveCommInfo(null)">Cancel</button>
+      <button class="act-btn act-btn-gold" style="flex:1;" id="comm-info-btn" onclick="resolveCommInfo(true)">Post</button>
+    </div>
+  </div>
+</div>
+
 <div class="modal-bg" id="confirm-modal">
   <div class="modal">
     <button class="modal-close" onclick="resolveConfirm(false)">✕</button>
@@ -13202,12 +13233,12 @@ async function communityImageFrom(url, ec, designOrPrefix) {
 async function addStaticToCommunity() {
   var url = (document.getElementById('s-url').value || '').trim();
   if (!url) { toast('Enter your URL or text first.','err'); return; }
-  var ok = await brandedConfirm('Add this design to the Community Inspiration board? It will be public and scan just like your printed or shared code does. Static posts can only be removed by written request.', 'Add to Community');
-  if (!ok) return;
+  var info = await communityPostDialog('Add this design to the Community Inspiration board? It will be public and scan just like your printed or shared code does. Static posts can only be removed by written request.');
+  if (!info) return;
   try {
     var ecEl = document.getElementById('s-ec');
     var img = await communityImageFrom(url, ecEl ? ecEl.value : 'M', 's');
-    await window._fb.addDoc(window._fb.collection(window._fb.db,'community_posts'), { image: img, type: 'static', created: Date.now() });
+    await window._fb.addDoc(window._fb.collection(window._fb.db,'community_posts'), { image: img, type: 'static', title: info.title, desc: info.desc, created: Date.now() });
     toast('Added to the Community board.','ok');
   } catch(e) { toast('Could not add it to the Community board. Please try again.','err'); }
 }
@@ -13215,12 +13246,12 @@ async function addStaticToCommunity() {
 // refreshes it with the current design instead of making duplicates.
 async function addDynamicToCommunity(data) {
   if (!window._user) { openAuthModal(); return; }
-  var ok = await brandedConfirm('Add "' + (data.name||'this code') + '" to the Community Inspiration board? It will be public and scan just like your printed or shared code does. You can delete it from the board any time.', 'Add to Community');
-  if (!ok) return;
+  var info = await communityPostDialog('Add "' + (data.name||'this code') + '" to the Community Inspiration board? It will be public and scan just like your printed or shared code does. You can delete it from the board any time.');
+  if (!info) return;
   try {
     var img = await communityImageFrom(BASE_REDIRECT + data.slug, (data.design && data.design.ec) || 'M', data.design || DEFAULT_DESIGN);
     var fb = window._fb;
-    await fb.setDoc(fb.doc(fb.db,'community_posts','dyn_'+data.slug), { image: img, type: 'dynamic', uid: window._user.uid, slug: data.slug, created: Date.now() });
+    await fb.setDoc(fb.doc(fb.db,'community_posts','dyn_'+data.slug), { image: img, type: 'dynamic', uid: window._user.uid, slug: data.slug, title: info.title, desc: info.desc, created: Date.now() });
     toast('Added to the Community board.','ok');
   } catch(e) { toast('Could not add it to the Community board. Please try again.','err'); }
 }
@@ -13239,12 +13270,30 @@ async function loadCommunityBoard() {
       var card = document.createElement('div'); card.className = 'comm-card';
       var img = document.createElement('img'); img.src = p.image; img.alt = 'Community QR code design'; img.loading = 'lazy';
       card.appendChild(img);
+      // WHY textContent: titles/descriptions are user-typed and public.
+      var tEl = document.createElement('div'); tEl.className = 'comm-title';
+      var dEl = document.createElement('div'); dEl.className = 'comm-desc';
+      function paintInfo(){ tEl.textContent = p.title || ''; tEl.style.display = p.title ? '' : 'none';
+                            dEl.textContent = p.desc || ''; dEl.style.display = p.desc ? '' : 'none'; }
+      paintInfo();
+      card.appendChild(tEl); card.appendChild(dEl);
       var meta = document.createElement('div'); meta.className = 'comm-meta';
       meta.textContent = (p.type === 'dynamic' ? 'Dynamic' : 'Static') + (p.created ? ' · ' + new Date(p.created).toLocaleDateString() : '');
       card.appendChild(meta);
       // WHY owner-only delete for dynamic (Hali), plus admin for written removal requests.
       var mine = window._user && p.uid && p.uid === window._user.uid;
       if (mine || window._isAdmin) {
+        var btnRow = document.createElement('div'); btnRow.style.cssText = 'display:flex;gap:8px;';
+        var edit = document.createElement('button'); edit.type = 'button'; edit.className = 'act-btn'; edit.style.fontSize = '.7rem';
+        edit.textContent = 'Edit';
+        edit.onclick = async function(){
+          var v = await communityInfoDialog(p.title, p.desc, 'Save');
+          if (!v) return;
+          try { await fb.updateDoc(fb.doc(fb.db,'community_posts',p.id), { title: v.title, desc: v.desc });
+                p.title = v.title; p.desc = v.desc; paintInfo(); toast('Saved.','ok'); }
+          catch(e) { toast('Could not save. Please try again.','err'); }
+        };
+        btnRow.appendChild(edit);
         var del = document.createElement('button'); del.type = 'button'; del.className = 'act-btn act-btn-danger'; del.style.fontSize = '.7rem';
         del.textContent = 'Delete';
         del.onclick = async function(){
@@ -13252,7 +13301,8 @@ async function loadCommunityBoard() {
           try { await fb.deleteDoc(fb.doc(fb.db,'community_posts',p.id)); card.remove(); toast('Removed from the Community board.','ok'); }
           catch(e) { toast('Could not delete it. Please try again.','err'); }
         };
-        card.appendChild(del);
+        btnRow.appendChild(del);
+        card.appendChild(btnRow);
       }
       grid.appendChild(card);
     });
@@ -14050,6 +14100,43 @@ var _confirmResolve = null;
 // refreshDynamicDesign below reuse this same modal for a non-delete "are
 // you sure", where a button that says "Delete" would be actively
 // misleading about what it's about to do.
+// WHY promise-based like brandedConfirm: the add flows just await one
+// result -- null = cancelled, otherwise {title, desc} (may be empty).
+var _commPostResolve = null, _commInfoResolve = null;
+function communityPostDialog(message) {
+  return new Promise(function(resolve){
+    document.getElementById('comm-post-msg').textContent = message;
+    _commPostResolve = resolve;
+    openModal('comm-post-modal');
+  });
+}
+function resolveCommPost(result) {
+  closeModal('comm-post-modal');
+  if (_commPostResolve) { var r=_commPostResolve; _commPostResolve=null; r(result); }
+}
+// WHY hand the first dialog's promise to the second: "Add title &
+// description" swaps pop-ups, and Post there finishes the same add.
+function commPostAddInfo() {
+  var r = _commPostResolve; _commPostResolve = null;
+  closeModal('comm-post-modal');
+  communityInfoDialog('', '', 'Post').then(function(v){ if (r) r(v); });
+}
+function communityInfoDialog(title, desc, btnLabel) {
+  return new Promise(function(resolve){
+    document.getElementById('comm-info-title').value = title || '';
+    document.getElementById('comm-info-desc').value = desc || '';
+    document.getElementById('comm-info-btn').textContent = btnLabel || 'Save';
+    _commInfoResolve = resolve;
+    openModal('comm-info-modal');
+    setTimeout(function(){ document.getElementById('comm-info-title').focus(); }, 50);
+  });
+}
+function resolveCommInfo(ok) {
+  var v = ok ? { title: document.getElementById('comm-info-title').value.trim().slice(0,80),
+                 desc: document.getElementById('comm-info-desc').value.trim().slice(0,300) } : null;
+  closeModal('comm-info-modal');
+  if (_commInfoResolve) { var r=_commInfoResolve; _commInfoResolve=null; r(v); }
+}
 function brandedConfirm(message, confirmLabel){
   return new Promise(function(resolve){
     document.getElementById('confirm-modal-msg').textContent = message;
