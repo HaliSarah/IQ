@@ -70,7 +70,8 @@ main{max-width:1100px;margin:0 auto;padding:20px 24px 0;width:100%;flex:1;}
 /* WHY green: Hali -- Edit styled like Delete, in the same green as the Dynamic tag. */
 .act-btn.green{color:var(--green);border-color:var(--green);}
 .req-link{font-size:.68rem;color:var(--muted);text-decoration:underline;cursor:pointer;background:none;border:none;font-family:inherit;}
-.req-box{margin:40px auto 0;max-width:720px;background:var(--panel);border:1px solid var(--line);border-radius:var(--r);padding:24px;}
+.req-gold{color:var(--gold2) !important;text-decoration:underline;}
+.req-box{background:var(--panel);border-radius:var(--r);padding:24px;max-height:90vh;overflow:auto;}
 .req-box h2{font-family:'Cinzel',serif;font-size:1.1rem;color:var(--gold2);margin-bottom:6px;}
 .req-box label{display:block;font-size:.78rem;color:var(--muted);margin:10px 0 4px;}
 .req-box input,.req-box select,.req-box textarea{width:100%;padding:9px 11px;border-radius:7px;border:1px solid #666;background:#333;color:var(--white);font-family:inherit;font-size:.88rem;}
@@ -112,25 +113,13 @@ footer a{color:var(--muted);} footer a:hover{color:var(--white);}
 <header>
   <div class="eyebrow">Shared by the Community</div>
   <h1>Community Inspiration</h1>
-  <p>Custom QR code designs made with the I.Q. Productionz QR Code Platform. Find an idea you like, then make your own.</p>
-  <button type="button" class="share-btn" onclick="sharePage()">Share this page</button>
+  <!-- WHY two lines in this order: Hali's wording/order; Share button removed at her request. -->
+  <p>Find an idea you like, then make your own.<br>Custom QR code designs made with the I.Q. Productionz QR Code Platform.</p>
 </header>
 
 <main>
   <div id="status">Loading designs…</div>
   <div class="grid" id="grid"></div>
-
-  <section class="req-box" id="req-box">
-    <h2>Request a Change or Removal</h2>
-    <p style="font-size:.84rem;color:var(--muted);">Static posts can't be edited or deleted by visitors. Use this form and we'll take care of it. Dynamic code owners can edit or delete their own posts while signed in.</p>
-    <label for="r-email">Your email</label><input type="email" id="r-email" maxlength="120" placeholder="you@example.com">
-    <label for="r-post">Which design (use "Request a change or removal" under it to fill this in)</label><input type="text" id="r-post" maxlength="200" placeholder="Design title or date posted">
-    <label for="r-type">Request</label>
-    <select id="r-type"><option>Remove my design</option><option>Change the title or description</option><option>Other</option></select>
-    <label for="r-msg">Details</label><textarea id="r-msg" rows="4" maxlength="1000" placeholder="What should change?"></textarea>
-    <button type="button" class="mic-btn" id="r-mic">🎤 Speak</button>
-    <button type="button" class="act-btn gold" style="margin-top:14px;padding:10px 18px;font-size:.84rem;" id="r-send" onclick="sendRequest()">Send Request</button>
-  </section>
 
   <section class="cta-box">
     <h2>Make Your Own</h2>
@@ -143,7 +132,7 @@ footer a{color:var(--muted);} footer a:hover{color:var(--white);}
   <div style="display:flex;gap:20px;justify-content:center;flex-wrap:wrap;margin-bottom:8px;">
     <a href="/QRCode/">Generator</a><a href="/QRCode/Features/">Features</a><a href="/QRCode/FAQ/">FAQ</a>
   </div>
-  © I.Q. Productionz · Static posts are removed by written request only.
+  © I.Q. Productionz · Static posts are removed by <a href="javascript:void(0)" id="req-open" class="req-gold" onclick="openReq()">written request</a><span id="req-plain" style="display:none;">written request</span> only.
 </footer>
 
 <!-- Edit title & description (owners + admin) -->
@@ -168,6 +157,22 @@ footer a{color:var(--muted);} footer a:hover{color:var(--white);}
       <button class="act-btn danger" style="flex:1;" onclick="closeConfirm(true)">Delete</button>
     </div>
   </div>
+</div>
+<!-- WHY a pop-up, not a section on the page: Hali -- keep it subtle; it opens
+     from the gold "written request" link in the footer (visitors only). -->
+<div class="modal-bg" id="req-modal">
+  <div class="modal req-box" id="req-box" style="max-width:520px;margin:0;">
+    <button type="button" onclick="closeReq()" style="float:right;background:none;border:none;color:var(--muted);font-size:1.1rem;cursor:pointer;">✕</button>
+    <h2>Request a Change or Removal</h2>
+    <p style="font-size:.84rem;color:var(--muted);">Static posts can't be edited or deleted by visitors. Use this form and we'll take care of it. Dynamic code owners can edit or delete their own posts while signed in.</p>
+    <label for="r-email">Your email</label><input type="email" id="r-email" maxlength="120" placeholder="you@example.com">
+    <label for="r-post">Which design (use "Request a change or removal" under it to fill this in)</label><input type="text" id="r-post" maxlength="200" placeholder="Design title or date posted">
+    <label for="r-type">Request</label>
+    <select id="r-type"><option>Remove my design</option><option>Change the title or description</option><option>Other</option></select>
+    <label for="r-msg">Details</label><textarea id="r-msg" rows="4" maxlength="1000" placeholder="What should change?"></textarea>
+    <button type="button" class="mic-btn" id="r-mic">🎤 Speak</button>
+    <button type="button" class="act-btn gold" style="margin-top:14px;padding:10px 18px;font-size:.84rem;" id="r-send" onclick="sendRequest()">Send Request</button>
+    </div>
 </div>
 <div id="toast"></div>
 
@@ -205,6 +210,8 @@ footer a{color:var(--muted);} footer a:hover{color:var(--white);}
   function askDelete(){ document.getElementById('confirm-modal').classList.add('open'); return new Promise(r=>confirmResolve=r); }
   window.closeConfirm=function(ok){ document.getElementById('confirm-modal').classList.remove('open'); if (confirmResolve){ const r=confirmResolve; confirmResolve=null; r(ok); } };
 
+  window.openReq=function(){ document.getElementById('req-modal').classList.add('open'); setTimeout(()=>document.getElementById('r-email').focus(),50); };
+  window.closeReq=function(){ document.getElementById('req-modal').classList.remove('open'); };
   window.sendRequest=async function(){
     const email=document.getElementById('r-email').value.trim(), post=document.getElementById('r-post').value.trim();
     const type=document.getElementById('r-type').value, msg=document.getElementById('r-msg').value.trim();
@@ -220,6 +227,7 @@ footer a{color:var(--muted);} footer a:hover{color:var(--white);}
       });
       toast('Request sent. We will follow up by email.');
       ['r-post','r-msg'].forEach(id=>document.getElementById(id).value='');
+      closeReq();
     } catch(e){ toast('Could not send right now. Please email SarahParsons@IQProductionz.com.'); }
     btn.disabled=false;
   };
@@ -248,9 +256,10 @@ footer a{color:var(--muted);} footer a:hover{color:var(--white);}
       card.appendChild(m);
       // WHY a request link on static posts: they have no owner account, so a
       // written request is the only way to change or remove them (Hali).
-      if (p.type!=='dynamic'){
+      // WHY !user: Hali -- signed-in users manage their own posts, so no request option for them.
+      if (p.type!=='dynamic' && !user){
         const rq=document.createElement('button'); rq.type='button'; rq.className='req-link'; rq.textContent='Request a change or removal';
-        rq.onclick=()=>{ document.getElementById('r-post').value=p.id + (p.title ? ' (' + p.title + ')' : ''); document.getElementById('req-box').scrollIntoView({behavior:'smooth'}); document.getElementById('r-email').focus(); };
+        rq.onclick=()=>{ document.getElementById('r-post').value=p.id + (p.title ? ' (' + p.title + ')' : ''); openReq(); };
         card.appendChild(rq);
       }
       // WHY owner-only for dynamic posts (Hali), plus admin for written removal requests.
@@ -286,6 +295,10 @@ footer a{color:var(--muted);} footer a:hover{color:var(--white);}
   // WHY re-render on sign-in state: owners/admin buttons depend on who is signed in.
   onAuthStateChanged(auth, async u=>{
     user=u||null; isAdmin=false;
+    // WHY hide the request form when signed in: dynamic users edit/delete their own posts (Hali).
+    document.getElementById('req-open').style.display = user ? 'none' : '';
+    document.getElementById('req-plain').style.display = user ? '' : 'none';
+    if (user) closeReq();
     if (u && u.email){ try { isAdmin = (await sha256Hex(u.email.trim().toLowerCase()))===ADMIN_EMAIL_HASH; } catch(e){} }
     if (posts.length) render();
   });
