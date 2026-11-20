@@ -6,7 +6,7 @@
   Modified By: Claude (2026-11-18: Heart/frame edge clipping fix; Random dot colors 2-10 w/ count dropdown + Shuffle;
                asymmetric corners no longer turn black when one corner switches to Solid;
                floating corner picker while Asymmetric Corners is on;
-               2026-11-20: Inner Dot Style + Corner Style "Apply to all corners" (asymmetric only, gold); Inner Dot Size + Random Sizing moved under Inner Dot Style, shown with Asymmetric on or off; floating Refresh Design / Undo;
+               2026-11-20: Community Inspiration board (public posts, static no-account, dynamic owner delete); Inner Dot Style + Corner Style "Apply to all corners" (asymmetric only, gold); Inner Dot Size + Random Sizing moved under Inner Dot Style, shown with Asymmetric on or off; floating Refresh Design / Undo;
                Reflect Inner Dot (Vertical/Horizontal, per corner when asymmetric);
                main-dot orientation buttons back (click = all, click again = off, double-click = random mix) (Reflect Dots removed);
                floating bars always side by side: desktop refresh+undo top-left / corners top-right, phone refresh+undo top-left / corners bottom;
@@ -346,6 +346,17 @@ nav{display:flex;justify-content:space-between;align-items:center;padding:calc(1
    don't actually scan (see the per-shape scan testing in drawFrame/
    computeFrameInnerBox's WHY) — Hali wants that risk impossible to miss
    right where someone is about to download, not buried in a tooltip. */
+/* WHY light gray with a thinner, lighter gray border + matching text: Hali's
+   exact spec for the Community buttons, so they read as secondary to the gold
+   Generate/Save actions. */
+.comm-btn{background:#8f8f8f;border:1px solid #e4e4e4;color:#e4e4e4;border-radius:8px;font-family:'Raleway',sans-serif;font-weight:700;cursor:pointer;transition:filter .2s;}
+.comm-btn:hover{filter:brightness(1.12);}
+.comm-btn-top{margin-left:auto;align-self:center;padding:7px 16px;font-size:.78rem;}
+.comm-btn-full{width:100%;padding:13px;font-size:.9rem;margin:10px 0 4px;}
+.comm-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:18px;}
+.comm-card{background:var(--panel);border:1px solid var(--line);border-radius:var(--r);padding:14px;display:flex;flex-direction:column;align-items:center;gap:8px;}
+.comm-card img{width:100%;height:auto;background:#fff;border-radius:6px;}
+.comm-meta{font-size:.68rem;color:var(--muted);}
 .scan-warning{color:#c0392b;font-weight:800;text-transform:uppercase;text-align:center;font-size:.8rem;letter-spacing:.03em;line-height:1.5;margin:10px 0;}
 
 /* QR RESULT */
@@ -363,9 +374,13 @@ nav{display:flex;justify-content:space-between;align-items:center;padding:calc(1
 .dash-header h2{font-family:'Cinzel',serif;font-size:1.3rem;font-weight:600;}
 .qr-item{background:var(--panel);border:1px solid var(--line);border-radius:var(--r);padding:20px;margin-bottom:14px;display:flex;gap:20px;align-items:center;flex-wrap:wrap;}
 .qr-item-qr{flex-shrink:0;background:#fff;padding:8px;border-radius:6px;width:72px;height:72px;display:flex;align-items:center;justify-content:center;}
-.qr-item-body{flex:1;min-width:0;}
+/* WHY flex-basis auto (content width) instead of 0: Hali -- My Codes titles
+   and links were wrapping on desktop. The body now asks for its full one-line
+   width, so the action buttons drop to the next row first; text only wraps
+   when the screen is narrower than the line itself. */
+.qr-item-body{flex:1 1 auto;min-width:0;}
 .qr-item-name{font-weight:600;font-size:.92rem;margin-bottom:4px;}
-.qr-item-url{font-size:.78rem;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:400px;}
+.qr-item-url{font-size:.78rem;color:var(--muted);overflow-wrap:anywhere;} /* WHY: whole link shown, no 400px cut-off (Hali); wraps only when too small */
 .qr-item-type{display:inline-block;padding:2px 8px;border-radius:10px;font-size:.65rem;font-weight:700;margin-left:8px;font-family:'Cinzel',serif;}
 .type-static{background:rgba(201,138,46,.12);color:var(--gold2);}
 .type-dynamic{background:rgba(106,191,123,.12);color:var(--green);}
@@ -681,6 +696,8 @@ footer a{color:var(--muted);}footer a:hover{color:var(--white);}
     <div class="tab-row">
       <button class="tab" id="tab-static" onclick="switchTab('static')">Static — Free Forever</button>
       <button class="tab active" id="tab-dynamic" onclick="switchTab('dynamic')">Dynamic — Free to Start</button>
+      <!-- WHY right side of the tab row: Hali -- "the community inspirational board button should be on the right side when you get to the generator." -->
+      <button type="button" class="comm-btn comm-btn-top" onclick="showView('community')">Community Inspiration</button>
     </div>
 
     <!-- STATIC -->
@@ -1321,6 +1338,8 @@ footer a{color:var(--muted);}footer a:hover{color:var(--white);}
           </div>
         </div><!-- end design-grid -->
 
+        <!-- WHY here, full width, before the scan warning: Hali's placement for Static (no account needed to post). -->
+        <button type="button" class="comm-btn comm-btn-full" onclick="addStaticToCommunity()">Add my design to the community</button>
         <div class="scan-warning">Make sure code scans before you download (some combinations don't work)</div>
         <button class="gen-btn" onclick="generateCustomQR()">Generate QR Code</button>
 
@@ -2023,6 +2042,21 @@ footer a{color:var(--muted);}footer a:hover{color:var(--white);}
      and renderNav's matching display rule), not gated by window._isAdmin.
      Kept as its own view/functions rather than reusing the admin ones so
      the admin tool/button/view above is never touched by this change. -->
+<!-- COMMUNITY INSPIRATION — Hali: a public board of designs users choose to
+     publish. View only (no "use this design"). Posts go live right away and
+     scan to the poster's real link. Dynamic owners can delete their own;
+     static posts stay unless a written removal request is made (admin can
+     delete). Filled in by loadCommunityBoard(). -->
+<div class="view" id="view-community">
+  <div class="section" style="padding-bottom:64px;">
+    <h2 class="section-title">Community Inspiration</h2>
+    <p class="section-sub">QR code designs shared by people using the platform. Make your own in the Generator and add it here.</p>
+    <div id="comm-status" style="font-size:.82rem;color:var(--muted);margin:10px 0 18px;">Loading…</div>
+    <div class="comm-grid" id="comm-grid"></div>
+    <div style="text-align:center;margin-top:36px;"><button class="gen-btn" style="max-width:360px;" onclick="navToGenerator()">Make Your Own</button></div>
+  </div>
+</div>
+
 <div class="view" id="view-my-shapes">
   <div class="section" style="padding-bottom:48px;">
     <h2 class="section-title">Upload Your Own Design</h2>
@@ -10448,6 +10482,7 @@ function showView(name) {
   if (name==='dashboard') showDashboard();
   if (name==='admin-shapes') { renderAdminShapesView(); if (window._isAdmin) adminLoadShapeRequests(); }
   if (name==='my-shapes') renderMyShapesView();
+  if (name==='community') loadCommunityBoard();
 }
 function requireAuth(dest) { if(!window._user){openAuthModal();return;} showView(dest); }
 function switchTab(t) {
@@ -11979,6 +12014,15 @@ function buildQRItem(data) {
   trackBtn.onclick=function(){toggleTrackPanel(data.slug);};
   [dlBtn,changeBtn,statsBtn,trackBtn].forEach(b=>actions.appendChild(b));
   div.appendChild(actions);
+  // WHY a full-width row appended last with the button pushed right: Hali
+  // wants "Add to Community" at the bottom right of each My Codes card, and
+  // it must stay there even when the Download/Stats panels open below.
+  var commRow=document.createElement('div'); commRow.style.cssText='flex-basis:100%;display:flex;justify-content:flex-end;order:99;';
+  var commBtn=document.createElement('button'); commBtn.type='button'; commBtn.className='comm-btn'; commBtn.style.cssText='padding:6px 14px;font-size:.72rem;';
+  commBtn.textContent='Add to Community';
+  commBtn.onclick=function(){addDynamicToCommunity(data);};
+  commRow.appendChild(commBtn);
+  div.appendChild(commRow);
   var tp=document.createElement('div'); tp.className='dl-panel track-panel'; tp.id='trackpanel-'+data.slug;
   tp.innerHTML=trackPanelHtml(data);
   div.appendChild(tp);
@@ -13131,6 +13175,88 @@ async function deleteOneQRDoc(slug) {
     }
   } catch(e) { /* non-fatal — the code itself still gets deleted below */ }
   await fb.deleteDoc(fb.doc(fb.db,'qrcodes',slug));
+  // WHY: a deleted code's board post would scan to a dead link. Best-effort.
+  try { await fb.deleteDoc(fb.doc(fb.db,'community_posts','dyn_'+slug)); } catch(e) {}
+}
+
+// ── COMMUNITY INSPIRATION BOARD ─────────────────────────────────────────────
+// WHY a PNG snapshot stored on the post (not the design settings): the board
+// is view only, and an image shows exactly what the poster saw, scanning to
+// their real link (Hali's choice), with no re-render cost per visitor.
+// WHY 400px: crisp enough on the board while staying well under Firestore's
+// 1 MB per-document limit.
+var COMM_IMG_SIZE = 400;
+var COMM_MAX_CHARS = 900000;
+async function communityImageFrom(url, ec, designOrPrefix) {
+  var c = document.createElement('canvas');
+  c.width = COMM_IMG_SIZE; c.height = COMM_IMG_SIZE;
+  var ok = await renderQRCore(c, url, COMM_IMG_SIZE, ec || 'M', designOrPrefix);
+  if (ok === false) throw new Error('render failed');
+  var img = c.toDataURL('image/png');
+  if (img.length > COMM_MAX_CHARS) img = c.toDataURL('image/jpeg', 0.92); // WHY: fallback for very colorful designs
+  if (img.length > COMM_MAX_CHARS) throw new Error('image too large');
+  return img;
+}
+// WHY no sign-in for Static: Hali -- "no account, their design is just saved
+// to that page"; static posts stay "forever unless written request is made".
+async function addStaticToCommunity() {
+  var url = (document.getElementById('s-url').value || '').trim();
+  if (!url) { toast('Enter your URL or text first.','err'); return; }
+  var ok = await brandedConfirm('Add this design to the Community Inspiration board? It will be public and scan to: ' + url + '. Static posts can only be removed by written request.', 'Add to Community');
+  if (!ok) return;
+  try {
+    var ecEl = document.getElementById('s-ec');
+    var img = await communityImageFrom(url, ecEl ? ecEl.value : 'M', 's');
+    await window._fb.addDoc(window._fb.collection(window._fb.db,'community_posts'), { image: img, type: 'static', created: Date.now() });
+    toast('Added to the Community board.','ok');
+  } catch(e) { toast('Could not add it to the Community board. Please try again.','err'); }
+}
+// WHY doc id dyn_<slug>: one post per dynamic code -- adding again just
+// refreshes it with the current design instead of making duplicates.
+async function addDynamicToCommunity(data) {
+  if (!window._user) { openAuthModal(); return; }
+  var ok = await brandedConfirm('Add "' + (data.name||'this code') + '" to the Community Inspiration board? It will be public and scan to your code. You can delete it from the board any time.', 'Add to Community');
+  if (!ok) return;
+  try {
+    var img = await communityImageFrom(BASE_REDIRECT + data.slug, (data.design && data.design.ec) || 'M', data.design || DEFAULT_DESIGN);
+    var fb = window._fb;
+    await fb.setDoc(fb.doc(fb.db,'community_posts','dyn_'+data.slug), { image: img, type: 'dynamic', uid: window._user.uid, slug: data.slug, created: Date.now() });
+    toast('Added to the Community board.','ok');
+  } catch(e) { toast('Could not add it to the Community board. Please try again.','err'); }
+}
+async function loadCommunityBoard() {
+  var grid = document.getElementById('comm-grid'), status = document.getElementById('comm-status');
+  if (!grid) return;
+  grid.innerHTML = ''; status.textContent = 'Loading…';
+  try {
+    var fb = window._fb;
+    var snap = await fb.getDocs(fb.collection(fb.db,'community_posts'));
+    // WHY sort here: newest first without needing a Firestore index.
+    var posts = snap.docs.map(function(d){ var o = d.data(); o.id = d.id; return o; })
+      .sort(function(a,b){ return (b.created||0) - (a.created||0); });
+    status.textContent = posts.length ? '' : 'No designs yet. Be the first to add yours.';
+    posts.forEach(function(p){
+      var card = document.createElement('div'); card.className = 'comm-card';
+      var img = document.createElement('img'); img.src = p.image; img.alt = 'Community QR code design'; img.loading = 'lazy';
+      card.appendChild(img);
+      var meta = document.createElement('div'); meta.className = 'comm-meta';
+      meta.textContent = (p.type === 'dynamic' ? 'Dynamic' : 'Static') + (p.created ? ' · ' + new Date(p.created).toLocaleDateString() : '');
+      card.appendChild(meta);
+      // WHY owner-only delete for dynamic (Hali), plus admin for written removal requests.
+      var mine = window._user && p.uid && p.uid === window._user.uid;
+      if (mine || window._isAdmin) {
+        var del = document.createElement('button'); del.type = 'button'; del.className = 'act-btn act-btn-danger'; del.style.fontSize = '.7rem';
+        del.textContent = 'Delete';
+        del.onclick = async function(){
+          if (!(await brandedConfirm('Delete this design from the Community board?', 'Delete'))) return;
+          try { await fb.deleteDoc(fb.doc(fb.db,'community_posts',p.id)); card.remove(); toast('Removed from the Community board.','ok'); }
+          catch(e) { toast('Could not delete it. Please try again.','err'); }
+        };
+        card.appendChild(del);
+      }
+      grid.appendChild(card);
+    });
+  } catch(e) { status.textContent = 'The Community board could not load right now.'; }
 }
 
 // WHY no single-code delete function/button anymore: checking just that
