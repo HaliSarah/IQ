@@ -353,9 +353,6 @@ nav{display:flex;justify-content:space-between;align-items:center;padding:calc(1
 .comm-btn:focus-visible{outline:3px solid var(--white);outline-offset:2px;}
 .comm-btn-top{margin-left:auto;align-self:center;}
 .comm-btn-full{width:100%;padding:13px;margin:10px 0 4px;}
-.comm-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:18px;}
-.comm-card{background:var(--panel);border:1px solid var(--line);border-radius:var(--r);padding:14px;display:flex;flex-direction:column;align-items:center;gap:8px;}
-.comm-card img{width:100%;height:auto;background:#fff;border-radius:6px;}
 .comm-meta{font-size:.68rem;color:var(--muted);}
 .comm-title{font-family:'Cinzel',serif;font-weight:600;font-size:.92rem;color:var(--gold2);text-align:center;}
 .comm-desc{font-size:.78rem;color:var(--white);text-align:center;line-height:1.45;overflow-wrap:anywhere;}
@@ -699,7 +696,7 @@ footer a{color:var(--muted);}footer a:hover{color:var(--white);}
       <button class="tab" id="tab-static" onclick="switchTab('static')">Static — Free Forever</button>
       <button class="tab active" id="tab-dynamic" onclick="switchTab('dynamic')">Dynamic — Free to Start</button>
       <!-- WHY right side of the tab row: Hali -- "the community inspirational board button should be on the right side when you get to the generator." -->
-      <button type="button" class="comm-btn comm-btn-top" onclick="showView('community')">Community Inspiration</button>
+      <a class="comm-btn comm-btn-top" href="/QRCode/Community/" style="text-decoration:none;">Community Inspiration</a>
     </div>
 
     <!-- STATIC -->
@@ -2044,21 +2041,6 @@ footer a{color:var(--muted);}footer a:hover{color:var(--white);}
      and renderNav's matching display rule), not gated by window._isAdmin.
      Kept as its own view/functions rather than reusing the admin ones so
      the admin tool/button/view above is never touched by this change. -->
-<!-- COMMUNITY INSPIRATION — Hali: a public board of designs users choose to
-     publish. View only (no "use this design"). Posts go live right away and
-     scan to the poster's real link. Dynamic owners can delete their own;
-     static posts stay unless a written removal request is made (admin can
-     delete). Filled in by loadCommunityBoard(). -->
-<div class="view" id="view-community">
-  <div class="section" style="padding-bottom:64px;">
-    <h2 class="section-title">Community Inspiration</h2>
-    <p class="section-sub">QR code designs shared by people using the platform. Make your own in the Generator and add it here.</p>
-    <div id="comm-status" style="font-size:.82rem;color:var(--muted);margin:10px 0 18px;">Loading…</div>
-    <div class="comm-grid" id="comm-grid"></div>
-    <div style="text-align:center;margin-top:36px;"><button class="gen-btn" style="max-width:360px;" onclick="navToGenerator()">Make Your Own</button></div>
-  </div>
-</div>
-
 <div class="view" id="view-my-shapes">
   <div class="section" style="padding-bottom:48px;">
     <h2 class="section-title">Upload Your Own Design</h2>
@@ -10513,7 +10495,6 @@ function showView(name) {
   if (name==='dashboard') showDashboard();
   if (name==='admin-shapes') { renderAdminShapesView(); if (window._isAdmin) adminLoadShapeRequests(); }
   if (name==='my-shapes') renderMyShapesView();
-  if (name==='community') loadCommunityBoard();
 }
 function requireAuth(dest) { if(!window._user){openAuthModal();return;} showView(dest); }
 function switchTab(t) {
@@ -13239,7 +13220,7 @@ async function addStaticToCommunity() {
     var ecEl = document.getElementById('s-ec');
     var img = await communityImageFrom(url, ecEl ? ecEl.value : 'M', 's');
     await window._fb.addDoc(window._fb.collection(window._fb.db,'community_posts'), { image: img, type: 'static', title: info.title, desc: info.desc, created: Date.now() });
-    toast('Added to the Community board.','ok');
+    toast('Added to the Community board: iqproductionz.com/QRCode/Community/','ok');
   } catch(e) { toast('Could not add it to the Community board. Please try again.','err'); }
 }
 // WHY doc id dyn_<slug>: one post per dynamic code -- adding again just
@@ -13252,62 +13233,11 @@ async function addDynamicToCommunity(data) {
     var img = await communityImageFrom(BASE_REDIRECT + data.slug, (data.design && data.design.ec) || 'M', data.design || DEFAULT_DESIGN);
     var fb = window._fb;
     await fb.setDoc(fb.doc(fb.db,'community_posts','dyn_'+data.slug), { image: img, type: 'dynamic', uid: window._user.uid, slug: data.slug, title: info.title, desc: info.desc, created: Date.now() });
-    toast('Added to the Community board.','ok');
+    toast('Added to the Community board: iqproductionz.com/QRCode/Community/','ok');
   } catch(e) { toast('Could not add it to the Community board. Please try again.','err'); }
 }
-async function loadCommunityBoard() {
-  var grid = document.getElementById('comm-grid'), status = document.getElementById('comm-status');
-  if (!grid) return;
-  grid.innerHTML = ''; status.textContent = 'Loading…';
-  try {
-    var fb = window._fb;
-    var snap = await fb.getDocs(fb.collection(fb.db,'community_posts'));
-    // WHY sort here: newest first without needing a Firestore index.
-    var posts = snap.docs.map(function(d){ var o = d.data(); o.id = d.id; return o; })
-      .sort(function(a,b){ return (b.created||0) - (a.created||0); });
-    status.textContent = posts.length ? '' : 'No designs yet. Be the first to add yours.';
-    posts.forEach(function(p){
-      var card = document.createElement('div'); card.className = 'comm-card';
-      var img = document.createElement('img'); img.src = p.image; img.alt = 'Community QR code design'; img.loading = 'lazy';
-      card.appendChild(img);
-      // WHY textContent: titles/descriptions are user-typed and public.
-      var tEl = document.createElement('div'); tEl.className = 'comm-title';
-      var dEl = document.createElement('div'); dEl.className = 'comm-desc';
-      function paintInfo(){ tEl.textContent = p.title || ''; tEl.style.display = p.title ? '' : 'none';
-                            dEl.textContent = p.desc || ''; dEl.style.display = p.desc ? '' : 'none'; }
-      paintInfo();
-      card.appendChild(tEl); card.appendChild(dEl);
-      var meta = document.createElement('div'); meta.className = 'comm-meta';
-      meta.textContent = (p.type === 'dynamic' ? 'Dynamic' : 'Static') + (p.created ? ' · ' + new Date(p.created).toLocaleDateString() : '');
-      card.appendChild(meta);
-      // WHY owner-only delete for dynamic (Hali), plus admin for written removal requests.
-      var mine = window._user && p.uid && p.uid === window._user.uid;
-      if (mine || window._isAdmin) {
-        var btnRow = document.createElement('div'); btnRow.style.cssText = 'display:flex;gap:8px;';
-        var edit = document.createElement('button'); edit.type = 'button'; edit.className = 'act-btn'; edit.style.fontSize = '.7rem';
-        edit.textContent = 'Edit';
-        edit.onclick = async function(){
-          var v = await communityInfoDialog(p.title, p.desc, 'Save');
-          if (!v) return;
-          try { await fb.updateDoc(fb.doc(fb.db,'community_posts',p.id), { title: v.title, desc: v.desc });
-                p.title = v.title; p.desc = v.desc; paintInfo(); toast('Saved.','ok'); }
-          catch(e) { toast('Could not save. Please try again.','err'); }
-        };
-        btnRow.appendChild(edit);
-        var del = document.createElement('button'); del.type = 'button'; del.className = 'act-btn act-btn-danger'; del.style.fontSize = '.7rem';
-        del.textContent = 'Delete';
-        del.onclick = async function(){
-          if (!(await brandedConfirm('Delete this design from the Community board?', 'Delete'))) return;
-          try { await fb.deleteDoc(fb.doc(fb.db,'community_posts',p.id)); card.remove(); toast('Removed from the Community board.','ok'); }
-          catch(e) { toast('Could not delete it. Please try again.','err'); }
-        };
-        btnRow.appendChild(del);
-        card.appendChild(btnRow);
-      }
-      grid.appendChild(card);
-    });
-  } catch(e) { status.textContent = 'The Community board could not load right now.'; }
-}
+// WHY no in-app board here: it has its own shareable page at
+// /QRCode/Community/ (Hali), which reads community_posts directly.
 
 // WHY no single-code delete function/button anymore: checking just that
 // one code's box and clicking Delete Selected does the exact same thing —
