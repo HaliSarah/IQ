@@ -5,7 +5,8 @@
   Date:        2026-09-25
   Modified By: Claude (2026-11-18: Heart/frame edge clipping fix; Random dot colors 2-10 w/ count dropdown + Shuffle;
                asymmetric corners no longer turn black when one corner switches to Solid;
-               floating corner picker while Asymmetric Corners is on;
+               floating corner picker while Asymmetric Corners is on (2026-11-19: moved to top, under nav);
+               2026-11-20: floating Refresh Design / Undo bar (top-left, under nav);
                removed 4 Rounded·Point overall shapes; $5/$50 Overall Shape requests + exclusive-shape log/flags;
                2026-11-15: corners default to Match Body, incl. solid color; 2026-11-09: Scan Locations + unique/time/hours/devices/map stats, date range,
                name sort that follows renames, floating toolbar, tracking settings, CSV columns)
@@ -529,10 +530,16 @@ nav{display:flex;justify-content:space-between;align-items:center;padding:calc(1
 .corner-tab-btn.active{background:var(--gold);border-color:var(--gold);color:#fff;font-weight:600;}
 /* WHY a floating copy of the corner tabs: Hali -- "float the corner picker
    when asymmetric is selected so we don't have to keep scrolling back."
-   Pinned bottom-center (her bottom-heavy layout preference, and clear of the
-   draggable floating preview) and shown only while the real tab row is
-   scrolled out of view. */
-.corner-float-bar{position:fixed;left:50%;bottom:16px;transform:translateX(-50%);z-index:999;display:none;align-items:center;gap:6px;padding:8px 10px;background:var(--panel);border:1px solid var(--gold);border-radius:10px;box-shadow:0 8px 30px rgba(0,0,0,.45);}
+   Pinned top-center just under the sticky nav (Hali, 2026-11-19: "floats at
+   the bottom of the screen, not the top" -- she wants it at the top, where
+   the real tabs sit above the panels) and shown only while the real tab
+   row is scrolled out of view. --nav-h is measured in
+   updateFloatingCornerBars so it never hides under the nav. */
+.corner-float-bar{position:fixed;left:50%;top:calc(var(--nav-h,64px) + 10px);transform:translateX(-50%);z-index:999;display:none;align-items:center;gap:6px;padding:8px 10px;background:var(--panel);border:1px solid var(--gold);border-radius:10px;box-shadow:0 8px 30px rgba(0,0,0,.45);}
+.design-float-bar{position:fixed;left:16px;top:calc(var(--nav-h,64px) + 10px);z-index:999;display:none;align-items:center;gap:6px;padding:8px 10px;background:var(--panel);border:1px solid var(--line);border-radius:10px;box-shadow:0 8px 30px rgba(0,0,0,.45);}
+/* WHY top-LEFT for the Refresh/Undo bar: top-center is the floating corner
+   picker and top-right is where the floating preview opens, so the left
+   corner keeps all three visible at once without overlapping. */
 .corner-float-bar span{font-size:.65rem;color:var(--muted);margin-right:2px;white-space:nowrap;}
 .char-options{display:flex;flex-wrap:wrap;gap:5px;}
 .char-opt{width:36px;height:36px;border-radius:6px;border:1px solid var(--line);background:var(--panel);display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:.95rem;transition:all .2s;user-select:none;}
@@ -1169,8 +1176,6 @@ footer a{color:var(--muted);}footer a:hover{color:var(--white);}
             <div class="field">
               <label>Inner Dot Style</label>
               <div class="shape-grid" id="finder-dot-style-grid"></div>
-              <!-- WHY: Hali -- "apply to all corners button for the inner dot style only visible when asymmetric corners is selected." Shown/hidden by syncAsymmetricCornersUI. -->
-              <button type="button" id="s-inner-apply-all" class="act-btn" style="display:none;margin-top:6px;font-size:.72rem;" onclick="applyInnerDotToAllCorners('s')">Apply to all corners</button>
               <p style="font-size:.66rem;color:var(--muted);margin-top:4px;"><strong style="color:var(--gold2);">⚠ = Caution</strong> — shapes marked with this symbol below can scan less reliably as a corner eye on some devices (still fine as a regular dot). Worth a real test scan before you commit to one.</p>
               <!-- Twin of s-crescent-orientation-row above the main Dot Type
                    grid -- same shared setting, see that row's own WHY.
@@ -1691,8 +1696,6 @@ footer a{color:var(--muted);}footer a:hover{color:var(--white);}
             <div class="field">
               <label>Inner Dot Style</label>
               <div class="shape-grid" id="d-finder-dot-style-grid"></div>
-              <!-- WHY: Hali -- "apply to all corners button for the inner dot style only visible when asymmetric corners is selected." Shown/hidden by syncAsymmetricCornersUI. -->
-              <button type="button" id="d-inner-apply-all" class="act-btn" style="display:none;margin-top:6px;font-size:.72rem;" onclick="applyInnerDotToAllCorners('d')">Apply to all corners</button>
               <p style="font-size:.66rem;color:var(--muted);margin-top:4px;"><strong style="color:var(--gold2);">⚠ = Caution</strong> — shapes marked with this symbol below can scan less reliably as a corner eye on some devices (still fine as a regular dot). Worth a real test scan before you commit to one.</p>
               <!-- Mirrors s-finder-crescent-orientation-row; see its WHY
                    there. -->
@@ -6176,28 +6179,6 @@ function setAsymmetricCorners(prefix, checked) {
 // shared Corner Style / Inner Dot Style grids at whatever the currently
 // active corner tab resolves to (an override, or the global style when
 // turning OFF so the grids go back to showing the one shared choice).
-// WHY copy the active corner's EFFECTIVE inner style (its own pick, or the
-// shared one it falls back to) plus its Crescent orientation: that's what
-// the user is looking at in the picker, so "apply to all" should make the
-// other two corners match exactly what they see. Only the inner dot shape
-// is copied -- outer style, colors and sizes stay per-corner on purpose.
-function applyInnerDotToAllCorners(prefix) {
-  prefix = prefix || 's';
-  if (!_asymmetricCorners[prefix]) return;
-  var active = _activeCornerEdit[prefix] || 'tl';
-  var globalInner = prefix==='s' ? _finderDotStyle : _finderDotStyleD;
-  var key = _finderDotStyleCorner[prefix][active] || globalInner;
-  var orient = _crescentOrientationCorner[prefix][active];
-  ['tl','tr','bl'].forEach(function(c){
-    _finderDotStyleCorner[prefix][c] = key;
-    _crescentOrientationCorner[prefix][c] = orient;
-  });
-  syncCrescentOrientationTiles(prefix);
-  syncShapeReflectButtons(prefix);
-  scheduleLivePreview(prefix);
-  toast('Inner dot style applied to all 3 corners.','ok');
-}
-
 function syncAsymmetricCornersUI(prefix) {
   prefix = prefix || 's';
   var on = _asymmetricCorners[prefix];
@@ -6209,8 +6190,6 @@ function syncAsymmetricCornersUI(prefix) {
   scheduleFloatingCornerUpdate();
   if (sizeRow) sizeRow.style.display = on ? 'block' : 'none';
   if (randomRow) randomRow.style.display = on ? 'block' : 'none';
-  var applyAllBtn = document.getElementById(prefix+'-inner-apply-all');
-  if (applyAllBtn) applyAllBtn.style.display = on ? 'inline-block' : 'none';
   if (on) {
     setActiveCornerEdit(prefix, _activeCornerEdit[prefix] || 'tl');
   } else {
@@ -6327,8 +6306,13 @@ function updateFloatingCornerBars() {
     var show = false;
     if (_asymmetricCorners[prefix] && row.offsetParent !== null) {
       var vh = window.innerHeight || document.documentElement.clientHeight;
+      // WHY measure the nav: it's sticky, so the bar must sit below it, and a
+      // tab row tucked UNDER the nav counts as out of view.
+      var nav = document.querySelector('nav');
+      var navH = nav ? nav.getBoundingClientRect().height : 0;
+      document.documentElement.style.setProperty('--nav-h', navH + 'px');
       var r = row.getBoundingClientRect();
-      var rowVisible = r.bottom > 0 && r.top < vh;
+      var rowVisible = r.bottom > navH && r.top < vh;
       var card = row.closest('.gen-card') || row.parentElement;
       var cr = card.getBoundingClientRect();
       var cardVisible = cr.bottom > 80 && cr.top < vh - 80;
@@ -10191,6 +10175,7 @@ function requireAuth(dest) { if(!window._user){openAuthModal();return;} showView
 function switchTab(t) {
   // WHY: the other tab's floating corner bar must hide/show with its tab.
   if (typeof scheduleFloatingCornerUpdate === 'function') setTimeout(scheduleFloatingCornerUpdate, 0);
+  if (typeof scheduleFloatingDesignUpdate === 'function') setTimeout(scheduleFloatingDesignUpdate, 0);
   document.getElementById('panel-static').style.display  = t==='static' ?'':'none';
   document.getElementById('panel-dynamic').style.display = t==='dynamic'?'':'none';
   document.getElementById('tab-static').classList.toggle('active', t==='static');
@@ -10773,7 +10758,61 @@ function updateUndoButtonState(prefix) {
   var has = _undoStack[prefix] && _undoStack[prefix].length > 0;
   link.style.opacity = has ? '1' : '.35';
   link.style.pointerEvents = has ? '' : 'none';
+  // Keep the floating copy's Undo in the same enabled/disabled state.
+  var fUndo = document.getElementById(prefix+'-float-undo');
+  if (fUndo) { fUndo.disabled = !has; fUndo.style.opacity = has ? '1' : '.35'; }
 }
+
+// ── FLOATING REFRESH / UNDO ─────────────────────────────────────────────────
+// WHY: Hali -- "can you make the refresh design and undo button floating?"
+// Both live up in the first field's label, so after scrolling down to the
+// style/color panels they were a long scroll away. Same approach as the
+// floating corner picker: buttons that call the exact same functions as the
+// originals, shown only while those originals are scrolled out of view and
+// the generator is still on screen.
+function buildFloatingDesignBar(prefix) {
+  if (document.getElementById(prefix+'-design-float-bar')) return;
+  var bar = document.createElement('div');
+  bar.id = prefix+'-design-float-bar';
+  bar.className = 'design-float-bar';
+  bar.innerHTML =
+    '<button type="button" class="corner-tab-btn" title="Start this design over">↻ Refresh Design</button>' +
+    '<button type="button" class="corner-tab-btn" id="'+prefix+'-float-undo" title="Undo the last design change">↩ Undo</button>';
+  document.body.appendChild(bar);
+  var btns = bar.querySelectorAll('button');
+  btns[0].addEventListener('click', function(){ if (prefix==='s') refreshStaticDesign(); else refreshDynamicDesign(); });
+  btns[1].addEventListener('click', function(){ undoDesign(prefix); });
+  updateUndoButtonState(prefix);
+}
+function updateFloatingDesignBars() {
+  var nav = document.querySelector('nav');
+  var navH = nav ? nav.getBoundingClientRect().height : 0;
+  document.documentElement.style.setProperty('--nav-h', navH + 'px');
+  var vh = window.innerHeight || document.documentElement.clientHeight;
+  ['s','d'].forEach(function(prefix){
+    buildFloatingDesignBar(prefix);
+    var bar = document.getElementById(prefix+'-design-float-bar');
+    var anchor = document.getElementById(prefix+'-undo-link');
+    if (!bar || !anchor) return;
+    var show = false;
+    // WHY offsetParent: null while this tab's panel is hidden.
+    if (anchor.offsetParent !== null) {
+      var r = anchor.getBoundingClientRect();
+      var anchorVisible = r.bottom > navH && r.top < vh;
+      var card = anchor.closest('.gen-card') || anchor.parentElement;
+      var cr = card.getBoundingClientRect();
+      show = !anchorVisible && cr.bottom > 80 && cr.top < vh - 80;
+    }
+    bar.style.display = show ? 'flex' : 'none';
+  });
+}
+var _designFloatRaf = 0;
+function scheduleFloatingDesignUpdate() {
+  if (_designFloatRaf) return;
+  _designFloatRaf = requestAnimationFrame(function(){ _designFloatRaf = 0; updateFloatingDesignBars(); });
+}
+window.addEventListener('scroll', scheduleFloatingDesignUpdate, { passive: true });
+window.addEventListener('resize', scheduleFloatingDesignUpdate);
 
 function undoDesign(prefix) {
   var stack = _undoStack[prefix];
