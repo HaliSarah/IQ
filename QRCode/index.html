@@ -8,7 +8,7 @@
                floating corner picker while Asymmetric Corners is on;
                2026-11-20: Inner Dot Style "Apply to all corners" (asymmetric only); floating Refresh Design / Undo;
                Reflect Inner Dot (Vertical/Horizontal, per corner when asymmetric);
-               Reflect Dots (Vertical/Horizontal, double-click = both) replaces the 4 Crescent orientation buttons;
+               main-dot orientation buttons back (click = all, click again = off, double-click = random mix) (Reflect Dots removed);
                floating bars: desktop corners right / refresh+undo left, phone refresh+undo top / corners bottom;
                removed 4 Rounded·Point overall shapes; $5/$50 Overall Shape requests + exclusive-shape log/flags;
                2026-11-15: corners default to Match Body, incl. solid color; 2026-11-09: Scan Locations + unique/time/hours/devices/map stats, date range,
@@ -836,11 +836,11 @@ footer a{color:var(--muted);}footer a:hover{color:var(--white);}
                    Only shown while Crescent is actually in play somewhere
                    (see syncCrescentOrientationTiles/isCrescentInUse). -->
               <div id="s-crescent-orientation-row" class="stretch-dir-row" style="display:none;margin-top:8px;flex-wrap:wrap;gap:6px;">
-                <span style="width:100%;font-size:.76rem;color:var(--muted);">Orientation (pick one or more — multiple mix randomly):</span>
-                <button type="button" class="vary-dot-btn crescent-orient-btn" data-orient="tr" data-label="↗ Top Right" onclick="toggleCrescentOrientation('s','tr')" style="padding:6px 12px;font-size:.72rem;">↗ Top Right</button>
-                <button type="button" class="vary-dot-btn crescent-orient-btn" data-orient="br" data-label="↘ Bottom Right" onclick="toggleCrescentOrientation('s','br')" style="padding:6px 12px;font-size:.72rem;">↘ Bottom Right</button>
-                <button type="button" class="vary-dot-btn crescent-orient-btn" data-orient="bl" data-label="↙ Bottom Left" onclick="toggleCrescentOrientation('s','bl')" style="padding:6px 12px;font-size:.72rem;">↙ Bottom Left</button>
-                <button type="button" class="vary-dot-btn crescent-orient-btn" data-orient="tl" data-label="↖ Top Left" onclick="toggleCrescentOrientation('s','tl')" style="padding:6px 12px;font-size:.72rem;">↖ Top Left</button>
+                <span style="width:100%;font-size:.76rem;color:var(--muted);">Orientation: click = all dots that way, click again = off (back to Top Right), double-click = mix that direction in randomly (double-click again to take it out).</span>
+                <button type="button" class="vary-dot-btn crescent-orient-btn" data-orient="tr" data-label="↗ Top Right" onclick="orientClick('s','tr')" ondblclick="orientDblClick('s','tr')" style="padding:6px 12px;font-size:.72rem;">↗ Top Right</button>
+                <button type="button" class="vary-dot-btn crescent-orient-btn" data-orient="br" data-label="↘ Bottom Right" onclick="orientClick('s','br')" ondblclick="orientDblClick('s','br')" style="padding:6px 12px;font-size:.72rem;">↘ Bottom Right</button>
+                <button type="button" class="vary-dot-btn crescent-orient-btn" data-orient="bl" data-label="↙ Bottom Left" onclick="orientClick('s','bl')" ondblclick="orientDblClick('s','bl')" style="padding:6px 12px;font-size:.72rem;">↙ Bottom Left</button>
+                <button type="button" class="vary-dot-btn crescent-orient-btn" data-orient="tl" data-label="↖ Top Left" onclick="orientClick('s','tl')" ondblclick="orientDblClick('s','tl')" style="padding:6px 12px;font-size:.72rem;">↖ Top Left</button>
               </div>
               <!-- REFLECT — Hali: crow/digital dog/Santa/witch hat/pumpkins/
                    music notes/bolt get a simple mirror toggle (see
@@ -1491,11 +1491,11 @@ footer a{color:var(--muted);}footer a:hover{color:var(--white);}
               <!-- CRESCENT ORIENTATION — same control as the Static tab's own
                    s-crescent-orientation-row; see its WHY there. -->
               <div id="d-crescent-orientation-row" class="stretch-dir-row" style="display:none;margin-top:8px;flex-wrap:wrap;gap:6px;">
-                <span style="width:100%;font-size:.76rem;color:var(--muted);">Orientation (pick one or more — multiple mix randomly):</span>
-                <button type="button" class="vary-dot-btn crescent-orient-btn" data-orient="tr" data-label="↗ Top Right" onclick="toggleCrescentOrientation('d','tr')" style="padding:6px 12px;font-size:.72rem;">↗ Top Right</button>
-                <button type="button" class="vary-dot-btn crescent-orient-btn" data-orient="br" data-label="↘ Bottom Right" onclick="toggleCrescentOrientation('d','br')" style="padding:6px 12px;font-size:.72rem;">↘ Bottom Right</button>
-                <button type="button" class="vary-dot-btn crescent-orient-btn" data-orient="bl" data-label="↙ Bottom Left" onclick="toggleCrescentOrientation('d','bl')" style="padding:6px 12px;font-size:.72rem;">↙ Bottom Left</button>
-                <button type="button" class="vary-dot-btn crescent-orient-btn" data-orient="tl" data-label="↖ Top Left" onclick="toggleCrescentOrientation('d','tl')" style="padding:6px 12px;font-size:.72rem;">↖ Top Left</button>
+                <span style="width:100%;font-size:.76rem;color:var(--muted);">Orientation: click = all dots that way, click again = off (back to Top Right), double-click = mix that direction in randomly (double-click again to take it out).</span>
+                <button type="button" class="vary-dot-btn crescent-orient-btn" data-orient="tr" data-label="↗ Top Right" onclick="orientClick('d','tr')" ondblclick="orientDblClick('d','tr')" style="padding:6px 12px;font-size:.72rem;">↗ Top Right</button>
+                <button type="button" class="vary-dot-btn crescent-orient-btn" data-orient="br" data-label="↘ Bottom Right" onclick="orientClick('d','br')" ondblclick="orientDblClick('d','br')" style="padding:6px 12px;font-size:.72rem;">↘ Bottom Right</button>
+                <button type="button" class="vary-dot-btn crescent-orient-btn" data-orient="bl" data-label="↙ Bottom Left" onclick="orientClick('d','bl')" ondblclick="orientDblClick('d','bl')" style="padding:6px 12px;font-size:.72rem;">↙ Bottom Left</button>
+                <button type="button" class="vary-dot-btn crescent-orient-btn" data-orient="tl" data-label="↖ Top Left" onclick="orientClick('d','tl')" ondblclick="orientDblClick('d','tl')" style="padding:6px 12px;font-size:.72rem;">↖ Top Left</button>
               </div>
               <div id="d-shape-reflect-row" class="stretch-dir-row" style="display:none;margin-top:8px;flex-wrap:wrap;gap:6px;"></div>
               <!-- DOT SIZE (Stretch / Vary) — mirrors the Static tab's; see its WHY. -->
@@ -6528,6 +6528,53 @@ function normalizeCrescentOrientation(value) {
   if (typeof value === 'string' && value) return [ CRESCENT_ORIENTATION_MIGRATE[value] || value ];
   return ['tr'];
 }
+// WHY: Reflect Dots stored mirrors (none/H/V/both); these map exactly onto
+// the 4 orientations (tr/tl/br/bl), so old saves convert with no look change.
+function dotReflectToOrient(r) {
+  if (!r || (!r.h && !r.v)) return null;
+  return r.h && r.v ? 'bl' : (r.h ? 'tl' : 'br');
+}
+// ── MAIN DOT ORIENTATION CLICKS ─────────────────────────────────────────────
+// WHY: Hali -- "one click should make all the dots change a second click
+// takes that change off and a doubl-click randomizes the change." The old
+// buttons added to the random mix on EVERY click (the bug). Now:
+//   click        -> every dot faces that way ([key])
+//   click again  -> off, back to the default Top Right (['tr'])
+//   double-click -> adds/removes that direction from the random mix
+// WHY the timer: a double-click fires two clicks first; waiting ~250ms lets
+// orientDblClick cancel them so a double-click never also does a click.
+var _orientClickTimer = { s: 0, d: 0 };
+function orientClick(prefix, key) {
+  prefix = prefix || 's';
+  clearTimeout(_orientClickTimer[prefix]);
+  _orientClickTimer[prefix] = setTimeout(function(){
+    _orientClickTimer[prefix] = 0;
+    var arr = _crescentOrientation[prefix];
+    var onlyThis = arr.length === 1 && arr[0] === key;
+    arr.length = 0;
+    arr.push(onlyThis ? 'tr' : key);
+    syncCrescentOrientationTiles(prefix);
+    if (typeof scheduleLivePreview==='function') scheduleLivePreview(prefix);
+  }, 250);
+}
+function orientDblClick(prefix, key) {
+  prefix = prefix || 's';
+  clearTimeout(_orientClickTimer[prefix]);
+  _orientClickTimer[prefix] = 0;
+  var arr = _crescentOrientation[prefix];
+  var idx = arr.indexOf(key);
+  if (idx > -1) {
+    // WHY keep at least one: an empty pool has no direction to draw.
+    if (arr.length === 1) return;
+    arr.splice(idx, 1);
+    syncCrescentOrientationTiles(prefix);
+    if (typeof scheduleLivePreview==='function') scheduleLivePreview(prefix);
+    return;
+  }
+  // WHY reuse toggleCrescentOrientation for adding: it already carries the
+  // right-triangle top/bottom no-mix guard (those don't scan together).
+  toggleCrescentOrientation(prefix, key);
+}
 // WHY a 3rd 'context' param now: Hali -- "the cresent in the inner dot
 // should be all uniform unless aysemetric is clicked and they are choosing
 // specifically for each corner." The main Dot Type row always edits the one
@@ -6641,7 +6688,7 @@ function effectiveCrescentOrientation(prefix, context) {
 function syncCrescentOrientationTiles(prefix) {
   prefix = prefix || 's';
   [
-    { rowId: prefix==='s' ? 's-crescent-orientation-row' : 'd-crescent-orientation-row', visible: false /* WHY: replaced by Reflect Dots (see _dotReflect) */, picked: effectiveCrescentOrientation(prefix, 'main') },
+    { rowId: prefix==='s' ? 's-crescent-orientation-row' : 'd-crescent-orientation-row', visible: isCrescentInUse(prefix, 'main') /* WHY: Hali asked for these back in place of Reflect Dots */, picked: effectiveCrescentOrientation(prefix, 'main') },
     { rowId: prefix==='s' ? 's-finder-crescent-orientation-row' : 'd-finder-crescent-orientation-row', visible: isCrescentInUse(prefix, 'finder'), picked: effectiveCrescentOrientation(prefix, 'finder') }
   ].forEach(function(cfg){
     var row = document.getElementById(cfg.rowId);
@@ -6796,9 +6843,10 @@ function shapeReflectKeysInUse(prefix, context) {
 function syncShapeReflectButtons(prefix) {
   prefix = prefix || 's';
   [
-    // WHY no entries anymore: the main row is now the always-on
-    // Vertical/Horizontal "Reflect Dots" control (syncDotReflectRow) and the
-    // finder row is "Reflect Inner Dot" (syncFinderReflectRow).
+    // WHY no entries: Hali -- "under the main dots ... we didnt have reflect
+    // options they were orientation options." Main dots get only the 4
+    // orientation buttons; the finder row is "Reflect Inner Dot"
+    // (syncFinderReflectRow), untouched. Saved reflect flags still render.
   ].forEach(function(cfg){
     var row = document.getElementById(cfg.rowId);
     if (!row) return;
@@ -6813,7 +6861,6 @@ function syncShapeReflectButtons(prefix) {
       }).join('');
   });
   syncFinderReflectRow(prefix);
-  syncDotReflectRow(prefix);
 }
 
 // WHY a per-tab string, same gradient-direction value set the body/finder
@@ -8716,8 +8763,12 @@ async function renderQRCore(canvas, url, size, ec, prefix) {
   // settings: the reflect then turns it to the other three directions.
   // Designs saved before Reflect Dots existed (no dotReflect) keep their old
   // orientation pool so they look exactly as saved.
-  _activeCrescentOrientation = settings.dotReflect ? ['tr'] : ((settings.crescentOrientation && settings.crescentOrientation.length) ? settings.crescentOrientation : ['tr']);
-  _activeDotReflect = settings.dotReflect || null;
+  // WHY dotReflectToOrient: Reflect Dots was removed (Hali wanted the 4
+  // orientation buttons back); a design saved during the short time it
+  // existed still faces the way it was saved. Mirror is never applied now.
+  var _rdOri = dotReflectToOrient(settings.dotReflect);
+  _activeCrescentOrientation = _rdOri ? [_rdOri] : ((settings.crescentOrientation && settings.crescentOrientation.length) ? settings.crescentOrientation : ['tr']);
+  _activeDotReflect = null;
   // WHY set here too, same live render-time handoff: drawReflectable (used
   // by crow/digital dog/Santa/witch hat/pumpkins/music notes/bolt) has no
   // idea which tab/saved-design is rendering either -- see
@@ -10774,15 +10825,11 @@ function applyDesignSettings(prefix, design) {
   _finderDotStyleCorner[prefix] = { tl: fdc.tl||null, tr: fdc.tr||null, bl: fdc.bl||null };
   var frf = design.finderReflect || {}, frc = design.finderReflectCorner || {};
   _finderReflect[prefix] = { h: !!frf.h, v: !!frf.v };
-  // WHY map an old single Crescent orientation onto Reflect Dots: re-saving
-  // an older design from the editor should keep its crescent facing the
-  // same way (tr = none, tl = H, br = V, bl = both).
-  if (design.dotReflect) {
-    _dotReflect[prefix] = { h: !!design.dotReflect.h, v: !!design.dotReflect.v };
-  } else {
-    var oldOri = Array.isArray(design.crescentOrientation) && design.crescentOrientation.length === 1 ? design.crescentOrientation[0] : 'tr';
-    _dotReflect[prefix] = { h: oldOri==='tl' || oldOri==='bl', v: oldOri==='br' || oldOri==='bl' };
-  }
+  // WHY: Reflect Dots is gone, so a design saved with it is turned back into
+  // the matching orientation (see dotReflectToOrient) and the flags cleared.
+  var rdOri = dotReflectToOrient(design.dotReflect);
+  if (rdOri) _crescentOrientation[prefix] = [rdOri];
+  _dotReflect[prefix] = { h: false, v: false };
   _finderReflectCorner[prefix] = { tl: frc.tl||null, tr: frc.tr||null, bl: frc.bl||null };
   _finderCornerSize[prefix] = {
     tl: typeof fcs.tl==='number' ? fcs.tl : 0,
