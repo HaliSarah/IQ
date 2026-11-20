@@ -5,8 +5,11 @@
   Date:        2026-09-25
   Modified By: Claude (2026-11-18: Heart/frame edge clipping fix; Random dot colors 2-10 w/ count dropdown + Shuffle;
                asymmetric corners no longer turn black when one corner switches to Solid;
-               floating corner picker while Asymmetric Corners is on (2026-11-19: moved to top, under nav);
-               2026-11-20: floating Refresh Design / Undo bar (top-left, under nav);
+               floating corner picker while Asymmetric Corners is on;
+               2026-11-20: Inner Dot Style "Apply to all corners" (asymmetric only); floating Refresh Design / Undo;
+               Reflect Inner Dot (Vertical/Horizontal, per corner when asymmetric);
+               Reflect Dots (Vertical/Horizontal, double-click = both) replaces the 4 Crescent orientation buttons;
+               floating bars: desktop corners right / refresh+undo left, phone refresh+undo top / corners bottom;
                removed 4 Rounded·Point overall shapes; $5/$50 Overall Shape requests + exclusive-shape log/flags;
                2026-11-15: corners default to Match Body, incl. solid color; 2026-11-09: Scan Locations + unique/time/hours/devices/map stats, date range,
                name sort that follows renames, floating toolbar, tracking settings, CSV columns)
@@ -528,19 +531,26 @@ nav{display:flex;justify-content:space-between;align-items:center;padding:calc(1
 .corner-tab-btn{padding:7px 12px;border:1px solid var(--line);border-radius:6px;background:var(--navy);color:var(--white);font-size:.72rem;cursor:pointer;font-family:'Raleway',sans-serif;transition:all .2s;}
 .corner-tab-btn:hover{border-color:var(--gold);}
 .corner-tab-btn.active{background:var(--gold);border-color:var(--gold);color:#fff;font-weight:600;}
-/* WHY a floating copy of the corner tabs: Hali -- "float the corner picker
-   when asymmetric is selected so we don't have to keep scrolling back."
-   Pinned top-center just under the sticky nav (Hali, 2026-11-19: "floats at
-   the bottom of the screen, not the top" -- she wants it at the top, where
-   the real tabs sit above the panels) and shown only while the real tab
-   row is scrolled out of view. --nav-h is measured in
-   updateFloatingCornerBars so it never hides under the nav. */
-.corner-float-bar{position:fixed;left:50%;top:calc(var(--nav-h,64px) + 10px);transform:translateX(-50%);z-index:999;display:none;align-items:center;gap:6px;padding:8px 10px;background:var(--panel);border:1px solid var(--gold);border-radius:10px;box-shadow:0 8px 30px rgba(0,0,0,.45);}
-.design-float-bar{position:fixed;left:16px;top:calc(var(--nav-h,64px) + 10px);z-index:999;display:none;align-items:center;gap:6px;padding:8px 10px;background:var(--panel);border:1px solid var(--line);border-radius:10px;box-shadow:0 8px 30px rgba(0,0,0,.45);}
-/* WHY top-LEFT for the Refresh/Undo bar: top-center is the floating corner
-   picker and top-right is where the floating preview opens, so the left
-   corner keeps all three visible at once without overlapping. */
-.corner-float-bar span{font-size:.65rem;color:var(--muted);margin-right:2px;white-space:nowrap;}
+/* WHY floating copies of the corner tabs and of Refresh Design / Undo:
+   Hali -- "float the corner picker when asymmetric is selected so we don't
+   have to keep scrolling back" and "make the refresh design and undo button
+   floating." Placement (Hali, 2026-11-20): on DESKTOP the corner picker
+   floats on the right side of the screen and Refresh/Undo on the left,
+   stacked vertically and centered top-to-bottom so they stay out of the
+   nav and the middle of the page; on PHONES (no side room) Refresh/Undo
+   float at the top under the nav and the corner picker at the bottom.
+   Each only shows while its original controls are scrolled out of view. */
+.corner-float-bar,.design-float-bar{position:fixed;z-index:999;display:none;gap:6px;padding:8px;background:var(--panel);border:1px solid var(--gold);border-radius:10px;box-shadow:0 8px 30px rgba(0,0,0,.45);}
+.design-float-bar{border-color:var(--line);}
+.corner-float-bar span{font-size:.65rem;color:var(--muted);white-space:nowrap;text-align:center;}
+.corner-float-bar,.design-float-bar{top:50%;transform:translateY(-50%);flex-direction:column;align-items:stretch;}
+.corner-float-bar{right:16px;}
+.design-float-bar{left:16px;}
+@media (max-width:768px){
+  .corner-float-bar,.design-float-bar{flex-direction:row;align-items:center;left:50%;right:auto;transform:translateX(-50%);}
+  .design-float-bar{top:calc(var(--nav-h,64px) + 10px);}
+  .corner-float-bar{top:auto;bottom:calc(16px + env(safe-area-inset-bottom));}
+}
 .char-options{display:flex;flex-wrap:wrap;gap:5px;}
 .char-opt{width:36px;height:36px;border-radius:6px;border:1px solid var(--line);background:var(--panel);display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:.95rem;transition:all .2s;user-select:none;}
 .char-opt:hover{border-color:var(--gold);}
@@ -1176,6 +1186,8 @@ footer a{color:var(--muted);}footer a:hover{color:var(--white);}
             <div class="field">
               <label>Inner Dot Style</label>
               <div class="shape-grid" id="finder-dot-style-grid"></div>
+              <!-- WHY: Hali -- "apply to all corners button for the inner dot style only visible when asymmetric corners is selected." Shown/hidden by syncAsymmetricCornersUI. -->
+              <button type="button" id="s-inner-apply-all" class="act-btn" style="display:none;margin-top:6px;font-size:.72rem;" onclick="applyInnerDotToAllCorners('s')">Apply to all corners</button>
               <p style="font-size:.66rem;color:var(--muted);margin-top:4px;"><strong style="color:var(--gold2);">⚠ = Caution</strong> — shapes marked with this symbol below can scan less reliably as a corner eye on some devices (still fine as a regular dot). Worth a real test scan before you commit to one.</p>
               <!-- Twin of s-crescent-orientation-row above the main Dot Type
                    grid -- same shared setting, see that row's own WHY.
@@ -1696,6 +1708,8 @@ footer a{color:var(--muted);}footer a:hover{color:var(--white);}
             <div class="field">
               <label>Inner Dot Style</label>
               <div class="shape-grid" id="d-finder-dot-style-grid"></div>
+              <!-- WHY: Hali -- "apply to all corners button for the inner dot style only visible when asymmetric corners is selected." Shown/hidden by syncAsymmetricCornersUI. -->
+              <button type="button" id="d-inner-apply-all" class="act-btn" style="display:none;margin-top:6px;font-size:.72rem;" onclick="applyInnerDotToAllCorners('d')">Apply to all corners</button>
               <p style="font-size:.66rem;color:var(--muted);margin-top:4px;"><strong style="color:var(--gold2);">⚠ = Caution</strong> — shapes marked with this symbol below can scan less reliably as a corner eye on some devices (still fine as a regular dot). Worth a real test scan before you commit to one.</p>
               <!-- Mirrors s-finder-crescent-orientation-row; see its WHY
                    there. -->
@@ -3879,13 +3893,22 @@ function roundRectPath(ctx, x, y, w, h, radii) {
 // or shrink the INNER eye's radius -- the outer ring and gap ring above it
 // stay at the fixed 3.5/2.5-cell radii that keep the finder's 7-module
 // footprint scanner-safe regardless of what this corner's size override is.
+// WHY a render-time global (same pattern as _activeCrescentOrientation):
+// renderQRCore sets it to each corner's reflect right before that corner's
+// drawFinderComposite call, so the shared draw code needs no new params.
+var _activeFinderReflect = null;
 function drawFinderComposite(ctx, x, y, cellSize, outerColor, innerColor, gapColor, outerKey, innerKey, chars, innerGradDescriptor, innerScale) {
   var cx = x+cellSize*3.5, cy = y+cellSize*3.5;
   var outerFn = FINDER_RING_SHAPES[outerKey] || FINDER_RING_SHAPES.square;
   outerFn(ctx, cx, cy, cellSize*3.5, outerColor);
   outerFn(ctx, cx, cy, cellSize*2.5, gapColor || '#ffffff');
   var innerR = cellSize*1.5*(typeof innerScale==='number' ? innerScale : 1);
+  // WHY mirror around the eye's own center: the dot flips in place and
+  // never moves out of its ring. Horizontal = left/right, Vertical = top/bottom.
+  var rf = _activeFinderReflect, flip = rf && (rf.h || rf.v);
+  if (flip) { ctx.save(); ctx.translate(cx, cy); ctx.scale(rf.h ? -1 : 1, rf.v ? -1 : 1); ctx.translate(-cx, -cy); }
   drawFinderInnerDot(ctx, cx, cy, innerR, innerColor, innerKey || outerKey, chars, innerGradDescriptor);
+  if (flip) ctx.restore();
 }
 
 // WHY the inner eye needs its own draw path instead of just reusing
@@ -6179,6 +6202,30 @@ function setAsymmetricCorners(prefix, checked) {
 // shared Corner Style / Inner Dot Style grids at whatever the currently
 // active corner tab resolves to (an override, or the global style when
 // turning OFF so the grids go back to showing the one shared choice).
+// WHY copy the active corner's EFFECTIVE inner style (its own pick, or the
+// shared one it falls back to) plus its Crescent orientation: that's what
+// the user is looking at in the picker, so "apply to all" should make the
+// other two corners match exactly what they see. Only the inner dot shape
+// is copied -- outer style, colors and sizes stay per-corner on purpose.
+function applyInnerDotToAllCorners(prefix) {
+  prefix = prefix || 's';
+  if (!_asymmetricCorners[prefix]) return;
+  var active = _activeCornerEdit[prefix] || 'tl';
+  var globalInner = prefix==='s' ? _finderDotStyle : _finderDotStyleD;
+  var key = _finderDotStyleCorner[prefix][active] || globalInner;
+  var orient = _crescentOrientationCorner[prefix][active];
+  var refl = effFinderReflect(prefix, active);
+  ['tl','tr','bl'].forEach(function(c){
+    _finderDotStyleCorner[prefix][c] = key;
+    _crescentOrientationCorner[prefix][c] = orient;
+    _finderReflectCorner[prefix][c] = { h: !!refl.h, v: !!refl.v }; // WHY: "apply to all" should match what's shown, mirror included
+  });
+  syncCrescentOrientationTiles(prefix);
+  syncShapeReflectButtons(prefix);
+  scheduleLivePreview(prefix);
+  toast('Inner dot style applied to all 3 corners.','ok');
+}
+
 function syncAsymmetricCornersUI(prefix) {
   prefix = prefix || 's';
   var on = _asymmetricCorners[prefix];
@@ -6190,6 +6237,9 @@ function syncAsymmetricCornersUI(prefix) {
   scheduleFloatingCornerUpdate();
   if (sizeRow) sizeRow.style.display = on ? 'block' : 'none';
   if (randomRow) randomRow.style.display = on ? 'block' : 'none';
+  var applyAllBtn = document.getElementById(prefix+'-inner-apply-all');
+  if (applyAllBtn) applyAllBtn.style.display = on ? 'inline-block' : 'none';
+  syncFinderReflectRow(prefix);
   if (on) {
     setActiveCornerEdit(prefix, _activeCornerEdit[prefix] || 'tl');
   } else {
@@ -6264,6 +6314,7 @@ function getEffFinderColorSnapshot(part, prefix, corner) {
 
 function syncCornerTabButtons(prefix) {
   var active = _activeCornerEdit[prefix];
+  if (typeof syncFinderReflectRow === 'function') syncFinderReflectRow(prefix); // WHY: buttons show the picked corner's own reflect
   ['tl','tr','bl'].forEach(function(c){
     var btn = document.getElementById(prefix+'-corner-tab-'+c);
     if (btn) btn.classList.toggle('active', c===active);
@@ -6306,8 +6357,8 @@ function updateFloatingCornerBars() {
     var show = false;
     if (_asymmetricCorners[prefix] && row.offsetParent !== null) {
       var vh = window.innerHeight || document.documentElement.clientHeight;
-      // WHY measure the nav: it's sticky, so the bar must sit below it, and a
-      // tab row tucked UNDER the nav counts as out of view.
+      // WHY measure the nav: it's sticky, so a tab row tucked UNDER it
+      // counts as out of view (and the phone layout sits the bar below it).
       var nav = document.querySelector('nav');
       var navH = nav ? nav.getBoundingClientRect().height : 0;
       document.documentElement.style.setProperty('--nav-h', navH + 'px');
@@ -6588,7 +6639,7 @@ function effectiveCrescentOrientation(prefix, context) {
 function syncCrescentOrientationTiles(prefix) {
   prefix = prefix || 's';
   [
-    { rowId: prefix==='s' ? 's-crescent-orientation-row' : 'd-crescent-orientation-row', visible: isCrescentInUse(prefix, 'main'), picked: effectiveCrescentOrientation(prefix, 'main') },
+    { rowId: prefix==='s' ? 's-crescent-orientation-row' : 'd-crescent-orientation-row', visible: false /* WHY: replaced by Reflect Dots (see _dotReflect) */, picked: effectiveCrescentOrientation(prefix, 'main') },
     { rowId: prefix==='s' ? 's-finder-crescent-orientation-row' : 'd-finder-crescent-orientation-row', visible: isCrescentInUse(prefix, 'finder'), picked: effectiveCrescentOrientation(prefix, 'finder') }
   ].forEach(function(cfg){
     var row = document.getElementById(cfg.rowId);
@@ -6611,6 +6662,100 @@ function syncCrescentOrientationTiles(prefix) {
 // REFLECTABLE_SHAPE_KEYS' own WHY. Missing/undefined for a key means "not
 // reflected", same as every other boolean-flag default in this file.
 var _shapeReflect = { s: {}, d: {} };
+// WHY one Vertical/Horizontal reflect for the MAIN dots: Hali -- the four
+// diagonal "orientation" buttons (built for Crescent) should become "like
+// what we just did for the inner dots: reflect main dots with horizontal
+// and vertical and a note that says double-click for both directions."
+// Mirroring in both axes reproduces all four old Crescent directions
+// (none = Top Right, H = Top Left, V = Bottom Right, both = Bottom Left)
+// and works for every dot shape, not just Crescent.
+var _dotReflect = { s: {h:false,v:false}, d: {h:false,v:false} };
+var _activeDotReflect = null; // render-time copy, set by renderQRCore (same pattern as _activeShapeReflect)
+// WHY swap neighbors: shapes that join to neighboring dots (Connect, etc.)
+// read left/right/up/down -- once mirrored, "left" is drawn on the right,
+// so the flags must swap too or the joins would point the wrong way.
+function drawDotReflected(def, c, x, y, s, chars, nb) {
+  var rf = _activeDotReflect;
+  if (!rf || (!rf.h && !rf.v)) return def.draw(c, x, y, s, chars, nb);
+  if (nb) nb = { up: rf.v ? nb.down : nb.up, down: rf.v ? nb.up : nb.down,
+                 left: rf.h ? nb.right : nb.left, right: rf.h ? nb.left : nb.right };
+  c.save();
+  c.translate(x + s/2, y + s/2); c.scale(rf.h ? -1 : 1, rf.v ? -1 : 1); c.translate(-(x + s/2), -(y + s/2));
+  def.draw(c, x, y, s, chars, nb);
+  c.restore();
+}
+function toggleDotReflect(prefix, axis) {
+  prefix = prefix || 's';
+  _dotReflect[prefix][axis] = !_dotReflect[prefix][axis];
+  syncDotReflectRow(prefix);
+  if (typeof scheduleLivePreview==='function') scheduleLivePreview(prefix);
+}
+// WHY dblclick decides from the state BEFORE the double-click: the two
+// single clicks inside it toggle the axis on and back off, so by the time
+// dblclick fires the state is back where it started -- then it turns BOTH
+// on (or both off, if both were already on).
+function dblDotReflect(prefix) {
+  prefix = prefix || 's';
+  var r = _dotReflect[prefix], both = r.h && r.v;
+  r.h = !both; r.v = !both;
+  syncDotReflectRow(prefix);
+  if (typeof scheduleLivePreview==='function') scheduleLivePreview(prefix);
+}
+function syncDotReflectRow(prefix) {
+  prefix = prefix || 's';
+  var row = document.getElementById(prefix==='s' ? 's-shape-reflect-row' : 'd-shape-reflect-row');
+  if (!row) return;
+  var r = _dotReflect[prefix];
+  var btn = function(axis, label){
+    var on = !!r[axis];
+    return '<button type="button" class="vary-dot-btn shape-reflect-btn'+(on?' active':'')+'" onclick="toggleDotReflect(\''+prefix+'\',\''+axis+'\')" ondblclick="dblDotReflect(\''+prefix+'\')" style="padding:6px 12px;font-size:.72rem;">'+(on?'✓ ':'')+label+'</button>';
+  };
+  row.style.display = 'flex';
+  row.innerHTML = '<span style="width:100%;font-size:.76rem;color:var(--muted);">Reflect Dots:</span>' + btn('v','Vertical') + btn('h','Horizontal') +
+    '<span style="width:100%;font-size:.66rem;color:var(--muted);">Double-click for both directions.</span>';
+}
+// WHY a separate inner-dot reflect with Vertical + Horizontal: Hali -- "when
+// asymmetrical corners is pressed, the reflect inner dot option disappears
+// ... the title saying reflect inner dot and two options vertical and
+// horizontal." The old finder row only ever listed a handful of character
+// shapes and could only mirror one way; this works for EVERY inner dot,
+// both directions, and (under Asymmetric Corners) per corner, with null
+// meaning "inherit the shared setting" -- same pattern as
+// _finderDotStyleCorner.
+var _finderReflect = { s: {h:false,v:false}, d: {h:false,v:false} };
+var _finderReflectCorner = { s: {tl:null,tr:null,bl:null}, d: {tl:null,tr:null,bl:null} };
+function effFinderReflect(prefix, corner) {
+  var o = _asymmetricCorners[prefix] && corner ? _finderReflectCorner[prefix][corner] : null;
+  return o || _finderReflect[prefix];
+}
+function toggleFinderReflect(prefix, axis) {
+  prefix = prefix || 's';
+  if (_asymmetricCorners[prefix]) {
+    var c = _activeCornerEdit[prefix] || 'tl';
+    // WHY copy first: a corner's first edit starts from what it was
+    // showing (the shared setting), so only the clicked axis changes.
+    var cur = effFinderReflect(prefix, c);
+    var next = { h: !!cur.h, v: !!cur.v };
+    next[axis] = !next[axis];
+    _finderReflectCorner[prefix][c] = next;
+  } else {
+    _finderReflect[prefix][axis] = !_finderReflect[prefix][axis];
+  }
+  syncFinderReflectRow(prefix);
+  if (typeof scheduleLivePreview==='function') scheduleLivePreview(prefix);
+}
+function syncFinderReflectRow(prefix) {
+  prefix = prefix || 's';
+  var row = document.getElementById(prefix==='s' ? 's-finder-shape-reflect-row' : 'd-finder-shape-reflect-row');
+  if (!row) return;
+  var r = effFinderReflect(prefix, _activeCornerEdit[prefix]);
+  var btn = function(axis, label){
+    var on = !!r[axis];
+    return '<button type="button" class="vary-dot-btn shape-reflect-btn'+(on?' active':'')+'" onclick="toggleFinderReflect(\''+prefix+'\',\''+axis+'\')" style="padding:6px 12px;font-size:.72rem;">'+(on?'✓ ':'')+label+'</button>';
+  };
+  row.style.display = 'flex';
+  row.innerHTML = '<span style="width:100%;font-size:.76rem;color:var(--muted);">Reflect Inner Dot'+(_asymmetricCorners[prefix]?' (this corner)':'')+':</span>' + btn('v','Vertical') + btn('h','Horizontal');
+}
 function toggleShapeReflect(prefix, key) {
   prefix = prefix || 's';
   _shapeReflect[prefix][key] = !_shapeReflect[prefix][key];
@@ -6649,8 +6794,9 @@ function shapeReflectKeysInUse(prefix, context) {
 function syncShapeReflectButtons(prefix) {
   prefix = prefix || 's';
   [
-    { rowId: prefix==='s' ? 's-shape-reflect-row' : 'd-shape-reflect-row', context: 'main' },
-    { rowId: prefix==='s' ? 's-finder-shape-reflect-row' : 'd-finder-shape-reflect-row', context: 'finder' }
+    // WHY no entries anymore: the main row is now the always-on
+    // Vertical/Horizontal "Reflect Dots" control (syncDotReflectRow) and the
+    // finder row is "Reflect Inner Dot" (syncFinderReflectRow).
   ].forEach(function(cfg){
     var row = document.getElementById(cfg.rowId);
     if (!row) return;
@@ -6664,6 +6810,8 @@ function syncShapeReflectButtons(prefix) {
         return '<button type="button" class="vary-dot-btn shape-reflect-btn'+(on?' active':'')+'" onclick="toggleShapeReflect(\''+prefix+'\',\''+k+'\')" style="padding:6px 12px;font-size:.72rem;">'+escapeHtml(label)+' Reflect</button>';
       }).join('');
   });
+  syncFinderReflectRow(prefix);
+  syncDotReflectRow(prefix);
 }
 
 // WHY a per-tab string, same gradient-direction value set the body/finder
@@ -7377,6 +7525,15 @@ function resolveRenderSettings(prefix) {
         tr: (d.finderDotStyleCorner && d.finderDotStyleCorner.tr) || null,
         bl: (d.finderDotStyleCorner && d.finderDotStyleCorner.bl) || null
       },
+      // Inner dot reflect -- see _finderReflect's WHY. Older designs have none = no mirror.
+      finderReflect: { h: !!(d.finderReflect && d.finderReflect.h), v: !!(d.finderReflect && d.finderReflect.v) },
+      // null for older designs -- see renderQRCore's Crescent pin WHY.
+      dotReflect: d.dotReflect ? { h: !!d.dotReflect.h, v: !!d.dotReflect.v } : null,
+      finderReflectCorner: {
+        tl: (d.finderReflectCorner && d.finderReflectCorner.tl) || null,
+        tr: (d.finderReflectCorner && d.finderReflectCorner.tr) || null,
+        bl: (d.finderReflectCorner && d.finderReflectCorner.bl) || null
+      },
       finderCornerSize: {
         tl: (d.finderCornerSize && typeof d.finderCornerSize.tl === 'number') ? d.finderCornerSize.tl : 0,
         tr: (d.finderCornerSize && typeof d.finderCornerSize.tr === 'number') ? d.finderCornerSize.tr : 0,
@@ -7587,6 +7744,9 @@ function resolveRenderSettings(prefix) {
     asymmetricCorners: _asymmetricCorners[prefix],
     finderStyleCorner: { tl: _finderStyleCorner[prefix].tl, tr: _finderStyleCorner[prefix].tr, bl: _finderStyleCorner[prefix].bl },
     finderDotStyleCorner: { tl: _finderDotStyleCorner[prefix].tl, tr: _finderDotStyleCorner[prefix].tr, bl: _finderDotStyleCorner[prefix].bl },
+    finderReflect: { h: !!_finderReflect[prefix].h, v: !!_finderReflect[prefix].v },
+    dotReflect: { h: !!_dotReflect[prefix].h, v: !!_dotReflect[prefix].v },
+    finderReflectCorner: { tl: _finderReflectCorner[prefix].tl, tr: _finderReflectCorner[prefix].tr, bl: _finderReflectCorner[prefix].bl },
     finderCornerSize: { tl: _finderCornerSize[prefix].tl, tr: _finderCornerSize[prefix].tr, bl: _finderCornerSize[prefix].bl },
     finderOuterColorCorner: { tl: _finderOuterColorCorner[prefix].tl, tr: _finderOuterColorCorner[prefix].tr, bl: _finderOuterColorCorner[prefix].bl },
     finderInnerColorCorner: { tl: _finderInnerColorCorner[prefix].tl, tr: _finderInnerColorCorner[prefix].tr, bl: _finderInnerColorCorner[prefix].bl },
@@ -8456,9 +8616,9 @@ function drawFrame(ctx, size, innerX0, innerY0, innerX1, innerY1, cellSize, fg, 
           var sgDef = SHAPES[sgKey] || SHAPES['dot'];
           if (fillerBoundary[sgrow][sgcol]) {
             var sgShrunk = shrinkBoundaryCell(sgx, sgy, cellSize);
-            sgDef.draw(dctx, sgShrunk.x, sgShrunk.y, sgShrunk.s, sgChars || []);
+            drawDotReflected(sgDef, dctx, sgShrunk.x, sgShrunk.y, sgShrunk.s, sgChars || []);
           } else {
-            sgDef.draw(dctx, sgx, sgy, cellSize, sgChars || []);
+            drawDotReflected(sgDef, dctx, sgx, sgy, cellSize, sgChars || []);
           }
         } else {
           drawShapeFittedRect(dctx, sgKey, sgx, sgy, sgw*cellSize, sgh*cellSize, sgChars);
@@ -8497,9 +8657,9 @@ function drawFrame(ctx, size, innerX0, innerY0, innerX1, innerY1, cellSize, fg, 
         if (vw===1 && vh===1) {
           if (fillerBoundary[vrow][vcol]) {
             var vShrunk = shrinkBoundaryCell(vx, vy, cellSize);
-            vDef.draw(dctx, vShrunk.x, vShrunk.y, vShrunk.s, vChars || []);
+            drawDotReflected(vDef, dctx, vShrunk.x, vShrunk.y, vShrunk.s, vChars || []);
           } else {
-            vDef.draw(dctx, vx, vy, cellSize, vChars || []);
+            drawDotReflected(vDef, dctx, vx, vy, cellSize, vChars || []);
           }
         } else {
           drawShapeFittedUniform(dctx, vKey, vx, vy, vw*cellSize, vh*cellSize, vChars, null, cellSize, false);
@@ -8517,9 +8677,9 @@ function drawFrame(ctx, size, innerX0, innerY0, innerX1, innerY1, cellSize, fg, 
         dctx.fillStyle = fg;
         if (fillerBoundary[ofr][ofc]) {
           var ofShrunk = shrinkBoundaryCell(ofx, ofy, cellSize);
-          fillerDef.draw(dctx, ofShrunk.x, ofShrunk.y, ofShrunk.s, fillerChars || []);
+          drawDotReflected(fillerDef, dctx, ofShrunk.x, ofShrunk.y, ofShrunk.s, fillerChars || []);
         } else {
-          fillerDef.draw(dctx, ofx, ofy, cellSize, fillerChars || []);
+          drawDotReflected(fillerDef, dctx, ofx, ofy, cellSize, fillerChars || []);
         }
       }
     }
@@ -8550,7 +8710,12 @@ async function renderQRCore(canvas, url, size, ec, prefix) {
   // rendering, so this is how settings.crescentOrientation (live DOM or a
   // saved design, whichever resolveRenderSettings just resolved) actually
   // reaches it.
-  _activeCrescentOrientation = (settings.crescentOrientation && settings.crescentOrientation.length) ? settings.crescentOrientation : ['tr'];
+  // WHY pin body Crescent to Top Right when the design has Reflect Dots
+  // settings: the reflect then turns it to the other three directions.
+  // Designs saved before Reflect Dots existed (no dotReflect) keep their old
+  // orientation pool so they look exactly as saved.
+  _activeCrescentOrientation = settings.dotReflect ? ['tr'] : ((settings.crescentOrientation && settings.crescentOrientation.length) ? settings.crescentOrientation : ['tr']);
+  _activeDotReflect = settings.dotReflect || null;
   // WHY set here too, same live render-time handoff: drawReflectable (used
   // by crow/digital dog/Santa/witch hat/pumpkins/music notes/bolt) has no
   // idea which tab/saved-design is rendering either -- see
@@ -8723,7 +8888,7 @@ async function renderQRCore(canvas, url, size, ec, prefix) {
             left:  gcol>0            && !!matrix[grow][gcol-1],
             right: gcol<modules-1    && !!matrix[grow][gcol+1]
           };
-          gShapeDef.draw(ctx, gx, gy, cellSize, pickCharsForCell(gKey, grow, gcol, modules), gNeighbors);
+          drawDotReflected(gShapeDef, ctx, gx, gy, cellSize, pickCharsForCell(gKey, grow, gcol, modules), gNeighbors);
         } else {
           drawShapeFittedRect(ctx, gKey, gx, gy, gw*cellSize, gh*cellSize, settings.chars);
         }
@@ -9116,13 +9281,13 @@ async function renderQRCore(canvas, url, size, ec, prefix) {
             // it doesn't work rather than substitute something else"
             // pattern as the "big" tier's own SAFE_VARY_BIG_SHAPES gate.
             if (SAFE_VARY_SMALL_SHAPES.indexOf(vKey) === -1) {
-              vShapeDef.draw(ctx, vx, vy, cellSize, pickCharsForCell(vKey, vrow, vcol, modules), vNeighbors);
+              drawDotReflected(vShapeDef, ctx, vx, vy, cellSize, pickCharsForCell(vKey, vrow, vcol, modules), vNeighbors);
             } else {
               if (_activeGradient) ctx.fillStyle = gradientColorAt(vx + cellSize/2, vy + cellSize/2);
               var vSmallS = cellSize * VARY_SMALL_SCALE;
               var vSmallX = vx + (cellSize - vSmallS)/2;
               var vSmallY = vy + (cellSize - vSmallS)/2;
-              vShapeDef.draw(ctx, vSmallX, vSmallY, vSmallS, pickCharsForCell(vKey, vrow, vcol, modules), vNeighbors);
+              drawDotReflected(vShapeDef, ctx, vSmallX, vSmallY, vSmallS, pickCharsForCell(vKey, vrow, vcol, modules), vNeighbors);
             }
           } else if (vRoll < vTierProbs.pSmall + vTierProbs.pBig) {
             // WHY no neighbor-based clip here (an earlier version of this
@@ -9190,16 +9355,16 @@ async function renderQRCore(canvas, url, size, ec, prefix) {
             // the real selected shape, genuinely bigger, nothing else
             // mixed in underneath it.
             if (SAFE_VARY_BIG_SHAPES.indexOf(vKey) === -1) {
-              vShapeDef.draw(ctx, vx, vy, cellSize, pickCharsForCell(vKey, vrow, vcol, modules), vNeighbors);
+              drawDotReflected(vShapeDef, ctx, vx, vy, cellSize, pickCharsForCell(vKey, vrow, vcol, modules), vNeighbors);
             } else {
               if (_activeGradient) ctx.fillStyle = gradientColorAt(vx + cellSize/2, vy + cellSize/2);
               var vBigS = cellSize * VARY_BIG_SCALE;
               var vBigX = vx + (cellSize - vBigS)/2;
               var vBigY = vy + (cellSize - vBigS)/2;
-              vShapeDef.draw(ctx, vBigX, vBigY, vBigS, pickCharsForCell(vKey, vrow, vcol, modules), vNeighbors);
+              drawDotReflected(vShapeDef, ctx, vBigX, vBigY, vBigS, pickCharsForCell(vKey, vrow, vcol, modules), vNeighbors);
             }
           } else {
-            vShapeDef.draw(ctx, vx, vy, cellSize, pickCharsForCell(vKey, vrow, vcol, modules), vNeighbors);
+            drawDotReflected(vShapeDef, ctx, vx, vy, cellSize, pickCharsForCell(vKey, vrow, vcol, modules), vNeighbors);
           }
         } else {
           // WHY a plain dot UNDER each real cell of the group, THEN the
@@ -9364,7 +9529,7 @@ async function renderQRCore(canvas, url, size, ec, prefix) {
           left:  col>0            && !!matrix[row][col-1],
           right: col<modules-1    && !!matrix[row][col+1]
         };
-        shapeDef.draw(ctx, x, y, cellSize, pickCharsForCell(moduleKey, row, col, modules), neighbors);
+        drawDotReflected(shapeDef, ctx, x, y, cellSize, pickCharsForCell(moduleKey, row, col, modules), neighbors);
       }
     }
   }
@@ -9502,6 +9667,12 @@ async function renderQRCore(canvas, url, size, ec, prefix) {
   // must still leave every corner uniform with the others, inheriting the
   // same one shared pick.
   var _sharedFinderCrescentPick = null;
+  // WHY alongside the crescent pin: both pick this corner's own value (its
+  // override under Asymmetric, else the shared one) right before it draws.
+  function pinReflectForFinder(corner) {
+    var o = settings.asymmetricCorners && settings.finderReflectCorner && settings.finderReflectCorner[corner];
+    _activeFinderReflect = o || settings.finderReflect || null;
+  }
   function pinCrescentForFinder(corner) {
     // WHY index 0, never a random pick, on either branch here (this used
     // to be Math.floor(Math.random()*override.length), same on the shared-
@@ -9530,13 +9701,14 @@ async function renderQRCore(canvas, url, size, ec, prefix) {
       _activeCrescentOrientation = _sharedFinderCrescentPick;
     }
   }
-  pinCrescentForFinder('tl');
+  pinCrescentForFinder('tl'); pinReflectForFinder('tl');
   drawFinderComposite(ctx, box.x0, box.y0, cellSize, tl.outer, tl.inner, bg, tlFinder.outer, tlFinder.inner, settings.finderChars, tl.innerGrad, tlFinder.scale);
-  pinCrescentForFinder('tr');
+  pinCrescentForFinder('tr'); pinReflectForFinder('tr');
   drawFinderComposite(ctx, box.x0 + (modules-7)*cellSize, box.y0, cellSize, tr.outer, tr.inner, bg, trFinder.outer, trFinder.inner, settings.finderChars, tr.innerGrad, trFinder.scale);
-  pinCrescentForFinder('bl');
+  pinCrescentForFinder('bl'); pinReflectForFinder('bl');
   drawFinderComposite(ctx, box.x0, box.y0 + (modules-7)*cellSize, cellSize, bl.outer, bl.inner, bg, blFinder.outer, blFinder.inner, settings.finderChars, bl.innerGrad, blFinder.scale);
   _activeCrescentOrientation = settings.crescentOrientation;
+  _activeFinderReflect = null; // WHY: never leak a corner's mirror into later draws
   _activeGradient = _savedGradForFinder;
 
   // Logo overlay — WHY centered on the real QR box instead of the canvas:
@@ -10256,6 +10428,9 @@ function captureDesignSettings(prefix) {
     // into an already-captured/saved design object sitting elsewhere.
     finderStyleCorner: { tl: _finderStyleCorner[prefix].tl, tr: _finderStyleCorner[prefix].tr, bl: _finderStyleCorner[prefix].bl },
     finderDotStyleCorner: { tl: _finderDotStyleCorner[prefix].tl, tr: _finderDotStyleCorner[prefix].tr, bl: _finderDotStyleCorner[prefix].bl },
+    finderReflect: { h: !!_finderReflect[prefix].h, v: !!_finderReflect[prefix].v },
+    dotReflect: { h: !!_dotReflect[prefix].h, v: !!_dotReflect[prefix].v },
+    finderReflectCorner: { tl: _finderReflectCorner[prefix].tl, tr: _finderReflectCorner[prefix].tr, bl: _finderReflectCorner[prefix].bl },
     finderCornerSize: { tl: _finderCornerSize[prefix].tl, tr: _finderCornerSize[prefix].tr, bl: _finderCornerSize[prefix].bl },
     finderOuterColorCorner: { tl: _finderOuterColorCorner[prefix].tl, tr: _finderOuterColorCorner[prefix].tr, bl: _finderOuterColorCorner[prefix].bl },
     finderInnerColorCorner: { tl: _finderInnerColorCorner[prefix].tl, tr: _finderInnerColorCorner[prefix].tr, bl: _finderInnerColorCorner[prefix].bl },
@@ -10595,6 +10770,18 @@ function applyDesignSettings(prefix, design) {
   var fcs = design.finderCornerSize || {};
   _finderStyleCorner[prefix] = { tl: fsc.tl||null, tr: fsc.tr||null, bl: fsc.bl||null };
   _finderDotStyleCorner[prefix] = { tl: fdc.tl||null, tr: fdc.tr||null, bl: fdc.bl||null };
+  var frf = design.finderReflect || {}, frc = design.finderReflectCorner || {};
+  _finderReflect[prefix] = { h: !!frf.h, v: !!frf.v };
+  // WHY map an old single Crescent orientation onto Reflect Dots: re-saving
+  // an older design from the editor should keep its crescent facing the
+  // same way (tr = none, tl = H, br = V, bl = both).
+  if (design.dotReflect) {
+    _dotReflect[prefix] = { h: !!design.dotReflect.h, v: !!design.dotReflect.v };
+  } else {
+    var oldOri = Array.isArray(design.crescentOrientation) && design.crescentOrientation.length === 1 ? design.crescentOrientation[0] : 'tr';
+    _dotReflect[prefix] = { h: oldOri==='tl' || oldOri==='bl', v: oldOri==='br' || oldOri==='bl' };
+  }
+  _finderReflectCorner[prefix] = { tl: frc.tl||null, tr: frc.tr||null, bl: frc.bl||null };
   _finderCornerSize[prefix] = {
     tl: typeof fcs.tl==='number' ? fcs.tl : 0,
     tr: typeof fcs.tr==='number' ? fcs.tr : 0,
@@ -10764,12 +10951,11 @@ function updateUndoButtonState(prefix) {
 }
 
 // ── FLOATING REFRESH / UNDO ─────────────────────────────────────────────────
-// WHY: Hali -- "can you make the refresh design and undo button floating?"
-// Both live up in the first field's label, so after scrolling down to the
-// style/color panels they were a long scroll away. Same approach as the
-// floating corner picker: buttons that call the exact same functions as the
-// originals, shown only while those originals are scrolled out of view and
-// the generator is still on screen.
+// WHY buttons that call the exact same functions as the originals (which
+// live up in the first field's label): picking either copy does the same
+// thing, and the bar only shows while the originals are scrolled out of
+// view and the generator is still on screen. Placement is in the
+// .design-float-bar CSS WHY.
 function buildFloatingDesignBar(prefix) {
   if (document.getElementById(prefix+'-design-float-bar')) return;
   var bar = document.createElement('div');
@@ -10806,6 +10992,7 @@ function updateFloatingDesignBars() {
     bar.style.display = show ? 'flex' : 'none';
   });
 }
+// WHY requestAnimationFrame throttling: one layout measure per frame keeps scrolling smooth.
 var _designFloatRaf = 0;
 function scheduleFloatingDesignUpdate() {
   if (_designFloatRaf) return;
