@@ -9,7 +9,7 @@
                2026-11-20: Inner Dot Style "Apply to all corners" (asymmetric only); floating Refresh Design / Undo;
                Reflect Inner Dot (Vertical/Horizontal, per corner when asymmetric);
                Reflect Dots (Vertical/Horizontal, double-click = both) replaces the 4 Crescent orientation buttons;
-               floating bars: desktop corners right / refresh+undo left, phone refresh+undo top / corners bottom;
+               floating bars: desktop corners right / refresh+undo side by side under nav, phone refresh+undo stacked top-left / corners bottom;
                removed 4 Rounded·Point overall shapes; $5/$50 Overall Shape requests + exclusive-shape log/flags;
                2026-11-15: corners default to Match Body, incl. solid color; 2026-11-09: Scan Locations + unique/time/hours/devices/map stats, date range,
                name sort that follows renames, floating toolbar, tracking settings, CSV columns)
@@ -535,21 +535,20 @@ nav{display:flex;justify-content:space-between;align-items:center;padding:calc(1
    Hali -- "float the corner picker when asymmetric is selected so we don't
    have to keep scrolling back" and "make the refresh design and undo button
    floating." Placement (Hali, 2026-11-20): on DESKTOP the corner picker
-   floats on the right side of the screen and Refresh/Undo on the left,
-   stacked vertically and centered top-to-bottom so they stay out of the
-   nav and the middle of the page; on PHONES (no side room) Refresh/Undo
-   float at the top under the nav and the corner picker at the bottom.
+   floats stacked on the right side of the screen; Refresh/Undo sit side
+   by side top-left, pinned right under the nav (Hali: "on desktop have
+   them side by side the way they were" -- the mid-page stacked version
+   looked detached from the menu). On PHONES (no side room) Refresh/Undo
+   stack top-left under the nav and the corner picker runs along the bottom.
    Each only shows while its original controls are scrolled out of view. */
 .corner-float-bar,.design-float-bar{position:fixed;z-index:999;display:none;gap:6px;padding:8px;background:var(--panel);border:1px solid var(--gold);border-radius:10px;box-shadow:0 8px 30px rgba(0,0,0,.45);}
 .design-float-bar{border-color:var(--line);}
 .corner-float-bar span{font-size:.65rem;color:var(--muted);white-space:nowrap;text-align:center;}
-.corner-float-bar,.design-float-bar{top:50%;transform:translateY(-50%);flex-direction:column;align-items:stretch;}
-.corner-float-bar{right:16px;}
-.design-float-bar{left:16px;}
+.corner-float-bar{top:50%;right:16px;transform:translateY(-50%);flex-direction:column;align-items:stretch;}
+.design-float-bar{top:calc(var(--nav-h,64px) + 10px);left:16px;flex-direction:row;align-items:center;}
 @media (max-width:768px){
-  .corner-float-bar,.design-float-bar{flex-direction:row;align-items:center;left:50%;right:auto;transform:translateX(-50%);}
-  .design-float-bar{top:calc(var(--nav-h,64px) + 10px);}
-  .corner-float-bar{top:auto;bottom:calc(16px + env(safe-area-inset-bottom));}
+  .corner-float-bar{flex-direction:row;align-items:center;top:auto;left:50%;right:auto;bottom:calc(16px + env(safe-area-inset-bottom));transform:translateX(-50%);}
+  .design-float-bar{flex-direction:column;align-items:stretch;}
 }
 .char-options{display:flex;flex-wrap:wrap;gap:5px;}
 .char-opt{width:36px;height:36px;border-radius:6px;border:1px solid var(--line);background:var(--panel);display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:.95rem;transition:all .2s;user-select:none;}
@@ -13534,8 +13533,8 @@ async function fulfillShapeRequest(paymentIntentId) {
   // WHY wrapped in its own try/catch now, like the first emailjs.send above
   // already was: these two calls used to run unguarded after that first
   // try/catch block ended, so an EmailJS failure here (the library not
-  // being loaded was exactly that failure, until the <script> tag was added
-  // in <head> -- see its own WHY) threw uncaught and skipped the toast()
+  // being loaded was exactly that failure, until the script tag was added
+  // in the head -- see its own WHY) threw uncaught and skipped the toast()
   // and cleanup at the bottom of this function entirely, even though the
   // customer had already been charged and the request already logged.
   var customerEmail = window._user ? window._user.email : null;
@@ -13839,7 +13838,7 @@ document.querySelectorAll('.modal-bg').forEach(bg=>bg.addEventListener('click',f
 // other places already in THIS file (shape-request notifications, the
 // signup welcome email), all send through the same already-paid-for
 // service_75wx6fk/template_nnmxioq EmailJS project, just with the SDK
-// script never actually loaded (see the <script> tag added in <head> and
+// script never actually loaded (see the script tag added in the head and
 // its own WHY) -- so this reuses her existing account instead of asking
 // her to go set up a second one. WHY still a mailto fallback, same
 // reasoning as before: a ticket should never just vanish because of a
