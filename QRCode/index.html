@@ -1129,7 +1129,9 @@ footer a{color:var(--muted);}footer a:hover{color:var(--white);}
               <div class="shape-grid" id="finder-style-grid" style="max-height:none;"></div>
               <!-- WHY: Hali -- "apply to all corners ... under the outter corner as well," only while Asymmetric is on. Shown/hidden by syncAsymmetricCornersUI. -->
               <button type="button" id="s-outer-apply-all" class="act-btn act-btn-gold" style="display:none;margin-top:6px;font-size:.72rem;" onclick="applyOuterToAllCorners('s')">Apply to all corners</button>
-              <div class="grad-toggle" style="margin-top:10px;flex-wrap:wrap;">
+              <!-- WHY a header: Hali -- with Match Body selected the color options were hard to find under the shape grid. -->
+              <label style="display:block;margin-top:16px;">Outer Corner Color</label>
+              <div class="grad-toggle" style="margin-top:6px;flex-wrap:wrap;">
                 <button id="c-finder-outer-mode-solid" onclick="setFinderColorMode('outer','solid','s')">Solid</button>
                 <button id="c-finder-outer-mode-grad2" onclick="setFinderColorMode('outer','grad2','s')">2-color</button>
                 <button id="c-finder-outer-mode-grad4" onclick="setFinderColorMode('outer','grad4','s')">4-color</button>
@@ -1205,7 +1207,9 @@ footer a{color:var(--muted);}footer a:hover{color:var(--white);}
                 <button type="button" class="vary-dot-btn crescent-orient-btn" data-orient="tl" data-label="↖ Top Left" onclick="toggleCrescentOrientation('s','tl','finder')" style="padding:6px 12px;font-size:.72rem;">↖ Top Left</button>
               </div>
               <div id="s-finder-shape-reflect-row" class="stretch-dir-row" style="display:none;margin-top:8px;flex-wrap:wrap;gap:6px;"></div>
-              <div class="grad-toggle" style="margin-top:10px;flex-wrap:wrap;">
+              <!-- WHY a header: Hali -- with Match Body selected the color options were hard to find under the shape grid. -->
+              <label style="display:block;margin-top:16px;">Inner Corner Color</label>
+              <div class="grad-toggle" style="margin-top:6px;flex-wrap:wrap;">
                 <button id="c-finder-inner-mode-solid" onclick="setFinderColorMode('inner','solid','s')">Solid</button>
                 <button id="c-finder-inner-mode-grad2" onclick="setFinderColorMode('inner','grad2','s')">2-color</button>
                 <button id="c-finder-inner-mode-grad4" onclick="setFinderColorMode('inner','grad4','s')">4-color</button>
@@ -1661,7 +1665,9 @@ footer a{color:var(--muted);}footer a:hover{color:var(--white);}
               <div class="shape-grid" id="d-finder-style-grid" style="max-height:none;"></div>
               <!-- WHY: Hali -- "apply to all corners ... under the outter corner as well," only while Asymmetric is on. Shown/hidden by syncAsymmetricCornersUI. -->
               <button type="button" id="d-outer-apply-all" class="act-btn act-btn-gold" style="display:none;margin-top:6px;font-size:.72rem;" onclick="applyOuterToAllCorners('d')">Apply to all corners</button>
-              <div class="grad-toggle" style="margin-top:10px;flex-wrap:wrap;">
+              <!-- WHY a header: Hali -- with Match Body selected the color options were hard to find under the shape grid. -->
+              <label style="display:block;margin-top:16px;">Outer Corner Color</label>
+              <div class="grad-toggle" style="margin-top:6px;flex-wrap:wrap;">
                 <button id="d-c-finder-outer-mode-solid" onclick="setFinderColorMode('outer','solid','d')">Solid</button>
                 <button id="d-c-finder-outer-mode-grad2" onclick="setFinderColorMode('outer','grad2','d')">2-color</button>
                 <button id="d-c-finder-outer-mode-grad4" onclick="setFinderColorMode('outer','grad4','d')">4-color</button>
@@ -1727,7 +1733,9 @@ footer a{color:var(--muted);}footer a:hover{color:var(--white);}
                 <button type="button" class="vary-dot-btn crescent-orient-btn" data-orient="tl" data-label="↖ Top Left" onclick="toggleCrescentOrientation('d','tl','finder')" style="padding:6px 12px;font-size:.72rem;">↖ Top Left</button>
               </div>
               <div id="d-finder-shape-reflect-row" class="stretch-dir-row" style="display:none;margin-top:8px;flex-wrap:wrap;gap:6px;"></div>
-              <div class="grad-toggle" style="margin-top:10px;flex-wrap:wrap;">
+              <!-- WHY a header: Hali -- with Match Body selected the color options were hard to find under the shape grid. -->
+              <label style="display:block;margin-top:16px;">Inner Corner Color</label>
+              <div class="grad-toggle" style="margin-top:6px;flex-wrap:wrap;">
                 <button id="d-c-finder-inner-mode-solid" onclick="setFinderColorMode('inner','solid','d')">Solid</button>
                 <button id="d-c-finder-inner-mode-grad2" onclick="setFinderColorMode('inner','grad2','d')">2-color</button>
                 <button id="d-c-finder-inner-mode-grad4" onclick="setFinderColorMode('inner','grad4','d')">4-color</button>
