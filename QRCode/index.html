@@ -9,7 +9,7 @@
                2026-11-20: Inner Dot Style "Apply to all corners" (asymmetric only); floating Refresh Design / Undo;
                Reflect Inner Dot (Vertical/Horizontal, per corner when asymmetric);
                Reflect Dots (Vertical/Horizontal, double-click = both) replaces the 4 Crescent orientation buttons;
-               floating bars: desktop corners right / refresh+undo side by side under nav, phone refresh+undo stacked top-left / corners bottom;
+               floating bars: desktop corners right / refresh+undo left, phone refresh+undo top / corners bottom;
                removed 4 Rounded·Point overall shapes; $5/$50 Overall Shape requests + exclusive-shape log/flags;
                2026-11-15: corners default to Match Body, incl. solid color; 2026-11-09: Scan Locations + unique/time/hours/devices/map stats, date range,
                name sort that follows renames, floating toolbar, tracking settings, CSV columns)
@@ -535,20 +535,23 @@ nav{display:flex;justify-content:space-between;align-items:center;padding:calc(1
    Hali -- "float the corner picker when asymmetric is selected so we don't
    have to keep scrolling back" and "make the refresh design and undo button
    floating." Placement (Hali, 2026-11-20): on DESKTOP the corner picker
-   floats stacked on the right side of the screen; Refresh/Undo sit side
-   by side top-left, pinned right under the nav (Hali: "on desktop have
-   them side by side the way they were" -- the mid-page stacked version
-   looked detached from the menu). On PHONES (no side room) Refresh/Undo
-   stack top-left under the nav and the corner picker runs along the bottom.
+   floats on the right side of the screen and Refresh/Undo sit side by side
+   at the top-left under the nav; on PHONES (no side room) Refresh/Undo
+   stack at the top-left and the corner picker runs along the bottom.
    Each only shows while its original controls are scrolled out of view. */
 .corner-float-bar,.design-float-bar{position:fixed;z-index:999;display:none;gap:6px;padding:8px;background:var(--panel);border:1px solid var(--gold);border-radius:10px;box-shadow:0 8px 30px rgba(0,0,0,.45);}
 .design-float-bar{border-color:var(--line);}
 .corner-float-bar span{font-size:.65rem;color:var(--muted);white-space:nowrap;text-align:center;}
+/* Desktop: corner picker stacked on the right, centered top-to-bottom.
+   Refresh/Undo side by side, pinned top-left under the nav (Hali,
+   2026-11-20: "on desktop have them side by side the way they were"). */
 .corner-float-bar{top:50%;right:16px;transform:translateY(-50%);flex-direction:column;align-items:stretch;}
 .design-float-bar{top:calc(var(--nav-h,64px) + 10px);left:16px;flex-direction:row;align-items:center;}
+/* Phones: Refresh/Undo stacked at top-left under the nav (she said stacked
+   "might be nice on mobile"), corner picker in a row along the bottom. */
 @media (max-width:768px){
-  .corner-float-bar{flex-direction:row;align-items:center;top:auto;left:50%;right:auto;bottom:calc(16px + env(safe-area-inset-bottom));transform:translateX(-50%);}
   .design-float-bar{flex-direction:column;align-items:stretch;}
+  .corner-float-bar{flex-direction:row;align-items:center;top:auto;right:auto;left:50%;transform:translateX(-50%);bottom:calc(16px + env(safe-area-inset-bottom));}
 }
 .char-options{display:flex;flex-wrap:wrap;gap:5px;}
 .char-opt{width:36px;height:36px;border-radius:6px;border:1px solid var(--line);background:var(--panel);display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:.95rem;transition:all .2s;user-select:none;}
