@@ -6,10 +6,10 @@
   Modified By: Claude (2026-11-18: Heart/frame edge clipping fix; Random dot colors 2-10 w/ count dropdown + Shuffle;
                asymmetric corners no longer turn black when one corner switches to Solid;
                floating corner picker while Asymmetric Corners is on;
-               2026-11-20: Inner Dot Style "Apply to all corners" (asymmetric only); floating Refresh Design / Undo;
+               2026-11-20: Inner Dot Style + Corner Style "Apply to all corners" (asymmetric only, gold); Inner Dot Size + Random Sizing moved under Inner Dot Style, shown with Asymmetric on or off; floating Refresh Design / Undo;
                Reflect Inner Dot (Vertical/Horizontal, per corner when asymmetric);
                main-dot orientation buttons back (click = all, click again = off, double-click = random mix) (Reflect Dots removed);
-               floating bars: desktop corners right / refresh+undo left, phone refresh+undo top / corners bottom;
+               floating bars always side by side: desktop refresh+undo top-left / corners top-right, phone refresh+undo top-left / corners bottom;
                removed 4 Rounded·Point overall shapes; $5/$50 Overall Shape requests + exclusive-shape log/flags;
                2026-11-15: corners default to Match Body, incl. solid color; 2026-11-09: Scan Locations + unique/time/hours/devices/map stats, date range,
                name sort that follows renames, floating toolbar, tracking settings, CSV columns)
@@ -377,6 +377,9 @@ nav{display:flex;justify-content:space-between;align-items:center;padding:calc(1
    read as different at a glance from the other, non-destructive actions
    sitting right next to it. */
 .act-btn-danger{color:var(--red);border-color:var(--red);}
+/* WHY gold: Hali -- "make these buttons gold so they stand out" (the Apply to all corners buttons). */
+.act-btn-gold{background:var(--gold);border-color:var(--gold);color:#fff;font-weight:600;}
+.act-btn-gold:hover{background:var(--gold2);border-color:var(--gold2);color:#222;}
 .act-btn-danger:hover{background:var(--red);color:#fff;border-color:var(--red);}
 /* WHY a toolbar instead of leaving the per-card checkboxes to speak for
    themselves: the checkboxes existed for bulk CSV export + delete, but
@@ -534,25 +537,20 @@ nav{display:flex;justify-content:space-between;align-items:center;padding:calc(1
 /* WHY floating copies of the corner tabs and of Refresh Design / Undo:
    Hali -- "float the corner picker when asymmetric is selected so we don't
    have to keep scrolling back" and "make the refresh design and undo button
-   floating." Placement (Hali, 2026-11-20): on DESKTOP the corner picker
-   floats on the right side of the screen and Refresh/Undo sit side by side
-   at the top-left under the nav; on PHONES (no side room) Refresh/Undo
-   stack at the top-left and the corner picker runs along the bottom.
+   floating." Placement (Hali, 2026-11-20): buttons ALWAYS side by side in
+   both bars ("always keep buttons side by side" -- stacked versions looked
+   detached). Desktop: Refresh/Undo top-left, corner picker top-right, both
+   pinned under the nav. Phone: Refresh/Undo top-left under the nav, corner
+   picker along the bottom.
    Each only shows while its original controls are scrolled out of view. */
-.corner-float-bar,.design-float-bar{position:fixed;z-index:999;display:none;gap:6px;padding:8px;background:var(--panel);border:1px solid var(--gold);border-radius:10px;box-shadow:0 8px 30px rgba(0,0,0,.45);}
-.design-float-bar{border-color:var(--line);}
+.corner-float-bar,.design-float-bar{position:fixed;z-index:999;display:none;gap:6px;padding:8px;background:var(--panel);border:1px solid var(--gold);border-radius:10px;box-shadow:0 8px 30px rgba(0,0,0,.45);flex-direction:row;align-items:center;}
+.design-float-bar{border-color:var(--line);top:calc(var(--nav-h,64px) + 10px);left:16px;}
 .corner-float-bar span{font-size:.65rem;color:var(--muted);white-space:nowrap;text-align:center;}
-/* Desktop: corner picker stacked on the right, centered top-to-bottom.
-   Refresh/Undo side by side, pinned top-left under the nav (Hali,
-   2026-11-20: "on desktop have them side by side the way they were"). */
-.corner-float-bar{top:50%;right:16px;transform:translateY(-50%);flex-direction:column;align-items:stretch;}
-.design-float-bar{top:calc(var(--nav-h,64px) + 10px);left:16px;flex-direction:row;align-items:center;}
-/* Phones: Refresh/Undo stacked at top-left under the nav (she said stacked
-   "might be nice on mobile"), corner picker in a row along the bottom. */
+.corner-float-bar{top:calc(var(--nav-h,64px) + 10px);right:16px;}
 @media (max-width:768px){
-  .design-float-bar{flex-direction:column;align-items:stretch;}
-  .corner-float-bar{flex-direction:row;align-items:center;top:auto;right:auto;left:50%;transform:translateX(-50%);bottom:calc(16px + env(safe-area-inset-bottom));}
+  .corner-float-bar{top:auto;right:auto;left:50%;transform:translateX(-50%);bottom:calc(16px + env(safe-area-inset-bottom));}
 }
+
 .char-options{display:flex;flex-wrap:wrap;gap:5px;}
 .char-opt{width:36px;height:36px;border-radius:6px;border:1px solid var(--line);background:var(--panel);display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:.95rem;transition:all .2s;user-select:none;}
 .char-opt:hover{border-color:var(--gold);}
@@ -962,7 +960,9 @@ footer a{color:var(--muted);}footer a:hover{color:var(--white);}
 
               <div id="color-solid">
                 <div style="display:flex;gap:14px;">
-                  <div class="grad-stop"><input type="color" id="c-fg" value="#000000"><span>Dot color</span></div>
+                  <div class="grad-stop"><input type="color" id="c-fg" value="#000000"><span>YOUR dot colors</span></div>
+                  <!-- WHY: Hali -- "make a note next to color square to click square for all colors" (the square opens the full color picker). -->
+                  <span style="align-self:center;font-size:.72rem;color:var(--muted);font-style:italic;">Click the square for all colors</span>
                   
                 </div>
               </div>
@@ -1107,15 +1107,6 @@ footer a{color:var(--muted);}footer a:hover{color:var(--white);}
                 <button type="button" id="s-corner-tab-tr" class="corner-tab-btn" onclick="setActiveCornerEdit('s','tr')">Corner 2</button>
                 <button type="button" id="s-corner-tab-bl" class="corner-tab-btn" onclick="setActiveCornerEdit('s','bl')">Corner 3</button>
               </div>
-              <div id="s-corner-size-row" style="display:none;margin-top:12px;">
-                <label style="display:flex;justify-content:space-between;">Size (this corner) <span id="s-corner-size-val" style="color:var(--gold2);">Normal</span></label>
-                <input type="range" id="s-corner-size" min="-1" max="1" step="0.1" value="0" style="width:100%;" oninput="setCornerSize('s', this.value)">
-                <div style="display:flex;justify-content:space-between;font-size:.65rem;color:var(--muted);margin-top:2px;"><span>Smaller</span><span>Bigger</span></div>
-              </div>
-              <div id="s-random-sizing-row" style="display:none;margin-top:10px;">
-                <label style="display:flex;align-items:center;cursor:pointer;"><input type="checkbox" id="s-random-sizing" onchange="setRandomCornerSizing('s', this.checked)" style="width:14px;height:14px;min-width:14px;flex:0 0 14px;margin:0 7px 0 0;padding:0;vertical-align:middle;">Random Sizing</label>
-                <p style="font-size:.72rem;color:var(--muted);margin-top:4px;">Rolls a new random size for all three corners. Check it again any time for a different roll.</p>
-              </div>
             </div>
 
             <!-- FINDER (CORNER) STYLE — WHY only 5 options here vs. the full
@@ -1138,6 +1129,8 @@ footer a{color:var(--muted);}footer a:hover{color:var(--white);}
             <div class="field">
               <label>Corner Style</label>
               <div class="shape-grid" id="finder-style-grid" style="max-height:none;"></div>
+              <!-- WHY: Hali -- "apply to all corners ... under the outter corner as well," only while Asymmetric is on. Shown/hidden by syncAsymmetricCornersUI. -->
+              <button type="button" id="s-outer-apply-all" class="act-btn act-btn-gold" style="display:none;margin-top:6px;font-size:.72rem;" onclick="applyOuterToAllCorners('s')">Apply to all corners</button>
               <div class="grad-toggle" style="margin-top:10px;flex-wrap:wrap;">
                 <button id="c-finder-outer-mode-solid" onclick="setFinderColorMode('outer','solid','s')">Solid</button>
                 <button id="c-finder-outer-mode-grad2" onclick="setFinderColorMode('outer','grad2','s')">2-color</button>
@@ -1189,7 +1182,17 @@ footer a{color:var(--muted);}footer a:hover{color:var(--white);}
               <label>Inner Dot Style</label>
               <div class="shape-grid" id="finder-dot-style-grid"></div>
               <!-- WHY: Hali -- "apply to all corners button for the inner dot style only visible when asymmetric corners is selected." Shown/hidden by syncAsymmetricCornersUI. -->
-              <button type="button" id="s-inner-apply-all" class="act-btn" style="display:none;margin-top:6px;font-size:.72rem;" onclick="applyInnerDotToAllCorners('s')">Apply to all corners</button>
+              <button type="button" id="s-inner-apply-all" class="act-btn act-btn-gold" style="display:none;margin-top:6px;font-size:.72rem;" onclick="applyInnerDotToAllCorners('s')">Apply to all corners</button>
+              <!-- WHY here, under Inner Dot Style, and always shown: Hali -- "this size this corner only changes the inner dot ... move the sizer to under the inner dots ... show up weather aysemetric is on or off." Off = one size for all 3 corners; on = the picked corner only. The outer ring is not sizable (see FINDER_SIZE_MAX_DELTA WHY). -->
+              <div id="s-corner-size-row" style="margin-top:12px;">
+                <label style="display:flex;justify-content:space-between;"><span id="s-corner-size-title">Inner Dot Size</span> <span id="s-corner-size-val" style="color:var(--gold2);">Normal</span></label>
+                <input type="range" id="s-corner-size" min="-1" max="1" step="0.1" value="0" style="width:100%;" oninput="setCornerSize('s', this.value)">
+                <div style="display:flex;justify-content:space-between;font-size:.65rem;color:var(--muted);margin-top:2px;"><span>Smaller</span><span>Bigger</span></div>
+              </div>
+              <div id="s-random-sizing-row" style="margin-top:10px;">
+                <label style="display:flex;align-items:center;cursor:pointer;"><input type="checkbox" id="s-random-sizing" onchange="setRandomCornerSizing('s', this.checked)" style="width:14px;height:14px;min-width:14px;flex:0 0 14px;margin:0 7px 0 0;padding:0;vertical-align:middle;">Random Sizing</label>
+                <p id="s-random-sizing-note" style="font-size:.72rem;color:var(--muted);margin-top:4px;">Rolls a new random inner dot size. Uncheck and check it again any time for a different roll.</p>
+              </div>
               <p style="font-size:.66rem;color:var(--muted);margin-top:4px;"><strong style="color:var(--gold2);">⚠ = Caution</strong> — shapes marked with this symbol below can scan less reliably as a corner eye on some devices (still fine as a regular dot). Worth a real test scan before you commit to one.</p>
               <!-- Twin of s-crescent-orientation-row above the main Dot Type
                    grid -- same shared setting, see that row's own WHY.
@@ -1560,7 +1563,9 @@ footer a{color:var(--muted);}footer a:hover{color:var(--white);}
               <div id="d-color-random" style="display:none;"></div>
               <div id="d-color-solid">
                 <div style="display:flex;gap:14px;">
-                  <div class="grad-stop"><input type="color" id="d-c-fg" value="#000000"><span>Dot color</span></div>
+                  <div class="grad-stop"><input type="color" id="d-c-fg" value="#000000"><span>YOUR dot colors</span></div>
+                  <!-- WHY: Hali -- "make a note next to color square to click square for all colors" (the square opens the full color picker). -->
+                  <span style="align-self:center;font-size:.72rem;color:var(--muted);font-style:italic;">Click the square for all colors</span>
                   
                 </div>
               </div>
@@ -1649,15 +1654,6 @@ footer a{color:var(--muted);}footer a:hover{color:var(--white);}
                 <button type="button" id="d-corner-tab-tr" class="corner-tab-btn" onclick="setActiveCornerEdit('d','tr')">Corner 2</button>
                 <button type="button" id="d-corner-tab-bl" class="corner-tab-btn" onclick="setActiveCornerEdit('d','bl')">Corner 3</button>
               </div>
-              <div id="d-corner-size-row" style="display:none;margin-top:12px;">
-                <label style="display:flex;justify-content:space-between;">Size (this corner) <span id="d-corner-size-val" style="color:var(--gold2);">Normal</span></label>
-                <input type="range" id="d-corner-size" min="-1" max="1" step="0.1" value="0" style="width:100%;" oninput="setCornerSize('d', this.value)">
-                <div style="display:flex;justify-content:space-between;font-size:.65rem;color:var(--muted);margin-top:2px;"><span>Smaller</span><span>Bigger</span></div>
-              </div>
-              <div id="d-random-sizing-row" style="display:none;margin-top:10px;">
-                <label style="display:flex;align-items:center;cursor:pointer;"><input type="checkbox" id="d-random-sizing" onchange="setRandomCornerSizing('d', this.checked)" style="width:14px;height:14px;min-width:14px;flex:0 0 14px;margin:0 7px 0 0;padding:0;vertical-align:middle;">Random Sizing</label>
-                <p style="font-size:.72rem;color:var(--muted);margin-top:4px;">Rolls a new random size for all three corners. Uncheck and check it again any time for a different roll.</p>
-              </div>
             </div>
 
             <!-- FINDER (CORNER) STYLE — mirrors the Static tab's; see that
@@ -1667,6 +1663,8 @@ footer a{color:var(--muted);}footer a:hover{color:var(--white);}
             <div class="field">
               <label>Corner Style</label>
               <div class="shape-grid" id="d-finder-style-grid" style="max-height:none;"></div>
+              <!-- WHY: Hali -- "apply to all corners ... under the outter corner as well," only while Asymmetric is on. Shown/hidden by syncAsymmetricCornersUI. -->
+              <button type="button" id="d-outer-apply-all" class="act-btn act-btn-gold" style="display:none;margin-top:6px;font-size:.72rem;" onclick="applyOuterToAllCorners('d')">Apply to all corners</button>
               <div class="grad-toggle" style="margin-top:10px;flex-wrap:wrap;">
                 <button id="d-c-finder-outer-mode-solid" onclick="setFinderColorMode('outer','solid','d')">Solid</button>
                 <button id="d-c-finder-outer-mode-grad2" onclick="setFinderColorMode('outer','grad2','d')">2-color</button>
@@ -1711,7 +1709,17 @@ footer a{color:var(--muted);}footer a:hover{color:var(--white);}
               <label>Inner Dot Style</label>
               <div class="shape-grid" id="d-finder-dot-style-grid"></div>
               <!-- WHY: Hali -- "apply to all corners button for the inner dot style only visible when asymmetric corners is selected." Shown/hidden by syncAsymmetricCornersUI. -->
-              <button type="button" id="d-inner-apply-all" class="act-btn" style="display:none;margin-top:6px;font-size:.72rem;" onclick="applyInnerDotToAllCorners('d')">Apply to all corners</button>
+              <button type="button" id="d-inner-apply-all" class="act-btn act-btn-gold" style="display:none;margin-top:6px;font-size:.72rem;" onclick="applyInnerDotToAllCorners('d')">Apply to all corners</button>
+              <!-- WHY here, under Inner Dot Style, and always shown: Hali -- "this size this corner only changes the inner dot ... move the sizer to under the inner dots ... show up weather aysemetric is on or off." Off = one size for all 3 corners; on = the picked corner only. The outer ring is not sizable (see FINDER_SIZE_MAX_DELTA WHY). -->
+              <div id="d-corner-size-row" style="margin-top:12px;">
+                <label style="display:flex;justify-content:space-between;"><span id="d-corner-size-title">Inner Dot Size</span> <span id="d-corner-size-val" style="color:var(--gold2);">Normal</span></label>
+                <input type="range" id="d-corner-size" min="-1" max="1" step="0.1" value="0" style="width:100%;" oninput="setCornerSize('d', this.value)">
+                <div style="display:flex;justify-content:space-between;font-size:.65rem;color:var(--muted);margin-top:2px;"><span>Smaller</span><span>Bigger</span></div>
+              </div>
+              <div id="d-random-sizing-row" style="margin-top:10px;">
+                <label style="display:flex;align-items:center;cursor:pointer;"><input type="checkbox" id="d-random-sizing" onchange="setRandomCornerSizing('d', this.checked)" style="width:14px;height:14px;min-width:14px;flex:0 0 14px;margin:0 7px 0 0;padding:0;vertical-align:middle;">Random Sizing</label>
+                <p id="d-random-sizing-note" style="font-size:.72rem;color:var(--muted);margin-top:4px;">Rolls a new random inner dot size. Uncheck and check it again any time for a different roll.</p>
+              </div>
               <p style="font-size:.66rem;color:var(--muted);margin-top:4px;"><strong style="color:var(--gold2);">⚠ = Caution</strong> — shapes marked with this symbol below can scan less reliably as a corner eye on some devices (still fine as a regular dot). Worth a real test scan before you commit to one.</p>
               <!-- Mirrors s-finder-crescent-orientation-row; see its WHY
                    there. -->
@@ -6165,6 +6173,9 @@ var _finderDotStyleCorner = { s: {tl:null,tr:null,bl:null}, d: {tl:null,tr:null,
 var _crescentOrientationCorner = { s: {tl:null,tr:null,bl:null}, d: {tl:null,tr:null,bl:null} };
 var _finderCornerSize = { s: {tl:0,tr:0,bl:0}, d: {tl:0,tr:0,bl:0} };
 var _randomCornerSizing = { s:false, d:false };
+// WHY a shared inner dot size: the sizer now shows with Asymmetric off too,
+// where all 3 corners must stay matching -- so one -1..1 value for all.
+var _finderInnerSize = { s: 0, d: 0 };
 // WHY a per-corner COLOR override too, same null="inherit" shape as
 // _finderStyleCorner above: Hali -- "I'm trying to do a different gradient
 // on each corner, and every time I change one corner, the gradient changes
@@ -6209,6 +6220,18 @@ function setAsymmetricCorners(prefix, checked) {
 // the user is looking at in the picker, so "apply to all" should make the
 // other two corners match exactly what they see. Only the inner dot shape
 // is copied -- outer style, colors and sizes stay per-corner on purpose.
+// WHY the outer twin copies only the Corner Style shape: same rule as the
+// inner one -- colors and sizes stay per-corner on purpose.
+function applyOuterToAllCorners(prefix) {
+  prefix = prefix || 's';
+  if (!_asymmetricCorners[prefix]) return;
+  var active = _activeCornerEdit[prefix] || 'tl';
+  var globalOuter = prefix==='s' ? _finderStyle : _finderStyleD;
+  var key = _finderStyleCorner[prefix][active] || globalOuter;
+  ['tl','tr','bl'].forEach(function(c){ _finderStyleCorner[prefix][c] = key; });
+  scheduleLivePreview(prefix);
+  toast('Corner style applied to all 3 corners.','ok');
+}
 function applyInnerDotToAllCorners(prefix) {
   prefix = prefix || 's';
   if (!_asymmetricCorners[prefix]) return;
@@ -6237,10 +6260,15 @@ function syncAsymmetricCornersUI(prefix) {
   if (tabsRow) tabsRow.style.display = on ? 'flex' : 'none';
   buildFloatingCornerBar(prefix);
   scheduleFloatingCornerUpdate();
-  if (sizeRow) sizeRow.style.display = on ? 'block' : 'none';
-  if (randomRow) randomRow.style.display = on ? 'block' : 'none';
+  // WHY always shown now (see the size row's HTML WHY); only the label and
+  // which value the slider edits change with Asymmetric.
+  if (sizeRow) sizeRow.style.display = 'block';
+  if (randomRow) randomRow.style.display = 'block';
+  syncInnerSizeSlider(prefix);
   var applyAllBtn = document.getElementById(prefix+'-inner-apply-all');
   if (applyAllBtn) applyAllBtn.style.display = on ? 'inline-block' : 'none';
+  var outerApplyBtn = document.getElementById(prefix+'-outer-apply-all');
+  if (outerApplyBtn) outerApplyBtn.style.display = on ? 'inline-block' : 'none';
   syncFinderReflectRow(prefix);
   if (on) {
     setActiveCornerEdit(prefix, _activeCornerEdit[prefix] || 'tl');
@@ -6280,11 +6308,7 @@ function setActiveCornerEdit(prefix, corner) {
   var effInner = _finderDotStyleCorner[prefix][corner] || globalInner;
   setFinderGridSelection(prefix==='s'?'finder-style-grid':'d-finder-style-grid', effOuter);
   setFinderGridSelection(prefix==='s'?'finder-dot-style-grid':'d-finder-dot-style-grid', effInner);
-  var sizeVal = _finderCornerSize[prefix][corner] || 0;
-  var slider = document.getElementById(prefix+'-corner-size');
-  var lbl = document.getElementById(prefix+'-corner-size-val');
-  if (slider) slider.value = sizeVal;
-  if (lbl) lbl.textContent = cornerSizeLabel(sizeVal);
+  syncInnerSizeSlider(prefix);
   // Re-point the Outer/Inner Color panels at THIS corner's own colors too
   // (falling back to the shared global look if this corner has never had
   // its own edit) -- see getEffFinderColorSnapshot/applyFinderColorSnapshot's
@@ -6386,11 +6410,29 @@ window.addEventListener('resize', scheduleFloatingCornerUpdate);
 
 function setCornerSize(prefix, val) {
   prefix = prefix || 's';
-  var corner = _activeCornerEdit[prefix];
-  _finderCornerSize[prefix][corner] = parseFloat(val);
+  var v = parseFloat(val);
+  // WHY two stores: Asymmetric off = one shared size; on = the picked corner.
+  if (_asymmetricCorners[prefix]) _finderCornerSize[prefix][_activeCornerEdit[prefix]] = v;
+  else _finderInnerSize[prefix] = v;
   var lbl = document.getElementById(prefix+'-corner-size-val');
-  if (lbl) lbl.textContent = cornerSizeLabel(_finderCornerSize[prefix][corner]);
+  if (lbl) lbl.textContent = cornerSizeLabel(v);
   if (typeof scheduleLivePreview==='function') scheduleLivePreview(prefix);
+}
+// WHY one helper: the toggle, a corner-tab switch and a design load all need
+// the slider + label to show whichever value it currently edits.
+function syncInnerSizeSlider(prefix) {
+  prefix = prefix || 's';
+  var on = _asymmetricCorners[prefix];
+  var v = on ? (_finderCornerSize[prefix][_activeCornerEdit[prefix]] || 0) : (_finderInnerSize[prefix] || 0);
+  var slider = document.getElementById(prefix+'-corner-size');
+  var lbl = document.getElementById(prefix+'-corner-size-val');
+  var title = document.getElementById(prefix+'-corner-size-title');
+  var note = document.getElementById(prefix+'-random-sizing-note');
+  if (slider) slider.value = v;
+  if (lbl) lbl.textContent = cornerSizeLabel(v);
+  if (title) title.textContent = on ? 'Inner Dot Size (this corner)' : 'Inner Dot Size';
+  if (note) note.textContent = on ? 'Rolls a new random inner dot size for each corner. Uncheck and check it again any time for a different roll.'
+                                  : 'Rolls one new random inner dot size for all 3 corners. Uncheck and check it again any time for a different roll.';
 }
 
 function cornerSizeLabel(v) {
@@ -6409,10 +6451,13 @@ function setRandomCornerSizing(prefix, checked) {
   prefix = prefix || 's';
   _randomCornerSizing[prefix] = !!checked;
   if (checked) {
-    ['tl','tr','bl'].forEach(function(c){
-      _finderCornerSize[prefix][c] = (Math.random()*2-1);
-    });
-    setActiveCornerEdit(prefix, _activeCornerEdit[prefix]);
+    // WHY: off = one random size so the corners stay matching; on = each its own.
+    if (_asymmetricCorners[prefix]) {
+      ['tl','tr','bl'].forEach(function(c){ _finderCornerSize[prefix][c] = (Math.random()*2-1); });
+    } else {
+      _finderInnerSize[prefix] = (Math.random()*2-1);
+    }
+    syncInnerSizeSlider(prefix);
   }
   if (typeof scheduleLivePreview==='function') scheduleLivePreview(prefix);
 }
@@ -7583,6 +7628,7 @@ function resolveRenderSettings(prefix) {
         tr: (d.finderReflectCorner && d.finderReflectCorner.tr) || null,
         bl: (d.finderReflectCorner && d.finderReflectCorner.bl) || null
       },
+      finderInnerSize: typeof d.finderInnerSize === 'number' ? d.finderInnerSize : 0, // older designs: normal size
       finderCornerSize: {
         tl: (d.finderCornerSize && typeof d.finderCornerSize.tl === 'number') ? d.finderCornerSize.tl : 0,
         tr: (d.finderCornerSize && typeof d.finderCornerSize.tr === 'number') ? d.finderCornerSize.tr : 0,
@@ -7797,6 +7843,7 @@ function resolveRenderSettings(prefix) {
     dotReflect: { h: !!_dotReflect[prefix].h, v: !!_dotReflect[prefix].v },
     finderReflectCorner: { tl: _finderReflectCorner[prefix].tl, tr: _finderReflectCorner[prefix].tr, bl: _finderReflectCorner[prefix].bl },
     finderCornerSize: { tl: _finderCornerSize[prefix].tl, tr: _finderCornerSize[prefix].tr, bl: _finderCornerSize[prefix].bl },
+    finderInnerSize: _finderInnerSize[prefix] || 0,
     finderOuterColorCorner: { tl: _finderOuterColorCorner[prefix].tl, tr: _finderOuterColorCorner[prefix].tr, bl: _finderOuterColorCorner[prefix].bl },
     finderInnerColorCorner: { tl: _finderInnerColorCorner[prefix].tl, tr: _finderInnerColorCorner[prefix].tr, bl: _finderInnerColorCorner[prefix].bl },
     frameShape: prefix==='s' ? _frameShape : _frameShapeD,
@@ -9681,7 +9728,9 @@ async function renderQRCore(canvas, url, size, ec, prefix) {
       scale: cornerInnerScale(fcs[corner] || 0)
     };
   }
-  var tlFinder = { outer: settings.finderStyle, inner: settings.finderDotStyle, scale: 1 };
+  // WHY cornerInnerScale(finderInnerSize): the shared Inner Dot Size used
+  // while Asymmetric is off (older designs have 0 = normal).
+  var tlFinder = { outer: settings.finderStyle, inner: settings.finderDotStyle, scale: cornerInnerScale(settings.finderInnerSize || 0) };
   var trFinder = settings.asymmetricCorners ? resolveCornerFinder('tr') : tlFinder;
   var blFinder = settings.asymmetricCorners ? resolveCornerFinder('bl') : tlFinder;
   // WHY Top-Left ALSO resolves through resolveCornerFinder when the toggle's
@@ -10485,6 +10534,7 @@ function captureDesignSettings(prefix) {
     dotReflect: { h: !!_dotReflect[prefix].h, v: !!_dotReflect[prefix].v },
     finderReflectCorner: { tl: _finderReflectCorner[prefix].tl, tr: _finderReflectCorner[prefix].tr, bl: _finderReflectCorner[prefix].bl },
     finderCornerSize: { tl: _finderCornerSize[prefix].tl, tr: _finderCornerSize[prefix].tr, bl: _finderCornerSize[prefix].bl },
+    finderInnerSize: _finderInnerSize[prefix] || 0,
     finderOuterColorCorner: { tl: _finderOuterColorCorner[prefix].tl, tr: _finderOuterColorCorner[prefix].tr, bl: _finderOuterColorCorner[prefix].bl },
     finderInnerColorCorner: { tl: _finderInnerColorCorner[prefix].tl, tr: _finderInnerColorCorner[prefix].tr, bl: _finderInnerColorCorner[prefix].bl },
     frameShape: prefix==='s' ? _frameShape : _frameShapeD,
@@ -10831,6 +10881,7 @@ function applyDesignSettings(prefix, design) {
   if (rdOri) _crescentOrientation[prefix] = [rdOri];
   _dotReflect[prefix] = { h: false, v: false };
   _finderReflectCorner[prefix] = { tl: frc.tl||null, tr: frc.tr||null, bl: frc.bl||null };
+  _finderInnerSize[prefix] = typeof design.finderInnerSize==='number' ? design.finderInnerSize : 0;
   _finderCornerSize[prefix] = {
     tl: typeof fcs.tl==='number' ? fcs.tl : 0,
     tr: typeof fcs.tr==='number' ? fcs.tr : 0,
@@ -12366,9 +12417,11 @@ async function buildDashSVG(slug,url,design) {
       scale: cornerInnerScale(typeof fcs==='number' ? fcs : 0)
     };
   }
-  var tlF = { outer: outerStyle, inner: innerStyle, scale: 1 };
-  var trF = { outer: outerStyle, inner: innerStyle, scale: 1 };
-  var blF = { outer: outerStyle, inner: innerStyle, scale: 1 };
+  // WHY: shared Inner Dot Size when Asymmetric is off, same as the canvas.
+  var sharedInner = cornerInnerScale(typeof design.finderInnerSize==='number' ? design.finderInnerSize : 0);
+  var tlF = { outer: outerStyle, inner: innerStyle, scale: sharedInner };
+  var trF = { outer: outerStyle, inner: innerStyle, scale: sharedInner };
+  var blF = { outer: outerStyle, inner: innerStyle, scale: sharedInner };
   if (design.asymmetricCorners) {
     tlF = resolveCornerFinderSVG('tl');
     trF = resolveCornerFinderSVG('tr');
