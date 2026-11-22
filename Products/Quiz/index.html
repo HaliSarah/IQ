@@ -1,0 +1,280 @@
+<!DOCTYPE html>
+<!--
+  Title:       I.Q. Productionz — Product Finder Quiz
+  Author:      Hali Sarah Parsons
+  Date:        2026-11-20
+  Modified By: Claude, 2026-11-20, created the quiz page
+  Description: IQProductionz.com/Products/Quiz — a 5-question quiz that scores
+               every product on the site and recommends the best match plus two
+               runners-up, each linking to its own product page.
+-->
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Find Your Product Quiz | I.Q. Productionz</title>
+  <meta name="robots" content="index, follow">
+  <meta name="description" content="Take a quick quiz to find the I.Q. Productionz orgonite, crystal, jewelry or oil that fits your intention, style and budget.">
+  <link rel="canonical" href="https://iqproductionz.com/Products/Quiz/">
+  <meta property="og:type" content="website">
+  <meta property="og:site_name" content="I.Q. Productionz">
+  <meta property="og:title" content="Find Your Product Quiz | I.Q. Productionz">
+  <meta property="og:description" content="Answer 5 quick questions and get matched with your best-fit I.Q. Productionz product.">
+  <meta property="og:url" content="https://iqproductionz.com/Products/Quiz/">
+  <meta property="og:image" content="https://static.wixstatic.com/media/b63ec4_d6fad9165f744284a4b90915a9fbbbc5~mv2.jpg">
+  <meta name="twitter:card" content="summary_large_image">
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel+Decorative&family=Cormorant+Garamond:wght@400;600&display=swap" rel="stylesheet">
+  <style>
+    * { margin:0; padding:0; box-sizing:border-box; }
+    :root {
+      --bg:#2a2720; --ink:#f3e9d6; --muted:rgba(243,233,214,.62);
+      --gold:#c98a2e; --gold-soft:rgba(201,138,46,.25); --card:rgba(20,16,10,.72);
+    }
+    html, body { min-height:100%; }
+    body {
+      background:var(--bg) url('https://static.wixstatic.com/media/b63ec4_d6fad9165f744284a4b90915a9fbbbc5~mv2.jpg') center/cover fixed;
+      color:var(--ink); font-family:'Cormorant Garamond',Georgia,serif; font-size:1.15rem;
+    }
+    /* Dark veil keeps text readable over the photo background */
+    body::before { content:''; position:fixed; inset:0; background:rgba(20,16,10,.8); z-index:-1; }
+
+    /* Stage pushes content toward the bottom of the viewport (bottom-heavy layout) */
+    .stage { min-height:100vh; display:flex; flex-direction:column; justify-content:flex-end;
+             max-width:760px; margin:0 auto; padding:2rem 1.25rem 3rem; gap:1.5rem; }
+    header { text-align:center; }
+    header img { height:56px; filter:drop-shadow(0 0 14px rgba(201,138,46,.6)); }
+    h1, h2, h3 { font-family:'Cinzel Decorative','Palatino Linotype',serif; font-weight:400; color:var(--gold); }
+    h1 { font-size:1.05rem; letter-spacing:.25em; text-transform:uppercase; margin-top:.6rem; }
+    header p { color:var(--muted); margin-top:.4rem; }
+
+    .progress { height:4px; background:var(--gold-soft); border-radius:4px; overflow:hidden; }
+    .progress span { display:block; height:100%; width:0; background:var(--gold); transition:width .6s ease; }
+
+    .panel { background:var(--card); border:1px solid var(--gold-soft); border-radius:14px;
+             padding:1.75rem 1.5rem 2rem; animation:fade 1.2s ease; }
+    @keyframes fade { from { opacity:0; transform:translateY(12px); } to { opacity:1; transform:none; } }
+    .panel h2 { font-size:1.15rem; line-height:1.5; margin-bottom:1.25rem; text-align:center; }
+    .step { text-align:center; color:var(--muted); font-size:.85rem; letter-spacing:.2em; text-transform:uppercase; margin-bottom:.5rem; }
+
+    .options { display:grid; grid-template-columns:repeat(auto-fit,minmax(200px,1fr)); gap:.75rem; }
+    .options button {
+      background:transparent; color:var(--ink); border:1px solid var(--gold-soft); border-radius:10px;
+      padding:.9rem 1rem; font:inherit; text-align:left; cursor:pointer; transition:.25s;
+    }
+    .options button:hover, .options button:focus-visible { border-color:var(--gold); background:rgba(201,138,46,.12); outline:none; }
+    .options small { display:block; color:var(--muted); font-size:.9rem; }
+    .back { margin-top:1.25rem; background:none; border:none; color:var(--muted); font:inherit; cursor:pointer; }
+    .back:hover { color:var(--gold); }
+
+    /* Results: runners-up sit above, the top pick is the largest block at the bottom */
+    .runners { display:grid; grid-template-columns:1fr 1fr; gap:.75rem; margin-bottom:1rem; }
+    .mini { border:1px solid var(--gold-soft); border-radius:10px; padding:.9rem; }
+    .mini h3 { font-size:.8rem; line-height:1.4; }
+    .mini p { color:var(--muted); font-size:.95rem; margin:.3rem 0 .5rem; }
+    .top { border:1px solid var(--gold); border-radius:14px; padding:1.75rem 1.5rem;
+           background:linear-gradient(180deg,rgba(201,138,46,.06),rgba(201,138,46,.18)); text-align:center; }
+    .top .label { font-size:.8rem; letter-spacing:.3em; text-transform:uppercase; color:var(--muted); }
+    .top h3 { font-size:1.45rem; margin:.5rem 0; }
+    .top .cat { color:var(--muted); }
+    .top .why { margin:1rem 0 1.4rem; line-height:1.55; }
+    .price { color:var(--gold); font-weight:600; }
+    a.btn, button.btn {
+      display:inline-block; text-decoration:none; background:var(--gold); color:#1b160e; border:none;
+      border-radius:999px; padding:.85rem 1.8rem; font:600 1.05rem 'Cormorant Garamond',serif; cursor:pointer;
+    }
+    a.link { color:var(--gold); font-size:.95rem; }
+    .again { display:block; margin:1.25rem auto 0; background:none; border:1px solid var(--gold-soft);
+             color:var(--ink); border-radius:999px; padding:.6rem 1.4rem; font:inherit; cursor:pointer; }
+    footer { text-align:center; color:var(--muted); font-size:.9rem; }
+    footer a { color:var(--gold); }
+    @media (max-width:520px) { .runners { grid-template-columns:1fr; } }
+  </style>
+</head>
+<body>
+  <main class="stage">
+    <header>
+      <a href="https://iqproductionz.com/"><img src="https://iqproductionz.com/Content/Images/Main/IQ-noglow_Updated.avif" alt="I.Q. Productionz"></a>
+      <h1>Find Your Match</h1>
+      <p>Five quick questions. One product made for you.</p>
+    </header>
+    <div class="progress" aria-hidden="true"><span id="bar"></span></div>
+    <section id="app" class="panel" aria-live="polite"></section>
+    <footer>Want something custom? <a href="https://iqproductionz.com/Contact/">Send a request</a> · <a href="https://iqproductionz.com/Products/">Browse all products</a></footer>
+  </main>
+
+  <script>
+    /*
+      Product catalog. Pulled from each product page under /Products so the quiz
+      can only recommend items that actually exist on the site.
+      in  = intentions (first one is the product's main purpose, so it scores higher)
+      use = how it's used, col = dominant colors, sp = special-case match
+      price = null when the page lists no price (it then fits any budget)
+    */
+    const P = [
+      // Bears — pocket/purse orgonites
+      { n:'Calm Bear', c:'Bears', u:'Bears/Calm', price:25, in:['calm'], use:['carry'], col:['purple'], why:'Purple orgonite with amethyst that releases tension and centers you.' },
+      { n:'Creative Bear', c:'Bears', u:'Bears/Creative', price:25, in:['create','abund'], use:['carry'], col:['red'], why:'Red orgonite with carnelian to restore motivation and sharpen focus.' },
+      { n:'Divine Bear', c:'Bears', u:'Bears/Divine', price:25, in:['intuit','calm'], use:['carry'], col:['blue'], why:'Blue lapis lazuli bear for celestial connection and stress relief.' },
+      { n:'Healing Bear', c:'Bears', u:'Bears/Healing', price:25, in:['heal'], use:['carry'], col:['green'], why:'Green malachite bear for protection and transformation.' },
+      { n:'Opportunity Bear', c:'Bears', u:'Bears/Opportunity', price:25, in:['abund','create'], use:['carry'], col:['orange'], why:'Orange lotus bear that boosts ambition and opens new possibilities.' },
+      { n:'Power Bear', c:'Bears', u:'Bears/Power', price:25, in:['abund'], use:['carry'], col:['yellow'], why:'Yellow tiger\'s eye bear for confidence, integrity and reaching goals.' },
+      { n:'Serenity Bear', c:'Bears', u:'Bears/Serenity', price:25, in:['calm','clarity'], use:['carry'], col:['clear'], why:'White howlite and wood for grounding, stillness and an open mind.' },
+      { n:'Star Bear', c:'Bears', u:'Bears/Star', price:25, in:['create','abund'], use:['carry'], col:['clear'], why:'Star-symbol bear that drives inspiration and grows your talents.' },
+
+      // Bodies, plates, crystals
+      { n:'Persistent Love Pregnancy Body', c:'Bodies', u:'Bodies/Persistent-Love-Pregnancy-Body', price:111, in:['love'], use:['space'], col:['pink'], sp:'baby', why:'Rose quartz body with twin copper spirals for partner and child, inscribed "never never give up!"' },
+      { n:'Amplified Heart Charger', c:'Charging Plates', u:'Charging-Plates/Amplified-Heart', price:45, in:['love'], use:['charge','space'], col:['pink'], why:'Five pink heart sections with rose quartz to charge your items with love.' },
+      { n:'Demystifying Holographic Windowsill Plate', c:'Charging Plates', u:'Charging-Plates/Demystifying-Holographic-Windowsill', price:180, in:['intuit','heal'], use:['charge','space'], col:['purple'], why:'Holographic Metatron plate with amethyst and moonstone for your windowsill.' },
+      { n:'Love Infused Square Plate', c:'Charging Plates', u:'Charging-Plates/Love-Infused-Square', price:220, in:['love','abund'], use:['charge','space'], col:['pink','yellow'], why:'Celtic intertwined-hearts plate with rose quartz and 24k gold flakes.' },
+      { n:'Creativity Gems', c:'Crystals', u:'Crystals/Creativity-Gems', price:25, in:['create','calm'], use:['carry'], col:['yellow','orange'], why:'Citrine, carnelian, moss agate and labradorite working together for creativity.' },
+      { n:'Pocket Gems', c:'Crystals', u:'Crystals/Pocket-Gems', price:null, in:['heal','love','intuit'], use:['carry'], col:['green','yellow','orange','pink','blue','purple','red'], why:'Tiny copper-wrapped quartz gems in every color — pick the energy you need.' },
+      { n:'Rainbow Chakra Obelisk Tower', c:'Crystals', u:'Crystals/Rainbow-Chakra-Obelisk-Tower', price:111, in:['heal','intuit','clarity'], use:['space'], col:['purple','blue','green','yellow'], why:'Seven-level chakra tower linked by a gold-plated spiral to balance your whole body.' },
+
+      // Earrings — close to the head, good for phone/earbud users
+      { n:'Aqua Ovals Earrings', c:'Earrings', u:'Earrings/Aqua-Ovals', price:9.99, in:['abund','create'], use:['wear'], col:['aqua'], sp:'phone', why:'Womb-shaped ovals that support your manifestations.' },
+      { n:'Marine Treasures Earrings', c:'Earrings', u:'Earrings/Marine-Treasures', price:9.99, in:['heal','abund'], use:['wear'], col:['green'], sp:'phone', why:'Green egg and square shapes for balance, structure and being who you are.' },
+      { n:'Midnight Pinks Earrings', c:'Earrings', u:'Earrings/Midnight-Pinks', price:9.99, in:['intuit'], use:['wear'], col:['pink'], sp:'phone', why:'A moon and a star to sharpen your intuition.' },
+      { n:'Pink Diamonds Earrings', c:'Earrings', u:'Earrings/Pink-Diamonds', price:9.99, in:['abund','love'], use:['wear'], col:['pink'], sp:'phone', why:'Diamond shapes for wealth, contentment and trusting your abundance.' },
+      { n:'Pink Gem Hearts Earrings', c:'Earrings', u:'Earrings/Pink-Gem-Hearts', price:9.99, in:['love','heal'], use:['wear'], col:['pink'], sp:'phone', why:'Faceted hearts that raise your loving vibration.' },
+      { n:'Pink Pizza Slices Earrings', c:'Earrings', u:'Earrings/Pink-Pizza-Slices', price:9.99, in:['abund','love'], use:['wear'], col:['pink'], sp:'phone', why:'Playful slices for self-worth and stronger connections.' },
+      { n:'Pink Promises Earrings', c:'Earrings', u:'Earrings/Pink-Promises', price:9.99, in:['abund'], use:['wear'], col:['pink'], sp:'phone', why:'Mismatched oval and square that strengthen trust in yourself.' },
+      { n:'Slender Celadons Earrings', c:'Earrings', u:'Earrings/Slender-Celadons', price:9.99, in:['calm','heal'], use:['wear'], col:['green'], sp:'phone', why:'Tear shapes in celadon for serenity, renewal and forgiveness.' },
+      { n:'Teal Triangles Earrings', c:'Earrings', u:'Earrings/Teal-Triangles', price:9.99, in:['calm','abund'], use:['wear'], col:['aqua'], sp:'phone', why:'Teal triangles for serenity with a boost of courage.' },
+
+      // Games, hands, keychains
+      { n:'Eye-Contact Trust Dominos', c:'Games', u:'Games/Eye-Contact-Trust-Dominos', price:null, in:['create','love'], use:['play'], col:['orange'], why:'A 28-piece orgonite domino set that turns game night into fun, trusting energy.' },
+      { n:'Creative Hand', c:'Hands', u:'Hands/Creative-Hand', price:75, in:['create'], use:['space'], col:[], why:'Copper spirals, a key and an open chain to unlock your creative freedom.' },
+      { n:'Healing Hand', c:'Hands', u:'Hands/Healing-Hand', price:65, in:['heal','love'], use:['space'], col:['green','pink'], why:'Malachite and rose quartz flowing through five copper-wrapped fingertips.' },
+      { n:'Basic Keychains', c:'Keychains', u:'Keychains/Basic-Keychains', price:15, in:['heal','abund'], use:['car','carry'], col:['yellow'], why:'Happy yellow orgonite that softens car EMF on every drive.' },
+      { n:'Purity Keychain', c:'Keychains', u:'Keychains/Purity-Keychain', price:20, in:['intuit','clarity'], use:['car','carry'], col:['aqua'], why:'Aquamarine, spiral and lotus for purity and spiritual awakening on the go.' },
+
+      // Necklaces
+      { n:'Clear Empowering Pi Shift', c:'Necklaces', u:'Necklaces/Clear-Empowering-Pi-Shift', price:19.99, in:['abund','heal'], use:['wear'], col:['clear'], why:'Tiger\'s eye and black tourmaline for self-confidence and releasing fear.' },
+      { n:'Misty Inner Traveler', c:'Necklaces', u:'Necklaces/Misty-Inner-Traveler', price:14.99, in:['heal','intuit'], use:['wear'], col:['green'], why:'Tourmaline for protection and aventurine to dissolve negative thoughts.' },
+      { n:'Mossy Droplet', c:'Necklaces', u:'Necklaces/Mossy-Droplet', price:14.99, in:['heal','clarity'], use:['wear'], col:['green'], why:'Moss agate soul refresher that encourages growth.' },
+      { n:'Mossy Puzzle Piece', c:'Necklaces', u:'Necklaces/Mossy-Puzzle-Piece', price:14.99, in:['abund'], use:['wear'], col:['green'], why:'A puzzle piece with moss agate to attract abundance and complete your soul\'s puzzle.' },
+      { n:'Passionate Creativity Chamber', c:'Necklaces', u:'Necklaces/Passionate-Creativity-Chamber', price:19.99, in:['create'], use:['wear'], col:['red','orange'], why:'Spiral, heart and broken chain for inspiration, passion and freedom to express.' },
+      { n:'Paw Spirit Connection', c:'Necklaces', u:'Necklaces/Paw-Spirit-Connection', price:14.99, in:['intuit','love'], use:['wear'], col:[], sp:'pet', why:'Connects you with the spirit of a pet — living or crossed over.' },
+      { n:'Pure Periwinkle Pair', c:'Necklaces', u:'Necklaces/Pure-Periwinkle-Pair', price:14.99, in:['calm','love','clarity'], use:['wear'], col:['purple','blue'], why:'Two periwinkle shells with 24k gold for cleansing ocean energy and unity.' },
+      { n:'Purity Puzzle Piece', c:'Necklaces', u:'Necklaces/Purity-Puzzle-Piece', price:14.99, in:['clarity'], use:['wear'], col:['clear'], why:'A clean, simple quartz puzzle piece for pure, clear energy.' },
+      { n:'Strawberry Peach Copper Droplet', c:'Necklaces', u:'Necklaces/Strawberry-Peach-Copper-Droplet', price:19.99, in:['abund','heal'], use:['wear'], col:['orange','pink'], why:'Gold-plated nails for stability on a healing copper chain.' },
+      { n:'Strawberry Peach Half-Heart (Large)', c:'Necklaces', u:'Necklaces/Strawberry-Peach-Half-Heart-Large', price:14.99, in:['love'], use:['wear'], col:['pink','orange'], why:'A half-heart with brass spirals — perfect to share love with someone.' },
+      { n:'Strawberry Peach Rectangle Half-Heart', c:'Necklaces', u:'Necklaces/Strawberry-Peach-Rectangle-Half-Heart', price:14.99, in:['love'], use:['wear'], col:['pink','orange'], why:'A modern rectangle half-heart that amplifies loving energy.' },
+
+      // Pyramids & skull — home, altar and meditation pieces
+      { n:'Celestial Oceanic Bubble Pyramid', c:'Pyramids', u:'Pyramids/Celestial-Oceanic-Bubble-Pyramid', price:45, in:['intuit'], use:['space'], col:['blue'], why:'Angelite, lapis and celestite to develop psychic abilities and hear your guides.' },
+      { n:'Dream Recall Pyramid', c:'Pyramids', u:'Pyramids/Dream-Recall-Pyramid', price:65, in:['dream','intuit'], use:['space'], col:['green'], why:'Flower of life and aventurine to influence and remember your dreams.' },
+      { n:'Intuitive Third-Eye Pyramid', c:'Pyramids', u:'Pyramids/Intuitive-Third-Eye-Pyramid', price:25, in:['intuit','calm'], use:['space','carry'], col:['aqua'], why:'A tiny turquoise pyramid for soul expression and regaining balance.' },
+      { n:'The Celestial Skull', c:'Skulls', u:'Skulls/The-Celestial-Skull', price:null, in:['calm','intuit','love'], use:['space'], col:['blue'], why:'Lapis-eyed skull with 24k gold for meditation and your altar.' },
+
+      // Oils — share one category page
+      { n:'Tangible Tangerine Oil', c:'Oils', u:'Oils', price:9.99, in:['abund'], use:['ritual'], col:['orange'], why:'A knuckle-massage oil ritual for magical manifestation.' },
+      { n:'Mesmerizing Mango Oil', c:'Oils', u:'Oils', price:9.99, in:['intuit','dream'], use:['ritual'], col:['orange','yellow'], why:'An eye-area oil ritual for vision enhancement.' },
+      { n:'Grounding Grapefruit Oil', c:'Oils', u:'Oils', price:9.99, in:['clarity','calm'], use:['ritual'], col:['pink'], why:'A palm-and-forehead oil ritual for mental clarity.' }
+    ];
+
+    /* Questions. Each option's value feeds the scoring in score(). */
+    const Q = [
+      { k:'in', q:'What do you want more of right now?', o:[
+        ['love','Love','Romance, self-love, family'], ['calm','Peace & calm','Less stress, more stillness'],
+        ['create','Creativity','Motivation & inspiration'], ['heal','Healing & protection','Shielding & renewal'],
+        ['intuit','Intuition','Spirit, psychic & divine connection'], ['abund','Abundance & confidence','Goals, worth, courage'],
+        ['clarity','Clarity','A clear, focused mind'], ['dream','Dreams','Remember & guide your dreams'] ] },
+      { k:'use', q:'How do you want to use it?', o:[
+        ['wear','Wear it','Necklace or earrings'], ['carry','Carry it','Pocket or purse'],
+        ['car','In my car','Keys & commute'], ['space','Display it','Home, desk or altar'],
+        ['charge','Charge things','Crystals, food, plants'], ['ritual','Self-care ritual','Apply on my skin'],
+        ['play','Play with others','Game night'] ] },
+      { k:'budget', q:'What\'s your budget?', o:[
+        [20,'Under $20',''], [50,'Up to $50',''], [120,'Up to $120',''], [Infinity,'Treat myself','No limit'] ] },
+      { k:'sp', q:'Does any of these fit you?', o:[
+        ['phone','I\'m on my phone or earbuds a lot',''], ['pet','I want to connect with a pet',''],
+        ['baby','Pregnancy or motherhood',''], ['none','None of these',''] ] },
+      { k:'col', q:'Which color are you drawn to?', o:[
+        ['pink','Pink',''], ['purple','Purple',''], ['blue','Blue',''], ['aqua','Aqua / Teal',''],
+        ['green','Green',''], ['orange','Orange / Red',''], ['yellow','Yellow / Gold',''], ['clear','Clear / White',''] ] }
+    ];
+
+    const app = document.getElementById('app');
+    const bar = document.getElementById('bar');
+    let step = 0, ans = {};
+
+    // Escapes text before it goes into innerHTML so product copy can't break the markup
+    const esc = s => String(s).replace(/[&<>"']/g, ch => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch]));
+    const money = p => p == null ? 'See price' : '$' + (Number.isInteger(p) ? p : p.toFixed(2));
+    // Relative link keeps it working on any host/preview that mirrors the folder layout
+    const href = p => '../' + p.u + '/';
+
+    function ask() {
+      const q = Q[step];
+      bar.style.width = (step / Q.length * 100) + '%';
+      app.innerHTML =
+        `<p class="step">Question ${step + 1} of ${Q.length}</p><h2>${esc(q.q)}</h2>
+         <div class="options">${q.o.map((o, i) =>
+           `<button data-i="${i}">${esc(o[1])}${o[2] ? `<small>${esc(o[2])}</small>` : ''}</button>`).join('')}</div>
+         ${step ? '<button class="back">← Back</button>' : ''}`;
+      // Re-trigger the fade so each question gets its breathing-room transition
+      app.style.animation = 'none'; void app.offsetWidth; app.style.animation = '';
+      app.querySelectorAll('.options button').forEach(b => b.onclick = () => {
+        ans[q.k] = q.o[b.dataset.i][0];
+        step++;
+        step < Q.length ? ask() : result();
+      });
+      const back = app.querySelector('.back');
+      if (back) back.onclick = () => { step--; ask(); };
+    }
+
+    /*
+      Weighted scoring instead of strict filtering, so a shopper always gets a
+      recommendation even when no product matches every answer exactly.
+      Intention matters most, then how it's used, then special needs, then color.
+    */
+    function score(p) {
+      let s = 0;
+      const i = p.in.indexOf(ans.in);
+      if (i === 0) s += 6; else if (i > 0) s += 4;
+      if (p.use.includes(ans.use)) s += 5;
+      if (ans.sp !== 'none' && p.sp === ans.sp) s += 7;
+      // Phone users benefit from anything worn near the head, not just earrings
+      if (ans.sp === 'phone' && p.use.includes('wear')) s += 1;
+      if (p.col.includes(ans.col)) s += 2;
+      // Over-budget items stay possible but sink, so a near-miss still beats nothing
+      if (p.price != null && p.price > ans.budget) s -= 8;
+      return s;
+    }
+
+    function result() {
+      bar.style.width = '100%';
+      // Shuffle first so ties don't always favor items listed earlier in the catalog
+      const ranked = P.map(p => ({ p, s: score(p) + Math.random() * 0.5 }))
+                      .sort((a, b) => b.s - a.s);
+      const seen = new Set(), picks = [];
+      // Skip duplicate category pages (the three oils share one link) for variety
+      for (const r of ranked) {
+        const key = r.p.u === 'Oils' ? 'Oils' : r.p.n;
+        if (seen.has(key)) continue;
+        seen.add(key); picks.push(r.p);
+        if (picks.length === 3) break;
+      }
+      const [top, ...rest] = picks;
+      app.innerHTML =
+        `<p class="step">Your matches</p>
+         <div class="runners">${rest.map(p =>
+           `<div class="mini"><h3>${esc(p.n)}</h3><p>${esc(p.c)} · <span class="price">${money(p.price)}</span></p>
+            <a class="link" href="${href(p)}">View →</a></div>`).join('')}</div>
+         <div class="top">
+           <div class="label">Your best match</div>
+           <h3>${esc(top.n)}</h3>
+           <div class="cat">${esc(top.c)} · <span class="price">${money(top.price)}</span></div>
+           <p class="why">${esc(top.why)}</p>
+           <a class="btn" href="${href(top)}">See this product</a>
+         </div>
+         <button class="again">Retake the quiz</button>`;
+      app.style.animation = 'none'; void app.offsetWidth; app.style.animation = '';
+      app.querySelector('.again').onclick = () => { step = 0; ans = {}; ask(); };
+    }
+
+    ask();
+  </script>
+</body>
+</html>
