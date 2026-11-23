@@ -5,6 +5,7 @@
   Date:        2026-11-20
   Modified By: Claude, 2026-11-20, created the quiz page
                Claude, 2026-11-23, focused the quiz on orgonites only and added the ORGONITES heading
+               Claude, 2026-11-23, product links now use full URLs to each product page
   Description: IQProductionz.com/Products/Quiz — a 5-question quiz that scores
                every orgonite product on the site and recommends the best match plus two
                runners-up, each linking to its own product page.
@@ -202,8 +203,8 @@
     // Escapes text before it goes into innerHTML so product copy can't break the markup
     const esc = s => String(s).replace(/[&<>"']/g, ch => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch]));
     const money = p => p == null ? 'See price' : '$' + (Number.isInteger(p) ? p : p.toFixed(2));
-    // Relative link keeps it working on any host/preview that mirrors the folder layout
-    const href = p => '../' + p.u + '/';
+    // Full URL so the link always lands on the product's own page, no matter how the quiz URL was typed
+    const href = p => 'https://iqproductionz.com/Products/' + p.u + '/';
 
     function ask() {
       const q = Q[step];
