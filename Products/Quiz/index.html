@@ -4,26 +4,27 @@
   Author:      Hali Sarah Parsons
   Date:        2026-11-20
   Modified By: Claude, 2026-11-20, created the quiz page
+               Claude, 2026-11-23, focused the quiz on orgonites only and added the ORGONITES heading
   Description: IQProductionz.com/Products/Quiz — a 5-question quiz that scores
-               every product on the site and recommends the best match plus two
+               every orgonite product on the site and recommends the best match plus two
                runners-up, each linking to its own product page.
 -->
 <html lang="en">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Find Your Product Quiz | I.Q. Productionz</title>
+  <title>Orgonite Finder Quiz | I.Q. Productionz</title>
   <meta name="robots" content="index, follow">
-  <meta name="description" content="Take a quick quiz to find the I.Q. Productionz orgonite, crystal, jewelry or oil that fits your intention, style and budget.">
+  <meta name="description" content="Take a quick quiz to find the I.Q. Productionz orgonite that fits your intention, style and budget.">
   <link rel="canonical" href="https://iqproductionz.com/Products/Quiz/">
   <meta property="og:type" content="website">
   <meta property="og:site_name" content="I.Q. Productionz">
-  <meta property="og:title" content="Find Your Product Quiz | I.Q. Productionz">
-  <meta property="og:description" content="Answer 5 quick questions and get matched with your best-fit I.Q. Productionz product.">
+  <meta property="og:title" content="Orgonite Finder Quiz | I.Q. Productionz">
+  <meta property="og:description" content="Answer 5 quick questions and get matched with your best-fit I.Q. Productionz orgonite.">
   <meta property="og:url" content="https://iqproductionz.com/Products/Quiz/">
   <meta property="og:image" content="https://static.wixstatic.com/media/b63ec4_d6fad9165f744284a4b90915a9fbbbc5~mv2.jpg">
   <meta name="twitter:card" content="summary_large_image">
-  <link href="https://fonts.googleapis.com/css2?family=Cinzel+Decorative&family=Cormorant+Garamond:wght@400;600&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel+Decorative&family=Oswald:wght@500&family=Cormorant+Garamond:wght@400;600&display=swap" rel="stylesheet">
   <style>
     * { margin:0; padding:0; box-sizing:border-box; }
     :root {
@@ -42,6 +43,9 @@
     .stage { min-height:100vh; display:flex; flex-direction:column; justify-content:flex-end;
              max-width:760px; margin:0 auto; padding:2rem 1.25rem 3rem; gap:1.5rem; }
     header { text-align:center; }
+    /* Matches the white ORGONITES title on the Orgonites page so the quiz reads as part of that section */
+    .section-title { font-family:'Oswald',sans-serif; font-weight:500; color:#fff; font-size:clamp(2.6rem,9vw,3.6rem);
+                     letter-spacing:.03em; line-height:1.1; text-shadow:rgba(0,0,0,.4) 0 4px 5px; margin-bottom:.6rem; }
     header img { height:56px; filter:drop-shadow(0 0 14px rgba(201,138,46,.6)); }
     h1, h2, h3 { font-family:'Cinzel Decorative','Palatino Linotype',serif; font-weight:400; color:var(--gold); }
     h1 { font-size:1.05rem; letter-spacing:.25em; text-transform:uppercase; margin-top:.6rem; }
@@ -93,19 +97,20 @@
 <body>
   <main class="stage">
     <header>
+      <div class="section-title">ORGONITES</div>
       <a href="https://iqproductionz.com/"><img src="https://iqproductionz.com/Content/Images/Main/IQ-noglow_Updated.avif" alt="I.Q. Productionz"></a>
-      <h1>Find Your Match</h1>
-      <p>Five quick questions. One product made for you.</p>
+      <h1>Find Your Orgonite</h1>
+      <p>Five quick questions. One orgonite made for you.</p>
     </header>
     <div class="progress" aria-hidden="true"><span id="bar"></span></div>
     <section id="app" class="panel" aria-live="polite"></section>
-    <footer>Want something custom? <a href="https://iqproductionz.com/Contact/">Send a request</a> · <a href="https://iqproductionz.com/Products/">Browse all products</a></footer>
+    <footer>Want something custom? <a href="https://iqproductionz.com/Contact/">Send a request</a> · <a href="https://iqproductionz.com/Products/Orgonites/">Browse all orgonites</a></footer>
   </main>
 
   <script>
     /*
-      Product catalog. Pulled from each product page under /Products so the quiz
-      can only recommend items that actually exist on the site.
+      Orgonite catalog. Pulled from each orgonite product page under /Products so
+      the quiz can only recommend orgonites that actually exist on the site.
       in  = intentions (first one is the product's main purpose, so it scores higher)
       use = how it's used, col = dominant colors, sp = special-case match
       price = null when the page lists no price (it then fits any budget)
@@ -166,11 +171,6 @@
       { n:'Dream Recall Pyramid', c:'Pyramids', u:'Pyramids/Dream-Recall-Pyramid', price:65, in:['dream','intuit'], use:['space'], col:['green'], why:'Flower of life and aventurine to influence and remember your dreams.' },
       { n:'Intuitive Third-Eye Pyramid', c:'Pyramids', u:'Pyramids/Intuitive-Third-Eye-Pyramid', price:25, in:['intuit','calm'], use:['space','carry'], col:['aqua'], why:'A tiny turquoise pyramid for soul expression and regaining balance.' },
       { n:'The Celestial Skull', c:'Skulls', u:'Skulls/The-Celestial-Skull', price:null, in:['calm','intuit','love'], use:['space'], col:['blue'], why:'Lapis-eyed skull with 24k gold for meditation and your altar.' },
-
-      // Oils — share one category page
-      { n:'Tangible Tangerine Oil', c:'Oils', u:'Oils', price:9.99, in:['abund'], use:['ritual'], col:['orange'], why:'A knuckle-massage oil ritual for magical manifestation.' },
-      { n:'Mesmerizing Mango Oil', c:'Oils', u:'Oils', price:9.99, in:['intuit','dream'], use:['ritual'], col:['orange','yellow'], why:'An eye-area oil ritual for vision enhancement.' },
-      { n:'Grounding Grapefruit Oil', c:'Oils', u:'Oils', price:9.99, in:['clarity','calm'], use:['ritual'], col:['pink'], why:'A palm-and-forehead oil ritual for mental clarity.' }
     ];
 
     /* Questions. Each option's value feeds the scoring in score(). */
@@ -183,7 +183,7 @@
       { k:'use', q:'How do you want to use it?', o:[
         ['wear','Wear it','Necklace or earrings'], ['carry','Carry it','Pocket or purse'],
         ['car','In my car','Keys & commute'], ['space','Display it','Home, desk or altar'],
-        ['charge','Charge things','Crystals, food, plants'], ['ritual','Self-care ritual','Apply on my skin'],
+        ['charge','Charge things','Crystals, food, plants'],
         ['play','Play with others','Game night'] ] },
       { k:'budget', q:'What\'s your budget?', o:[
         [20,'Under $20',''], [50,'Up to $50',''], [120,'Up to $120',''], [Infinity,'Treat myself','No limit'] ] },
@@ -249,11 +249,10 @@
       const ranked = P.map(p => ({ p, s: score(p) + Math.random() * 0.5 }))
                       .sort((a, b) => b.s - a.s);
       const seen = new Set(), picks = [];
-      // Skip duplicate category pages (the three oils share one link) for variety
+      // Set guards against a product being listed twice if the catalog ever repeats one
       for (const r of ranked) {
-        const key = r.p.u === 'Oils' ? 'Oils' : r.p.n;
-        if (seen.has(key)) continue;
-        seen.add(key); picks.push(r.p);
+        if (seen.has(r.p.u)) continue;
+        seen.add(r.p.u); picks.push(r.p);
         if (picks.length === 3) break;
       }
       const [top, ...rest] = picks;
