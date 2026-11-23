@@ -105,6 +105,8 @@ footer a{color:var(--muted);} footer a:hover{color:var(--white);}
     <span>QR Platform</span>
   </a>
   <div style="display:flex;gap:8px;">
+    <!-- WHY hidden until sign-in is known: Hali -- My Codes only for signed-in users. -->
+    <a class="nav-btn" id="nav-mycodes" href="/QRCode/#mycodes" style="display:none;">My Codes</a>
     <a class="nav-btn" href="/QRCode/Features/">Features</a>
     <a class="nav-btn primary" href="/QRCode/">Open the Generator</a>
   </div>
@@ -295,6 +297,7 @@ footer a{color:var(--muted);} footer a:hover{color:var(--white);}
   // WHY re-render on sign-in state: owners/admin buttons depend on who is signed in.
   onAuthStateChanged(auth, async u=>{
     user=u||null; isAdmin=false;
+    document.getElementById('nav-mycodes').style.display = user ? '' : 'none';
     // WHY hide the request form when signed in: dynamic users edit/delete their own posts (Hali).
     document.getElementById('req-open').style.display = user ? 'none' : '';
     document.getElementById('req-plain').style.display = user ? '' : 'none';

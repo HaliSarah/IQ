@@ -10547,6 +10547,13 @@ function switchTab(t) {
 // ── NAV ───────────────────────────────────────────────────────────────────────
 function renderNav() {
   var u=window._user;
+  // WHY: the Community page's "My Codes" link lands here as /QRCode/#mycodes;
+  // once sign-in is known, open My Codes directly, then clear the hash so a
+  // reload doesn't keep jumping there.
+  if (u && location.hash === '#mycodes' && !window._myCodesHashDone) {
+    window._myCodesHashDone = true;
+    setTimeout(function(){ showView('dashboard'); history.replaceState(null, '', location.pathname + location.search); }, 0);
+  }
   document.getElementById('nav-signin').style.display  = u?'none':'';
   document.getElementById('nav-signup').style.display  = u?'none':'';
   document.getElementById('nav-signout').style.display = u?'':'none';
