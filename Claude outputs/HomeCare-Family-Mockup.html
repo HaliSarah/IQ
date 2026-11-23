@@ -1,0 +1,354 @@
+<!DOCTYPE html>
+<!--
+  Title:       HomeCare Family — Website Redesign Concept + Caregiver App Button
+  Author:      Hali Sarah Parsons (I.Q. Productionz)
+  Date:        2026-11-23
+  Modified By: Claude (Anthropic), 2026-11-23; Claude (Anthropic), 2026-11-23: moving hero (slow-zoom photo),
+               text entrance and scroll-in animations
+  Description: Pitch mockup of a refreshed thehomecarefamily.com homepage, using the agency's own
+               logo, icons, colors and wording. Includes a "Get the Caregiver App" button with
+               their logo as the app icon, a phone preview, and the install steps caregivers would
+               see. Images load from their live site. Concept only; nothing here is connected.
+-->
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>HomeCare Family — Redesign Concept</title>
+<meta name="robots" content="noindex, nofollow">
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@500;700;800&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+/* WHY these values: pulled from their current site (navy, steel blue, cream; Manrope + Inter),
+   so the redesign reads as an upgrade of their brand, not a different company. */
+:root{
+  --navy:#153459;--steel:#375E82;--blue:#6490B4;--cream:#F1EBC9;--cream-lt:#faf7e8;
+  --ink:#1f2124;--grey:#5f6670;--line:#e3e6ec;--white:#fff;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{font-family:'Inter',sans-serif;color:var(--ink);background:var(--white);line-height:1.6}
+h1,h2,h3{font-family:'Manrope',sans-serif;line-height:1.15}
+a{color:inherit}
+.wrap{max-width:1140px;margin:0 auto;padding:0 22px}
+
+.concept{background:#2a2720;color:#e0a84a;font-size:12px;text-align:center;padding:6px 10px;letter-spacing:.5px}
+
+/* Header */
+header{position:sticky;top:0;z-index:30;background:var(--navy);box-shadow:0 2px 14px rgba(0,0,0,.18)}
+.nav{display:flex;align-items:center;justify-content:space-between;gap:18px;height:74px}
+.nav img{height:46px;width:auto;display:block}
+.nav ul{display:flex;gap:22px;list-style:none;font-size:14px;font-weight:500}
+.nav ul a{color:#dfe7f1;text-decoration:none}
+.nav ul a:hover{color:#fff}
+.nav .right{display:flex;gap:10px;align-items:center}
+.pill{display:inline-flex;align-items:center;gap:8px;border-radius:40px;font:700 14px 'Manrope',sans-serif;text-decoration:none;padding:11px 20px;cursor:pointer;border:0;white-space:nowrap}
+.pill-cream{background:var(--cream);color:var(--navy)}
+.pill-cream:hover{background:#fff}
+.pill-ghost{border:1.5px solid rgba(255,255,255,.55);color:#fff;background:transparent}
+.pill-ghost:hover{border-color:#fff}
+.pill-navy{background:var(--navy);color:#fff}
+.pill img.ico{width:22px;height:22px;border-radius:6px;background:#fff}
+@media(max-width:900px){.nav ul{display:none}}
+@media(max-width:520px){.nav .pill-ghost{display:none}.nav img{height:38px}}
+
+/* Hero */
+.hero{position:relative;min-height:560px;display:flex;align-items:center;color:#fff;overflow:hidden;background:var(--navy)}
+/* WHY a slow zoom-and-drift (Ken Burns): the photo feels alive, like a GIF, without a heavy video. */
+.hero-bg{position:absolute;inset:0;z-index:0}
+.hero-bg .layer{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;transition:opacity 1.8s ease}
+.hero-bg .photo{background:url('https://thehomecarefamily.com/wp-content/uploads/2025/07/Services-Main-Image2B-Tablet.jpg') center/cover;animation:kenburns 16s ease-in-out infinite alternate}
+@keyframes kenburns{from{transform:scale(1) translate(0,0)}to{transform:scale(1.14) translate(-2%,-1.5%)}}
+.hero-bg::after{content:'';position:absolute;inset:0;background:linear-gradient(100deg,rgba(21,52,89,.94) 0%,rgba(21,52,89,.78) 45%,rgba(21,52,89,.25) 100%)}
+.hero .wrap{position:relative;z-index:1;display:grid;grid-template-columns:1.1fr .9fr;gap:30px;align-items:center;padding-top:60px;padding-bottom:60px}
+.eyebrow{display:inline-block;background:rgba(241,235,201,.16);border:1px solid rgba(241,235,201,.4);color:var(--cream);border-radius:30px;font-size:12.5px;font-weight:600;letter-spacing:1px;text-transform:uppercase;padding:6px 14px}
+.hero h1{font-size:clamp(36px,5.4vw,60px);font-weight:800;margin:16px 0 14px}
+.hero p{font-size:18px;color:#dbe4ef;max-width:520px}
+.hero .cta{display:flex;flex-wrap:wrap;gap:12px;margin-top:26px}
+.hero .pill{padding:14px 24px;font-size:15px}
+.quick{background:rgba(255,255,255,.96);color:var(--ink);border-radius:18px;padding:22px;box-shadow:0 20px 50px rgba(0,0,0,.25)}
+.quick h3{font-size:19px;color:var(--navy);margin-bottom:4px}
+.quick p{font-size:13.5px;color:var(--grey);margin-bottom:14px}
+.quick input,.quick select{width:100%;padding:11px 12px;border:1px solid var(--line);border-radius:10px;font:500 14px 'Inter',sans-serif;margin-bottom:10px;background:#fff}
+.quick button{width:100%;justify-content:center}
+@media(max-width:860px){.hero .wrap{grid-template-columns:1fr}.hero{min-height:0}}
+
+/* Trust strip */
+.trust{background:var(--cream-lt);border-bottom:1px solid var(--line)}
+.trust .wrap{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;padding-top:22px;padding-bottom:22px}
+.trust div{font-size:14px;color:var(--steel);font-weight:600;display:flex;gap:10px;align-items:center}
+.trust b{font:800 22px 'Manrope',sans-serif;color:var(--navy)}
+@media(max-width:760px){.trust .wrap{grid-template-columns:1fr 1fr}}
+
+section{padding:80px 0}
+.sec-head{text-align:center;max-width:640px;margin:0 auto 40px}
+.sec-head .tag{color:var(--blue);font-weight:700;font-size:13px;letter-spacing:1.5px;text-transform:uppercase}
+.sec-head h2{font-size:clamp(28px,3.6vw,40px);color:var(--navy);margin:8px 0 10px}
+.sec-head p{color:var(--grey)}
+
+/* Services */
+.svc-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:20px}
+.svc{border:1px solid var(--line);border-radius:18px;padding:24px;transition:transform .2s,box-shadow .2s;background:#fff}
+.svc:hover{transform:translateY(-3px);box-shadow:0 14px 34px rgba(21,52,89,.12)}
+.svc img{width:58px;height:58px;object-fit:contain;margin-bottom:12px}
+.svc h3{font-size:18px;color:var(--navy);margin-bottom:6px}
+.svc p{font-size:14px;color:var(--grey)}
+@media(max-width:860px){.svc-grid{grid-template-columns:1fr 1fr}}
+@media(max-width:560px){.svc-grid{grid-template-columns:1fr}}
+
+/* Process */
+.process{background:var(--navy);color:#fff}
+.process .sec-head h2{color:#fff}.process .sec-head p{color:#c9d6e5}.process .sec-head .tag{color:var(--cream)}
+.steps{display:grid;grid-template-columns:repeat(3,1fr);gap:20px}
+.step{background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.14);border-radius:18px;padding:24px}
+.step .n{width:40px;height:40px;border-radius:50%;background:var(--cream);color:var(--navy);display:flex;align-items:center;justify-content:center;font:800 18px 'Manrope',sans-serif;margin-bottom:12px}
+.step h3{font-size:18px;margin-bottom:6px}
+.step p{font-size:14px;color:#c9d6e5}
+@media(max-width:760px){.steps{grid-template-columns:1fr}}
+
+/* WHY bottom-heavy: the app section is the pitch, so it carries the most visual weight near the end. */
+.app{background:linear-gradient(180deg,var(--cream-lt),var(--cream));padding:90px 0}
+.app .wrap{display:grid;grid-template-columns:1fr 1fr;gap:40px;align-items:center}
+.app h2{font-size:clamp(30px,4vw,44px);color:var(--navy);margin:10px 0 12px}
+.app .lead{color:#4d5560;font-size:17px;margin-bottom:18px}
+.feat{list-style:none;display:grid;gap:10px;margin-bottom:26px}
+.feat li{display:flex;gap:12px;align-items:flex-start;font-size:15px;color:var(--ink)}
+.feat li span{flex:0 0 26px;height:26px;border-radius:8px;background:var(--navy);color:var(--cream);display:flex;align-items:center;justify-content:center;font-size:14px}
+.dl{display:inline-flex;align-items:center;gap:14px;background:var(--navy);color:#fff;border:0;border-radius:18px;padding:14px 26px 14px 14px;cursor:pointer;box-shadow:0 14px 30px rgba(21,52,89,.3);text-align:left;transition:transform .15s}
+.dl:hover{transform:translateY(-2px)}
+.dl img{width:54px;height:54px;border-radius:14px;background:#fff;padding:4px;box-shadow:0 2px 8px rgba(0,0,0,.2)}
+.dl small{display:block;font:500 12px 'Inter',sans-serif;color:#c9d6e5;letter-spacing:.5px;text-transform:uppercase}
+.dl b{display:block;font:800 20px 'Manrope',sans-serif}
+.app .fine{font-size:13px;color:var(--grey);margin-top:12px}
+
+/* Phone preview */
+.phone{width:290px;height:590px;margin:0 auto;border-radius:44px;background:#111;padding:12px;box-shadow:0 30px 70px rgba(21,52,89,.35);position:relative}
+.screen{width:100%;height:100%;border-radius:34px;overflow:hidden;position:relative;
+  background:radial-gradient(circle at 30% 20%,#6490B4 0%,#375E82 45%,#153459 100%)}
+.notch{position:absolute;top:10px;left:50%;transform:translateX(-50%);width:96px;height:26px;border-radius:20px;background:#111;z-index:2}
+.statusbar{display:flex;justify-content:space-between;color:#fff;font:600 12px 'Inter',sans-serif;padding:16px 26px 0}
+.apps{display:grid;grid-template-columns:repeat(4,1fr);gap:18px 10px;padding:40px 18px}
+.icon{text-align:center;color:#fff;font-size:10.5px}
+.icon i{display:block;width:52px;height:52px;margin:0 auto 5px;border-radius:14px;background:rgba(255,255,255,.22)}
+.icon.hc i{background:#fff url('https://thehomecarefamily.com/wp-content/uploads/2025/05/Favicon-300x300.png') center/80% no-repeat;box-shadow:0 0 0 3px var(--cream),0 6px 16px rgba(0,0,0,.3);animation:pop 2.4s ease-in-out infinite}
+@keyframes pop{0%,100%{transform:scale(1)}50%{transform:scale(1.08)}}
+.icon.hc{font-weight:700}
+.dock{position:absolute;bottom:14px;left:14px;right:14px;height:74px;border-radius:24px;background:rgba(255,255,255,.18);display:flex;justify-content:space-around;align-items:center}
+.dock i{width:48px;height:48px;border-radius:13px;background:rgba(255,255,255,.3)}
+@media(max-width:860px){.app .wrap{grid-template-columns:1fr}.phone{order:-1}}
+@media(prefers-reduced-motion:reduce){.icon.hc i{animation:none}}
+
+/* Install modal */
+.modal{display:none;position:fixed;inset:0;z-index:60;background:rgba(10,20,35,.7);align-items:center;justify-content:center;padding:18px}
+.modal.show{display:flex}
+.mbox{background:#fff;border-radius:22px;max-width:440px;width:100%;padding:26px;position:relative;text-align:center}
+.mbox .x{position:absolute;top:10px;right:14px;background:none;border:0;font-size:28px;color:var(--grey);cursor:pointer}
+.mbox img.big{width:84px;height:84px;border-radius:20px;box-shadow:0 8px 20px rgba(21,52,89,.25);margin-bottom:10px}
+.mbox h3{color:var(--navy);font-size:22px}
+.tabs{display:flex;gap:6px;justify-content:center;margin:16px 0 12px}
+.tabs button{border:1px solid var(--line);background:#fff;border-radius:30px;padding:8px 16px;font:600 13px 'Inter',sans-serif;cursor:pointer}
+.tabs button[aria-selected="true"]{background:var(--navy);color:#fff;border-color:var(--navy)}
+.mbox ol{text-align:left;margin:0 0 0 20px;font-size:14.5px;color:var(--ink);display:grid;gap:8px}
+.mbox .note{font-size:12.5px;color:var(--grey);margin-top:14px}
+
+/* WHY entrance motion: their current site fades content in on arrival, which makes it feel live. */
+@keyframes rise{from{opacity:0;transform:translateY(26px)}to{opacity:1;transform:none}}
+@keyframes slideL{from{opacity:0;transform:translateX(40px)}to{opacity:1;transform:none}}
+.in{opacity:0;animation:rise .9s cubic-bezier(.2,.7,.2,1) forwards}
+.hero h1 .w{display:inline-block;opacity:0;animation:rise .8s cubic-bezier(.2,.7,.2,1) forwards}
+.quick{opacity:0;animation:slideL 1s .9s cubic-bezier(.2,.7,.2,1) forwards}
+.reveal{opacity:0;transform:translateY(30px);transition:opacity .8s ease,transform .8s cubic-bezier(.2,.7,.2,1)}
+.reveal.seen{opacity:1;transform:none}
+@media(prefers-reduced-motion:reduce){.in,.hero h1 .w,.quick,.reveal{animation:none;opacity:1;transform:none;transition:none}.hero-bg .photo{animation:none}}
+footer{background:#0f2540;color:#c9d6e5;padding:54px 0 26px}
+footer .wrap{display:grid;grid-template-columns:1.3fr 1fr 1fr;gap:30px}
+footer img{height:44px;margin-bottom:12px}
+footer h4{font-family:'Manrope',sans-serif;color:#fff;margin-bottom:10px}
+footer a{display:block;color:#c9d6e5;text-decoration:none;font-size:14px;margin-bottom:6px}
+footer a:hover{color:#fff}
+.copy{text-align:center;font-size:12.5px;margin-top:34px;color:#8ea3bb}
+@media(max-width:760px){footer .wrap{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+
+<div class="concept">Concept mockup prepared by I.Q. Productionz · not the live site</div>
+
+<header>
+  <div class="wrap nav">
+    <a href="#top"><img src="https://thehomecarefamily.com/wp-content/uploads/2025/05/HomeCare-Logo-Light-Wide1B.png" alt="HomeCare Family"></a>
+    <ul>
+      <li><a href="#services">Services</a></li>
+      <li><a href="#process">Our Process</a></li>
+      <li><a href="#app">Caregivers</a></li>
+      <li><a href="#contact">Contact</a></li>
+    </ul>
+    <div class="right">
+      <a class="pill pill-ghost" href="tel:2818880385">281-888-0385</a>
+      <button class="pill pill-cream" type="button" data-open-app><img class="ico" src="https://thehomecarefamily.com/wp-content/uploads/2025/05/Favicon-150x150.png" alt=""> Get the App</button>
+    </div>
+  </div>
+</header>
+
+<section class="hero" id="top">
+  <div class="hero-bg" aria-hidden="true">
+    <div class="layer photo"></div>
+  </div>
+  <div class="wrap">
+    <div>
+      <span class="eyebrow in" style="animation-delay:.1s">In-home care · Humble, Texas</span>
+      <h1 id="heroTitle">Care That Feels Like Family</h1>
+      <p class="in" style="animation-delay:1s">Local, compassionate in-home care tailored to your loved one's needs, from daily support to 24/7 care.</p>
+      <div class="cta in" style="animation-delay:1.25s">
+        <a class="pill pill-cream" href="#contact">Request Care →</a>
+        <a class="pill pill-ghost" href="tel:2818880385">Call 281-888-0385</a>
+      </div>
+    </div>
+    <form class="quick" onsubmit="event.preventDefault();this.querySelector('button').textContent='✓ Thank you! We’ll call you soon.'">
+      <h3>Get a free care consultation</h3>
+      <p>Tell us a little, and we'll call you back within one business day.</p>
+      <input type="text" placeholder="Your name" aria-label="Your name">
+      <input type="tel" placeholder="Phone number" aria-label="Phone number">
+      <select aria-label="Type of care"><option>Type of care needed</option><option>Total Home Care (24/7)</option><option>Daily Living Support</option><option>Respite Care</option><option>Alzheimer's &amp; Dementia Care</option><option>Companion Care</option><option>Hospital-to-Home Care</option></select>
+      <button class="pill pill-navy" type="submit">Request a Call Back</button>
+    </form>
+  </div>
+</section>
+
+<div class="trust reveal">
+  <div class="wrap">
+    <div><b>24/7</b> care available</div>
+    <div><b>G-Tube</b> feeding offered</div>
+    <div><b>Meds</b> administration</div>
+    <div><b>Local</b> Humble-based team</div>
+  </div>
+</div>
+
+<section id="services">
+  <div class="wrap">
+    <div class="sec-head reveal">
+      <span class="tag">Our Services</span>
+      <h2>In-home care, delivered with heart</h2>
+      <p>Flexible care plans that adapt as your family's needs change, including specialized services many agencies don't offer.</p>
+    </div>
+    <div class="svc-grid reveal">
+      <div class="svc"><img src="https://thehomecarefamily.com/wp-content/uploads/2025/05/Total-Care-Icon.png" alt=""><h3>Total Home Care</h3><p>Around-the-clock, hands-on support in shifts, so someone is always there.</p></div>
+      <div class="svc"><img src="https://thehomecarefamily.com/wp-content/uploads/2025/05/Living-Support-Icon.png" alt=""><h3>Daily Living Support</h3><p>Help with bathing, dressing, meals and the everyday routines of home.</p></div>
+      <div class="svc"><img src="https://thehomecarefamily.com/wp-content/uploads/2025/05/Respite-Care-Icon.png" alt=""><h3>Respite Care</h3><p>A trusted break for family caregivers, for a few hours or a few days.</p></div>
+      <div class="svc"><img src="https://thehomecarefamily.com/wp-content/uploads/2025/05/Alz-Care-Icon.png" alt=""><h3>Alzheimer's &amp; Dementia Care</h3><p>Patient, familiar support that keeps loved ones safe and calm at home.</p></div>
+      <div class="svc"><img src="https://thehomecarefamily.com/wp-content/uploads/2025/05/Companion-Care-Icon.png" alt=""><h3>Companion Care</h3><p>Conversation, errands and outings that keep life full and connected.</p></div>
+      <div class="svc"><img src="https://thehomecarefamily.com/wp-content/uploads/2025/05/Hospital-Care-Icon.png" alt=""><h3>Hospital-to-Home Care</h3><p>A smooth, safe transition home after a hospital or rehab stay.</p></div>
+    </div>
+  </div>
+</section>
+
+<section class="process" id="process">
+  <div class="wrap">
+    <div class="sec-head reveal">
+      <span class="tag">How It Works</span>
+      <h2>Getting started is simple</h2>
+      <p>From the first call to the first visit, we keep your family in the loop.</p>
+    </div>
+    <div class="steps reveal">
+      <div class="step"><div class="n">1</div><h3>Free consultation</h3><p>Call or request a call back, and we'll talk through your loved one's needs.</p></div>
+      <div class="step"><div class="n">2</div><h3>Personal care plan</h3><p>We build a plan with you, covering daily routines through specialized care.</p></div>
+      <div class="step"><div class="n">3</div><h3>Your caregiver</h3><p>We match a caregiver who fits your family, and stay in touch every step.</p></div>
+    </div>
+  </div>
+</section>
+
+<section class="app" id="app">
+  <div class="wrap reveal">
+    <div>
+      <span class="eyebrow" style="background:rgba(21,52,89,.08);border-color:rgba(21,52,89,.2);color:var(--navy)">For HomeCare Family caregivers</span>
+      <h2>Everything you need, one tap away</h2>
+      <p class="lead">Our caregiver app installs right from this website. No app store, no passwords to remember every shift.</p>
+      <ul class="feat">
+        <li><span>✓</span>Request time off. It goes straight to the office.</li>
+        <li><span>✓</span>Report an incident in seconds.</li>
+        <li><span>✓</span>Policies, contacts and announcements in one place.</li>
+        <li><span>✓</span>Your own login that stays signed in.</li>
+      </ul>
+      <button class="dl" type="button" data-open-app>
+        <img src="https://thehomecarefamily.com/wp-content/uploads/2025/05/Favicon-300x300.png" alt="HomeCare Family app icon">
+        <span><small>Download the</small><b>Caregiver App</b></span>
+      </button>
+      <p class="fine">Works on iPhone and Android. Caregivers only; you'll sign in with your staff account.</p>
+    </div>
+    <div class="phone" aria-hidden="true">
+      <div class="screen">
+        <div class="notch"></div>
+        <div class="statusbar"><span>9:41</span><span>●●● 5G</span></div>
+        <div class="apps">
+          <div class="icon"><i></i>Phone</div><div class="icon"><i></i>Messages</div><div class="icon"><i></i>Calendar</div><div class="icon"><i></i>Photos</div>
+          <div class="icon"><i></i>Maps</div><div class="icon hc"><i></i>HomeCare</div><div class="icon"><i></i>Clock</div><div class="icon"><i></i>Notes</div>
+          <div class="icon"><i></i>Mail</div><div class="icon"><i></i>Weather</div><div class="icon"><i></i>Music</div><div class="icon"><i></i>Settings</div>
+        </div>
+        <div class="dock"><i></i><i></i><i></i><i></i></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<footer id="contact">
+  <div class="wrap">
+    <div>
+      <img src="https://thehomecarefamily.com/wp-content/uploads/2025/05/HomeCare-Logo-Light-Wide1B.png" alt="HomeCare Family">
+      <p style="font-size:14px;max-width:320px">Local, compassionate in-home care for families in Humble, Texas and the surrounding area.</p>
+    </div>
+    <div><h4>Contact</h4><a href="tel:2818880385">281-888-0385</a><a href="mailto:info@thehomecarefamily.com">info@thehomecarefamily.com</a><a href="#top">Request a consultation</a></div>
+    <div><h4>Company</h4><a href="#services">Services</a><a href="#process">Our Process</a><a href="#app">Caregiver App</a><a href="#top">Employment</a></div>
+  </div>
+  <div class="copy">© 2026 HomeCare Family LLC · Redesign concept by I.Q. Productionz</div>
+</footer>
+
+<div class="modal" id="appModal" role="dialog" aria-modal="true" aria-labelledby="mTitle">
+  <div class="mbox">
+    <button class="x" type="button" aria-label="Close" data-close>&times;</button>
+    <img class="big" src="https://thehomecarefamily.com/wp-content/uploads/2025/05/Favicon-300x300.png" alt="">
+    <h3 id="mTitle">Install the Caregiver App</h3>
+    <div class="tabs" role="tablist">
+      <button type="button" role="tab" aria-selected="true" data-os="ios">iPhone</button>
+      <button type="button" role="tab" aria-selected="false" data-os="android">Android</button>
+    </div>
+    <ol id="steps"></ol>
+    <p class="note">In the finished version, Android phones get a one-tap "Install" button, and the app opens straight to your sign-in.</p>
+  </div>
+</div>
+
+<script>
+/* ---------- Hero motion ---------- */
+const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+/** Splits the headline into words that rise in one after another. WHY: mimics their live site's entrance. */
+(function splitTitle(){
+  const h = document.getElementById('heroTitle');
+  h.innerHTML = h.textContent.split(' ').map((w, i) => `<span class="w" style="animation-delay:${.3 + i * .12}s">${w}</span>`).join(' ');
+})();
+/** Fades sections in as they scroll into view. WHY IntersectionObserver: smooth, and cheap on phones. */
+(function reveals(){
+  const els = document.querySelectorAll('.reveal');
+  if (reduce || !('IntersectionObserver' in window)) { els.forEach(e => e.classList.add('seen')); return; }
+  const io = new IntersectionObserver(es => es.forEach(e => { if (e.isIntersecting) { e.target.classList.add('seen'); io.unobserve(e.target); } }), { threshold:.15 });
+  els.forEach(e => io.observe(e));
+})();
+
+/* WHY separate step lists: iPhone and Android install home-screen apps differently. */
+const STEPS = {
+  ios: ['Open this page in <b>Safari</b>.', 'Tap the <b>Share</b> button (square with an arrow).', 'Choose <b>Add to Home Screen</b>, then tap <b>Add</b>.', 'Open <b>HomeCare</b> from your home screen and sign in.'],
+  android: ['Open this page in <b>Chrome</b>.', 'Tap <b>Install app</b> when it pops up, or the <b>⋮</b> menu → <b>Add to Home screen</b>.', 'Tap <b>Install</b>.', 'Open <b>HomeCare</b> from your home screen and sign in.']
+};
+const modal = document.getElementById('appModal');
+/** Shows the steps for one phone type. WHY guess first: most people want their own phone's steps right away. */
+function showSteps(os){
+  document.getElementById('steps').innerHTML = STEPS[os].map(s => `<li>${s}</li>`).join('');
+  document.querySelectorAll('[data-os]').forEach(b => b.setAttribute('aria-selected', b.dataset.os === os));
+}
+document.querySelectorAll('[data-open-app]').forEach(b => b.addEventListener('click', () => {
+  showSteps(/android/i.test(navigator.userAgent) ? 'android' : 'ios');
+  modal.classList.add('show');
+}));
+document.querySelectorAll('[data-os]').forEach(b => b.addEventListener('click', () => showSteps(b.dataset.os)));
+modal.addEventListener('click', e => { if (e.target === modal || e.target.hasAttribute('data-close')) modal.classList.remove('show'); });
+document.addEventListener('keydown', e => { if (e.key === 'Escape') modal.classList.remove('show'); });
+</script>
+</body>
+</html>
