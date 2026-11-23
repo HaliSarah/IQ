@@ -6,7 +6,7 @@
   Modified By: Claude (2026-11-18: Heart/frame edge clipping fix; Random dot colors 2-10 w/ count dropdown + Shuffle;
                asymmetric corners no longer turn black when one corner switches to Solid;
                floating corner picker while Asymmetric Corners is on;
-               2026-11-20: Community Inspiration board (public posts, static no-account, dynamic owner delete); Inner Dot Style + Corner Style "Apply to all corners" (asymmetric only, gold); Inner Dot Size + Random Sizing moved under Inner Dot Style, shown with Asymmetric on or off; floating Refresh Design / Undo;
+               2026-11-20: Community Inspiration board (public posts, static no-account, dynamic owner delete); Inner Dot Style + Corner Style "Apply shape to all corners" and "Apply color to all corners" (asymmetric only, gold); Inner Dot Size + Random Sizing moved under Inner Dot Style, shown with Asymmetric on or off; floating Refresh Design / Undo;
                Reflect Inner Dot (Vertical/Horizontal, per corner when asymmetric);
                main-dot orientation buttons back (click = all, click again = off, double-click = random mix) (Reflect Dots removed);
                floating bars always side by side: desktop refresh+undo top-left / corners top-right, phone refresh+undo top-left / corners bottom;
@@ -1148,7 +1148,7 @@ footer a{color:var(--muted);}footer a:hover{color:var(--white);}
               <label>Corner Style</label>
               <div class="shape-grid" id="finder-style-grid" style="max-height:none;"></div>
               <!-- WHY: Hali -- "apply to all corners ... under the outter corner as well," only while Asymmetric is on. Shown/hidden by syncAsymmetricCornersUI. -->
-              <button type="button" id="s-outer-apply-all" class="act-btn act-btn-gold" style="display:none;margin-top:6px;font-size:.72rem;" onclick="applyOuterToAllCorners('s')">Apply to all corners</button>
+              <button type="button" id="s-outer-apply-all" class="act-btn act-btn-gold" style="display:none;margin-top:6px;font-size:.72rem;" onclick="applyOuterToAllCorners('s')">Apply shape to all corners</button>
               <!-- WHY a header: Hali -- with Match Body selected the color options were hard to find under the shape grid. -->
               <label style="display:block;margin-top:16px;">Outer Corner Color</label>
               <div class="grad-toggle" style="margin-top:6px;flex-wrap:wrap;">
@@ -1186,6 +1186,8 @@ footer a{color:var(--muted);}footer a:hover{color:var(--white);}
                 <label style="display:flex;align-items:center;cursor:pointer;margin-top:8px;"><input type="checkbox" id="c-finder-outer-g4-gradient" onchange="onFinderColorEdited('outer','s')" style="width:14px;height:14px;min-width:14px;flex:0 0 14px;margin:0 7px 0 0;padding:0;vertical-align:middle;">Gradient</label>
               </div>
               <p id="c-finder-outer-match-note" style="font-size:.72rem;color:var(--muted);margin-top:6px;">Matches the body: the dot color when Color Mode is Solid, or the body's gradient color at this corner's position.</p>
+              <!-- WHY: Hali -- a second Apply button for colors, under the color section, Asymmetric only. Shown/hidden by syncAsymmetricCornersUI. -->
+              <button type="button" id="s-outer-color-apply-all" class="act-btn act-btn-gold" style="display:none;margin-top:8px;font-size:.72rem;" onclick="applyColorToAllCorners('s','outer')">Apply color to all corners</button>
             </div>
 
             <!-- INNER DOT STYLE — the small center "eye" of each finder,
@@ -1202,7 +1204,7 @@ footer a{color:var(--muted);}footer a:hover{color:var(--white);}
               <label>Inner Dot Style</label>
               <div class="shape-grid" id="finder-dot-style-grid"></div>
               <!-- WHY: Hali -- "apply to all corners button for the inner dot style only visible when asymmetric corners is selected." Shown/hidden by syncAsymmetricCornersUI. -->
-              <button type="button" id="s-inner-apply-all" class="act-btn act-btn-gold" style="display:none;margin-top:6px;font-size:.72rem;" onclick="applyInnerDotToAllCorners('s')">Apply to all corners</button>
+              <button type="button" id="s-inner-apply-all" class="act-btn act-btn-gold" style="display:none;margin-top:6px;font-size:.72rem;" onclick="applyInnerDotToAllCorners('s')">Apply shape to all corners</button>
               <!-- WHY here, under Inner Dot Style, and always shown: Hali -- "this size this corner only changes the inner dot ... move the sizer to under the inner dots ... show up weather aysemetric is on or off." Off = one size for all 3 corners; on = the picked corner only. The outer ring is not sizable (see FINDER_SIZE_MAX_DELTA WHY). -->
               <div id="s-corner-size-row" style="margin-top:12px;">
                 <label style="display:flex;justify-content:space-between;"><span id="s-corner-size-title">Inner Dot Size</span> <span id="s-corner-size-val" style="color:var(--gold2);">Normal</span></label>
@@ -1264,6 +1266,8 @@ footer a{color:var(--muted);}footer a:hover{color:var(--white);}
                 <label style="display:flex;align-items:center;cursor:pointer;margin-top:8px;"><input type="checkbox" id="c-finder-inner-g4-gradient" onchange="onFinderColorEdited('inner','s')" style="width:14px;height:14px;min-width:14px;flex:0 0 14px;margin:0 7px 0 0;padding:0;vertical-align:middle;">Gradient</label>
               </div>
               <p id="c-finder-inner-match-note" style="font-size:.72rem;color:var(--muted);margin-top:6px;">Matches the body: the dot color when Color Mode is Solid, or the body's gradient color at this corner's position.</p>
+              <!-- WHY: Hali -- a second Apply button for colors, under the color section, Asymmetric only. Shown/hidden by syncAsymmetricCornersUI. -->
+              <button type="button" id="s-inner-color-apply-all" class="act-btn act-btn-gold" style="display:none;margin-top:8px;font-size:.72rem;" onclick="applyColorToAllCorners('s','inner')">Apply color to all corners</button>
             </div>
 
             <!-- OVERALL SHAPE — wraps the real, untouched square QR in a
@@ -1688,7 +1692,7 @@ footer a{color:var(--muted);}footer a:hover{color:var(--white);}
               <label>Corner Style</label>
               <div class="shape-grid" id="d-finder-style-grid" style="max-height:none;"></div>
               <!-- WHY: Hali -- "apply to all corners ... under the outter corner as well," only while Asymmetric is on. Shown/hidden by syncAsymmetricCornersUI. -->
-              <button type="button" id="d-outer-apply-all" class="act-btn act-btn-gold" style="display:none;margin-top:6px;font-size:.72rem;" onclick="applyOuterToAllCorners('d')">Apply to all corners</button>
+              <button type="button" id="d-outer-apply-all" class="act-btn act-btn-gold" style="display:none;margin-top:6px;font-size:.72rem;" onclick="applyOuterToAllCorners('d')">Apply shape to all corners</button>
               <!-- WHY a header: Hali -- with Match Body selected the color options were hard to find under the shape grid. -->
               <label style="display:block;margin-top:16px;">Outer Corner Color</label>
               <div class="grad-toggle" style="margin-top:6px;flex-wrap:wrap;">
@@ -1726,6 +1730,8 @@ footer a{color:var(--muted);}footer a:hover{color:var(--white);}
                 <label style="display:flex;align-items:center;cursor:pointer;margin-top:8px;"><input type="checkbox" id="d-c-finder-outer-g4-gradient" onchange="onFinderColorEdited('outer','d')" style="width:14px;height:14px;min-width:14px;flex:0 0 14px;margin:0 7px 0 0;padding:0;vertical-align:middle;">Gradient</label>
               </div>
               <p id="d-c-finder-outer-match-note" style="font-size:.72rem;color:var(--muted);margin-top:6px;">Matches the body: the dot color when Color Mode is Solid, or the body's gradient color at this corner's position.</p>
+              <!-- WHY: Hali -- a second Apply button for colors, under the color section, Asymmetric only. Shown/hidden by syncAsymmetricCornersUI. -->
+              <button type="button" id="d-outer-color-apply-all" class="act-btn act-btn-gold" style="display:none;margin-top:8px;font-size:.72rem;" onclick="applyColorToAllCorners('d','outer')">Apply color to all corners</button>
             </div>
 
             <!-- INNER DOT STYLE — mirrors the Static tab's; see its WHY on
@@ -1735,7 +1741,7 @@ footer a{color:var(--muted);}footer a:hover{color:var(--white);}
               <label>Inner Dot Style</label>
               <div class="shape-grid" id="d-finder-dot-style-grid"></div>
               <!-- WHY: Hali -- "apply to all corners button for the inner dot style only visible when asymmetric corners is selected." Shown/hidden by syncAsymmetricCornersUI. -->
-              <button type="button" id="d-inner-apply-all" class="act-btn act-btn-gold" style="display:none;margin-top:6px;font-size:.72rem;" onclick="applyInnerDotToAllCorners('d')">Apply to all corners</button>
+              <button type="button" id="d-inner-apply-all" class="act-btn act-btn-gold" style="display:none;margin-top:6px;font-size:.72rem;" onclick="applyInnerDotToAllCorners('d')">Apply shape to all corners</button>
               <!-- WHY here, under Inner Dot Style, and always shown: Hali -- "this size this corner only changes the inner dot ... move the sizer to under the inner dots ... show up weather aysemetric is on or off." Off = one size for all 3 corners; on = the picked corner only. The outer ring is not sizable (see FINDER_SIZE_MAX_DELTA WHY). -->
               <div id="d-corner-size-row" style="margin-top:12px;">
                 <label style="display:flex;justify-content:space-between;"><span id="d-corner-size-title">Inner Dot Size</span> <span id="d-corner-size-val" style="color:var(--gold2);">Normal</span></label>
@@ -1794,6 +1800,8 @@ footer a{color:var(--muted);}footer a:hover{color:var(--white);}
                 <label style="display:flex;align-items:center;cursor:pointer;margin-top:8px;"><input type="checkbox" id="d-c-finder-inner-g4-gradient" onchange="onFinderColorEdited('inner','d')" style="width:14px;height:14px;min-width:14px;flex:0 0 14px;margin:0 7px 0 0;padding:0;vertical-align:middle;">Gradient</label>
               </div>
               <p id="d-c-finder-inner-match-note" style="font-size:.72rem;color:var(--muted);margin-top:6px;">Matches the body: the dot color when Color Mode is Solid, or the body's gradient color at this corner's position.</p>
+              <!-- WHY: Hali -- a second Apply button for colors, under the color section, Asymmetric only. Shown/hidden by syncAsymmetricCornersUI. -->
+              <button type="button" id="d-inner-color-apply-all" class="act-btn act-btn-gold" style="display:none;margin-top:8px;font-size:.72rem;" onclick="applyColorToAllCorners('d','inner')">Apply color to all corners</button>
             </div>
 
             <!-- OVERALL SHAPE — mirrors the Static tab's. -->
@@ -6280,6 +6288,19 @@ function setAsymmetricCorners(prefix, checked) {
 // is copied -- outer style, colors and sizes stay per-corner on purpose.
 // WHY the outer twin copies only the Corner Style shape: same rule as the
 // inner one -- colors and sizes stay per-corner on purpose.
+// WHY copy the color panel as it's shown now (captureFinderColorSnapshot):
+// that's the picked corner's colors, the same snapshot the panel saves per
+// corner on every edit. Each corner gets its own copy so later edits to one
+// corner don't change the others. Shapes and sizes are left alone.
+function applyColorToAllCorners(prefix, part) {
+  prefix = prefix || 's';
+  if (!_asymmetricCorners[prefix]) return;
+  var store = (part === 'outer') ? _finderOuterColorCorner : _finderInnerColorCorner;
+  var snap = captureFinderColorSnapshot(part, prefix);
+  ['tl','tr','bl'].forEach(function(c){ store[prefix][c] = JSON.parse(JSON.stringify(snap)); });
+  scheduleLivePreview(prefix);
+  toast((part === 'outer' ? 'Outer' : 'Inner') + ' corner color applied to all 3 corners.','ok');
+}
 function applyOuterToAllCorners(prefix) {
   prefix = prefix || 's';
   if (!_asymmetricCorners[prefix]) return;
@@ -6327,6 +6348,11 @@ function syncAsymmetricCornersUI(prefix) {
   if (applyAllBtn) applyAllBtn.style.display = on ? 'inline-block' : 'none';
   var outerApplyBtn = document.getElementById(prefix+'-outer-apply-all');
   if (outerApplyBtn) outerApplyBtn.style.display = on ? 'inline-block' : 'none';
+  if (typeof refreshFloatingPreviewSpot === 'function') refreshFloatingPreviewSpot(prefix);
+  ['outer','inner'].forEach(function(part){
+    var cb = document.getElementById(prefix+'-'+part+'-color-apply-all');
+    if (cb) cb.style.display = on ? 'inline-block' : 'none';
+  });
   syncFinderReflectRow(prefix);
   if (on) {
     setActiveCornerEdit(prefix, _activeCornerEdit[prefix] || 'tl');
@@ -14274,9 +14300,7 @@ function openFloatingPreview(prefix) {
   _floatingPreviewPrefix = prefix;
   var panel = document.getElementById('floating-preview');
   if (!panel) return;
-  var nav = document.querySelector('nav');
-  var navH = nav ? nav.getBoundingClientRect().height : 60;
-  panel.style.top = (navH + 12) + 'px';
+  panel.style.top = floatingPreviewDefaultTop(prefix) + 'px';
   panel.style.right = '16px';
   panel.style.left = 'auto';
   panel.style.display = 'block';
@@ -14285,6 +14309,30 @@ function openFloatingPreview(prefix) {
   // panel is opened (see _floatingPreviewSize's own WHY).
   applyFloatingPreviewSize(_floatingPreviewSize);
   syncFloatingPreview();
+}
+// WHY: Hali -- with Asymmetric on, the floating preview should open UNDER
+// the floating corner picker, which sits top-right under the nav on desktop
+// (same spot the preview used to open). The bar may be hidden at that
+// moment, so its height falls back to its usual size. Phones keep the old
+// spot because their corner picker floats at the bottom.
+function floatingPreviewDefaultTop(prefix) {
+  var nav = document.querySelector('nav');
+  var navH = nav ? nav.getBoundingClientRect().height : 60;
+  var top = navH + 12;
+  if (_asymmetricCorners[prefix] && window.innerWidth > 768) {
+    var bar = document.getElementById(prefix+'-corner-float-bar');
+    var barH = (bar && bar.offsetHeight) || 48;
+    top = navH + 10 + barH + 10;
+  }
+  return top;
+}
+// WHY: if Asymmetric is toggled while the preview is open in its default
+// spot (never dragged), move it so it stays clear of the corner picker.
+function refreshFloatingPreviewSpot(prefix) {
+  var panel = document.getElementById('floating-preview');
+  if (!panel || panel.style.display !== 'block' || _floatingPreviewPrefix !== prefix) return;
+  if (panel.style.left && panel.style.left !== 'auto') return; // user moved it
+  panel.style.top = floatingPreviewDefaultTop(prefix) + 'px';
 }
 function closeFloatingPreview() {
   var panel = document.getElementById('floating-preview');
