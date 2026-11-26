@@ -1,0 +1,1284 @@
+<!DOCTYPE html>
+<!--
+  Title:       I.Q. Productionz Blog: Digital Products
+  Author:      Hali Sarah Parsons
+  Date:        2026-11-25
+  Modified By: Claude (Anthropic), 2026-11-25
+  Description: Blog page with one full post for each digital product on
+               iqproductionz.com/Products/Digital/ALL. Every post is written straight
+               into the HTML (nothing loads by script), so search engines read all of it
+               on the first crawl. Each post links to its product page.
+               Also holds a QR Code Platform post and 23 Interview Ready career
+               guides (built by build_blog.py from careers.py).
+               Uses the same colors, fonts, top bar and footer as /Tools.
+               If this page moves from /Products/Digital/Blog/, update the canonical,
+               og:url and the JSON-LD "url" values to match.
+-->
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Blog: Digital Tools for Independent Business Owners | I.Q. Productionz</title>
+<meta name="description" content="Practical guides on interview prep, launching a digital product, landing your first clients, AI agents, Amazon KDP publishing, and skincare quizzes, with the I.Q. Productionz tools that help you do each one.">
+<link rel="canonical" href="https://iqproductionz.com/Products/Digital/Blog/">
+<meta name="robots" content="index, follow, max-image-preview:large">
+<meta property="og:type" content="blog">
+<meta property="og:site_name" content="I.Q. Productionz">
+<meta property="og:title" content="Blog: Digital Tools for Independent Business Owners | I.Q. Productionz">
+<meta property="og:description" content="Practical guides for creators, job seekers, and direct sellers, plus the digital tools that go with them.">
+<meta property="og:url" content="https://iqproductionz.com/Products/Digital/Blog/">
+<meta property="og:image" content="https://iqproductionz.com/Content/Images/Main/IQ-noglow_Updated.avif">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:site" content="@IQProductionz">
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700&family=Raleway:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+<!-- WHY JSON-LD: tells Google this is a blog, which posts it holds, and which product
+     each post is about, so posts can show up with dates and titles in search. -->
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "Blog",
+  "name": "I.Q. Productionz Blog",
+  "url": "https://iqproductionz.com/Products/Digital/Blog/",
+  "publisher": {
+    "@type": "Organization",
+    "name": "I.Q. Productionz",
+    "url": "https://iqproductionz.com/"
+  },
+  "blogPost": [
+    {
+      "@type": "BlogPosting",
+      "headline": "How to Prepare for a Job Interview When You Don't Know What They'll Ask",
+      "url": "https://iqproductionz.com/Products/Digital/Blog/#interview-prep",
+      "datePublished": "2026-11-25",
+      "author": {
+        "@type": "Person",
+        "name": "Hali Sarah Parsons"
+      },
+      "about": "https://iqproductionz.com/Products/Digital/ALL/InterviewReady/"
+    },
+    {
+      "@type": "BlogPosting",
+      "headline": "How to Launch Your First Digital Product Without Guessing",
+      "url": "https://iqproductionz.com/Products/Digital/Blog/#launch-digital-product",
+      "datePublished": "2026-11-25",
+      "author": {
+        "@type": "Person",
+        "name": "Hali Sarah Parsons"
+      },
+      "about": "https://iqproductionz.com/Products/Digital/ALL/LaunchRoadmap/"
+    },
+    {
+      "@type": "BlogPosting",
+      "headline": "How to Set Up an AI Agent for Your Small Business (Safely)",
+      "url": "https://iqproductionz.com/Products/Digital/Blog/#ai-agent-small-business",
+      "datePublished": "2026-11-25",
+      "author": {
+        "@type": "Person",
+        "name": "Hali Sarah Parsons"
+      },
+      "about": "https://iqproductionz.com/Products/Digital/ALL/NightShift/"
+    },
+    {
+      "@type": "BlogPosting",
+      "headline": "How to Publish a Book on Amazon KDP and Understand Your Royalties",
+      "url": "https://iqproductionz.com/Products/Digital/Blog/#publish-on-kdp",
+      "datePublished": "2026-11-25",
+      "author": {
+        "@type": "Person",
+        "name": "Hali Sarah Parsons"
+      },
+      "about": "https://iqproductionz.com/Products/Digital/ALL/RoyaltyStack/"
+    },
+    {
+      "@type": "BlogPosting",
+      "headline": "How to Land Your First Paying Clients in 20 Days",
+      "url": "https://iqproductionz.com/Products/Digital/Blog/#first-clients-20-days",
+      "datePublished": "2026-11-25",
+      "author": {
+        "@type": "Person",
+        "name": "Hali Sarah Parsons"
+      },
+      "about": "https://iqproductionz.com/Products/Digital/ALL/ClientSprintPlanner/"
+    },
+    {
+      "@type": "BlogPosting",
+      "headline": "AI Prompts That Help You Plan Your First $1,000",
+      "url": "https://iqproductionz.com/Products/Digital/Blog/#ai-prompts-first-1000",
+      "datePublished": "2026-11-25",
+      "author": {
+        "@type": "Person",
+        "name": "Hali Sarah Parsons"
+      },
+      "about": "https://iqproductionz.com/Products/Digital/ALL/AIMoneySprint/"
+    },
+    {
+      "@type": "BlogPosting",
+      "headline": "Turn Website Visitors Into Booked Skincare Consultations With a Quiz",
+      "url": "https://iqproductionz.com/Products/Digital/Blog/#skincare-quiz",
+      "datePublished": "2026-11-25",
+      "author": {
+        "@type": "Person",
+        "name": "Hali Sarah Parsons"
+      },
+      "about": "https://iqproductionz.com/Products/Digital/ALL/GlowCheckQuiz/"
+    },
+    {
+      "@type": "BlogPosting",
+      "headline": "Why Direct Sellers Lose Reorders, and the Simple Fix",
+      "url": "https://iqproductionz.com/Products/Digital/Blog/#reorder-tracker",
+      "datePublished": "2026-11-25",
+      "author": {
+        "@type": "Person",
+        "name": "Hali Sarah Parsons"
+      },
+      "about": "https://iqproductionz.com/Products/Digital/"
+    },
+    {
+      "@type": "BlogPosting",
+      "headline": "The Creator Starter Stack: Build It, Publish It, Let AI Help",
+      "url": "https://iqproductionz.com/Products/Digital/Blog/#creator-starter-bundle",
+      "datePublished": "2026-11-25",
+      "author": {
+        "@type": "Person",
+        "name": "Hali Sarah Parsons"
+      },
+      "about": "https://iqproductionz.com/Products/Digital/ALL/NightShiftRoyaltyStackBundle/"
+    },
+    {
+      "@type": "BlogPosting",
+      "headline": "Why Your Business Needs a QR Code That Looks Like Your Brand",
+      "url": "https://iqproductionz.com/Products/Digital/Blog/#custom-qr-codes",
+      "datePublished": "2026-11-25",
+      "author": {
+        "@type": "Person",
+        "name": "Hali Sarah Parsons"
+      },
+      "about": "https://iqproductionz.com/QRCode"
+    },
+    {
+      "@type": "BlogPosting",
+      "headline": "AI/ML Engineer Interview Questions: How to Prepare in 2026",
+      "url": "https://iqproductionz.com/Products/Digital/Blog/#ai-ml-engineer-interview",
+      "datePublished": "2026-11-25",
+      "author": {
+        "@type": "Person",
+        "name": "Hali Sarah Parsons"
+      },
+      "about": "https://iqproductionz.com/Products/Digital/ALL/InterviewReady/DataAI/AIMLEngineer/"
+    },
+    {
+      "@type": "BlogPosting",
+      "headline": "Data Scientist Interview Prep: Stats, SQL, and Telling the Story",
+      "url": "https://iqproductionz.com/Products/Digital/Blog/#data-scientist-interview",
+      "datePublished": "2026-11-25",
+      "author": {
+        "@type": "Person",
+        "name": "Hali Sarah Parsons"
+      },
+      "about": "https://iqproductionz.com/Products/Digital/ALL/InterviewReady/DataAI/DataScientist/"
+    },
+    {
+      "@type": "BlogPosting",
+      "headline": "Data Engineer Interview Questions: Don't Underestimate the SQL Round",
+      "url": "https://iqproductionz.com/Products/Digital/Blog/#data-engineer-interview",
+      "datePublished": "2026-11-25",
+      "author": {
+        "@type": "Person",
+        "name": "Hali Sarah Parsons"
+      },
+      "about": "https://iqproductionz.com/Products/Digital/ALL/InterviewReady/DataAI/DataEngineer/"
+    },
+    {
+      "@type": "BlogPosting",
+      "headline": "Information Security Analyst Interview: What Hiring Managers Really Test",
+      "url": "https://iqproductionz.com/Products/Digital/Blog/#information-security-analyst-interview",
+      "datePublished": "2026-11-25",
+      "author": {
+        "@type": "Person",
+        "name": "Hali Sarah Parsons"
+      },
+      "about": "https://iqproductionz.com/Products/Digital/ALL/InterviewReady/DataAI/InformationSecurityAnalyst/"
+    },
+    {
+      "@type": "BlogPosting",
+      "headline": "AI Governance & Risk Specialist: The New Job Interviewers Are Still Defining",
+      "url": "https://iqproductionz.com/Products/Digital/Blog/#ai-governance-risk-interview",
+      "datePublished": "2026-11-25",
+      "author": {
+        "@type": "Person",
+        "name": "Hali Sarah Parsons"
+      },
+      "about": "https://iqproductionz.com/Products/Digital/ALL/InterviewReady/DataAI/AIGovernanceRiskSpecialist/"
+    },
+    {
+      "@type": "BlogPosting",
+      "headline": "Nurse Practitioner Interview Questions for One of the Fastest-Growing Jobs",
+      "url": "https://iqproductionz.com/Products/Digital/Blog/#nurse-practitioner-interview",
+      "datePublished": "2026-11-25",
+      "author": {
+        "@type": "Person",
+        "name": "Hali Sarah Parsons"
+      },
+      "about": "https://iqproductionz.com/Products/Digital/ALL/InterviewReady/Healthcare/NursePractitioner/"
+    },
+    {
+      "@type": "BlogPosting",
+      "headline": "Registered Nurse Interview Questions: Prioritization, Safety, and Teamwork",
+      "url": "https://iqproductionz.com/Products/Digital/Blog/#registered-nurse-interview",
+      "datePublished": "2026-11-25",
+      "author": {
+        "@type": "Person",
+        "name": "Hali Sarah Parsons"
+      },
+      "about": "https://iqproductionz.com/Products/Digital/ALL/InterviewReady/Healthcare/RegisteredNurse/"
+    },
+    {
+      "@type": "BlogPosting",
+      "headline": "Physician Assistant Interview Prep: Why PA, and Why You",
+      "url": "https://iqproductionz.com/Products/Digital/Blog/#physician-assistant-interview",
+      "datePublished": "2026-11-25",
+      "author": {
+        "@type": "Person",
+        "name": "Hali Sarah Parsons"
+      },
+      "about": "https://iqproductionz.com/Products/Digital/ALL/InterviewReady/Healthcare/PhysicianAssistant/"
+    },
+    {
+      "@type": "BlogPosting",
+      "headline": "Physical and Occupational Therapist Interview Questions",
+      "url": "https://iqproductionz.com/Products/Digital/Blog/#physical-occupational-therapist-interview",
+      "datePublished": "2026-11-25",
+      "author": {
+        "@type": "Person",
+        "name": "Hali Sarah Parsons"
+      },
+      "about": "https://iqproductionz.com/Products/Digital/ALL/InterviewReady/Healthcare/PhysicalOccupationalTherapist/"
+    },
+    {
+      "@type": "BlogPosting",
+      "headline": "Home Health Aide Interview Questions: Show You're Reliable and Caring",
+      "url": "https://iqproductionz.com/Products/Digital/Blog/#home-health-aide-interview",
+      "datePublished": "2026-11-25",
+      "author": {
+        "@type": "Person",
+        "name": "Hali Sarah Parsons"
+      },
+      "about": "https://iqproductionz.com/Products/Digital/ALL/InterviewReady/Healthcare/HomeHealthAide/"
+    },
+    {
+      "@type": "BlogPosting",
+      "headline": "Industrial and Commercial Electrician Interview Questions",
+      "url": "https://iqproductionz.com/Products/Digital/Blog/#industrial-commercial-electrician-interview",
+      "datePublished": "2026-11-25",
+      "author": {
+        "@type": "Person",
+        "name": "Hali Sarah Parsons"
+      },
+      "about": "https://iqproductionz.com/Products/Digital/ALL/InterviewReady/Trades/IndustrialCommercialElectrician/"
+    },
+    {
+      "@type": "BlogPosting",
+      "headline": "HVAC/R Technician Interview Questions After the A2L Refrigerant Switch",
+      "url": "https://iqproductionz.com/Products/Digital/Blog/#hvac-r-technician-interview",
+      "datePublished": "2026-11-25",
+      "author": {
+        "@type": "Person",
+        "name": "Hali Sarah Parsons"
+      },
+      "about": "https://iqproductionz.com/Products/Digital/ALL/InterviewReady/Trades/HVACRTechnician/"
+    },
+    {
+      "@type": "BlogPosting",
+      "headline": "Wind and Solar Technician Interview Questions",
+      "url": "https://iqproductionz.com/Products/Digital/Blog/#wind-solar-technician-interview",
+      "datePublished": "2026-11-25",
+      "author": {
+        "@type": "Person",
+        "name": "Hali Sarah Parsons"
+      },
+      "about": "https://iqproductionz.com/Products/Digital/ALL/InterviewReady/Trades/WindSolarTechnician/"
+    },
+    {
+      "@type": "BlogPosting",
+      "headline": "Millwright Interview Questions: Precision, Rigging, and Problem Solving",
+      "url": "https://iqproductionz.com/Products/Digital/Blog/#millwright-interview",
+      "datePublished": "2026-11-25",
+      "author": {
+        "@type": "Person",
+        "name": "Hali Sarah Parsons"
+      },
+      "about": "https://iqproductionz.com/Products/Digital/ALL/InterviewReady/Trades/Millwright/"
+    },
+    {
+      "@type": "BlogPosting",
+      "headline": "Lineman Interview Questions: Safety Culture and Storm Work",
+      "url": "https://iqproductionz.com/Products/Digital/Blog/#grid-lineman-interview",
+      "datePublished": "2026-11-25",
+      "author": {
+        "@type": "Person",
+        "name": "Hali Sarah Parsons"
+      },
+      "about": "https://iqproductionz.com/Products/Digital/ALL/InterviewReady/Trades/GridLineman/"
+    },
+    {
+      "@type": "BlogPosting",
+      "headline": "Robotics and Automation Engineer Interview Questions",
+      "url": "https://iqproductionz.com/Products/Digital/Blog/#robotics-automation-engineer-interview",
+      "datePublished": "2026-11-25",
+      "author": {
+        "@type": "Person",
+        "name": "Hali Sarah Parsons"
+      },
+      "about": "https://iqproductionz.com/Products/Digital/ALL/InterviewReady/Engineering/RoboticsAutomationEngineer/"
+    },
+    {
+      "@type": "BlogPosting",
+      "headline": "Semiconductor Process Engineer Interview Questions as U.S. Fabs Hire",
+      "url": "https://iqproductionz.com/Products/Digital/Blog/#semiconductor-process-engineer-interview",
+      "datePublished": "2026-11-25",
+      "author": {
+        "@type": "Person",
+        "name": "Hali Sarah Parsons"
+      },
+      "about": "https://iqproductionz.com/Products/Digital/ALL/InterviewReady/Engineering/SemiconductorProcessEngineer/"
+    },
+    {
+      "@type": "BlogPosting",
+      "headline": "Industrial Engineer Interview Questions: Lean, Data, and People",
+      "url": "https://iqproductionz.com/Products/Digital/Blog/#industrial-engineer-interview",
+      "datePublished": "2026-11-25",
+      "author": {
+        "@type": "Person",
+        "name": "Hali Sarah Parsons"
+      },
+      "about": "https://iqproductionz.com/Products/Digital/ALL/InterviewReady/Engineering/IndustrialEngineer/"
+    },
+    {
+      "@type": "BlogPosting",
+      "headline": "Civil and Water Infrastructure Engineer Interview Questions",
+      "url": "https://iqproductionz.com/Products/Digital/Blog/#civil-water-engineer-interview",
+      "datePublished": "2026-11-25",
+      "author": {
+        "@type": "Person",
+        "name": "Hali Sarah Parsons"
+      },
+      "about": "https://iqproductionz.com/Products/Digital/ALL/InterviewReady/Engineering/CivilWaterInfrastructureEngineer/"
+    },
+    {
+      "@type": "BlogPosting",
+      "headline": "Supply Chain and Logistics Analyst Interview Questions",
+      "url": "https://iqproductionz.com/Products/Digital/Blog/#supply-chain-analyst-interview",
+      "datePublished": "2026-11-25",
+      "author": {
+        "@type": "Person",
+        "name": "Hali Sarah Parsons"
+      },
+      "about": "https://iqproductionz.com/Products/Digital/ALL/InterviewReady/HumanOps/SupplyChainLogisticsAnalyst/"
+    },
+    {
+      "@type": "BlogPosting",
+      "headline": "Clinical and Financial Operations Manager Interview Questions",
+      "url": "https://iqproductionz.com/Products/Digital/Blog/#clinical-operations-manager-interview",
+      "datePublished": "2026-11-25",
+      "author": {
+        "@type": "Person",
+        "name": "Hali Sarah Parsons"
+      },
+      "about": "https://iqproductionz.com/Products/Digital/ALL/InterviewReady/HumanOps/ClinicalFinancialOperationsManager/"
+    },
+    {
+      "@type": "BlogPosting",
+      "headline": "Mental Health Counselor Interview Questions: Ethics, Approach, and Fit",
+      "url": "https://iqproductionz.com/Products/Digital/Blog/#mental-health-counselor-interview",
+      "datePublished": "2026-11-25",
+      "author": {
+        "@type": "Person",
+        "name": "Hali Sarah Parsons"
+      },
+      "about": "https://iqproductionz.com/Products/Digital/ALL/InterviewReady/HumanOps/MentalHealthCounselor/"
+    },
+    {
+      "@type": "BlogPosting",
+      "headline": "Special Education Teacher Interview Questions: IEPs, Behavior, and Partnership",
+      "url": "https://iqproductionz.com/Products/Digital/Blog/#special-education-teacher-interview",
+      "datePublished": "2026-11-25",
+      "author": {
+        "@type": "Person",
+        "name": "Hali Sarah Parsons"
+      },
+      "about": "https://iqproductionz.com/Products/Digital/ALL/InterviewReady/HumanOps/SpecialEducationTeacher/"
+    }
+  ]
+}
+</script>
+
+<style>
+  /* Same tokens as /Tools and /QRCode, so the blog feels like the same site. */
+  :root {
+    --bg: #2a2a2a;
+    --bar: #222222;
+    --panel: #454545;
+    --line: #2e2b24;
+    --gold: #c98a2e;
+    --gold2: #e0a84a;
+    --white: #f0ece3;
+    --muted: #a9a9a9;
+    --r: 10px;
+    --gutter: clamp(16px, 4vw, 48px);
+  }
+
+  * { box-sizing: border-box; }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--white);
+    font-family: "Raleway", "Trebuchet MS", sans-serif;
+    font-size: 1.0625rem;
+    line-height: 1.7;
+  }
+
+  a { color: var(--gold2); }
+
+  a:focus-visible {
+    outline: 3px solid var(--gold2);
+    outline-offset: 3px;
+    box-shadow: 0 0 0 3px var(--bar);
+  }
+
+  .wrap { max-width: 1180px; margin: 0 auto; }
+
+  .topbar {
+    background: var(--bar);
+    border-bottom: 1px solid var(--line);
+    padding: 12px var(--gutter);
+  }
+
+  .topbar .wrap { display: flex; justify-content: space-between; align-items: center; gap: 12px; }
+
+  .logo img { display: block; width: 150px; height: auto; }
+
+  .button {
+    display: inline-block;
+    padding: 12px 24px;
+    border-radius: 8px;
+    background: linear-gradient(135deg, var(--gold2), var(--gold));
+    color: var(--bar);
+    font-weight: 700;
+    text-decoration: none;
+    transition: filter .2s;
+  }
+
+  .button:hover { filter: brightness(1.1); }
+
+  .topbar .button { padding: 8px 16px; font-size: .95rem; white-space: nowrap; }
+
+  h1, h2, h3 { font-family: "Cinzel", Georgia, serif; font-weight: 600; line-height: 1.2; margin: 0; }
+
+  /* Short, light hero: the weight of the page belongs to the posts below it. */
+  .hero {
+    background:
+      radial-gradient(ellipse 80% 60% at 50% -10%, rgba(201, 138, 46, .16) 0%, transparent 70%),
+      linear-gradient(160deg, #3a3a3a 0%, var(--bg) 60%);
+    padding: clamp(32px, 5vw, 56px) var(--gutter) clamp(28px, 4vw, 40px);
+  }
+
+  .crumbs { font-size: .9rem; color: var(--muted); margin: 0 0 10px; }
+  .crumbs a { color: var(--muted); }
+
+  h1 { font-size: clamp(1.9rem, 4.5vw, 3rem); max-width: 22ch; }
+  h1 em { font-style: normal; color: var(--gold2); }
+
+  .lede { max-width: 60ch; margin: 14px 0 0; color: var(--muted); font-size: 1.12rem; }
+
+  /* Jump links: one tap to any post, and plain links Google can follow. */
+  .toc { padding: 0 var(--gutter); }
+  .toc ol {
+    list-style: none;
+    margin: 0;
+    padding: 18px 0;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    border-bottom: 1px solid var(--line);
+  }
+  .toc a {
+    display: inline-block;
+    padding: 6px 14px;
+    border: 1px solid var(--gold-dim, #7a5218);
+    border-radius: 999px;
+    color: var(--white);
+    font-size: .92rem;
+    text-decoration: none;
+  }
+  .toc a:hover { border-color: var(--gold2); color: var(--gold2); }
+
+  .posts { padding: clamp(28px, 4vw, 48px) var(--gutter) 0; }
+  .posts .wrap { display: grid; gap: clamp(24px, 3vw, 36px); }
+
+  .post {
+    background: var(--panel);
+    border: 1px solid var(--line);
+    border-radius: var(--r);
+    padding: clamp(22px, 3.5vw, 40px);
+    max-width: 860px;
+    width: 100%;
+    margin: 0 auto;
+    /* WHY: keeps a jumped-to post's title from hiding under the browser edge. */
+    scroll-margin-top: 16px;
+  }
+
+  .meta { font-size: .88rem; color: var(--muted); margin: 0 0 10px; letter-spacing: .02em; }
+  .meta .tag { color: var(--gold2); font-weight: 700; text-transform: uppercase; letter-spacing: .08em; }
+
+  .post h2 { font-size: clamp(1.45rem, 2.8vw, 2rem); }
+  .post h3 { font-size: 1.15rem; margin-top: 22px; color: var(--gold2); }
+  .post p { margin: 14px 0 0; }
+  .post ul { margin: 12px 0 0; padding-left: 22px; }
+  .post li { margin: 6px 0; }
+
+  /* Gold-edged product box sits at the bottom of each post, where the reader decides. */
+  .cta {
+    margin-top: 26px;
+    padding: 20px 22px;
+    border-radius: var(--r);
+    background: var(--bar);
+    border-left: 4px solid var(--gold);
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 14px 24px;
+  }
+  .cta p { margin: 0; }
+  .cta strong { color: var(--white); font-family: "Cinzel", Georgia, serif; font-size: 1.1rem; }
+  .price { color: var(--gold2); font-weight: 700; white-space: nowrap; }
+
+  .fine { font-size: .9rem; color: var(--muted); }
+
+  /* The heaviest block on the page sits last, on purpose. */
+  .closer {
+    margin-top: clamp(56px, 8vw, 96px);
+    padding: clamp(56px, 9vw, 110px) var(--gutter);
+    background: var(--gold);
+    color: var(--bar);
+  }
+  .closer h2 { font-size: clamp(2rem, 5vw, 3.4rem); max-width: 18ch; }
+  .closer p { max-width: 56ch; margin: 18px 0 0; font-size: 1.2rem; font-weight: 500; }
+  .closer .button { margin-top: 28px; background: var(--bar); color: var(--gold2); }
+
+  footer {
+    background: var(--bar);
+    border-top: 1px solid var(--line);
+    padding: 26px var(--gutter);
+    color: var(--muted);
+    font-size: .95rem;
+  }
+  .footer-row { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 10px 28px; }
+  footer nav { display: flex; flex-wrap: wrap; gap: 8px 22px; }
+  footer a { color: inherit; }
+  footer a:hover { color: var(--white); }
+
+  @media (prefers-reduced-motion: reduce) {
+    html { scroll-behavior: auto; }
+    .button { transition: none; }
+  }
+
+  /* Career guides: stat row and subject headers. Gold numbers make the facts scannable. */
+  .stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); gap: 12px; margin-top: 18px; }
+  .stats div { background: var(--bar); border-radius: 8px; padding: 12px 14px; }
+  .stats b { display: block; font-family: "Cinzel", Georgia, serif; font-size: 1.35rem; color: var(--gold2); }
+  .stats span { font-size: .88rem; color: var(--muted); line-height: 1.4; display: block; }
+  .careers-intro, .group { max-width: 860px; width: 100%; margin: 0 auto; scroll-margin-top: 16px; }
+  .careers-intro { padding-top: clamp(24px, 4vw, 48px); border-top: 2px solid var(--gold); }
+  .careers-intro h2 { font-size: clamp(1.7rem, 3.6vw, 2.5rem); }
+  .group { padding: 22px 0 4px; }
+  .group h2 { font-size: clamp(1.3rem, 2.6vw, 1.7rem); color: var(--gold2); }
+  .careers-intro p, .group p { margin: 12px 0 16px; color: var(--muted); }
+</style>
+</head>
+<body>
+
+<header class="topbar">
+  <div class="wrap">
+    <a class="logo" href="https://iqproductionz.com/" aria-label="I.Q. Productionz home">
+      <img src="https://static.wixstatic.com/media/b63ec4_2117e26bc8e646c8ad8b0050222de71b~mv2.png/v1/fill/w_295,h_92,al_c,q_85,usm_0.66_1.00_0.01,enc_avif,quality_auto/IQ-noglow_edited_edited.png" alt="I.Q. Productionz" width="295" height="92">
+    </a>
+    <a class="button" href="https://iqproductionz.com/Products/Digital/ALL/">Shop digital products</a>
+  </div>
+</header>
+
+<section class="hero">
+  <div class="wrap">
+    <p class="crumbs"><a href="https://iqproductionz.com/">Home</a> / <a href="https://iqproductionz.com/Products/Digital/">Digital Products</a> / Blog</p>
+    <h1>Work smarter on <em>your own terms</em></h1>
+    <p class="lede">Plain-language guides for job seekers, creators, and direct sellers. Each post walks through one problem and points you to the tool that makes it easier.</p>
+  </div>
+</section>
+
+<nav class="toc" aria-label="Posts on this page">
+  <div class="wrap">
+    <ol>
+      <li><a href="#interview-prep">Interview prep</a></li>
+      <li><a href="#launch-digital-product">Launch a digital product</a></li>
+      <li><a href="#ai-agent-small-business">AI agents</a></li>
+      <li><a href="#publish-on-kdp">Amazon KDP</a></li>
+      <li><a href="#first-clients-20-days">First clients</a></li>
+      <li><a href="#ai-prompts-first-1000">AI prompts</a></li>
+      <li><a href="#skincare-quiz">Skincare quiz</a></li>
+      <li><a href="#reorder-tracker">Reorder tracking</a></li>
+      <li><a href="#custom-qr-codes">Custom QR codes</a></li>
+      <li><a href="#creator-starter-bundle">Creator bundle</a></li>
+      <li><a href="#interview-ready-careers">23 career interview guides</a></li>
+    </ol>
+  </div>
+</nav>
+
+<main class="posts">
+  <div class="wrap">
+
+    <article class="post" id="interview-prep">
+      <p class="meta"><span class="tag">Careers</span> · <time datetime="2026-11-25">November 25, 2026</time> · Hali Sarah Parsons</p>
+      <h2>How to Prepare for a Job Interview When You Don't Know What They'll Ask</h2>
+      <p>The hardest part of interview prep isn't answering questions. It's guessing which questions are coming. Generic lists of "top 50 interview questions" don't help much when you're interviewing to be a nurse practitioner, a data engineer, or a special education teacher. Each field has its own technical questions, its own scenarios, and its own idea of a strong answer.</p>
+      <h3>Prepare for the role, not just the interview</h3>
+      <ul>
+        <li><strong>Study the questions your field actually asks.</strong> Hiring managers test for the skills the job uses every day.</li>
+        <li><strong>Practice out loud.</strong> An answer that sounds good in your head often runs long when you say it.</li>
+        <li><strong>Use real examples.</strong> A short story about a problem you solved beats a list of adjectives.</li>
+        <li><strong>Bring your own questions.</strong> Asking about the team and the first 90 days shows you're already picturing the work.</li>
+      </ul>
+      <p>Interview Ready kits do the guessing for you. Each kit is built around one in-demand career, and there are 23 to choose from across fields like data and AI, cybersecurity, healthcare, and human services.</p>
+      <div class="cta">
+        <p><strong>Interview Ready</strong><br>Single kits, subject bundles, or the complete 23-career set.</p>
+        <p><span class="price">From $6.99</span></p>
+        <a class="button" href="#interview-ready-careers">Read the career guides</a>
+      </div>
+    </article>
+
+    <article class="post" id="launch-digital-product">
+      <p class="meta"><span class="tag">Digital products</span> · <time datetime="2026-11-25">November 25, 2026</time> · Hali Sarah Parsons</p>
+      <h2>How to Launch Your First Digital Product Without Guessing</h2>
+      <p>Most people who want to sell a digital product get stuck in one of two places: they can't pick an idea, or they build something nobody was looking for. Both problems come from skipping the planning. A product that sells usually starts with the math and the market, not the design.</p>
+      <h3>The launch path, in order</h3>
+      <ul>
+        <li><strong>Run the numbers first.</strong> Decide what you want to earn, then figure out how many sales at what price it takes.</li>
+        <li><strong>Find your sweet spot.</strong> Look where what you know, what you enjoy, and what people pay for overlap.</li>
+        <li><strong>Pick the strongest idea</strong> and study competitors to see what buyers already like and what's missing.</li>
+        <li><strong>Build fast.</strong> A focused first version you can make in a day beats a perfect one that never ships.</li>
+        <li><strong>Sell with a clear page, an email that follows up, and content people can find later.</strong></li>
+      </ul>
+      <p>The Digital Product Launch Roadmap is an interactive guide that takes you through each of these steps for one product, from idea to steady sales.</p>
+      <div class="cta">
+        <p><strong>Digital Product Launch Roadmap</strong><br>One product, one clear plan.</p>
+        <p><span class="price">$14.99</span></p>
+        <a class="button" href="https://iqproductionz.com/Products/Digital/ALL/LaunchRoadmap/">Get the roadmap</a>
+      </div>
+    </article>
+
+    <article class="post" id="ai-agent-small-business">
+      <p class="meta"><span class="tag">AI</span> · <time datetime="2026-11-25">November 25, 2026</time> · Hali Sarah Parsons</p>
+      <h2>How to Set Up an AI Agent for Your Small Business (Safely)</h2>
+      <p>An AI agent can research, draft, and schedule while you sleep. It can also post something off-brand, invent a statistic, or get access to accounts it never needed. The difference comes down to how you set it up. Think of it as hiring an assistant: give it a clear brief, only the keys it needs, and a rule that nothing goes public without your yes.</p>
+      <h3>The basics of a safe setup</h3>
+      <ul>
+        <li><strong>Write a one-page brief</strong> covering who you are, who you serve, how you sound, and what it must never do.</li>
+        <li><strong>Give the least access possible.</strong> Use official sign-in buttons and never paste passwords or bank details into a chat.</li>
+        <li><strong>Make it show its sources</strong> so you can check that the "demand" it finds is real.</li>
+        <li><strong>Add an approval step.</strong> The agent drafts and schedules; you review before anything goes live.</li>
+        <li><strong>Review weekly.</strong> Fifteen minutes to see what worked and fix what didn't keeps it improving.</li>
+      </ul>
+      <p>Night Shift is an interactive, step-by-step guide that walks you through all of it, works with any agent platform, and includes a Persona Card builder and copy-ready tasks. It's honest about limits, too: an agent is a fast assistant, not a money machine.</p>
+      <div class="cta">
+        <p><strong>Night Shift: Build Your AI Agent</strong><br>Nine steps, from first setup to a weekly review.</p>
+        <p><span class="price">$12.99 launch price</span></p>
+        <a class="button" href="https://iqproductionz.com/Products/Digital/ALL/NightShift/">Get Night Shift</a>
+      </div>
+    </article>
+
+    <article class="post" id="publish-on-kdp">
+      <p class="meta"><span class="tag">Publishing</span> · <time datetime="2026-11-25">November 25, 2026</time> · Hali Sarah Parsons</p>
+      <h2>How to Publish a Book on Amazon KDP and Understand Your Royalties</h2>
+      <p>Self-publishing through Amazon KDP lets you put an ebook and a paperback on sale without a publisher. The hard part isn't uploading the file. It's knowing what to write, how to price it, and what you'll actually keep from each sale after printing costs.</p>
+      <h3>What to get right before you hit publish</h3>
+      <ul>
+        <li><strong>Choose the right kind of book.</strong> Some formats earn better as ebooks, others as paperbacks.</li>
+        <li><strong>Price with the royalty math in front of you.</strong> Ebook and paperback royalties work differently, and page count changes your print cost.</li>
+        <li><strong>Follow a repeatable process</strong> so book #2 takes less time than book #1.</li>
+        <li><strong>Add a second format</strong> to the same book to reach more readers with the work you've already done.</li>
+      </ul>
+      <p>Royalty Stack is a book publishing playbook that breaks the process into eight phases with checklists, plus a royalty estimator so you can see what one book could earn at different prices and page counts. The estimator uses KDP's published rates; always confirm in KDP's own calculator before you set a price.</p>
+      <div class="cta">
+        <p><strong>Royalty Stack: Book Publishing Playbook</strong><br>Eight phases and a built-in royalty estimator.</p>
+        <p><span class="price">$9.99 launch price</span></p>
+        <a class="button" href="https://iqproductionz.com/Products/Digital/ALL/RoyaltyStack/">Get Royalty Stack</a>
+      </div>
+    </article>
+
+    <article class="post" id="first-clients-20-days">
+      <p class="meta"><span class="tag">Freelancing</span> · <time datetime="2026-11-25">November 25, 2026</time> · Hali Sarah Parsons</p>
+      <h2>How to Land Your First Paying Clients in 20 Days</h2>
+      <p>"Get clients" is too big to act on. "Send five messages today" is not. The fastest way to your first paying clients is to start with a number you want to reach, work backward to the daily actions that get you there, and track every one.</p>
+      <h3>Working backward from $1,000</h3>
+      <ul>
+        <li><strong>Set the goal and do the math.</strong> How many clients at what price add up to $1,000?</li>
+        <li><strong>Pick one path</strong> instead of trying every idea at once.</li>
+        <li><strong>Find one role model</strong> who already does what you want and learn from how they work.</li>
+        <li><strong>Follow a 20-day outreach plan</strong> and log every lead so no conversation slips away.</li>
+        <li><strong>Cut the plan in half</strong> when you fall behind, keeping only the actions that bring in money.</li>
+      </ul>
+      <p>The $1K Client Sprint Planner puts all of this on one page: a goal calculator, a 20-day plan, an outreach tracker, and a lead log. It doesn't guarantee income. It gives you a clear plan to follow.</p>
+      <div class="cta">
+        <p><strong>$1K Client Sprint Planner</strong><br>A 20-day plan built backward from your goal.</p>
+        <p><span class="price">$14.99</span></p>
+        <a class="button" href="https://iqproductionz.com/Products/Digital/ALL/ClientSprintPlanner/">Get the planner</a>
+      </div>
+    </article>
+
+    <article class="post" id="ai-prompts-first-1000">
+      <p class="meta"><span class="tag">AI</span> · <time datetime="2026-11-25">November 25, 2026</time> · Hali Sarah Parsons</p>
+      <h2>AI Prompts That Help You Plan Your First $1,000</h2>
+      <p>AI chat tools are great planning partners, if you know what to ask. A vague prompt like "how do I make money online" gets a vague answer. A specific prompt that knows your skills, your time, and your goal gets a plan you can start today.</p>
+      <h3>What good planning prompts do</h3>
+      <ul>
+        <li><strong>Find two paths</strong> to $1,000 that fit what you already know.</li>
+        <li><strong>Find a mentor to model</strong> so you're not inventing everything from scratch.</li>
+        <li><strong>Build a 20-day plan</strong> for finding customers, day by day.</li>
+        <li><strong>Cut the plan down</strong> to the steps that actually make money.</li>
+      </ul>
+      <p>The 1K AI Money Sprint is a checklist of copy-and-paste prompts for each of those steps. Paste them into the AI tool you already use, fill in your details, and work through them in order. Check the facts it gives you; AI can be wrong.</p>
+      <div class="cta">
+        <p><strong>1K AI Money Sprint (Prompt Checklist)</strong><br>Copy, paste, and plan in a 30-day sprint.</p>
+        <p><span class="price">$14.99</span></p>
+        <a class="button" href="https://iqproductionz.com/Products/Digital/ALL/AIMoneySprint/">Get the prompts</a>
+      </div>
+    </article>
+
+    <article class="post" id="skincare-quiz">
+      <p class="meta"><span class="tag">Beauty business</span> · <time datetime="2026-11-25">November 25, 2026</time> · Hali Sarah Parsons</p>
+      <h2>Turn Website Visitors Into Booked Skincare Consultations With a Quiz</h2>
+      <p>Most people who land on a beauty consultant's page leave without saying a word. They aren't sure what they need, and "message me for a consultation" feels like a big ask. A short skin quiz flips that around. It's fun, it takes a minute, and it ends with a personal plan and an easy next step.</p>
+      <h3>Why quizzes work for beauty pros</h3>
+      <ul>
+        <li><strong>They start the conversation for you.</strong> Visitors share their skin concerns without feeling sold to.</li>
+        <li><strong>They give value first.</strong> Every visitor walks away with a plan, even if they don't book.</li>
+        <li><strong>They make booking the natural next step</strong> instead of a cold ask.</li>
+      </ul>
+      <p>The Glow Check Skincare Quiz Template is a ready-made quiz you customize with your own name, products, and booking link, then share or add to your site.</p>
+      <div class="cta">
+        <p><strong>Glow Check Skincare Quiz Template</strong><br>Made for beauty consultants and skincare pros.</p>
+        <p><span class="price">$24.99</span></p>
+        <a class="button" href="https://iqproductionz.com/Products/Digital/ALL/GlowCheckQuiz/">See the quiz</a>
+      </div>
+    </article>
+
+    <article class="post" id="reorder-tracker">
+      <p class="meta"><span class="tag">Direct sales</span> · <time datetime="2026-11-25">November 25, 2026</time> · Hali Sarah Parsons</p>
+      <h2>Why Direct Sellers Lose Reorders, and the Simple Fix</h2>
+      <p>Your best customer is the one who already bought from you. But when follow-ups live in your head, on sticky notes, or scattered across text threads, the reminder to reach out comes too late. By then she's bought her cleanser somewhere else.</p>
+      <h3>Keep every next step in one place</h3>
+      <ul>
+        <li><strong>Log what each customer bought and when.</strong></li>
+        <li><strong>Set a reorder date</strong> based on how long the product usually lasts.</li>
+        <li><strong>Check who's due each week</strong> and reach out before they run out.</li>
+      </ul>
+      <p>I.Q. Productionz lead trackers give beauty consultants, direct sellers, and skincare businesses one clean place for customers, follow-ups, and reorder dates.</p>
+      <div class="cta">
+        <p><strong>Lead &amp; Reorder Trackers</strong><br>For beauty consultants, direct sellers, and skincare businesses.</p>
+        <a class="button" href="https://iqproductionz.com/Products/Digital/">See the trackers</a>
+      </div>
+    </article>
+
+
+    <article class="post" id="custom-qr-codes">
+      <p class="meta"><span class="tag">Small business</span> · <time datetime="2026-11-25">November 25, 2026</time> · Hali Sarah Parsons</p>
+      <h2>Why Your Business Needs a QR Code That Looks Like Your Brand</h2>
+      <p>QR codes aren't a pandemic leftover anymore. About 70% of U.S. consumers scan one at least once a month, and 71% say they're useful in daily life. That makes the little square on your business card, flyer, or product label one of the hardest-working pieces of marketing you own.</p>
+      <p>There's a catch: QR phishing, or "quishing," is rising fast. Microsoft recorded a 146% jump in QR code phishing in the first quarter of 2026. People are getting more careful about what they scan, and a plain black square gives them no reason to trust yours. A code with your colors and logo tells them it's really you.</p>
+      <h3>What makes a QR code worth scanning</h3>
+      <ul>
+        <li><strong>It looks like your brand.</strong> Your colors, custom shapes, and your logo in the center.</li>
+        <li><strong>It prints sharp at any size.</strong> SVG files stay crisp from a business card to a car decal.</li>
+        <li><strong>It tells people what they'll get.</strong> "Scan for the menu" beats a code with no context.</li>
+        <li><strong>It goes somewhere that works on a phone.</strong> A fast, mobile-friendly page keeps the scan from being wasted.</li>
+      </ul>
+      <p>The I.Q. Productionz QR Code Platform lets you mix custom shapes, gradients, and emoji dots, then add your logo. Static codes are free, with no account needed. If you want to change where a printed code goes later, a dynamic code costs $25 only when you change the link, and scan stats are $5 to view. There's no monthly fee.</p>
+      <div class="cta">
+        <p><strong>I.Q. Productionz QR Code Platform</strong><br>Free static codes. No account, no monthly fee.</p>
+        <p><span class="price">Free to start</span></p>
+        <a class="button" href="https://iqproductionz.com/QRCode">Design your QR code</a>
+      </div>
+      <p class="fine">Sources: <a href="https://www.qr-code-generator.com/blog/qr-code-usage-country/">QR Code Generator: QR Code Usage by Country (2026)</a></p>
+    </article>
+
+    <!-- WHY last: the bundle is the best value, so it closes out the posts right
+         before the final call to action. -->
+    <article class="post" id="creator-starter-bundle">
+      <p class="meta"><span class="tag">Bundle</span> · <time datetime="2026-11-25">November 25, 2026</time> · Hali Sarah Parsons</p>
+      <h2>The Creator Starter Stack: Build It, Publish It, Let AI Help</h2>
+      <p>If you've read this far, you've seen three tools that fit together. The Launch Roadmap helps you plan and sell one digital product. Royalty Stack helps you turn what you know into a book on Amazon. Night Shift helps you set up an AI assistant to research, draft, and schedule while you stay in charge.</p>
+      <p>Bought separately at launch prices, they come to $37.97. The bundle gets you all three for $29.99.</p>
+      <div class="cta">
+        <p><strong>Night Shift + Royalty Stack + Launch Roadmap</strong><br>Three guides for creators, one price.</p>
+        <p><span class="price">$29.99</span></p>
+        <a class="button" href="https://iqproductionz.com/Products/Digital/ALL/NightShiftRoyaltyStackBundle/">Get the bundle</a>
+      </div>
+      <p class="fine">These are educational tools. Results depend on your own effort and situation, and no income is promised.</p>
+    </article>
+
+
+    <section class="careers-intro" id="interview-ready-careers">
+      <p class="meta"><span class="tag">Interview Ready</span></p>
+      <h2>Career Interview Guides: 23 In-Demand Jobs</h2>
+      <p>Every career below has its own Interview Ready kit: a mock interview quiz with realistic behavioral, technical, and situational questions, plus a vocab trainer for the terms interviewers expect you to know. Each guide covers what the job pays, where it's headed, and what the interview really tests.</p>
+      <a class="button" href="https://iqproductionz.com/Products/Digital/ALL/InterviewReady/CompleteBundle/">All 23 kits for $39.99</a>
+    </section>
+    <section class="group" id="dataai-interview-guides" aria-labelledby="dataai-h">
+      <h2 id="dataai-h">Data, AI &amp; Cybersecurity</h2>
+      <p>Tech interviews have moved past trivia. Hiring teams want to see you reason through real problems, explain trade-offs, and talk about risk in plain language.</p>
+      <a class="button" href="https://iqproductionz.com/Products/Digital/ALL/InterviewReady/DataAI/">All 5 kits for $17.99</a>
+    </section>
+    <article class="post" id="ai-ml-engineer-interview">
+      <p class="meta"><span class="tag">Interview prep</span> · <time datetime="2026-11-25">November 25, 2026</time> · Hali Sarah Parsons</p>
+      <h2>AI/ML Engineer Interview Questions: How to Prepare in 2026</h2>
+      <p>AI/ML engineering interviews now cover two worlds at once: the classic machine learning fundamentals that haven't changed, and the fast-moving work of building with large language models. Strong candidates can explain why a model is failing, not just how to train one.</p>
+      <div class="stats"><div><b>$140,300</b><span>median pay for computer &amp; information research scientists, the closest BLS category</span></div><div><b>22%</b><span>projected growth, 2025&ndash;35</span></div><div><b>Master's</b><span>typical entry education in that category</span></div></div>
+      <h3>What interviewers test</h3>
+      <ul><li><strong>ML fundamentals:</strong> overfitting, the bias-variance trade-off, and choosing the right evaluation metric for the problem.</li><li><strong>Coding:</strong> usually Python, often working with data rather than pure algorithms.</li><li><strong>ML system design:</strong> taking a model from raw data to production, then monitoring it for drift.</li><li><strong>LLM work:</strong> when to prompt, when to fine-tune, how retrieval (RAG) helps, and how you evaluate output quality.</li></ul>
+      
+      <h3>Words to know cold</h3>
+      <p>Expect to hear terms like <em>precision vs. recall, regularization, embeddings, data drift, RAG, hyperparameters</em>. If any of them make you pause, practice until you can define each one in a sentence.</p>
+      <div class="cta">
+        <p><strong>AI/ML Engineer Interview Prep Kit</strong><br>An 8-question mock interview with explanations and interviewer tips, plus a vocab trainer with flashcards and quizzes. Works offline.</p>
+        <p><span class="price">$6.99</span></p>
+        <a class="button" href="https://iqproductionz.com/Products/Digital/ALL/InterviewReady/DataAI/AIMLEngineer/">Get the AI/ML Engineer kit</a>
+      </div>
+      <p class="fine">Sources: <a href="https://www.bls.gov/ooh/computer-and-information-technology/computer-and-information-research-scientists.htm">BLS: Computer and Information Research Scientists</a>. Pay is the May 2025 median; projections cover 2025&ndash;35. Kit questions reflect common interview themes, not any employer's actual questions.</p>
+    </article>
+    <article class="post" id="data-scientist-interview">
+      <p class="meta"><span class="tag">Interview prep</span> · <time datetime="2026-11-25">November 25, 2026</time> · Hali Sarah Parsons</p>
+      <h2>Data Scientist Interview Prep: Stats, SQL, and Telling the Story</h2>
+      <p>A data scientist interview is really three interviews: can you do the math, can you get the data, and can you explain what it means to someone who doesn't care about p-values? Most candidates over-prepare the first and under-prepare the last.</p>
+      <div class="stats"><div><b>$120,230</b><span>median annual pay</span></div><div><b>35%</b><span>projected growth, 2025&ndash;35, one of the fastest of any job</span></div><div><b>24,800</b><span>openings a year, on average</span></div></div>
+      <h3>What interviewers test</h3>
+      <ul><li><strong>Statistics:</strong> hypothesis testing, confidence intervals, and designing a fair A/B test.</li><li><strong>SQL and Python:</strong> joins, aggregations, and cleaning messy data.</li><li><strong>Modeling case:</strong> choosing a model, validating it, and spotting leakage.</li><li><strong>Communication:</strong> turning results into a clear recommendation for a business partner.</li></ul>
+      
+      <h3>Words to know cold</h3>
+      <p>Expect to hear terms like <em>p-value, confidence interval, A/B test, feature engineering, cross-validation, R-squared</em>. If any of them make you pause, practice until you can define each one in a sentence.</p>
+      <div class="cta">
+        <p><strong>Data Scientist Interview Prep Kit</strong><br>An 8-question mock interview with explanations and interviewer tips, plus a vocab trainer with flashcards and quizzes. Works offline.</p>
+        <p><span class="price">$6.99</span></p>
+        <a class="button" href="https://iqproductionz.com/Products/Digital/ALL/InterviewReady/DataAI/DataScientist/">Get the Data Scientist kit</a>
+      </div>
+      <p class="fine">Sources: <a href="https://www.bls.gov/ooh/math/data-scientists.htm">BLS: Data Scientists</a>. Pay is the May 2025 median; projections cover 2025&ndash;35. Kit questions reflect common interview themes, not any employer's actual questions.</p>
+    </article>
+    <article class="post" id="data-engineer-interview">
+      <p class="meta"><span class="tag">Interview prep</span> · <time datetime="2026-11-25">November 25, 2026</time> · Hali Sarah Parsons</p>
+      <h2>Data Engineer Interview Questions: Don't Underestimate the SQL Round</h2>
+      <p>Data engineers build the pipelines everyone else depends on, so interviewers test whether your pipelines would actually survive real life. Bad data, late data, duplicate data: you'll be asked what you'd do about all of it.</p>
+      <div class="stats"><div><b>$139,500</b><span>median pay for database architects, the closest BLS category</span></div><div><b>9%</b><span>projected growth for database architects, 2025&ndash;35</span></div><div><b>SQL</b><span>the most common topic in data engineer interviews</span></div></div>
+      <h3>What interviewers test</h3>
+      <ul><li><strong>SQL:</strong> window functions, deduplication, and writing queries that answer business questions.</li><li><strong>Pipeline design:</strong> batch vs. streaming, retries, and making jobs safe to re-run.</li><li><strong>Data modeling:</strong> star schemas and handling records that change over time.</li><li><strong>Cloud platforms:</strong> warehouses, orchestration, and keeping costs under control.</li></ul>
+      
+      <h3>Words to know cold</h3>
+      <p>Expect to hear terms like <em>ETL vs. ELT, idempotent, partitioning, slowly changing dimension (SCD Type 2), orchestration, data lineage</em>. If any of them make you pause, practice until you can define each one in a sentence.</p>
+      <div class="cta">
+        <p><strong>Data Engineer Interview Prep Kit</strong><br>An 8-question mock interview with explanations and interviewer tips, plus a vocab trainer with flashcards and quizzes. Works offline.</p>
+        <p><span class="price">$6.99</span></p>
+        <a class="button" href="https://iqproductionz.com/Products/Digital/ALL/InterviewReady/DataAI/DataEngineer/">Get the Data Engineer kit</a>
+      </div>
+      <p class="fine">Sources: <a href="https://www.bls.gov/ooh/computer-and-information-technology/database-administrators.htm">BLS: Database Administrators and Architects</a> · <a href="https://www.udacity.com/blog/data-engineer-interview-questions/">Udacity: Data Engineer Interview Questions</a>. Pay is the May 2025 median; projections cover 2025&ndash;35. Kit questions reflect common interview themes, not any employer's actual questions.</p>
+    </article>
+    <article class="post" id="information-security-analyst-interview">
+      <p class="meta"><span class="tag">Interview prep</span> · <time datetime="2026-11-25">November 25, 2026</time> · Hali Sarah Parsons</p>
+      <h2>Information Security Analyst Interview: What Hiring Managers Really Test</h2>
+      <p>Security interviews love a scenario: "It's 2 a.m. and an alert fires. Walk me through what you do." They're checking whether you stay calm, follow a process, and know when to escalate, not whether you can recite every acronym.</p>
+      <div class="stats"><div><b>$129,180</b><span>median annual pay</span></div><div><b>21%</b><span>projected growth, 2025&ndash;35</span></div><div><b>14,100</b><span>openings a year, on average</span></div></div>
+      <h3>What interviewers test</h3>
+      <ul><li><strong>Incident response:</strong> detect, contain, eradicate, recover, and document.</li><li><strong>Networking basics:</strong> ports, protocols, DNS, and what normal traffic looks like.</li><li><strong>Threats:</strong> phishing, ransomware, and how attackers move once inside.</li><li><strong>Communicating risk:</strong> explaining a vulnerability to leadership without the jargon.</li></ul>
+      <p>Many analysts start in general IT, often as network or systems administrators, so that experience is worth highlighting.</p>
+      <h3>Words to know cold</h3>
+      <p>Expect to hear terms like <em>SIEM, indicator of compromise (IOC), least privilege, zero trust, CVE, multi-factor authentication</em>. If any of them make you pause, practice until you can define each one in a sentence.</p>
+      <div class="cta">
+        <p><strong>Information Security Analyst Interview Prep Kit</strong><br>An 8-question mock interview with explanations and interviewer tips, plus a vocab trainer with flashcards and quizzes. Works offline.</p>
+        <p><span class="price">$6.99</span></p>
+        <a class="button" href="https://iqproductionz.com/Products/Digital/ALL/InterviewReady/DataAI/InformationSecurityAnalyst/">Get the Information Security Analyst kit</a>
+      </div>
+      <p class="fine">Sources: <a href="https://www.bls.gov/ooh/computer-and-information-technology/information-security-analysts.htm">BLS: Information Security Analysts</a>. Pay is the May 2025 median; projections cover 2025&ndash;35. Kit questions reflect common interview themes, not any employer's actual questions.</p>
+    </article>
+    <article class="post" id="ai-governance-risk-interview">
+      <p class="meta"><span class="tag">Interview prep</span> · <time datetime="2026-11-25">November 25, 2026</time> · Hali Sarah Parsons</p>
+      <h2>AI Governance &amp; Risk Specialist: The New Job Interviewers Are Still Defining</h2>
+      <p>AI governance barely existed as a job title a few years ago. Now companies need people who can turn laws and frameworks into rules engineers can actually follow. Because the field is new, interviewers care most about how you think through a risky use case.</p>
+      <div class="stats"><div><b>Aug 2, 2026</b><span>when EU AI Act transparency obligations began to apply</span></div><div><b>Dec 2, 2027</b><span>when the full high-risk regime is scheduled to apply</span></div><div><b>4</b><span>core functions in the NIST AI Risk Management Framework: Govern, Map, Measure, Manage</span></div></div>
+      <h3>What interviewers test</h3>
+      <ul><li><strong>Frameworks:</strong> the EU AI Act's risk tiers, the NIST AI RMF, and ISO/IEC 42001.</li><li><strong>Risk classification:</strong> "Here's a hiring tool that ranks resumes. How risky is it, and why?"</li><li><strong>Testing and documentation:</strong> bias checks, model cards, and audit trails.</li><li><strong>Working across teams:</strong> translating between legal, compliance, and engineering.</li></ul>
+      <p>People come into this field from law, compliance, risk management, data science, and policy, so your background can be an asset.</p>
+      <h3>Words to know cold</h3>
+      <p>Expect to hear terms like <em>model card, high-risk system, conformity assessment, AI RMF, ISO/IEC 42001, impact assessment</em>. If any of them make you pause, practice until you can define each one in a sentence.</p>
+      <div class="cta">
+        <p><strong>AI Governance &amp; Risk Specialist Interview Prep Kit</strong><br>An 8-question mock interview with explanations and interviewer tips, plus a vocab trainer with flashcards and quizzes. Works offline.</p>
+        <p><span class="price">$6.99</span></p>
+        <a class="button" href="https://iqproductionz.com/Products/Digital/ALL/InterviewReady/DataAI/AIGovernanceRiskSpecialist/">Get the AI Governance &amp; Risk Specialist kit</a>
+      </div>
+      <p class="fine">Sources: <a href="https://stacker.com/stories/ai/ai-governance-confidence-gap-why-trust-ai-running-ahead-capacity-govern-it">Stacker: The AI governance confidence gap</a> · <a href="https://techjacksolutions.com/careers/ai-governance-careers/">TechJack Solutions: AI governance careers</a> · <a href="https://www.careerexplorer.com/careers/ai-governance-specialist/ai-impact/">CareerExplorer: AI Governance Specialist</a>. Pay is the May 2025 median; projections cover 2025&ndash;35. Kit questions reflect common interview themes, not any employer's actual questions.</p>
+    </article>
+    <section class="group" id="healthcare-interview-guides" aria-labelledby="healthcare-h">
+      <h2 id="healthcare-h">Healthcare &amp; Clinical Care</h2>
+      <p>Healthcare interviews are built around patient safety. Expect scenarios that test how you prioritize, communicate, and act when something goes wrong.</p>
+      <a class="button" href="https://iqproductionz.com/Products/Digital/ALL/InterviewReady/Healthcare/">All 5 kits for $17.99</a>
+    </section>
+    <article class="post" id="nurse-practitioner-interview">
+      <p class="meta"><span class="tag">Interview prep</span> · <time datetime="2026-11-25">November 25, 2026</time> · Hali Sarah Parsons</p>
+      <h2>Nurse Practitioner Interview Questions for One of the Fastest-Growing Jobs</h2>
+      <p>Few careers are growing like nurse practitioners. That means more openings, but also panels that want proof you're ready to diagnose, prescribe, and own your decisions as a provider, not just as a nurse.</p>
+      <div class="stats"><div><b>$132,300</b><span>median annual pay</span></div><div><b>41%</b><span>projected growth, 2025&ndash;35</span></div><div><b>Master's+</b><span>plus national certification and a state APRN license</span></div></div>
+      <h3>What interviewers test</h3>
+      <ul><li><strong>Clinical scenarios:</strong> building a differential diagnosis and choosing what to order first.</li><li><strong>Prescribing safety:</strong> interactions, allergies, and follow-up.</li><li><strong>Scope of practice:</strong> when you consult or refer, and how you work with physicians.</li><li><strong>Patient education:</strong> explaining a new diagnosis so the patient actually follows the plan.</li></ul>
+      
+      <h3>Words to know cold</h3>
+      <p>Expect to hear terms like <em>differential diagnosis, SOAP note, scope of practice, prescriptive authority, HPI, review of systems</em>. If any of them make you pause, practice until you can define each one in a sentence.</p>
+      <div class="cta">
+        <p><strong>Nurse Practitioner (NP) Interview Prep Kit</strong><br>An 8-question mock interview with explanations and interviewer tips, plus a vocab trainer with flashcards and quizzes. Works offline.</p>
+        <p><span class="price">$6.99</span></p>
+        <a class="button" href="https://iqproductionz.com/Products/Digital/ALL/InterviewReady/Healthcare/NursePractitioner/">Get the Nurse Practitioner (NP) kit</a>
+      </div>
+      <p class="fine">Sources: <a href="https://www.bls.gov/ooh/healthcare/nurse-anesthetists-nurse-midwives-and-nurse-practitioners.htm">BLS: Nurse Anesthetists, Nurse Midwives, and Nurse Practitioners</a>. Pay is the May 2025 median; projections cover 2025&ndash;35. Kit questions reflect common interview themes, not any employer's actual questions.</p>
+    </article>
+    <article class="post" id="registered-nurse-interview">
+      <p class="meta"><span class="tag">Interview prep</span> · <time datetime="2026-11-25">November 25, 2026</time> · Hali Sarah Parsons</p>
+      <h2>Registered Nurse Interview Questions: Prioritization, Safety, and Teamwork</h2>
+      <p>"You have four patients and they all need you right now. Who do you see first?" Some version of that question shows up in almost every RN interview. Your answer shows how you think about safety under pressure.</p>
+      <div class="stats"><div><b>$97,550</b><span>median annual pay</span></div><div><b>6%</b><span>projected growth, 2025&ndash;35</span></div><div><b>180,800</b><span>openings a year, on average</span></div></div>
+      <h3>What interviewers test</h3>
+      <ul><li><strong>Prioritization:</strong> airway, breathing, circulation, and recognizing the unstable patient.</li><li><strong>Patient safety:</strong> catching and reporting medication errors.</li><li><strong>Communication:</strong> clear handoffs and calling a provider with the right information.</li><li><strong>Hard moments:</strong> upset families, short staffing, and disagreeing with a coworker.</li></ul>
+      
+      <h3>Words to know cold</h3>
+      <p>Expect to hear terms like <em>SBAR, ADPIE (the nursing process), MAR, PRN, NPO, intake and output (I&amp;O)</em>. If any of them make you pause, practice until you can define each one in a sentence.</p>
+      <div class="cta">
+        <p><strong>Registered Nurse (RN) Interview Prep Kit</strong><br>An 8-question mock interview with explanations and interviewer tips, plus a vocab trainer with flashcards and quizzes. Works offline.</p>
+        <p><span class="price">$6.99</span></p>
+        <a class="button" href="https://iqproductionz.com/Products/Digital/ALL/InterviewReady/Healthcare/RegisteredNurse/">Get the Registered Nurse (RN) kit</a>
+      </div>
+      <p class="fine">Sources: <a href="https://www.bls.gov/ooh/healthcare/registered-nurses.htm">BLS: Registered Nurses</a>. Pay is the May 2025 median; projections cover 2025&ndash;35. Kit questions reflect common interview themes, not any employer's actual questions.</p>
+    </article>
+    <article class="post" id="physician-assistant-interview">
+      <p class="meta"><span class="tag">Interview prep</span> · <time datetime="2026-11-25">November 25, 2026</time> · Hali Sarah Parsons</p>
+      <h2>Physician Assistant Interview Prep: Why PA, and Why You</h2>
+      <p>Almost every PA interview asks some version of "Why PA and not medicine or nursing?" A clear, honest answer about team-based care sets the tone for everything else.</p>
+      <div class="stats"><div><b>$135,880</b><span>median annual pay</span></div><div><b>21%</b><span>projected growth, 2025&ndash;35, about seven times the average</span></div><div><b>11,500</b><span>openings a year, on average</span></div></div>
+      <h3>What interviewers test</h3>
+      <ul><li><strong>Motivation:</strong> why the PA role fits how you want to practice.</li><li><strong>Team medicine:</strong> working with supervising or collaborating physicians.</li><li><strong>Clinical reasoning:</strong> working a case from chief complaint to plan.</li><li><strong>Accountability:</strong> a mistake you made and what you changed after.</li></ul>
+      
+      <h3>Words to know cold</h3>
+      <p>Expect to hear terms like <em>PA-C, collaborative practice, chief complaint, history and physical (H&amp;P), triage, PANCE</em>. If any of them make you pause, practice until you can define each one in a sentence.</p>
+      <div class="cta">
+        <p><strong>Physician Assistant (PA) Interview Prep Kit</strong><br>An 8-question mock interview with explanations and interviewer tips, plus a vocab trainer with flashcards and quizzes. Works offline.</p>
+        <p><span class="price">$6.99</span></p>
+        <a class="button" href="https://iqproductionz.com/Products/Digital/ALL/InterviewReady/Healthcare/PhysicianAssistant/">Get the Physician Assistant (PA) kit</a>
+      </div>
+      <p class="fine">Sources: <a href="https://www.bls.gov/ooh/healthcare/physician-assistants.htm">BLS: Physician Assistants</a>. Pay is the May 2025 median; projections cover 2025&ndash;35. Kit questions reflect common interview themes, not any employer's actual questions.</p>
+    </article>
+    <article class="post" id="physical-occupational-therapist-interview">
+      <p class="meta"><span class="tag">Interview prep</span> · <time datetime="2026-11-25">November 25, 2026</time> · Hali Sarah Parsons</p>
+      <h2>Physical and Occupational Therapist Interview Questions</h2>
+      <p>PT and OT interviews often hand you a patient case and ask you to build a plan on the spot. Interviewers want to see functional goals, safety awareness, and how you'd keep a discouraged patient motivated.</p>
+      <div class="stats"><div><b>$102,760</b><span>median pay for physical therapists ($100,330 for occupational therapists)</span></div><div><b>12% / 15%</b><span>projected growth for PTs / OTs, 2025&ndash;35</span></div><div><b>23,400</b><span>combined openings a year, on average</span></div></div>
+      <h3>What interviewers test</h3>
+      <ul><li><strong>Case planning:</strong> evaluation, measurable goals, and progression.</li><li><strong>Motivation:</strong> what you do when a patient stops showing up or doing home exercises.</li><li><strong>Documentation and productivity:</strong> keeping notes clean while meeting caseload expectations.</li><li><strong>Teamwork:</strong> coordinating with nurses, physicians, and families.</li></ul>
+      
+      <h3>Words to know cold</h3>
+      <p>Expect to hear terms like <em>range of motion (ROM), activities of daily living (ADLs), gait, functional goals, plan of care, contraindication</em>. If any of them make you pause, practice until you can define each one in a sentence.</p>
+      <div class="cta">
+        <p><strong>Physical &amp; Occupational Therapist Interview Prep Kit</strong><br>An 8-question mock interview with explanations and interviewer tips, plus a vocab trainer with flashcards and quizzes. Works offline.</p>
+        <p><span class="price">$6.99</span></p>
+        <a class="button" href="https://iqproductionz.com/Products/Digital/ALL/InterviewReady/Healthcare/PhysicalOccupationalTherapist/">Get the Physical &amp; Occupational Therapist kit</a>
+      </div>
+      <p class="fine">Sources: <a href="https://www.bls.gov/ooh/healthcare/physical-therapists.htm">BLS: Physical Therapists</a> · <a href="https://www.bls.gov/ooh/healthcare/occupational-therapists.htm">BLS: Occupational Therapists</a>. Pay is the May 2025 median; projections cover 2025&ndash;35. Kit questions reflect common interview themes, not any employer's actual questions.</p>
+    </article>
+    <article class="post" id="home-health-aide-interview">
+      <p class="meta"><span class="tag">Interview prep</span> · <time datetime="2026-11-25">November 25, 2026</time> · Hali Sarah Parsons</p>
+      <h2>Home Health Aide Interview Questions: Show You're Reliable and Caring</h2>
+      <p>In home care, you're often the only professional in the room. Agencies hire for trust: will you show up, protect a client's dignity and privacy, and know exactly what to do if they fall?</p>
+      <div class="stats"><div><b>760,500</b><span>openings a year, on average, more than almost any other job</span></div><div><b>18%</b><span>projected growth, 2025&ndash;35</span></div><div><b>$17.21</b><span>median hourly pay ($35,800 a year)</span></div></div>
+      <h3>What interviewers test</h3>
+      <ul><li><strong>Reliability:</strong> attendance, punctuality, and what you do if you can't make a shift.</li><li><strong>Emergencies:</strong> a fall, a change in condition, or a client who won't wake up.</li><li><strong>Dignity and privacy:</strong> helping with bathing and dressing, and keeping health information confidential.</li><li><strong>Challenging behavior:</strong> calmly supporting a client with dementia who is confused or upset.</li></ul>
+      <p>Demand is driven by an aging population: Americans 65 and older are projected to grow from 59.7 million in 2024 to 72.5 million by 2034.</p>
+      <h3>Words to know cold</h3>
+      <p>Expect to hear terms like <em>ADLs, IADLs, HIPAA, standard precautions, plan of care, gait belt</em>. If any of them make you pause, practice until you can define each one in a sentence.</p>
+      <div class="cta">
+        <p><strong>Home Health Aide Interview Prep Kit</strong><br>An 8-question mock interview with explanations and interviewer tips, plus a vocab trainer with flashcards and quizzes. Works offline.</p>
+        <p><span class="price">$6.99</span></p>
+        <a class="button" href="https://iqproductionz.com/Products/Digital/ALL/InterviewReady/Healthcare/HomeHealthAide/">Get the Home Health Aide kit</a>
+      </div>
+      <p class="fine">Sources: <a href="https://www.bls.gov/ooh/healthcare/home-health-aides-and-personal-care-aides.htm">BLS: Home Health and Personal Care Aides</a> · <a href="https://newsweek.com/americas-home-care-workers-are-leaving-elderly-are-paying-price-12651195">Newsweek: America's home care workers are leaving</a>. Pay is the May 2025 median; projections cover 2025&ndash;35. Kit questions reflect common interview themes, not any employer's actual questions.</p>
+    </article>
+    <section class="group" id="trades-interview-guides" aria-labelledby="trades-h">
+      <h2 id="trades-h">Skilled Trades &amp; Infrastructure</h2>
+      <p>Trades interviews are about safety, troubleshooting, and reliability. Foremen want to know you'll show up, follow procedure, and think before you touch anything live.</p>
+      <a class="button" href="https://iqproductionz.com/Products/Digital/ALL/InterviewReady/Trades/">All 5 kits for $17.99</a>
+    </section>
+    <article class="post" id="industrial-commercial-electrician-interview">
+      <p class="meta"><span class="tag">Interview prep</span> · <time datetime="2026-11-25">November 25, 2026</time> · Hali Sarah Parsons</p>
+      <h2>Industrial and Commercial Electrician Interview Questions</h2>
+      <p>Data centers, factories, and grid upgrades are keeping electricians busy. Interviewers want to hear that you know code, respect lockout/tagout every time, and can troubleshoot logically instead of swapping parts until something works.</p>
+      <div class="stats"><div><b>72,700</b><span>openings a year, on average</span></div><div><b>9%</b><span>projected growth, 2025&ndash;35</span></div><div><b>$63,190</b><span>median annual pay</span></div></div>
+      <h3>What interviewers test</h3>
+      <ul><li><strong>Code knowledge:</strong> the National Electrical Code and how local codes add to it.</li><li><strong>Safety:</strong> lockout/tagout, arc flash, and when you'd stop a job.</li><li><strong>Prints:</strong> reading blueprints and one-line diagrams.</li><li><strong>Troubleshooting:</strong> motor controls, three-phase power, and PLC basics on industrial jobs.</li></ul>
+      <p>BLS ties part of the demand to AI and data centers, which are pushing electricity use and grid upgrades.</p>
+      <h3>Words to know cold</h3>
+      <p>Expect to hear terms like <em>NEC, lockout/tagout (LOTO), arc flash, conduit fill, three-phase, PLC</em>. If any of them make you pause, practice until you can define each one in a sentence.</p>
+      <div class="cta">
+        <p><strong>Industrial &amp; Commercial Electrician Interview Prep Kit</strong><br>An 8-question mock interview with explanations and interviewer tips, plus a vocab trainer with flashcards and quizzes. Works offline.</p>
+        <p><span class="price">$6.99</span></p>
+        <a class="button" href="https://iqproductionz.com/Products/Digital/ALL/InterviewReady/Trades/IndustrialCommercialElectrician/">Get the Industrial &amp; Commercial Electrician kit</a>
+      </div>
+      <p class="fine">Sources: <a href="https://www.bls.gov/ooh/construction-and-extraction/electricians.htm">BLS: Electricians</a>. Pay is the May 2025 median; projections cover 2025&ndash;35. Kit questions reflect common interview themes, not any employer's actual questions.</p>
+    </article>
+    <article class="post" id="hvac-r-technician-interview">
+      <p class="meta"><span class="tag">Interview prep</span> · <time datetime="2026-11-25">November 25, 2026</time> · Hali Sarah Parsons</p>
+      <h2>HVAC/R Technician Interview Questions After the A2L Refrigerant Switch</h2>
+      <p>The refrigerants are changing. Since January 1, 2025, new comfort-cooling systems have had to use lower-GWP refrigerants like R-32 or R-454B, which are mildly flammable. Expect interviewers to ask how you handle them safely.</p>
+      <div class="stats"><div><b>$61,010</b><span>median annual pay</span></div><div><b>11%</b><span>projected growth, 2025&ndash;35</span></div><div><b>40,600</b><span>openings a year, on average</span></div></div>
+      <h3>What interviewers test</h3>
+      <ul><li><strong>Troubleshooting:</strong> "The house isn't cooling. Where do you start?"</li><li><strong>Refrigerant handling:</strong> EPA Section 608 rules and A2L safety.</li><li><strong>Electrical diagnostics:</strong> capacitors, contactors, and reading a wiring diagram.</li><li><strong>Customer service:</strong> explaining a repair and its cost without pressure.</li></ul>
+      
+      <h3>Words to know cold</h3>
+      <p>Expect to hear terms like <em>superheat, subcooling, EPA 608, A2L refrigerant, SEER2, compressor</em>. If any of them make you pause, practice until you can define each one in a sentence.</p>
+      <div class="cta">
+        <p><strong>HVAC/R Technician Interview Prep Kit</strong><br>An 8-question mock interview with explanations and interviewer tips, plus a vocab trainer with flashcards and quizzes. Works offline.</p>
+        <p><span class="price">$6.99</span></p>
+        <a class="button" href="https://iqproductionz.com/Products/Digital/ALL/InterviewReady/Trades/HVACRTechnician/">Get the HVAC/R Technician kit</a>
+      </div>
+      <p class="fine">Sources: <a href="https://www.bls.gov/ooh/installation-maintenance-and-repair/heating-air-conditioning-and-refrigeration-mechanics-and-installers.htm">BLS: HVAC Mechanics and Installers</a> · <a href="https://www.achrnews.com/articles/164168">ACHR News: New Year Ushers in Era of A2L Refrigerants</a>. Pay is the May 2025 median; projections cover 2025&ndash;35. Kit questions reflect common interview themes, not any employer's actual questions.</p>
+    </article>
+    <article class="post" id="wind-solar-technician-interview">
+      <p class="meta"><span class="tag">Interview prep</span> · <time datetime="2026-11-25">November 25, 2026</time> · Hali Sarah Parsons</p>
+      <h2>Wind and Solar Technician Interview Questions</h2>
+      <p>Solar installer and wind turbine technician are two of the fastest-growing jobs in the country. Wind techs climb towers that are often 200 feet or taller, so interviews put safety, fitness for the work, and teamwork front and center.</p>
+      <div class="stats"><div><b>37%</b><span>projected growth for solar installers, 2025&ndash;35</span></div><div><b>30%</b><span>projected growth for wind turbine techs, 2025&ndash;35</span></div><div><b>$64,120</b><span>median pay for wind techs ($53,140 for solar installers)</span></div></div>
+      <h3>What interviewers test</h3>
+      <ul><li><strong>Working at heights:</strong> fall protection, climb readiness, and rescue.</li><li><strong>Electrical basics:</strong> DC vs. AC, inverters, and lockout/tagout.</li><li><strong>Troubleshooting:</strong> finding why a turbine or array is underperforming.</li><li><strong>Field life:</strong> travel, remote sites, weather, and on-call work.</li></ul>
+      
+      <h3>Words to know cold</h3>
+      <p>Expect to hear terms like <em>nacelle, inverter, string, fall arrest, LOTO, kW vs. kWh</em>. If any of them make you pause, practice until you can define each one in a sentence.</p>
+      <div class="cta">
+        <p><strong>Wind/Solar Technician Interview Prep Kit</strong><br>An 8-question mock interview with explanations and interviewer tips, plus a vocab trainer with flashcards and quizzes. Works offline.</p>
+        <p><span class="price">$6.99</span></p>
+        <a class="button" href="https://iqproductionz.com/Products/Digital/ALL/InterviewReady/Trades/WindSolarTechnician/">Get the Wind/Solar Technician kit</a>
+      </div>
+      <p class="fine">Sources: <a href="https://www.bls.gov/ooh/installation-maintenance-and-repair/wind-turbine-technicians.htm">BLS: Wind Turbine Technicians</a> · <a href="https://www.bls.gov/ooh/construction-and-extraction/solar-photovoltaic-installers.htm">BLS: Solar Photovoltaic Installers</a>. Pay is the May 2025 median; projections cover 2025&ndash;35. Kit questions reflect common interview themes, not any employer's actual questions.</p>
+    </article>
+    <article class="post" id="millwright-interview">
+      <p class="meta"><span class="tag">Interview prep</span> · <time datetime="2026-11-25">November 25, 2026</time> · Hali Sarah Parsons</p>
+      <h2>Millwright Interview Questions: Precision, Rigging, and Problem Solving</h2>
+      <p>Millwrights install, move, and rebuild the machines that keep plants running. Putting one machine together can take days or weeks, so interviewers look for patience, precision, and serious respect for rigging safety.</p>
+      <div class="stats"><div><b>$65,700</b><span>median annual pay</span></div><div><b>51,900</b><span>openings a year across industrial machinery mechanics and millwrights</span></div><div><b>3&ndash;4 yrs</b><span>typical apprenticeship length</span></div></div>
+      <h3>What interviewers test</h3>
+      <ul><li><strong>Alignment:</strong> laser and dial-indicator shaft alignment.</li><li><strong>Rigging and lifting:</strong> load weights, slings, and crane signals.</li><li><strong>Prints and tolerances:</strong> reading drawings and precision measuring tools.</li><li><strong>Troubleshooting:</strong> bearings, vibration, and finding the root cause of a breakdown.</li></ul>
+      
+      <h3>Words to know cold</h3>
+      <p>Expect to hear terms like <em>shaft alignment, dial indicator, rigging, tolerance, bearing, grouting</em>. If any of them make you pause, practice until you can define each one in a sentence.</p>
+      <div class="cta">
+        <p><strong>Millwright Interview Prep Kit</strong><br>An 8-question mock interview with explanations and interviewer tips, plus a vocab trainer with flashcards and quizzes. Works offline.</p>
+        <p><span class="price">$6.99</span></p>
+        <a class="button" href="https://iqproductionz.com/Products/Digital/ALL/InterviewReady/Trades/Millwright/">Get the Millwright kit</a>
+      </div>
+      <p class="fine">Sources: <a href="https://www.bls.gov/ooh/installation-maintenance-and-repair/industrial-machinery-mechanics-and-maintenance-workers-and-millwrights.htm">BLS: Industrial Machinery Mechanics, Machinery Maintenance Workers, and Millwrights</a>. Pay is the May 2025 median; projections cover 2025&ndash;35. Kit questions reflect common interview themes, not any employer's actual questions.</p>
+    </article>
+    <article class="post" id="grid-lineman-interview">
+      <p class="meta"><span class="tag">Interview prep</span> · <time datetime="2026-11-25">November 25, 2026</time> · Hali Sarah Parsons</p>
+      <h2>Lineman Interview Questions: Safety Culture and Storm Work</h2>
+      <p>Power line work is one of the best-paid trades you can enter without a degree, and one of the most dangerous. Interviewers want to see a safety-first mindset, comfort at heights, and willingness to work long storm-restoration shifts.</p>
+      <div class="stats"><div><b>$95,320</b><span>median annual pay</span></div><div><b>10%</b><span>projected growth, 2025&ndash;35</span></div><div><b>10,900</b><span>openings a year, on average</span></div></div>
+      <h3>What interviewers test</h3>
+      <ul><li><strong>Safety:</strong> grounding, approach distances, and stopping work when something feels wrong.</li><li><strong>Physical work:</strong> climbing, bucket trucks, and weather.</li><li><strong>Storm duty:</strong> long hours away from home and staying sharp when tired.</li><li><strong>Crew teamwork:</strong> communication when a mistake can be fatal.</li></ul>
+      <p>Data centers are competing with utilities for the same skilled workers: Deloitte found data center job postings for core roles rose 64% from 2023 to 2025.</p>
+      <h3>Words to know cold</h3>
+      <p>Expect to hear terms like <em>hot stick, grounding, transformer, primary vs. secondary, de-energized, minimum approach distance</em>. If any of them make you pause, practice until you can define each one in a sentence.</p>
+      <div class="cta">
+        <p><strong>Grid Lineman Interview Prep Kit</strong><br>An 8-question mock interview with explanations and interviewer tips, plus a vocab trainer with flashcards and quizzes. Works offline.</p>
+        <p><span class="price">$6.99</span></p>
+        <a class="button" href="https://iqproductionz.com/Products/Digital/ALL/InterviewReady/Trades/GridLineman/">Get the Grid Lineman kit</a>
+      </div>
+      <p class="fine">Sources: <a href="https://www.bls.gov/ooh/installation-maintenance-and-repair/line-installers-and-repairers.htm">BLS: Line Installers and Repairers</a> · <a href="https://www.deloitte.com/us/en/insights/industry/power-and-utilities/data-centers-power-companies-compete-for-workforce.html">Deloitte: Data centers and power companies compete for workforce</a>. Pay is the May 2025 median; projections cover 2025&ndash;35. Kit questions reflect common interview themes, not any employer's actual questions.</p>
+    </article>
+    <section class="group" id="engineering-interview-guides" aria-labelledby="engineering-h">
+      <h2 id="engineering-h">Engineering &amp; Advanced Manufacturing</h2>
+      <p>Engineering panels test fundamentals, then hand you a messy real-world problem to see how you break it down and back your answer with data.</p>
+      <a class="button" href="https://iqproductionz.com/Products/Digital/ALL/InterviewReady/Engineering/">All 4 kits for $17.99</a>
+    </section>
+    <article class="post" id="robotics-automation-engineer-interview">
+      <p class="meta"><span class="tag">Interview prep</span> · <time datetime="2026-11-25">November 25, 2026</time> · Hali Sarah Parsons</p>
+      <h2>Robotics and Automation Engineer Interview Questions</h2>
+      <p>Factories worldwide now run 5 million industrial robots, and the U.S. passed Japan in 2025 to become the second-largest market. Automation interviews test whether you can make robots, PLCs, and people work together safely.</p>
+      <div class="stats"><div><b>5 million</b><span>industrial robots operating worldwide in 2025</span></div><div><b>~38,500</b><span>robots installed in the U.S. in 2025, up 12%</span></div><div><b>#2</b><span>U.S. rank among robot markets, behind China</span></div></div>
+      <h3>What interviewers test</h3>
+      <ul><li><strong>PLC and robot programming:</strong> ladder logic, I/O, and teaching robot paths.</li><li><strong>Safety:</strong> guarding, light curtains, and safety-rated controls.</li><li><strong>Integration:</strong> debugging a cell where the robot, vision, and conveyor don't agree.</li><li><strong>Cycle time:</strong> finding and fixing the bottleneck.</li></ul>
+      
+      <h3>Words to know cold</h3>
+      <p>Expect to hear terms like <em>PLC, HMI, end effector, cycle time, safety PLC, kinematics</em>. If any of them make you pause, practice until you can define each one in a sentence.</p>
+      <div class="cta">
+        <p><strong>Robotics &amp; Automation Engineer Interview Prep Kit</strong><br>An 8-question mock interview with explanations and interviewer tips, plus a vocab trainer with flashcards and quizzes. Works offline.</p>
+        <p><span class="price">$6.99</span></p>
+        <a class="button" href="https://iqproductionz.com/Products/Digital/ALL/InterviewReady/Engineering/RoboticsAutomationEngineer/">Get the Robotics &amp; Automation Engineer kit</a>
+      </div>
+      <p class="fine">Sources: <a href="https://ifr.org/news/five-million-robots-now-operate-in-factories-globally/">IFR: Five million robots now operate in factories globally</a> · <a href="https://www.therobotreport.com/5-million-robots-now-working-factories-worldwide-ifr-reports/">The Robot Report: 5M robots now working in factories</a>. Pay is the May 2025 median; projections cover 2025&ndash;35. Kit questions reflect common interview themes, not any employer's actual questions.</p>
+    </article>
+    <article class="post" id="semiconductor-process-engineer-interview">
+      <p class="meta"><span class="tag">Interview prep</span> · <time datetime="2026-11-25">November 25, 2026</time> · Hali Sarah Parsons</p>
+      <h2>Semiconductor Process Engineer Interview Questions as U.S. Fabs Hire</h2>
+      <p>New chip fabs are opening across the U.S., and they need engineers badly. One analysis warns of a shortage of up to 157,000 semiconductor workers by 2030, while only about 3% of U.S. engineering graduates enter the industry each year.</p>
+      <div class="stats"><div><b>157,000</b><span>possible U.S. semiconductor worker shortfall by 2030</span></div><div><b>3%</b><span>share of U.S. engineering grads entering the industry yearly</span></div><div><b>73%</b><span>of chip companies reporting significant trouble recruiting engineers</span></div></div>
+      <h3>What interviewers test</h3>
+      <ul><li><strong>Process steps:</strong> lithography, etch, deposition, and how they connect.</li><li><strong>Yield:</strong> statistical process control and reading control charts.</li><li><strong>Experiments:</strong> design of experiments (DOE) to tune a process.</li><li><strong>Excursions:</strong> root-causing a sudden yield drop without stopping the line for days.</li></ul>
+      
+      <h3>Words to know cold</h3>
+      <p>Expect to hear terms like <em>lithography, etch, chemical vapor deposition (CVD), yield, SPC, DOE</em>. If any of them make you pause, practice until you can define each one in a sentence.</p>
+      <div class="cta">
+        <p><strong>Semiconductor Process Engineer Interview Prep Kit</strong><br>An 8-question mock interview with explanations and interviewer tips, plus a vocab trainer with flashcards and quizzes. Works offline.</p>
+        <p><span class="price">$6.99</span></p>
+        <a class="button" href="https://iqproductionz.com/Products/Digital/ALL/InterviewReady/Engineering/SemiconductorProcessEngineer/">Get the Semiconductor Process Engineer kit</a>
+      </div>
+      <p class="fine">Sources: <a href="https://techradar.com/pro/we-just-dont-see-that-theres-enough-technical-people-in-the-pipeline-us-chip-fabs-are-facing-a-huge-worker-shortfall-despite-promise-of-huge-paychecks-industry-says-it-still-needs-over-150-000-workers">TechRadar: US chip fabs face a huge worker shortfall</a>. Pay is the May 2025 median; projections cover 2025&ndash;35. Kit questions reflect common interview themes, not any employer's actual questions.</p>
+    </article>
+    <article class="post" id="industrial-engineer-interview">
+      <p class="meta"><span class="tag">Interview prep</span> · <time datetime="2026-11-25">November 25, 2026</time> · Hali Sarah Parsons</p>
+      <h2>Industrial Engineer Interview Questions: Lean, Data, and People</h2>
+      <p>Industrial engineers make work flow better by combining people, machines, materials, and information. Interviews often hand you a slow process and ask how you'd fix it, then ask how you'd get the people on the floor to buy in.</p>
+      <div class="stats"><div><b>$102,440</b><span>median annual pay</span></div><div><b>12%</b><span>projected growth, 2025&ndash;35</span></div><div><b>23,100</b><span>openings a year, on average</span></div></div>
+      <h3>What interviewers test</h3>
+      <ul><li><strong>Process improvement:</strong> Lean, Six Sigma, and removing waste.</li><li><strong>Data analysis:</strong> time studies, capacity, and finding the bottleneck.</li><li><strong>Simulation and layout:</strong> testing a change before you make it.</li><li><strong>Change management:</strong> winning over operators who've done it the old way for years.</li></ul>
+      
+      <h3>Words to know cold</h3>
+      <p>Expect to hear terms like <em>Lean, takt time, bottleneck, Six Sigma, Kaizen, value stream map</em>. If any of them make you pause, practice until you can define each one in a sentence.</p>
+      <div class="cta">
+        <p><strong>Industrial Engineer Interview Prep Kit</strong><br>An 8-question mock interview with explanations and interviewer tips, plus a vocab trainer with flashcards and quizzes. Works offline.</p>
+        <p><span class="price">$6.99</span></p>
+        <a class="button" href="https://iqproductionz.com/Products/Digital/ALL/InterviewReady/Engineering/IndustrialEngineer/">Get the Industrial Engineer kit</a>
+      </div>
+      <p class="fine">Sources: <a href="https://www.bls.gov/ooh/architecture-and-engineering/industrial-engineers.htm">BLS: Industrial Engineers</a>. Pay is the May 2025 median; projections cover 2025&ndash;35. Kit questions reflect common interview themes, not any employer's actual questions.</p>
+    </article>
+    <article class="post" id="civil-water-engineer-interview">
+      <p class="meta"><span class="tag">Interview prep</span> · <time datetime="2026-11-25">November 25, 2026</time> · Hali Sarah Parsons</p>
+      <h2>Civil and Water Infrastructure Engineer Interview Questions</h2>
+      <p>Aging pipes, treatment plants, and stormwater systems need upgrades across the country. Civil interviews test design fundamentals, regulations, and whether you can explain a project to a city council as clearly as to another engineer.</p>
+      <div class="stats"><div><b>$100,840</b><span>median annual pay</span></div><div><b>6%</b><span>projected growth, 2025&ndash;35</span></div><div><b>22,700</b><span>openings a year, on average</span></div></div>
+      <h3>What interviewers test</h3>
+      <ul><li><strong>Design:</strong> hydraulics, pipe sizing, and stormwater management.</li><li><strong>Regulations:</strong> permits and water quality standards.</li><li><strong>Licensure path:</strong> where you are with the FE and PE exams.</li><li><strong>Project delivery:</strong> budgets, schedules, and public stakeholders.</li></ul>
+      
+      <h3>Words to know cold</h3>
+      <p>Expect to hear terms like <em>PE license, FE exam, hydraulics, stormwater, NPDES permit, head loss</em>. If any of them make you pause, practice until you can define each one in a sentence.</p>
+      <div class="cta">
+        <p><strong>Civil/Water Infrastructure Engineer Interview Prep Kit</strong><br>An 8-question mock interview with explanations and interviewer tips, plus a vocab trainer with flashcards and quizzes. Works offline.</p>
+        <p><span class="price">$6.99</span></p>
+        <a class="button" href="https://iqproductionz.com/Products/Digital/ALL/InterviewReady/Engineering/CivilWaterInfrastructureEngineer/">Get the Civil/Water Infrastructure Engineer kit</a>
+      </div>
+      <p class="fine">Sources: <a href="https://www.bls.gov/ooh/architecture-and-engineering/civil-engineers.htm">BLS: Civil Engineers</a>. Pay is the May 2025 median; projections cover 2025&ndash;35. Kit questions reflect common interview themes, not any employer's actual questions.</p>
+    </article>
+    <section class="group" id="humanops-interview-guides" aria-labelledby="humanops-h">
+      <h2 id="humanops-h">Human-Centric &amp; Strategic Operations</h2>
+      <p>These roles keep people and systems running. Interviews look for judgment, communication, and the ability to stay steady when the pressure is on.</p>
+      <a class="button" href="https://iqproductionz.com/Products/Digital/ALL/InterviewReady/HumanOps/">All 4 kits for $17.99</a>
+    </section>
+    <article class="post" id="supply-chain-analyst-interview">
+      <p class="meta"><span class="tag">Interview prep</span> · <time datetime="2026-11-25">November 25, 2026</time> · Hali Sarah Parsons</p>
+      <h2>Supply Chain and Logistics Analyst Interview Questions</h2>
+      <p>After years of shortages and shipping delays, companies want analysts who can see trouble coming. Expect a disruption scenario: a key supplier goes down. What do you check, who do you call, and how do you keep orders moving?</p>
+      <div class="stats"><div><b>$82,320</b><span>median pay for logisticians</span></div><div><b>18%</b><span>projected growth, 2025&ndash;35</span></div><div><b>26,600</b><span>openings a year, on average</span></div></div>
+      <h3>What interviewers test</h3>
+      <ul><li><strong>Forecasting:</strong> balancing demand against inventory.</li><li><strong>Metrics:</strong> lead time, fill rate, and on-time delivery.</li><li><strong>Disruptions:</strong> backup suppliers and expediting.</li><li><strong>Tools:</strong> Excel, SQL, and your company's ERP system.</li></ul>
+      
+      <h3>Words to know cold</h3>
+      <p>Expect to hear terms like <em>safety stock, lead time, EOQ, bullwhip effect, 3PL, OTIF</em>. If any of them make you pause, practice until you can define each one in a sentence.</p>
+      <div class="cta">
+        <p><strong>Supply Chain &amp; Logistics Analyst Interview Prep Kit</strong><br>An 8-question mock interview with explanations and interviewer tips, plus a vocab trainer with flashcards and quizzes. Works offline.</p>
+        <p><span class="price">$6.99</span></p>
+        <a class="button" href="https://iqproductionz.com/Products/Digital/ALL/InterviewReady/HumanOps/SupplyChainLogisticsAnalyst/">Get the Supply Chain &amp; Logistics Analyst kit</a>
+      </div>
+      <p class="fine">Sources: <a href="https://www.bls.gov/ooh/business-and-financial/logisticians.htm">BLS: Logisticians</a>. Pay is the May 2025 median; projections cover 2025&ndash;35. Kit questions reflect common interview themes, not any employer's actual questions.</p>
+    </article>
+    <article class="post" id="clinical-operations-manager-interview">
+      <p class="meta"><span class="tag">Interview prep</span> · <time datetime="2026-11-25">November 25, 2026</time> · Hali Sarah Parsons</p>
+      <h2>Clinical and Financial Operations Manager Interview Questions</h2>
+      <p>Healthcare operations managers sit between patient care and the budget. Interviewers want to know you can read a financial report, fix a billing problem, and lead clinicians who don't report to a spreadsheet.</p>
+      <div class="stats"><div><b>$123,860</b><span>median pay for medical and health services managers</span></div><div><b>24%</b><span>projected growth, 2025&ndash;35</span></div><div><b>62,300</b><span>openings a year, on average</span></div></div>
+      <h3>What interviewers test</h3>
+      <ul><li><strong>Revenue cycle:</strong> claims, denials, and patient billing.</li><li><strong>Budgets and staffing:</strong> matching staff to patient volume.</li><li><strong>Compliance:</strong> privacy rules and regulatory surveys.</li><li><strong>Turnaround:</strong> "This clinic lost money last quarter. What's your 90-day plan?"</li></ul>
+      
+      <h3>Words to know cold</h3>
+      <p>Expect to hear terms like <em>revenue cycle, denial rate, payer mix, HIPAA, FTE, patient census</em>. If any of them make you pause, practice until you can define each one in a sentence.</p>
+      <div class="cta">
+        <p><strong>Clinical &amp; Financial Operations Manager Interview Prep Kit</strong><br>An 8-question mock interview with explanations and interviewer tips, plus a vocab trainer with flashcards and quizzes. Works offline.</p>
+        <p><span class="price">$6.99</span></p>
+        <a class="button" href="https://iqproductionz.com/Products/Digital/ALL/InterviewReady/HumanOps/ClinicalFinancialOperationsManager/">Get the Clinical &amp; Financial Operations Manager kit</a>
+      </div>
+      <p class="fine">Sources: <a href="https://www.bls.gov/ooh/management/medical-and-health-services-managers.htm">BLS: Medical and Health Services Managers</a>. Pay is the May 2025 median; projections cover 2025&ndash;35. Kit questions reflect common interview themes, not any employer's actual questions.</p>
+    </article>
+    <article class="post" id="mental-health-counselor-interview">
+      <p class="meta"><span class="tag">Interview prep</span> · <time datetime="2026-11-25">November 25, 2026</time> · Hali Sarah Parsons</p>
+      <h2>Mental Health Counselor Interview Questions: Ethics, Approach, and Fit</h2>
+      <p>About 137 million people, roughly 40% of the U.S. population, live in a federally designated mental health professional shortage area. Counseling interviews focus on ethics, your clinical approach, and how you'd handle a client in crisis.</p>
+      <div class="stats"><div><b>18%</b><span>projected growth, 2025&ndash;35</span></div><div><b>50,500</b><span>openings a year, on average</span></div><div><b>$59,350</b><span>median annual pay</span></div></div>
+      <h3>What interviewers test</h3>
+      <ul><li><strong>Ethics:</strong> confidentiality and its limits, dual relationships, and informed consent.</li><li><strong>Risk assessment:</strong> how you assess safety and when you involve others.</li><li><strong>Approach:</strong> your theoretical orientation and why it fits your clients.</li><li><strong>Self-care:</strong> boundaries and preventing burnout.</li></ul>
+      
+      <h3>Words to know cold</h3>
+      <p>Expect to hear terms like <em>informed consent, duty to warn, CBT, DSM-5-TR, treatment plan, therapeutic alliance</em>. If any of them make you pause, practice until you can define each one in a sentence.</p>
+      <div class="cta">
+        <p><strong>Mental Health Counselor Interview Prep Kit</strong><br>An 8-question mock interview with explanations and interviewer tips, plus a vocab trainer with flashcards and quizzes. Works offline.</p>
+        <p><span class="price">$6.99</span></p>
+        <a class="button" href="https://iqproductionz.com/Products/Digital/ALL/InterviewReady/HumanOps/MentalHealthCounselor/">Get the Mental Health Counselor kit</a>
+      </div>
+      <p class="fine">Sources: <a href="https://www.bls.gov/ooh/community-and-social-service/substance-abuse-behavioral-disorder-and-mental-health-counselors.htm">BLS: Substance Abuse, Behavioral Disorder, and Mental Health Counselors</a> · <a href="https://bhw.hrsa.gov/sites/default/files/bureau-health-workforce/data-research/Behavioral-Health-Workforce-Brief-2025.pdf">HRSA: Behavioral Health Workforce Brief 2025</a>. Pay is the May 2025 median; projections cover 2025&ndash;35. Kit questions reflect common interview themes, not any employer's actual questions.</p>
+    </article>
+    <article class="post" id="special-education-teacher-interview">
+      <p class="meta"><span class="tag">Interview prep</span> · <time datetime="2026-11-25">November 25, 2026</time> · Hali Sarah Parsons</p>
+      <h2>Special Education Teacher Interview Questions: IEPs, Behavior, and Partnership</h2>
+      <p>Special education has been the top teacher shortage area for about 30 years. With more than 8.2 million special education students, about 1 in 6 public school students, districts need teachers who can write a solid IEP and keep a classroom calm.</p>
+      <div class="stats"><div><b>37,100</b><span>openings a year, on average</span></div><div><b>1 in 6</b><span>public school students receive special education</span></div><div><b>$67,170</b><span>median annual pay</span></div></div>
+      <h3>What interviewers test</h3>
+      <ul><li><strong>IEPs:</strong> writing measurable goals and tracking progress.</li><li><strong>Behavior:</strong> de-escalation and behavior intervention plans.</li><li><strong>Differentiation:</strong> one lesson, many learners.</li><li><strong>Partnership:</strong> working with parents, aides, and general education teachers.</li></ul>
+      
+      <h3>Words to know cold</h3>
+      <p>Expect to hear terms like <em>IEP, FAPE, least restrictive environment (LRE), IDEA, BIP, accommodations vs. modifications</em>. If any of them make you pause, practice until you can define each one in a sentence.</p>
+      <div class="cta">
+        <p><strong>Special Education Teacher Interview Prep Kit</strong><br>An 8-question mock interview with explanations and interviewer tips, plus a vocab trainer with flashcards and quizzes. Works offline.</p>
+        <p><span class="price">$6.99</span></p>
+        <a class="button" href="https://iqproductionz.com/Products/Digital/ALL/InterviewReady/HumanOps/SpecialEducationTeacher/">Get the Special Education Teacher kit</a>
+      </div>
+      <p class="fine">Sources: <a href="https://www.bls.gov/ooh/education-training-and-library/special-education-teachers.htm">BLS: Special Education Teachers</a> · <a href="https://www.edweek.org/leadership/these-maps-reveal-gaps-in-special-education-english-learner-teacher-supply/2025/09">Education Week: Gaps in special education teacher supply</a> · <a href="https://www.nhpr.org/2026-10-26/special-education-teachers-share-the-myths-and-realities-of-their-job">NHPR / NPR: Special education teachers share the myths and realities</a>. Pay is the May 2025 median; projections cover 2025&ndash;35. Kit questions reflect common interview themes, not any employer's actual questions.</p>
+    </article>
+
+  </div>
+</main>
+
+<section class="closer">
+  <div class="wrap">
+    <h2>Find the tool for your next move</h2>
+    <p>Interview kits, launch planners, publishing playbooks, and AI guides, all instant downloads.</p>
+    <a class="button" href="https://iqproductionz.com/Products/Digital/ALL/">Browse all digital products</a>
+  </div>
+</section>
+
+<footer>
+  <div class="wrap footer-row">
+    <span>&copy; 2026 I.Q. Productionz, Houston, Texas</span>
+    <nav aria-label="Footer">
+      <a href="https://iqproductionz.com/">Home</a>
+      <a href="https://iqproductionz.com/Products/Digital/ALL/">Digital Products</a>
+      <a href="https://iqproductionz.com/Tools4YRBiz/">Tools</a>
+      <a href="https://iqproductionz.com/BookNow">Book a Service</a>
+      <a href="https://Haligricity.IQProductionz.com/">Haligricity</a>
+    </nav>
+  </div>
+</footer>
+
+</body>
+</html>
