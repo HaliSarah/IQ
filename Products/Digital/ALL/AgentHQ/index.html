@@ -18,6 +18,8 @@
   :root { --bg:#333333; --card:#454545; --line:#2e2b24; --gold:#c98a2e; --gold-lt:#e0a84a;
           --white:#f0ece3; --muted:#a9a9a9; --r:10px; }
   * { box-sizing:border-box; margin:0; padding:0; }
+  /* WHY: inline display styles would otherwise beat the hidden attribute on the popup. */
+  [hidden] { display:none !important; }
   body { min-height:100vh; display:flex; flex-direction:column; background:var(--bg); color:var(--white);
          font-family:'Raleway',sans-serif; line-height:1.6; }
   a { color:var(--gold-lt); }
@@ -105,15 +107,30 @@
     </div>
     <div class="info">
       <h1>Agent HQ</h1>
-      <p class="price"><s style="color:var(--muted);font-weight:500">$27</s> $19 <span style="font-size:.8em;color:var(--muted)">launch price</span></p>
+      <p class="price"><s style="color:var(--muted);font-weight:500">$27</s> FREE</p>
       <p class="lede">Stop asking AI. Start assigning it. Onboard your AI like your best new hire, so you never re-explain your business again.</p>
       <ul class="ticks"><li>12 guided steps, from &quot;ask vs assign&quot; to rolling it out to a team</li><li>Home Base builder: generate your AGENTS.md or CLAUDE.md in 60 seconds</li><li>HQ folder plan with 6 context files: you, your business, offers, ideal customer, voice and values</li><li>Lessons Log that remembers every correction, in a file you own</li><li>Safety rules: read-only first, and it asks before it posts, sends or spends</li><li>Works with any agent app; interactive checklist saves your progress</li></ul>
       <!-- Buy box sits last in the column so the page's weight lands at the bottom. -->
       <div class="buybox">
-        <div class="msg" id="msg" role="alert"></div>
-        <button type="button" class="btn" id="buyBtn" data-product="agent-hq" data-label="Buy now: $19">Buy now: $19</button>
-        <p class="note">Secure checkout by Stripe. Your download opens the moment payment goes through.</p>
-        <p class="alt">Prefer PayPal or Cash App? Pay through <a href="https://paypal.me/IQPR?country.x=US&amp;locale.x=en_US" target="_blank" rel="noopener">PayPal</a> or Cash App <strong>$IQENT</strong>, then email your receipt with &ldquo;Agent HQ&rdquo; to <a href="mailto:SarahParsons@IQProductionz.com">SarahParsons@IQProductionz.com</a> and your file will be sent to you.</p>
+        <button type="button" class="btn" id="freeBtn" aria-expanded="false" aria-controls="freeForm">GET THIS PRODUCT FOR FREE</button>
+        <form id="freeForm" hidden style="margin-top:14px">
+          <div class="msg" id="msg" role="alert"></div>
+          <label for="freeEmail" style="display:block;font-weight:600;margin-bottom:6px">Where should we send your Agent HQ kit?</label>
+          <input id="freeEmail" type="email" required autocomplete="email" placeholder="you@email.com"
+                 style="width:100%;padding:13px;border:1px solid var(--line);border-radius:8px;background:#333;color:var(--white);font:500 1rem Raleway,sans-serif;margin-bottom:10px">
+          <!-- WHY a hidden field: bots fill every box, people never see this one. -->
+          <input type="text" id="freeHp" tabindex="-1" autocomplete="off" aria-hidden="true" style="position:absolute;left:-9999px">
+          <button type="submit" class="btn" id="freeSend">Send me the kit</button>
+          <p class="note">We'll email you the download link and the occasional tip or new product. Unsubscribe any time.</p>
+        </form>
+      </div>
+      <div id="freeModal" role="dialog" aria-modal="true" aria-labelledby="freeModalH" hidden
+           style="position:fixed;inset:0;background:rgba(0,0,0,.7);display:grid;place-items:center;padding:18px;z-index:50">
+        <div style="max-width:420px;width:100%;background:var(--card);border:1px solid var(--gold);border-radius:14px;padding:28px;text-align:center">
+          <h2 id="freeModalH" style="margin:0 0 10px">It's on its way!</h2>
+          <p>You'll receive <strong>Agent HQ</strong> in your email shortly. Check your inbox (and spam or promotions, just in case).</p>
+          <button type="button" class="btn" id="freeClose" style="margin-top:16px">Got it</button>
+        </div>
       </div>
     </div>
   </section>
@@ -132,41 +149,65 @@
   &copy; 2026 I.Q. Productionz, Houston, Texas
 </footer>
 
+<script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
 <script>
-  /* WHY the Worker: it holds the real price and the Stripe key, so neither can be
-     changed from the browser. It also hands over the download only after Stripe
-     confirms payment. */
-  const BUY_URL = 'https://iq-website-files.halisarahparsons.workers.dev/buy';
-  const buyBtn = document.getElementById('buyBtn');
+  /* Same EmailJS account and customer template as the Quote Builder. */
+  const EJS_PUBLIC_KEY = '3vNjQbWmqzzOO6IK-';
+  const EJS_SERVICE = 'service_wtg920o';
+  const EJS_TEMPLATE = 'template_nnmxioq';
+  const HALI_EMAIL = 'SarahParsons@IQProductionz.com';
+  const KIT_NAME = "Agent HQ";
+  const KIT_URL = new URL("Agent-HQ.html", location.href).href;
+  const form = document.getElementById('freeForm');
   const msg = document.getElementById('msg');
+  const say = (t) => { msg.textContent = t; msg.classList.toggle('show', !!t); };
 
-  /** Shows a note above the button. WHY one spot: every state reads the same way. */
-  function say(text) { msg.textContent = text; msg.classList.toggle('show', !!text); }
+  /* WHY reveal instead of a new page: one click, no lost shoppers. */
+  document.getElementById('freeBtn').addEventListener('click', (ev) => {
+    form.hidden = false; ev.currentTarget.setAttribute('aria-expanded', 'true');
+    document.getElementById('freeEmail').focus();
+  });
 
-  if (new URLSearchParams(location.search).get('status') === 'canceled') {
-    say('Your checkout was canceled, and you were not charged.');
+  /** Builds the welcome email body. WHY inline styles: email apps strip style blocks. */
+  function welcomeHtml() {
+    return `<div style="font-family:Arial,sans-serif;max-width:560px;margin:auto;color:#222">
+      <h2 style="color:#c98a2e">Welcome to I.Q. Productionz!</h2>
+      <p>Thanks for grabbing <strong>${KIT_NAME}</strong>. Your free kit is ready:</p>
+      <p><a href="${KIT_URL}" style="display:inline-block;padding:13px 24px;background:#c98a2e;color:#222;font-weight:bold;text-decoration:none;border-radius:8px">Open your ${KIT_NAME} kit</a></p>
+      <p>It opens right in your browser. To keep a copy, use your browser's Save Page (or Ctrl/Cmd + S).</p>
+      <p>Want the full system? <a href="https://iqproductionz.com/Products/Digital/ALL/SignalToSale/">See the Signal→Sale bundle</a>.</p>
+      <p>Sarah Parsons<br>I.Q. Productionz</p></div>`;
   }
 
-  buyBtn.addEventListener('click', async () => {
-    buyBtn.disabled = true;
-    buyBtn.textContent = 'Opening secure checkout…';
-    // WHY try/catch: a network hiccup should leave the button usable for another try.
+  form.addEventListener('submit', async (ev) => {
+    ev.preventDefault();
+    if (document.getElementById('freeHp').value) return; // bot
+    const email = document.getElementById('freeEmail').value.trim();
+    if (!form.reportValidity()) return;
+    if (!window.emailjs) { say('Email tool did not load. Check your connection and try again.'); return; }
+    const btn = document.getElementById('freeSend');
+    btn.disabled = true; btn.textContent = 'Sending…'; say('');
+    // WHY try/catch: a failed send must leave the form usable for another try.
     try {
-      const res = await fetch(BUY_URL, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ product: buyBtn.dataset.product }),
-      });
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.error || 'Checkout failed.');
-      location.href = data.url;
+      await emailjs.send(EJS_SERVICE, EJS_TEMPLATE, {
+        to_email: email, to_name: '', subject: `Your free ${KIT_NAME} kit is here`,
+        message: welcomeHtml(), reply_to: HALI_EMAIL, from_name: 'Sarah Parsons — I.Q. Productionz',
+      }, { publicKey: EJS_PUBLIC_KEY });
+      // WHY a second send: Hali gets every new lead in her inbox. Its failure must not upset the buyer.
+      emailjs.send(EJS_SERVICE, EJS_TEMPLATE, {
+        to_email: HALI_EMAIL, to_name: 'Sarah', subject: `New free ${KIT_NAME} signup`,
+        message: `<p>${email} just claimed the free ${KIT_NAME} kit.</p>`, reply_to: email, from_name: 'IQ Website',
+      }, { publicKey: EJS_PUBLIC_KEY }).catch((err) => console.error('Lead alert failed:', err));
+      form.reset(); form.hidden = true;
+      document.getElementById('freeModal').hidden = false;
+      document.getElementById('freeClose').focus();
     } catch (err) {
-      console.error('Checkout failed:', err);
-      buyBtn.disabled = false;
-      buyBtn.textContent = buyBtn.dataset.label;
-      say('Checkout could not open, and you were not charged. Please try again.');
+      console.error('Free kit email failed:', err);
+      say('That did not send. Please check your email address and try again.');
     }
+    btn.disabled = false; btn.textContent = 'Send me the kit';
   });
+  document.getElementById('freeClose').addEventListener('click', () => { document.getElementById('freeModal').hidden = true; });
 </script>
 <script>
   /* WHY swap one stage instead of showing everything at once: big videos and

@@ -18,6 +18,8 @@
   :root { --bg:#333333; --card:#454545; --line:#2e2b24; --gold:#c98a2e; --gold-lt:#e0a84a;
           --white:#f0ece3; --muted:#a9a9a9; --r:10px; }
   * { box-sizing:border-box; margin:0; padding:0; }
+  /* WHY: inline display styles would otherwise beat the hidden attribute on the popup. */
+  [hidden] { display:none !important; }
   body { min-height:100vh; display:flex; flex-direction:column; background:var(--bg); color:var(--white);
          font-family:'Raleway',sans-serif; line-height:1.6; }
   a { color:var(--gold-lt); }
@@ -111,7 +113,7 @@
       <div class="grid">
     <a class="card" href="/Products/Digital/ALL/AgentHQ/">
       <img src="/Products/Digital/ALL/AgentHQ/agent-hq-carousel-1.jpg" alt="" loading="lazy">
-      <div class="body"><h3>Agent HQ</h3><p>Set up your AI agent.</p><span class="price"><s style="color:var(--muted);font-weight:500">$27</s> $19 <span style="font-size:.8em;color:var(--muted)">launch price</span></span></div>
+      <div class="body"><h3>Agent HQ</h3><p>Set up your AI agent.</p><span class="price"><s style="color:var(--muted);font-weight:500">$27</s> FREE</span></div>
     </a>
     <a class="card" href="/Products/Digital/ALL/ConnectorAtlas/">
       <img src="/Products/Digital/ALL/ConnectorAtlas/connector-atlas-carousel-1.jpg" alt="" loading="lazy">
