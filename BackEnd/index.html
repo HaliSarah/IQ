@@ -3,8 +3,8 @@
   Title:       BackEnd Portal — I.Q. Productionz
   Author:      Hali Sarah Parsons (I.Q. Productionz)
   Date:        2026-11-14
-  Modified By: Claude (Anthropic), 2026-11-14
-  Description: BackEnd portal home. One card per section folder (Design, Document, InHouse, Marketing, MaryKay); each opens that section's landing page.
+  Modified By: Claude (Anthropic), 2026-11-14; 2026-11-27 (added Digital Product Leads card)
+  Description: BackEnd portal home. One card per section folder (Design, Document, InHouse, Marketing, MaryKay); each opens that section's landing page. Plus a Digital Product Leads card linking to the PIN-protected sign-up list on the Cloudflare worker.
 -->
 <html lang="en">
 <head>
@@ -113,6 +113,14 @@
     <div class="path">/BackEnd/MaryKay/ · 2 tools</div>
     <div class="desc">Assessment funnel, lead intake and pink-branded email.</div>
     <ul class="list"><li>Lead Processor</li><li>MK Branded Email</li></ul>
+  </a>
+  <!-- WHY external + new tab: the leads list lives on the Cloudflare worker (PIN-gated), not in this folder -->
+  <a class="card" href="https://iq-website-files.halisarahparsons.workers.dev/leads" target="_blank" rel="noopener">
+    <div class="icon">✉</div>
+    <div class="name">Digital Product Leads</div>
+    <div class="path">workers.dev/leads · PIN required</div>
+    <div class="desc">Every digital product sign-up email, newest first. Repeat sign-ups show once with a count.</div>
+    <ul class="list"><li>Sign-up dates</li><li>Download CSV (Sheets / Excel)</li><li>Locks 1 hr after 5 wrong PINs</li></ul>
   </a>
 </div>
 </main>
