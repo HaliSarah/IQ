@@ -46,6 +46,17 @@
   .card.feature img { width:50%; aspect-ratio:auto; }
   .card.feature .body { padding:28px; justify-content:center; }
   .card.feature h3 { font-size:1.5rem; }
+  /* Top "new" section: vertical reel beside 4:5 kit cards, the carousel shape. */
+  .new-drop { display:grid; grid-template-columns:minmax(220px,300px) 1fr; gap:22px; margin:6px 0 40px; padding:22px;
+              border:1px solid var(--gold); border-radius:14px; background:linear-gradient(180deg,rgba(201,138,46,.04),rgba(201,138,46,.14)); }
+  .new-drop .reel { border-radius:12px; overflow:hidden; background:#000; display:block; text-decoration:none; color:inherit; }
+  .new-drop .reel video { display:block; width:100%; aspect-ratio:9/16; object-fit:cover; }
+  .new-drop .tag { font-size:.78rem; letter-spacing:.2em; text-transform:uppercase; color:var(--gold-lt); font-weight:700; }
+  .new-drop h2 { margin:6px 0 6px; }
+  .new-drop .grid { grid-template-columns:repeat(4,1fr); gap:14px; margin-top:16px; }
+  .new-drop .card img { aspect-ratio:4/5; }
+  .new-drop .btn { width:auto; padding:13px 26px; margin-top:16px; }
+  @media (max-width:820px) { .new-drop .grid { grid-template-columns:repeat(2,1fr); } .new-drop { grid-template-columns:1fr; } .new-drop .reel { max-width:220px; margin:0 auto; } }
   .product { display:grid; grid-template-columns:1.15fr 1fr; gap:32px; align-items:start; }
   .stage { border:1px solid var(--line); border-radius:var(--r); overflow:hidden; background:#000; }
   .stage img, .stage video { display:block; width:100%; height:auto; max-height:70vh; object-fit:contain; margin:0 auto; }
@@ -89,6 +100,34 @@
   <nav class="crumbs" aria-label="Breadcrumb"><a href="/Products/Digital/">Digital Products</a> › All</nav>
   <h1>More Digital Products by IQ</h1>
   <p class="lede">Instant downloads you open right in your browser.</p>
+  <!-- New drop sits at the top per Hali's request; the reel autoplays muted so it plays on phones. -->
+  <section class="new-drop" aria-labelledby="newDrop">
+    <a class="reel" href="/Products/Digital/ALL/SignalToSale/" aria-label="Signal→Sale: The Full Bundle"><video src="/Products/Digital/ALL/SignalToSale/signal-to-sale-reel.mp4" poster="/Products/Digital/ALL/SignalToSale/signal-to-sale-carousel-1.jpg" autoplay muted loop playsinline preload="metadata"></video></a>
+    <div>
+      <span class="tag">New · Signal→Sale</span>
+      <h2 id="newDrop">Signal in. Sales out.</h2>
+      <p class="lede" style="margin:0">Four AI kits that turn your posts into a pipeline: set up your AI, plug in your tools, save your processes and tell stories that sell.</p>
+      <a class="btn" href="/Products/Digital/ALL/SignalToSale/">Get all 4 kits: <s style="opacity:.7">$67</s> $47</a>
+      <div class="grid">
+    <a class="card" href="/Products/Digital/ALL/AgentHQ/">
+      <img src="/Products/Digital/ALL/AgentHQ/agent-hq-carousel-1.jpg" alt="" loading="lazy">
+      <div class="body"><h3>Agent HQ</h3><p>Set up your AI agent.</p><span class="price"><s style="color:var(--muted);font-weight:500">$27</s> $19 <span style="font-size:.8em;color:var(--muted)">launch price</span></span></div>
+    </a>
+    <a class="card" href="/Products/Digital/ALL/ConnectorAtlas/">
+      <img src="/Products/Digital/ALL/ConnectorAtlas/connector-atlas-carousel-1.jpg" alt="" loading="lazy">
+      <div class="body"><h3>Connector Atlas</h3><p>Plug in your tools.</p><span class="price"><s style="color:var(--muted);font-weight:500">$19</s> $14 <span style="font-size:.8em;color:var(--muted)">launch price</span></span></div>
+    </a>
+    <a class="card" href="/Products/Digital/ALL/SkillShelf/">
+      <img src="/Products/Digital/ALL/SkillShelf/skill-shelf-carousel-1.jpg" alt="" loading="lazy">
+      <div class="body"><h3>Skill Shelf</h3><p>Save your processes.</p><span class="price"><s style="color:var(--muted);font-weight:500">$27</s> $19 <span style="font-size:.8em;color:var(--muted)">launch price</span></span></div>
+    </a>
+    <a class="card" href="/Products/Digital/ALL/StorylineStudio/">
+      <img src="/Products/Digital/ALL/StorylineStudio/storyline-studio-carousel-1.jpg" alt="" loading="lazy">
+      <div class="body"><h3>Storyline Studio</h3><p>Tell stories that sell.</p><span class="price"><s style="color:var(--muted);font-weight:500">$19</s> $14 <span style="font-size:.8em;color:var(--muted)">launch price</span></span></div>
+    </a>
+      </div>
+    </div>
+  </section>
   <div class="grid">
     <a class="card" href="/Products/Digital/ALL/NightShift/">
       <img src="/Products/Digital/ALL/NightShift/01.jpg" alt="" loading="lazy">
